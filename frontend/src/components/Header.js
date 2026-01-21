@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { Search, Menu, X, ShoppingCart, Heart, User, Bell, ChevronDown } from 'lucide-react';
 import {
   DropdownMenu,
@@ -12,10 +13,13 @@ import {
 
 const Header = () => {
   const { user, logout, isAuthenticated, isEnterprise } = useAuth();
+  const { getItemCount } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const cartCount = getItemCount();
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -82,9 +86,11 @@ const Header = () => {
             </button>
             <Link to="/cart" className="p-2 text-gray-400 hover:text-white transition-colors relative" data-testid="cart-btn">
               <ShoppingCart className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#0047AB] text-white text-xs rounded-full flex items-center justify-center">
-                0
-              </span>
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#D4AF37] text-black text-xs font-bold rounded-full flex items-center justify-center">
+                  {cartCount > 9 ? '9+' : cartCount}
+                </span>
+              )}
             </Link>
 
             {/* User Menu */}
