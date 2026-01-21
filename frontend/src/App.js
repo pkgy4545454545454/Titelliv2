@@ -1,53 +1,283 @@
-import { useEffect } from "react";
-import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'sonner';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+// Layout
+import Header from './components/Header';
+import Footer from './components/Footer';
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
+// Pages
+import HomePage from './pages/HomePage';
+import AuthPage from './pages/AuthPage';
+import ServicesPage from './pages/ServicesPage';
+import ProductsPage from './pages/ProductsPage';
+import EnterprisesPage from './pages/EnterprisesPage';
+import EnterprisePage from './pages/EnterprisePage';
+import EnterpriseDashboard from './pages/EnterpriseDashboard';
+import ClientDashboard from './pages/ClientDashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import { PaymentSuccessPage, PaymentCancelPage } from './pages/PaymentPages';
 
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
+import './index.css';
 
+// Protected Route Component
+const ProtectedRoute = ({ children, allowedTypes = [] }) => {
+  const { isAuthenticated, user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+        <div className="w-16 h-16 border-4 border-[#0047AB] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  if (allowedTypes.length > 0 && !allowedTypes.includes(user?.user_type)) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
+
+// Layout wrapper
+const MainLayout = ({ children, showFooter = true }) => {
   return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
+    <>
+      <Header />
+      <main className="min-h-screen pt-20">
+        {children}
+      </main>
+      {showFooter && <Footer />}
+    </>
   );
 };
 
+// Dashboard Layout (no footer)
+const DashboardLayout = ({ children }) => {
+  return (
+    <>
+      <Header />
+      {children}
+    </>
+  );
+};
+
+function AppRoutes() {
+  return (
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/" element={<MainLayout><HomePage /></MainLayout>} />
+      <Route path="/auth" element={<AuthPage />} />
+      <Route path="/services" element={<MainLayout><ServicesPage /></MainLayout>} />
+      <Route path="/products" element={<MainLayout><ProductsPage /></MainLayout>} />
+      <Route path="/entreprises" element={<MainLayout><EnterprisesPage /></MainLayout>} />
+      <Route path="/entreprise/:id" element={<MainLayout><EnterprisePage /></MainLayout>} />
+      
+      {/* Filtered pages - reuse EnterprisesPage with filter */}
+      <Route path="/certifies" element={<MainLayout><EnterprisesPage /></MainLayout>} />
+      <Route path="/labellises" element={<MainLayout><EnterprisesPage /></MainLayout>} />
+      <Route path="/premium" element={<MainLayout><EnterprisesPage /></MainLayout>} />
+      <Route path="/guests" element={<MainLayout><EnterprisesPage /></MainLayout>} />
+
+      {/* Payment Routes */}
+      <Route path="/payment/success" element={<MainLayout><PaymentSuccessPage /></MainLayout>} />
+      <Route path="/payment/cancel" element={<MainLayout><PaymentCancelPage /></MainLayout>} />
+
+      {/* Protected Enterprise Routes */}
+      <Route 
+        path="/dashboard/entreprise/*" 
+        element={
+          <ProtectedRoute allowedTypes={['entreprise']}>
+            <DashboardLayout><EnterpriseDashboard /></DashboardLayout>
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* Protected Client Routes */}
+      <Route 
+        path="/dashboard/client/*" 
+        element={
+          <ProtectedRoute allowedTypes={['client']}>
+            <DashboardLayout><ClientDashboard /></DashboardLayout>
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* Admin Route */}
+      <Route 
+        path="/admin/*" 
+        element={
+          <ProtectedRoute>
+            <DashboardLayout><AdminDashboard /></DashboardLayout>
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* Static Pages */}
+      <Route path="/about" element={<MainLayout><AboutPage /></MainLayout>} />
+      <Route path="/cgv" element={<MainLayout><CGVPage /></MainLayout>} />
+      <Route path="/mentions-legales" element={<MainLayout><MentionsLegalesPage /></MainLayout>} />
+      <Route path="/partenaires" element={<MainLayout><PartenairesPage /></MainLayout>} />
+      <Route path="/service-client" element={<MainLayout><ServiceClientPage /></MainLayout>} />
+
+      {/* 404 */}
+      <Route path="*" element={<MainLayout><NotFoundPage /></MainLayout>} />
+    </Routes>
+  );
+}
+
+// Simple Static Pages
+const AboutPage = () => (
+  <div className="min-h-screen bg-[#050505] pt-24 px-4">
+    <div className="max-w-4xl mx-auto py-16">
+      <h1 className="text-4xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
+        À propos de Titelli
+      </h1>
+      <div className="prose prose-invert max-w-none">
+        <p className="text-gray-400 text-lg leading-relaxed mb-6">
+          Titelli est la plateforme de référence pour découvrir et connecter les meilleurs prestataires de services et produits de la région de Lausanne.
+        </p>
+        <p className="text-gray-400 text-lg leading-relaxed mb-6">
+          Notre mission est d'exposer les talents locaux et de permettre aux clients de trouver facilement des prestataires de confiance, certifiés et labellisés.
+        </p>
+        <h2 className="text-2xl font-bold text-white mt-12 mb-6">Notre vision</h2>
+        <p className="text-gray-400 text-lg leading-relaxed mb-6">
+          Nous croyons en la qualité locale et souhaitons mettre en avant les entreprises qui font la richesse de notre région. Chaque prestataire sur Titelli est sélectionné pour son expertise et son engagement envers la satisfaction client.
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+const CGVPage = () => (
+  <div className="min-h-screen bg-[#050505] pt-24 px-4">
+    <div className="max-w-4xl mx-auto py-16">
+      <h1 className="text-4xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
+        Conditions Générales de Vente
+      </h1>
+      <div className="prose prose-invert max-w-none text-gray-400">
+        <h2 className="text-xl font-bold text-white mt-8 mb-4">Article 1 - Objet</h2>
+        <p className="mb-4">Les présentes conditions générales de vente régissent l'utilisation de la plateforme Titelli...</p>
+        
+        <h2 className="text-xl font-bold text-white mt-8 mb-4">Article 2 - Tarification</h2>
+        <ul className="list-disc pl-6 space-y-2">
+          <li>Inscription annuelle: 250 CHF</li>
+          <li>Service Premium annuel: 540 CHF</li>
+          <li>Service Premium mensuel: 45 CHF</li>
+          <li>Commission sur ventes: 10-20%</li>
+        </ul>
+        
+        <h2 className="text-xl font-bold text-white mt-8 mb-4">Article 3 - Paiements</h2>
+        <p className="mb-4">Tous les paiements sont sécurisés via Stripe. Les prix sont en CHF.</p>
+      </div>
+    </div>
+  </div>
+);
+
+const MentionsLegalesPage = () => (
+  <div className="min-h-screen bg-[#050505] pt-24 px-4">
+    <div className="max-w-4xl mx-auto py-16">
+      <h1 className="text-4xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
+        Mentions Légales
+      </h1>
+      <div className="prose prose-invert max-w-none text-gray-400">
+        <h2 className="text-xl font-bold text-white mt-8 mb-4">Éditeur</h2>
+        <p className="mb-4">Titelli SA<br />Lausanne, Suisse</p>
+        
+        <h2 className="text-xl font-bold text-white mt-8 mb-4">Hébergement</h2>
+        <p className="mb-4">Les données sont hébergées de manière sécurisée en Suisse.</p>
+        
+        <h2 className="text-xl font-bold text-white mt-8 mb-4">Protection des données</h2>
+        <p className="mb-4">Conformément à la LPD suisse et au RGPD, vos données personnelles sont protégées.</p>
+      </div>
+    </div>
+  </div>
+);
+
+const PartenairesPage = () => (
+  <div className="min-h-screen bg-[#050505] pt-24 px-4">
+    <div className="max-w-4xl mx-auto py-16">
+      <h1 className="text-4xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
+        Nos Partenaires
+      </h1>
+      <p className="text-gray-400 text-lg mb-8">
+        Titelli collabore avec les meilleurs acteurs de la région pour vous offrir une expérience exceptionnelle.
+      </p>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+          <div key={i} className="card-service rounded-xl p-8 flex items-center justify-center">
+            <div className="w-16 h-16 bg-white/10 rounded-full" />
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+const ServiceClientPage = () => (
+  <div className="min-h-screen bg-[#050505] pt-24 px-4">
+    <div className="max-w-4xl mx-auto py-16">
+      <h1 className="text-4xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
+        Service Client
+      </h1>
+      <div className="card-service rounded-xl p-8 mb-8">
+        <h2 className="text-xl font-bold text-white mb-4">Contactez-nous</h2>
+        <p className="text-gray-400 mb-6">Notre équipe est disponible pour répondre à toutes vos questions.</p>
+        <div className="space-y-4">
+          <p className="text-gray-400">📧 Email: contact@titelli.com</p>
+          <p className="text-gray-400">📞 Téléphone: +41 XX XXX XX XX</p>
+          <p className="text-gray-400">📍 Adresse: Lausanne, Suisse</p>
+        </div>
+      </div>
+      <div className="card-service rounded-xl p-8">
+        <h2 className="text-xl font-bold text-white mb-4">FAQ</h2>
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-white font-medium mb-2">Comment créer un compte entreprise ?</h3>
+            <p className="text-gray-400 text-sm">Cliquez sur "Connexion" puis sélectionnez "Entreprise" lors de l'inscription.</p>
+          </div>
+          <div>
+            <h3 className="text-white font-medium mb-2">Comment devenir certifié ?</h3>
+            <p className="text-gray-400 text-sm">Contactez notre équipe pour passer la certification (200 CHF).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const NotFoundPage = () => (
+  <div className="min-h-screen bg-[#050505] pt-24 flex items-center justify-center">
+    <div className="text-center">
+      <h1 className="text-6xl font-bold text-white mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>404</h1>
+      <p className="text-gray-400 mb-8">Page non trouvée</p>
+      <a href="/" className="btn-primary">Retour à l'accueil</a>
+    </div>
+  </div>
+);
+
 function App() {
   return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </div>
+    <BrowserRouter>
+      <AuthProvider>
+        <Toaster 
+          position="top-right"
+          toastOptions={{
+            style: {
+              background: '#0F0F0F',
+              color: '#E5E5E5',
+              border: '1px solid rgba(255,255,255,0.1)'
+            }
+          }}
+        />
+        <AppRoutes />
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
