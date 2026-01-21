@@ -233,9 +233,18 @@ const EnterprisePage = () => {
                       </div>
                       <h3 className="text-white font-semibold mb-2">{service.name}</h3>
                       <p className="text-sm text-gray-400 mb-3 line-clamp-2">{service.description}</p>
-                      <p className="text-lg font-bold text-white">
-                        {service.price.toFixed(2)} <span className="text-sm text-gray-400">{service.currency}</span>
-                      </p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-lg font-bold text-white">
+                          {service.price.toFixed(2)} <span className="text-sm text-gray-400">{service.currency}</span>
+                        </p>
+                        <button 
+                          onClick={() => handleAddToCart(service)}
+                          className="p-2 bg-[#0047AB] rounded-full text-white hover:bg-[#2E74D6] transition-colors"
+                          data-testid={`add-service-${service.id}`}
+                        >
+                          <ShoppingCart className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -266,7 +275,11 @@ const EnterprisePage = () => {
                         <p className="text-lg font-bold text-white">
                           {product.price.toFixed(2)} <span className="text-sm text-gray-400">{product.currency}</span>
                         </p>
-                        <button className="p-2 bg-[#D4AF37] rounded-full text-black hover:bg-[#F3CF55] transition-colors">
+                        <button 
+                          onClick={() => handleAddToCart(product)}
+                          className="p-2 bg-[#D4AF37] rounded-full text-black hover:bg-[#F3CF55] transition-colors"
+                          data-testid={`add-product-${product.id}`}
+                        >
                           <ShoppingCart className="w-4 h-4" />
                         </button>
                       </div>
