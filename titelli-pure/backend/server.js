@@ -126,7 +126,7 @@ app.post('/api/auth/register', async (req, res) => {
         const userId = uuidv4();
         
         const user = {
-            id: viserId,
+            id: userId,
             email,
             password: hashedPassword,
             first_name,
