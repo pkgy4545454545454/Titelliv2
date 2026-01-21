@@ -32,16 +32,18 @@ const AuthPage = () => {
     setLoading(true);
 
     try {
+      let loggedUser;
       if (isLogin) {
-        await login(formData.email, formData.password);
+        loggedUser = await login(formData.email, formData.password);
         toast.success('Connexion réussie !');
       } else {
-        await register({ ...formData, user_type: userType });
+        loggedUser = await register({ ...formData, user_type: userType });
         toast.success('Inscription réussie !');
       }
       
-      // Redirect based on user type
-      navigate(userType === 'entreprise' ? '/dashboard/entreprise' : '/dashboard/client');
+      // Redirect based on actual user type from response
+      const redirectType = loggedUser?.user_type || userType;
+      navigate(redirectType === 'entreprise' ? '/dashboard/entreprise' : '/dashboard/client');
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Une erreur est survenue');
     } finally {
