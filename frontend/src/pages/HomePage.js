@@ -1,0 +1,343 @@
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { ChevronRight, Star, Award, Crown, CheckCircle, ArrowRight, Play, Sparkles, TrendingUp, Gift, Users } from 'lucide-react';
+import { featuredAPI, categoryAPI, enterpriseAPI, servicesProductsAPI } from '../services/api';
+import EnterpriseCard from '../components/EnterpriseCard';
+import ServiceProductCard from '../components/ServiceProductCard';
+
+const HomePage = () => {
+  const [tendances, setTendances] = useState([]);
+  const [guests, setGuests] = useState([]);
+  const [offres, setOffres] = useState([]);
+  const [premium, setPremium] = useState([]);
+  const [productCategories, setProductCategories] = useState([]);
+  const [serviceCategories, setServiceCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [tendRes, guestRes, offreRes, premRes, prodCatRes, servCatRes] = await Promise.all([
+          featuredAPI.tendances(),
+          featuredAPI.guests(),
+          featuredAPI.offres(),
+          featuredAPI.premium(),
+          categoryAPI.products(),
+          categoryAPI.services()
+        ]);
+        setTendances(tendRes.data);
+        setGuests(guestRes.data);
+        setOffres(offreRes.data);
+        setPremium(premRes.data);
+        setProductCategories(prodCatRes.data);
+        setServiceCategories(servCatRes.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const heroImage = 'https://images.unsplash.com/photo-1733950489642-bd1a7c3e69bb?w=1920&q=80';
+
+  const mainCategories = [
+    { id: 'services', label: 'Services', path: '/services', icon: Sparkles },
+    { id: 'produits', label: 'Produits', path: '/products', icon: Gift },
+    { id: 'certifies', label: 'Certifiés', path: '/certifies', icon: CheckCircle },
+    { id: 'guests', label: 'Guests', path: '/guests', icon: Users },
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#050505]" data-testid="home-page">
+      {/* Hero Section */}
+      <section className="relative h-screen" data-testid="hero-section">
+        {/* Background */}
+        <div className="absolute inset-0">
+          <img 
+            src={heroImage} 
+            alt="Lausanne" 
+            className="w-full h-full object-cover"
+          />
+          <div className="hero-overlay absolute inset-0" />
+        </div>
+
+        {/* Video Placeholder Overlay */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2">
+          <button className="group w-20 h-20 rounded-full bg-white/10 backdrop-blur-lg border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all" data-testid="play-video-btn">
+            <Play className="w-8 h-8 text-white ml-1 group-hover:scale-110 transition-transform" />
+          </button>
+        </div>
+
+        {/* Hero Content */}
+        <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4 pt-20">
+          <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-white mb-6 animate-fade-in" style={{ fontFamily: 'Playfair Display, serif' }}>
+            Les meilleurs prestataires<br />
+            <span className="gold-gradient">de ta région</span>
+          </h1>
+          <p className="text-lg md:text-xl text-gray-300 max-w-2xl mb-12 animate-fade-in stagger-1">
+            Découvrez les services et produits de qualité à Lausanne
+          </p>
+
+          {/* Category Buttons */}
+          <div className="flex flex-wrap justify-center gap-4 animate-fade-in stagger-2">
+            {mainCategories.map((cat) => (
+              <Link
+                key={cat.id}
+                to={cat.path}
+                className="group px-8 py-4 bg-black/80 backdrop-blur-lg border border-white/10 rounded-lg text-white font-medium hover:bg-white hover:text-black transition-all duration-300"
+                data-testid={`hero-btn-${cat.id}`}
+              >
+                <span className="flex items-center gap-2">
+                  <cat.icon className="w-5 h-5" />
+                  {cat.label}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+          <div className="w-6 h-10 rounded-full border-2 border-white/30 flex justify-center pt-2">
+            <div className="w-1.5 h-3 bg-white/50 rounded-full" />
+          </div>
+        </div>
+      </section>
+
+      {/* Services Section - Blue Background */}
+      <section className="py-20 md:py-28 section-blue" data-testid="services-section">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Les meilleurs services de ta région
+              </h2>
+              <p className="text-gray-400">Découvrez nos prestataires de confiance</p>
+            </div>
+            <Link to="/services" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors" data-testid="view-all-services">
+              Voir tout
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+
+          {/* Service Category Tabs */}
+          <div className="flex flex-wrap gap-3 mb-10">
+            {serviceCategories.slice(0, 8).map((cat, index) => (
+              <Link
+                key={cat.id}
+                to={`/services?category=${cat.id}`}
+                className="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm text-gray-300 hover:text-white transition-all"
+                data-testid={`service-cat-${cat.id}`}
+              >
+                {cat.name}
+              </Link>
+            ))}
+          </div>
+
+          {/* Service Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {offres.length > 0 ? (
+              offres.slice(0, 6).map((item, index) => (
+                <div key={item.id} className={`animate-fade-in stagger-${index + 1}`}>
+                  <ServiceProductCard item={item} />
+                </div>
+              ))
+            ) : (
+              // Placeholder cards
+              [1, 2, 3].map((i) => (
+                <div key={i} className="card-service rounded-xl overflow-hidden">
+                  <div className="h-56 bg-white/5 animate-pulse" />
+                  <div className="p-5 space-y-3">
+                    <div className="h-6 bg-white/5 rounded animate-pulse" />
+                    <div className="h-4 bg-white/5 rounded w-3/4 animate-pulse" />
+                    <div className="h-8 bg-white/5 rounded w-1/3 animate-pulse" />
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <Link to="/services" className="md:hidden flex items-center justify-center gap-2 mt-8 text-[#0047AB] font-medium">
+            Voir tous les services
+            <ArrowRight className="w-5 h-5" />
+          </Link>
+        </div>
+      </section>
+
+      {/* Product Categories Grid */}
+      <section className="py-20 md:py-28" data-testid="products-section">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Produits
+              </h2>
+              <p className="text-gray-400">Trouvez ce dont vous avez besoin</p>
+            </div>
+            <Link to="/products" className="hidden md:flex items-center gap-2 text-[#D4AF37] hover:text-[#F3CF55] font-medium transition-colors">
+              Voir tout
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {productCategories.slice(0, 8).map((cat, index) => (
+              <Link
+                key={cat.id}
+                to={`/products?category=${cat.id}`}
+                className="group relative h-40 md:h-48 rounded-xl overflow-hidden bg-gradient-to-br from-white/10 to-white/5 border border-white/5 hover:border-[#D4AF37]/30 transition-all"
+                data-testid={`product-cat-${cat.id}`}
+              >
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
+                  <div className="w-12 h-12 rounded-full bg-[#D4AF37]/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <Gift className="w-6 h-6 text-[#D4AF37]" />
+                  </div>
+                  <span className="text-white font-medium text-sm md:text-base">{cat.name}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Tendances Actuelles */}
+      <section className="py-20 md:py-28 bg-gradient-to-b from-[#0A0A0A] to-[#050505]" data-testid="tendances-section">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          <div className="flex items-center justify-between mb-12">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-[#D4AF37]/10">
+                <TrendingUp className="w-6 h-6 text-[#D4AF37]" />
+              </div>
+              <div>
+                <h2 className="text-3xl md:text-4xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Tendances actuelles
+                </h2>
+                <p className="text-gray-400 mt-1">Nos prestataires labellisés du moment</p>
+              </div>
+            </div>
+            <Link to="/labellises" className="hidden md:flex items-center gap-2 text-[#D4AF37] hover:text-[#F3CF55] font-medium transition-colors">
+              Voir tout
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {tendances.length > 0 ? (
+              tendances.map((enterprise, index) => (
+                <div key={enterprise.id} className={`animate-fade-in stagger-${index + 1}`}>
+                  <EnterpriseCard enterprise={enterprise} />
+                </div>
+              ))
+            ) : (
+              [1, 2, 3].map((i) => (
+                <div key={i} className="card-service rounded-xl h-80 animate-pulse" />
+              ))
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Guests du moment */}
+      <section className="py-20 md:py-28" data-testid="guests-section">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          <div className="flex items-center justify-between mb-12">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-[#0047AB]/10">
+                <CheckCircle className="w-6 h-6 text-[#0047AB]" />
+              </div>
+              <div>
+                <h2 className="text-3xl md:text-4xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Guests du moment
+                </h2>
+                <p className="text-gray-400 mt-1">Nos prestataires certifiés</p>
+              </div>
+            </div>
+            <Link to="/certifies" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors">
+              Voir tout
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {guests.length > 0 ? (
+              guests.map((enterprise, index) => (
+                <div key={enterprise.id} className={`animate-fade-in stagger-${index + 1}`}>
+                  <EnterpriseCard enterprise={enterprise} />
+                </div>
+              ))
+            ) : (
+              [1, 2, 3].map((i) => (
+                <div key={i} className="card-service rounded-xl h-80 animate-pulse" />
+              ))
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Premium Section */}
+      <section className="py-20 md:py-28 relative overflow-hidden" data-testid="premium-section">
+        {/* Background Effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0047AB]/10 via-transparent to-[#D4AF37]/10" />
+        
+        <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
+          <div className="flex items-center justify-between mb-12">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#0047AB]">
+                <Crown className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-3xl md:text-4xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Premium
+                </h2>
+                <p className="text-gray-400 mt-1">L'excellence à votre service</p>
+              </div>
+            </div>
+            <Link to="/premium" className="hidden md:flex items-center gap-2 text-[#D4AF37] hover:text-[#F3CF55] font-medium transition-colors">
+              Découvrir
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {premium.length > 0 ? (
+              premium.map((enterprise, index) => (
+                <div key={enterprise.id} className={`animate-fade-in stagger-${index + 1}`}>
+                  <EnterpriseCard enterprise={enterprise} />
+                </div>
+              ))
+            ) : (
+              [1, 2, 3].map((i) => (
+                <div key={i} className="card-service rounded-xl h-80 animate-pulse" />
+              ))
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 md:py-28" data-testid="cta-section">
+        <div className="max-w-4xl mx-auto px-4 md:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>
+            Vous êtes un prestataire ?
+          </h2>
+          <p className="text-lg text-gray-400 mb-10 max-w-2xl mx-auto">
+            Rejoignez Titelli et exposez vos services aux clients de la région de Lausanne. 
+            Bénéficiez d'une visibilité premium et développez votre activité.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/auth?type=entreprise" className="btn-primary text-lg px-10 py-4" data-testid="cta-register-btn">
+              Inscrire mon entreprise
+            </Link>
+            <Link to="/about" className="btn-secondary text-lg px-10 py-4">
+              En savoir plus
+            </Link>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default HomePage;
