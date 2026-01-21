@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
 
 // Layout
 import Header from './components/Header';
@@ -17,6 +18,8 @@ import EnterprisePage from './pages/EnterprisePage';
 import EnterpriseDashboard from './pages/EnterpriseDashboard';
 import ClientDashboard from './pages/ClientDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import CartPage from './pages/CartPage';
+import OrdersPage from './pages/OrdersPage';
 import { PaymentSuccessPage, PaymentCancelPage } from './pages/PaymentPages';
 
 import './index.css';
@@ -83,6 +86,10 @@ function AppRoutes() {
       <Route path="/labellises" element={<MainLayout><EnterprisesPage /></MainLayout>} />
       <Route path="/premium" element={<MainLayout><EnterprisesPage /></MainLayout>} />
       <Route path="/guests" element={<MainLayout><EnterprisesPage /></MainLayout>} />
+
+      {/* Cart & Orders Routes */}
+      <Route path="/cart" element={<MainLayout><CartPage /></MainLayout>} />
+      <Route path="/orders" element={<MainLayout><OrdersPage /></MainLayout>} />
 
       {/* Payment Routes */}
       <Route path="/payment/success" element={<MainLayout><PaymentSuccessPage /></MainLayout>} />
@@ -265,17 +272,19 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Toaster 
-          position="top-right"
-          toastOptions={{
-            style: {
-              background: '#0F0F0F',
-              color: '#E5E5E5',
-              border: '1px solid rgba(255,255,255,0.1)'
-            }
-          }}
-        />
-        <AppRoutes />
+        <CartProvider>
+          <Toaster 
+            position="top-right"
+            toastOptions={{
+              style: {
+                background: '#0F0F0F',
+                color: '#E5E5E5',
+                border: '1px solid rgba(255,255,255,0.1)'
+              }
+            }}
+          />
+          <AppRoutes />
+        </CartProvider>
       </AuthProvider>
     </BrowserRouter>
   );
