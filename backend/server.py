@@ -324,13 +324,13 @@ async def register(user_data: UserCreate):
 
 @api_router.post("/auth/login")
 async def login(credentials: UserLogin):
-    user = await db.users.find_one({"email": credentials.email})
+    user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
     if not user or not verify_password(credentials.password, user['password']):
         raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect")
     
     token = create_token(user['id'], user['user_type'])
-    del user['password']
-    return {"token": token, "user": user}
+    user_response = {k: v for k, v in user.items() if k != 'password'}
+    return {"token": token, "user": user_response}
 
 @api_router.get("/auth/me")
 async def get_me(current_user: dict = Depends(get_current_user)):
