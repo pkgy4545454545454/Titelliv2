@@ -354,7 +354,9 @@ async def create_enterprise(data: EnterpriseCreate, current_user: dict = Depends
     enterprise_dict = enterprise.model_dump()
     enterprise_dict['created_at'] = enterprise_dict['created_at'].isoformat()
     
-    await db.enterprises.insert_one(enterprise_dict)
+    # Insert and return without _id
+    insert_doc = enterprise_dict.copy()
+    await db.enterprises.insert_one(insert_doc)
     return enterprise_dict
 
 @api_router.get("/enterprises")
