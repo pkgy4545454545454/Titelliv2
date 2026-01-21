@@ -551,7 +551,8 @@ async def create_order(data: OrderCreate, current_user: dict = Depends(get_curre
     order_dict = order.model_dump()
     order_dict['created_at'] = order_dict['created_at'].isoformat()
     
-    await db.orders.insert_one(order_dict)
+    insert_doc = order_dict.copy()
+    await db.orders.insert_one(insert_doc)
     return order_dict
 
 @api_router.get("/orders")
