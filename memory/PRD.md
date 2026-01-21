@@ -4,20 +4,37 @@
 Build a large-scale marketplace platform called "Titelli" to showcase local service providers in the Lausanne region. The platform connects businesses ("prestataires") and customers ("clients") with features for browsing, ordering, payments, and business management.
 
 ## Tech Stack
-- **Frontend**: Pure HTML5, CSS3, Vanilla JavaScript (ES6+)
-- **Backend**: Node.js + Express.js
+- **Frontend**: React.js with Tailwind CSS, Shadcn/UI
+- **Backend**: FastAPI (Python)
 - **Database**: MongoDB
-- **Payments**: Stripe
+- **Payments**: Stripe (Live keys configured)
 
 ## What's Been Implemented ✅
 
-### Core Features (Completed - December 2024)
+### Core Features (Completed - January 2026)
 
 #### Authentication System
 - ✅ User registration (Client/Enterprise types)
 - ✅ Login/Logout with JWT tokens
 - ✅ Protected routes and middleware
 - ✅ User type differentiation (client, enterprise, admin)
+- ✅ Beautiful login page with split layout
+
+#### Shopping Cart System (NEW)
+- ✅ CartContext for global cart state
+- ✅ Add to cart from services/products pages
+- ✅ Add to cart from enterprise profile page
+- ✅ Cart page with item management (+/- quantity, remove)
+- ✅ Cart badge in header showing item count
+- ✅ Cart persistence in localStorage
+- ✅ Checkout process creating orders
+
+#### Orders System (NEW)
+- ✅ OrdersPage showing all user orders
+- ✅ Order details with items, quantities, prices
+- ✅ Order status badges (En attente, Confirmée, Terminée, Annulée)
+- ✅ Order notes display
+- ✅ Link to enterprise from order
 
 #### Enterprise Management
 - ✅ Enterprise profile creation
@@ -32,15 +49,17 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 - ✅ Search functionality
 - ✅ Price management (CHF currency)
 - ✅ Delivery flag support
+- ✅ Add to cart buttons on all item cards
 
-#### Client Features
-- ✅ Client dashboard with order history
-- ✅ Cashback balance tracking
-- ✅ Favorites section (UI ready)
-- ✅ Agenda section (UI ready)
+#### Client Dashboard
+- ✅ Welcome message with user name
+- ✅ Cashback balance display
+- ✅ Order count statistics
+- ✅ Recent orders list
+- ✅ Navigation sidebar with all sections
 
 #### Enterprise Dashboard
-- ✅ Business statistics (orders, revenue, rating)
+- ✅ Business statistics (views, orders, revenue, rating)
 - ✅ Services/products management
 - ✅ Order management
 - ✅ Customer reviews
@@ -58,48 +77,52 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 - ✅ Subscription payments
 - ✅ Payment status tracking
 - ✅ Success/Cancel pages
+- ⚠️ Note: Stripe requires opening site in new tab (not iframe)
 
 #### UI/UX
 - ✅ Dark theme modern design
 - ✅ Responsive layout (desktop + mobile)
-- ✅ Toast notifications
-- ✅ Loading states
+- ✅ Toast notifications (sonner)
+- ✅ Loading states and spinners
 - ✅ Modal dialogs
 - ✅ Category badges (Certified, Labeled, Premium)
-
-### Database Seeding
-- ✅ Admin account (admin@titelli.com)
-- ✅ Test client account (test@example.com)
-- ✅ 6 demo enterprises with services
-- ✅ Sample reviews
-- ✅ Sample orders
+- ✅ Playfair Display font for headings
 
 ## Files Structure
 
 ```
-/app/titelli-pure/
-├── README.md                    # Documentation
+/app/
 ├── backend/
-│   ├── .env                     # Environment config
-│   ├── package.json             # Dependencies
-│   ├── server.js                # Express API (770+ lines)
-│   └── seed.js                  # Database seeding
+│   ├── server.py              # FastAPI application
+│   ├── requirements.txt       # Python dependencies
+│   └── .env                   # Environment config
 └── frontend/
-    ├── index.html               # Homepage
-    ├── auth.html                # Login/Register
-    ├── services.html            # Services listing
-    ├── products.html            # Products listing
-    ├── entreprises.html         # Enterprises listing
-    ├── entreprise.html          # Enterprise profile
-    ├── dashboard-client.html    # Client dashboard
-    ├── dashboard-entreprise.html # Enterprise dashboard
-    ├── admin.html               # Admin panel
-    ├── payment-success.html     # Payment success
-    ├── payment-cancel.html      # Payment cancelled
-    ├── css/style.css            # All styles
-    └── js/
-        ├── api.js               # API functions
-        └── app.js               # Main JS logic
+    ├── src/
+    │   ├── App.js             # Main app with routes
+    │   ├── context/
+    │   │   ├── AuthContext.js # Authentication state
+    │   │   └── CartContext.js # Shopping cart state (NEW)
+    │   ├── pages/
+    │   │   ├── HomePage.js
+    │   │   ├── AuthPage.js
+    │   │   ├── ServicesPage.js
+    │   │   ├── ProductsPage.js
+    │   │   ├── EnterprisesPage.js
+    │   │   ├── EnterprisePage.js
+    │   │   ├── CartPage.js    # (NEW)
+    │   │   ├── OrdersPage.js  # (NEW)
+    │   │   ├── ClientDashboard.js
+    │   │   ├── EnterpriseDashboard.js
+    │   │   ├── AdminDashboard.js
+    │   │   └── PaymentPages.js
+    │   ├── components/
+    │   │   ├── Header.js      # With cart badge
+    │   │   ├── Footer.js
+    │   │   ├── EnterpriseCard.js
+    │   │   └── ServiceProductCard.js
+    │   └── services/
+    │       └── api.js         # API functions
+    └── package.json
 ```
 
 ## API Endpoints
@@ -119,6 +142,11 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 - GET `/api/services-products`
 - POST `/api/services-products`
 - DELETE `/api/services-products/:id`
+
+### Orders (NEW)
+- GET `/api/orders` - List user orders
+- POST `/api/orders` - Create order from cart
+- PUT `/api/orders/:id/status` - Update order status
 
 ### Reviews
 - GET `/api/reviews/:enterprise_id`
@@ -141,17 +169,31 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 | Client | test@example.com | Test123! |
 | Enterprise | spa.luxury@titelli.com | Demo123! |
 
-## ZIP Archive
-- Location: `/app/titelli-pure.zip`
-- Size: ~68 KB (without node_modules)
-- Contains complete project ready to deploy
+## Live URL
+https://titelli-market.preview.emergentagent.com
 
-## Backlog / Future Tasks (P1-P2)
+## Recent Changes (January 21, 2026)
+
+### Bug Fixes
+1. **Cart System** - Implemented complete shopping cart:
+   - Created CartContext.js for global cart state
+   - Created CartPage.js with full cart management
+   - Created OrdersPage.js for order history
+   - Added cart functionality to Header.js
+   - Added onAddToCart to ServiceProductCard.js
+   - Updated ServicesPage.js and ProductsPage.js
+   - Updated EnterprisePage.js with add to cart buttons
+   - Updated App.js with CartProvider and new routes
+
+2. **Cart Badge** - Shows item count in header
+
+3. **Order Creation** - Cart checkout creates real orders in database
+
+## Backlog / Future Tasks
 
 ### P1 - High Priority
 - [ ] Image upload for enterprises (logo, photos)
 - [ ] Real-time order notifications
-- [ ] Full order workflow (create, pay, complete)
 - [ ] Email notifications (order confirmation, etc.)
 
 ### P2 - Medium Priority
@@ -167,3 +209,7 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 - [ ] Mobile app (React Native)
 - [ ] Analytics dashboard
 - [ ] Loyalty program
+
+## Notes
+- Stripe Checkout requires opening the site directly (not in iframe)
+- For testing payments, open: https://titelli-market.preview.emergentagent.com in a new tab
