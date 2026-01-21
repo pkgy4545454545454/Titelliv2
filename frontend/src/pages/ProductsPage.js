@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Grid, List } from 'lucide-react';
-import { categoryAPI, servicesProductsAPI } from '../services/api';
+import { categoryAPI, servicesProductsAPI, enterpriseAPI } from '../services/api';
+import { useCart } from '../context/CartContext';
 import ServiceProductCard from '../components/ServiceProductCard';
 import {
   Select,
@@ -13,8 +14,10 @@ import {
 
 const ProductsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { addItem } = useCart();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [enterprises, setEnterprises] = useState({});
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [viewMode, setViewMode] = useState('grid');
@@ -43,6 +46,19 @@ const ProductsPage = () => {
         const response = await servicesProductsAPI.list(params);
         setProducts(response.data.items);
         setTotal(response.data.total);
+
+        // Fetch enterprises for products
+        const enterpriseIds = [...new Set(response.data.items.map(p => p.enterprise_id))];
+        const enterprisesMap = {};
+        for (const eid of enterpriseIds) {
+          try {
+            const entRes = await enterpriseAPI.getById(eid);
+            enterprisesMap[eid] = entRes.data;
+          } catch (e) {
+            console.error('Error fetching enterprise:', e);
+          }
+        }
+        setEnterprises(enterprisesMap);
       } catch (error) {
         console.error('Error fetching products:', error);
       } finally {
@@ -59,6 +75,11 @@ const ProductsPage = () => {
       searchParams.set('category', value);
     }
     setSearchParams(searchParams);
+  };
+
+  const handleAddToCart = (item) => {
+    const enterprise = enterprises[item.enterprise_id];
+    addItem(item, enterprise);
   };
 
   return (
@@ -154,7 +175,7 @@ const ProductsPage = () => {
           }>
             {products.map((product, index) => (
               <div key={product.id} className={`animate-fade-in stagger-${(index % 6) + 1}`}>
-                <ServiceProductCard item={product} />
+                <ServiceProductCard item={product} onAddToCart={handleAddToCart} />
               </div>
             ))}
           </div>
