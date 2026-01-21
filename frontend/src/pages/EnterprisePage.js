@@ -3,18 +3,24 @@ import { useParams, Link } from 'react-router-dom';
 import { Star, MapPin, Phone, Mail, Globe, Clock, CheckCircle, Award, Crown, ChevronRight, ShoppingCart, MessageCircle, Share2, Heart } from 'lucide-react';
 import { enterpriseAPI, reviewAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { toast } from 'sonner';
 import ServiceProductCard from '../components/ServiceProductCard';
 
 const EnterprisePage = () => {
   const { id } = useParams();
   const { isAuthenticated, user } = useAuth();
+  const { addItem } = useCart();
   const [enterprise, setEnterprise] = useState(null);
   const [services, setServices] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('presentation');
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
+
+  const handleAddToCart = (item) => {
+    addItem(item, enterprise);
+  };
 
   useEffect(() => {
     const fetchEnterprise = async () => {
