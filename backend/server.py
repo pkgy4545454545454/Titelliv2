@@ -432,7 +432,8 @@ async def create_service_product(data: ServiceProductCreate, current_user: dict 
     item_dict = item.model_dump()
     item_dict['created_at'] = item_dict['created_at'].isoformat()
     
-    await db.services_products.insert_one(item_dict)
+    insert_doc = item_dict.copy()
+    await db.services_products.insert_one(insert_doc)
     return item_dict
 
 @api_router.get("/services-products")
