@@ -514,7 +514,8 @@ async def create_review(data: ReviewCreate, current_user: dict = Depends(get_cur
     review_dict = review.model_dump()
     review_dict['created_at'] = review_dict['created_at'].isoformat()
     
-    await db.reviews.insert_one(review_dict)
+    insert_doc = review_dict.copy()
+    await db.reviews.insert_one(insert_doc)
     
     # Update enterprise rating
     all_reviews = await db.reviews.find({"enterprise_id": data.enterprise_id}).to_list(1000)
