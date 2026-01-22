@@ -110,26 +110,90 @@ const EnterpriseDashboard = () => {
     }
   };
 
-  const menuItems = [
-    { id: 'overview', label: 'Tableau de bord', icon: LayoutDashboard },
-    { id: 'profile', label: 'Profil entreprise', icon: Building2 },
-    { id: 'services', label: 'Services & Produits', icon: Package },
-    { id: 'orders', label: 'Commandes', icon: ShoppingCart },
-    { id: 'offers', label: 'Offres & Promotions', icon: Gift },
-    { id: 'trainings', label: 'Formations', icon: GraduationCap },
-    { id: 'jobs', label: 'Offres d\'emploi', icon: Briefcase },
-    { id: 'realestate', label: 'Immobilier', icon: Home },
-    { id: 'investments', label: 'Investissements', icon: PieChart },
-    { id: 'stock', label: 'Gestion des stocks', icon: Box },
-    { id: 'agenda', label: 'Agenda', icon: Calendar },
-    { id: 'team', label: 'Mon équipe', icon: Users },
-    { id: 'permanent', label: 'Commandes permanentes', icon: ClipboardList },
-    { id: 'documents', label: 'Documents', icon: FolderOpen },
-    { id: 'development', label: 'Développement', icon: BookOpen },
-    { id: 'finances', label: 'Finances', icon: Wallet },
-    { id: 'advertising', label: 'Publicités', icon: Megaphone },
-    { id: 'settings', label: 'Paramètres', icon: Settings },
+  // Menu restructuré selon les besoins
+  const menuSections = [
+    {
+      title: 'Principal',
+      items: [
+        { id: 'overview', label: 'Accueil', icon: LayoutDashboard },
+        { id: 'profile', label: 'Profil entreprise', icon: Building2 },
+        { id: 'feed', label: 'Mon fil d\'actualité', icon: Rss },
+        { id: 'business_feed', label: 'Mon feed entreprises', icon: Newspaper },
+      ]
+    },
+    {
+      title: 'Commercial',
+      items: [
+        { id: 'services', label: 'Services & Produits', icon: Package },
+        { id: 'orders', label: 'Mes commandes', icon: ShoppingCart },
+        { id: 'deliveries', label: 'Mes livraisons', icon: Truck },
+        { id: 'activities', label: 'Mes activités', icon: Activity },
+        { id: 'stock', label: 'Gestion des stocks', icon: Box },
+        { id: 'permanent', label: 'Commandes permanentes', icon: ClipboardList },
+      ]
+    },
+    {
+      title: 'Marketing',
+      items: [
+        { id: 'offers', label: 'Offres & Promotions', icon: Gift },
+        { id: 'advertising', label: 'Mes publicités', icon: Megaphone },
+        { id: 'commercial_gesture', label: 'Geste commercial', icon: Heart },
+        { id: 'tendances', label: 'Tendances actuelles', icon: TrendingUp },
+        { id: 'guests', label: 'Guests du moment', icon: Star },
+      ]
+    },
+    {
+      title: 'Ressources Humaines',
+      items: [
+        { id: 'team', label: 'Mon personnel', icon: Users },
+        { id: 'jobs', label: 'Emplois & Stages', icon: Briefcase },
+        { id: 'trainings', label: 'Formations', icon: GraduationCap },
+      ]
+    },
+    {
+      title: 'Finances & Investissements',
+      items: [
+        { id: 'finances', label: 'Mes finances', icon: Wallet },
+        { id: 'cards', label: 'Mes cartes', icon: CreditCard },
+        { id: 'investments', label: 'Mes investissements', icon: PieChart },
+        { id: 'donations', label: 'Donations', icon: Heart },
+      ]
+    },
+    {
+      title: 'Actualités & Formation',
+      items: [
+        { id: 'business_news', label: 'Business News', icon: Newspaper },
+        { id: 'development', label: 'Formations métier', icon: BookOpen },
+      ]
+    },
+    {
+      title: 'Communication',
+      items: [
+        { id: 'messages', label: 'Messagerie', icon: MessageSquare },
+        { id: 'contacts', label: 'Contacts', icon: Phone },
+        { id: 'agenda', label: 'Agenda', icon: Calendar },
+      ]
+    },
+    {
+      title: 'Documents & Paramètres',
+      items: [
+        { id: 'documents', label: 'Documents', icon: FolderOpen },
+        { id: 'realestate', label: 'Immobilier', icon: Home },
+        { id: 'settings', label: 'Paramètres', icon: Settings },
+      ]
+    },
+    {
+      title: 'Aide & Informations',
+      items: [
+        { id: 'support', label: 'Service client', icon: HelpCircle },
+        { id: 'partners', label: 'Partenaires', icon: Handshake },
+        { id: 'about', label: 'À propos', icon: Info },
+      ]
+    },
   ];
+
+  // Flatten menu items for easy lookup
+  const menuItems = menuSections.flatMap(section => section.items);
 
   const stats = [
     { label: 'Vues ce mois', value: '1,234', icon: Eye, trend: '+12%', color: 'text-[#0047AB]' },
