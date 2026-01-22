@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Star, MapPin, Phone, Mail, Globe, Clock, CheckCircle, Award, Crown, ChevronRight, ChevronLeft, ShoppingCart, MessageCircle, Share2, Heart, Play, Pause, Volume2, VolumeX, Users, TrendingUp, BarChart3, Calendar as CalendarIcon } from 'lucide-react';
-import { enterpriseAPI, reviewAPI, servicesProductsAPI } from '../services/api';
+import { enterpriseAPI, reviewAPI, servicesProductsAPI, getImageUrl } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { toast } from 'sonner';
