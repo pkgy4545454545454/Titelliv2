@@ -176,7 +176,7 @@ const EnterprisePage = () => {
         <div className="absolute bottom-0 left-8 md:left-16 transform translate-y-1/2 z-30">
           <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-[#050505] overflow-hidden bg-[#0F0F0F] shadow-2xl">
             {enterprise.logo ? (
-              <img src={enterprise.logo} alt="" className="w-full h-full object-cover" />
+              <img src={getImageUrl(enterprise.logo)} alt="" className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#0047AB] to-[#D4AF37]">
                 <span className="text-4xl font-bold text-white">
