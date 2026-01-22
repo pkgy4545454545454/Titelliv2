@@ -894,6 +894,21 @@ const EnterpriseDashboard = () => {
             </div>
           )}
 
+          {/* IA Ciblage Clients */}
+          {activeTab === 'ia_clients' && (
+            <IAClientsSection />
+          )}
+
+          {/* Influenceurs */}
+          {activeTab === 'influencers' && (
+            <InfluencersSection />
+          )}
+
+          {/* Invitations Clients */}
+          {activeTab === 'invitations' && (
+            <InvitationsSection />
+          )}
+
           {/* Cartes de paiement */}
           {activeTab === 'cards' && (
             <div className="space-y-6">
