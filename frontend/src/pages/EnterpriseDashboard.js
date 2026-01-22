@@ -2997,15 +2997,70 @@ const IAClientsSection = () => {
 
 // Influenceurs Section
 const InfluencersSection = () => {
-  const [influencers] = useState([
-    { id: 1, name: 'Sophie Martin', followers: '45K', category: 'Lifestyle', engagement: '5.2%', price: '500 CHF', image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100' },
-    { id: 2, name: 'Lucas Dubois', followers: '128K', category: 'Food', engagement: '4.8%', price: '1200 CHF', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100' },
-    { id: 3, name: 'Emma Bernard', followers: '89K', category: 'Beauty', engagement: '6.1%', price: '800 CHF', image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100' },
-    { id: 4, name: 'Thomas Petit', followers: '210K', category: 'Tech', engagement: '3.9%', price: '1500 CHF', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100' },
-  ]);
+  const [influencers, setInfluencers] = useState([]);
+  const [collaborations, setCollaborations] = useState([]);
+  const [stats, setStats] = useState({ total_collaborations: 0, active_collaborations: 0, total_investment: 0 });
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [loading, setLoading] = useState(true);
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [selectedInfluencer, setSelectedInfluencer] = useState(null);
+  const [contactMessage, setContactMessage] = useState('');
 
   const categories = ['all', 'Lifestyle', 'Food', 'Beauty', 'Tech', 'Sport', 'Travel'];
+
+  useEffect(() => {
+    fetchData();
+  }, [selectedCategory]);
+
+  const fetchData = async () => {
+    try {
+      const [infRes, collabRes] = await Promise.all([
+        influencersAPI.list(selectedCategory === 'all' ? null : selectedCategory),
+        influencersAPI.getCollaborations()
+      ]);
+      setInfluencers(infRes.data.influencers || []);
+      setCollaborations(collabRes.data.collaborations || []);
+      setStats(collabRes.data.stats || {});
+    } catch (error) {
+      console.error('Error fetching influencers:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleContact = (influencer) => {
+    setSelectedInfluencer(influencer);
+    setShowContactModal(true);
+  };
+
+  const submitCollaboration = async () => {
+    if (!selectedInfluencer) return;
+    try {
+      await influencersAPI.createCollaboration(selectedInfluencer.id, contactMessage, selectedInfluencer.price);
+      toast.success('Demande de collaboration envoyée !');
+      setShowContactModal(false);
+      setContactMessage('');
+      fetchData();
+    } catch (error) {
+      toast.error('Erreur lors de l\'envoi de la demande');
+    }
+  };
+
+  const formatFollowers = (num) => {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(0) + 'K';
+    return num?.toString() || '0';
+  };
+
+  const totalReach = influencers.reduce((sum, inf) => sum + (inf.followers || 0), 0);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="w-10 h-10 border-4 border-[#0047AB] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6" data-testid="influencers-section">
@@ -3020,21 +3075,50 @@ const InfluencersSection = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="card-service rounded-xl p-4">
           <p className="text-sm text-gray-400">Influenceurs disponibles</p>
-          <p className="text-2xl font-bold text-[#0047AB]">156</p>
+          <p className="text-2xl font-bold text-[#0047AB]">{influencers.length}</p>
         </div>
         <div className="card-service rounded-xl p-4">
           <p className="text-sm text-gray-400">Collaborations actives</p>
-          <p className="text-2xl font-bold text-green-400">3</p>
+          <p className="text-2xl font-bold text-green-400">{stats.active_collaborations}</p>
         </div>
         <div className="card-service rounded-xl p-4">
           <p className="text-sm text-gray-400">Portée totale</p>
-          <p className="text-2xl font-bold text-[#D4AF37]">472K</p>
+          <p className="text-2xl font-bold text-[#D4AF37]">{formatFollowers(totalReach)}</p>
         </div>
         <div className="card-service rounded-xl p-4">
           <p className="text-sm text-gray-400">Investissement</p>
-          <p className="text-2xl font-bold text-purple-400">2.5K CHF</p>
+          <p className="text-2xl font-bold text-purple-400">{stats.total_investment?.toLocaleString()} CHF</p>
         </div>
       </div>
+
+      {/* My Collaborations */}
+      {collaborations.length > 0 && (
+        <div className="card-service rounded-xl p-6">
+          <h2 className="text-lg font-semibold text-white mb-4">Mes collaborations</h2>
+          <div className="space-y-3">
+            {collaborations.map((collab) => (
+              <div key={collab.id} className="p-3 bg-white/5 rounded-lg flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <img src={collab.influencer?.image} alt="" className="w-10 h-10 rounded-full object-cover" />
+                  <div>
+                    <p className="text-white font-medium">{collab.influencer?.name}</p>
+                    <p className="text-xs text-gray-400">{collab.influencer?.category}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-[#D4AF37]">{collab.budget} CHF</span>
+                  <span className={`px-2 py-1 rounded text-xs ${
+                    collab.status === 'active' ? 'bg-green-500/20 text-green-400' : 
+                    collab.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-gray-500/20 text-gray-400'
+                  }`}>
+                    {collab.status === 'active' ? 'Actif' : collab.status === 'pending' ? 'En attente' : collab.status}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Category Filter */}
       <div className="flex gap-2 flex-wrap">
@@ -3053,7 +3137,7 @@ const InfluencersSection = () => {
 
       {/* Influencers Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {influencers.filter(i => selectedCategory === 'all' || i.category === selectedCategory).map((influencer) => (
+        {influencers.map((influencer) => (
           <div key={influencer.id} className="card-service rounded-xl p-4">
             <div className="flex gap-4">
               <img src={influencer.image} alt={influencer.name} className="w-16 h-16 rounded-full object-cover" />
@@ -3062,13 +3146,17 @@ const InfluencersSection = () => {
                   <h3 className="text-white font-semibold">{influencer.name}</h3>
                   <span className="text-xs bg-[#0047AB]/20 text-[#0047AB] px-2 py-1 rounded">{influencer.category}</span>
                 </div>
+                <p className="text-xs text-gray-500 mb-2">{influencer.bio}</p>
                 <div className="flex items-center gap-4 text-sm text-gray-400 mb-3">
-                  <span>{influencer.followers} abonnés</span>
-                  <span>{influencer.engagement} engagement</span>
+                  <span>{formatFollowers(influencer.followers)} abonnés</span>
+                  <span>{influencer.engagement_rate}% engagement</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[#D4AF37] font-semibold">{influencer.price}</span>
-                  <button className="px-4 py-1.5 bg-[#0047AB] text-white rounded-lg text-sm hover:bg-[#2E74D6] transition-colors">
+                  <span className="text-[#D4AF37] font-semibold">{influencer.price} CHF</span>
+                  <button 
+                    onClick={() => handleContact(influencer)}
+                    className="px-4 py-1.5 bg-[#0047AB] text-white rounded-lg text-sm hover:bg-[#2E74D6] transition-colors"
+                  >
                     Contacter
                   </button>
                 </div>
@@ -3085,6 +3173,39 @@ const InfluencersSection = () => {
         <p className="text-sm text-gray-400 mb-4">Bénéficiez d'un accompagnement personnalisé pour vos campagnes</p>
         <button className="btn-primary">Découvrir les partenariats</button>
       </div>
+
+      {/* Contact Modal */}
+      {showContactModal && selectedInfluencer && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="card-service rounded-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-white mb-4">Contacter {selectedInfluencer.name}</h3>
+            <div className="flex items-center gap-4 mb-4 p-3 bg-white/5 rounded-lg">
+              <img src={selectedInfluencer.image} alt="" className="w-12 h-12 rounded-full object-cover" />
+              <div>
+                <p className="text-white font-medium">{selectedInfluencer.name}</p>
+                <p className="text-sm text-gray-400">{formatFollowers(selectedInfluencer.followers)} abonnés • {selectedInfluencer.engagement_rate}%</p>
+              </div>
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm text-gray-400 mb-2">Votre message</label>
+              <textarea
+                value={contactMessage}
+                onChange={(e) => setContactMessage(e.target.value)}
+                placeholder="Présentez votre entreprise et votre proposition de collaboration..."
+                className="input-dark w-full h-32"
+              />
+            </div>
+            <div className="p-3 bg-[#D4AF37]/10 rounded-lg mb-4">
+              <p className="text-sm text-gray-400">Budget estimé</p>
+              <p className="text-xl font-bold text-[#D4AF37]">{selectedInfluencer.price} CHF</p>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setShowContactModal(false)} className="btn-secondary flex-1">Annuler</button>
+              <button onClick={submitCollaboration} className="btn-primary flex-1">Envoyer la demande</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
