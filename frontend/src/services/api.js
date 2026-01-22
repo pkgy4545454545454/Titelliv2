@@ -8,6 +8,14 @@ const getAuthHeaders = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
+// Helper function to get full image URL
+export const getImageUrl = (path) => {
+  if (!path) return null;
+  if (path.startsWith('http')) return path;
+  if (path.startsWith('/api/uploads')) return `${BACKEND_URL}${path}`;
+  return path;
+};
+
 // Upload
 export const uploadAPI = {
   uploadImage: async (file) => {
