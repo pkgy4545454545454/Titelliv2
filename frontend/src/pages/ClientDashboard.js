@@ -323,13 +323,211 @@ const ClientDashboard = () => {
             </div>
           )}
 
-          {/* Other tabs */}
-          {['mode_vie', 'premium', 'agenda', 'cartes', 'finances', 'messages', 'settings'].includes(activeTab) && (
-            <div className="card-service rounded-xl p-12 text-center">
-              <h2 className="text-xl font-bold text-white mb-4">
-                {menuItems.find(m => m.id === activeTab)?.label}
-              </h2>
-              <p className="text-gray-400">Cette section sera bientôt disponible</p>
+          {/* Mode de vie */}
+          {activeTab === 'mode_vie' && (
+            <div>
+              <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Mon Mode de Vie
+              </h1>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="card-service rounded-xl p-6">
+                  <Heart className="w-8 h-8 text-red-500 mb-4" />
+                  <h3 className="text-lg font-semibold text-white mb-2">Mes Favoris</h3>
+                  <p className="text-gray-400 text-sm mb-4">Retrouvez vos entreprises et services favoris</p>
+                  <p className="text-3xl font-bold text-white">0</p>
+                  <p className="text-gray-500 text-sm">favoris enregistrés</p>
+                </div>
+                <div className="card-service rounded-xl p-6">
+                  <Star className="w-8 h-8 text-[#D4AF37] mb-4" />
+                  <h3 className="text-lg font-semibold text-white mb-2">Mes Avis</h3>
+                  <p className="text-gray-400 text-sm mb-4">Consultez les avis que vous avez laissés</p>
+                  <p className="text-3xl font-bold text-white">0</p>
+                  <p className="text-gray-500 text-sm">avis publiés</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Premium */}
+          {activeTab === 'premium' && (
+            <div>
+              <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Titelli Premium
+              </h1>
+              <div className="card-service rounded-xl p-8 text-center border-2 border-[#D4AF37]/30">
+                <Crown className="w-16 h-16 text-[#D4AF37] mx-auto mb-6" />
+                <h2 className="text-2xl font-bold text-white mb-4">Passez à Premium</h2>
+                <p className="text-gray-400 mb-8 max-w-lg mx-auto">
+                  Profitez d'avantages exclusifs : cash-back doublé, accès prioritaire, offres spéciales et bien plus !
+                </p>
+                <ul className="text-left max-w-md mx-auto space-y-3 mb-8">
+                  <li className="flex items-center gap-3 text-gray-300">
+                    <div className="w-5 h-5 rounded-full bg-[#D4AF37]/20 flex items-center justify-center">
+                      <span className="text-[#D4AF37] text-xs">✓</span>
+                    </div>
+                    Cash-back doublé sur tous vos achats
+                  </li>
+                  <li className="flex items-center gap-3 text-gray-300">
+                    <div className="w-5 h-5 rounded-full bg-[#D4AF37]/20 flex items-center justify-center">
+                      <span className="text-[#D4AF37] text-xs">✓</span>
+                    </div>
+                    Accès prioritaire aux nouvelles offres
+                  </li>
+                  <li className="flex items-center gap-3 text-gray-300">
+                    <div className="w-5 h-5 rounded-full bg-[#D4AF37]/20 flex items-center justify-center">
+                      <span className="text-[#D4AF37] text-xs">✓</span>
+                    </div>
+                    Réductions exclusives chez nos partenaires
+                  </li>
+                  <li className="flex items-center gap-3 text-gray-300">
+                    <div className="w-5 h-5 rounded-full bg-[#D4AF37]/20 flex items-center justify-center">
+                      <span className="text-[#D4AF37] text-xs">✓</span>
+                    </div>
+                    Support client prioritaire
+                  </li>
+                </ul>
+                <button className="btn-primary bg-gradient-to-r from-[#D4AF37] to-[#B8860B] hover:from-[#B8860B] hover:to-[#D4AF37]">
+                  S'abonner à Premium - 9.90 CHF/mois
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Agenda */}
+          {activeTab === 'agenda' && (
+            <div>
+              <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Mon Agenda
+              </h1>
+              <div className="card-service rounded-xl p-8 text-center">
+                <Calendar className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+                <p className="text-gray-400 mb-4">Aucun rendez-vous à venir</p>
+                <p className="text-sm text-gray-500">
+                  Vos rendez-vous pris chez les prestataires apparaîtront ici
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Cartes */}
+          {activeTab === 'cartes' && (
+            <div>
+              <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Mes Cartes de Paiement
+              </h1>
+              <div className="card-service rounded-xl p-8 text-center">
+                <CreditCard className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+                <p className="text-gray-400 mb-4">Aucune carte enregistrée</p>
+                <button className="btn-secondary">
+                  Ajouter une carte
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Finances */}
+          {activeTab === 'finances' && (
+            <div>
+              <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Mes Finances
+              </h1>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="card-service rounded-xl p-6 text-center">
+                  <p className="text-gray-400 text-sm mb-2">Total dépensé</p>
+                  <p className="text-2xl font-bold text-white">
+                    {orders.reduce((sum, o) => sum + (o.total || 0), 0).toFixed(2)} CHF
+                  </p>
+                </div>
+                <div className="card-service rounded-xl p-6 text-center">
+                  <p className="text-gray-400 text-sm mb-2">Cash-back gagné</p>
+                  <p className="text-2xl font-bold text-green-500">{cashback.toFixed(2)} CHF</p>
+                </div>
+                <div className="card-service rounded-xl p-6 text-center">
+                  <p className="text-gray-400 text-sm mb-2">Économies totales</p>
+                  <p className="text-2xl font-bold text-[#D4AF37]">{cashback.toFixed(2)} CHF</p>
+                </div>
+              </div>
+              <div className="card-service rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-white mb-4">Historique des transactions</h3>
+                {orders.length > 0 ? (
+                  <div className="space-y-3">
+                    {orders.slice(0, 5).map((order) => (
+                      <div key={order.id} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
+                        <div>
+                          <p className="text-white">{order.items?.length || 0} article(s)</p>
+                          <p className="text-sm text-gray-500">{new Date(order.created_at).toLocaleDateString('fr-FR')}</p>
+                        </div>
+                        <p className="text-white font-medium">-{order.total?.toFixed(2)} CHF</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-400 text-center py-8">Aucune transaction</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Messages */}
+          {activeTab === 'messages' && (
+            <div>
+              <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Messagerie
+              </h1>
+              <div className="card-service rounded-xl p-8 text-center">
+                <MessageSquare className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+                <p className="text-gray-400 mb-4">Aucun message</p>
+                <p className="text-sm text-gray-500">
+                  Vos conversations avec les prestataires apparaîtront ici
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Settings */}
+          {activeTab === 'settings' && (
+            <div>
+              <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Paramètres
+              </h1>
+              <div className="space-y-6">
+                <div className="card-service rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-white mb-4">Notifications</h3>
+                  <div className="space-y-4">
+                    <label className="flex items-center justify-between">
+                      <span className="text-gray-400">Notifications par email</span>
+                      <input type="checkbox" defaultChecked className="toggle" />
+                    </label>
+                    <label className="flex items-center justify-between">
+                      <span className="text-gray-400">Notifications push</span>
+                      <input type="checkbox" defaultChecked className="toggle" />
+                    </label>
+                    <label className="flex items-center justify-between">
+                      <span className="text-gray-400">Offres promotionnelles</span>
+                      <input type="checkbox" className="toggle" />
+                    </label>
+                  </div>
+                </div>
+                <div className="card-service rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-white mb-4">Confidentialité</h3>
+                  <div className="space-y-4">
+                    <label className="flex items-center justify-between">
+                      <span className="text-gray-400">Profil visible publiquement</span>
+                      <input type="checkbox" className="toggle" />
+                    </label>
+                    <label className="flex items-center justify-between">
+                      <span className="text-gray-400">Partager mes avis</span>
+                      <input type="checkbox" defaultChecked className="toggle" />
+                    </label>
+                  </div>
+                </div>
+                <div className="card-service rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-white mb-4 text-red-500">Zone de danger</h3>
+                  <button className="text-red-400 hover:text-red-300 text-sm">
+                    Supprimer mon compte
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </main>
