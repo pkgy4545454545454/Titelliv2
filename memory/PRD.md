@@ -113,9 +113,10 @@ Le menu entreprise a été entièrement restructuré avec les sections suivantes
 - ✅ Agenda
 
 **DOCUMENTS & PARAMÈTRES**
+- ✅ **Abonnements** (NOUVEAU - January 22, 2026) - Système complet de forfaits et options
 - ✅ Documents
 - ✅ Immobilier
-- ✅ Paramètres (abonnements)
+- ✅ Paramètres (notifications, sécurité)
 
 **AIDE & INFORMATIONS**
 - ✅ Service client
