@@ -1868,11 +1868,15 @@ async def toggle_advertising(ad_id: str, current_user: dict = Depends(get_curren
     if not ad:
         raise HTTPException(status_code=404, detail="Publicité non trouvée")
     
+    # Can only toggle if paid
+    if not ad.get('is_paid'):
+        raise HTTPException(status_code=400, detail="Vous devez payer cette publicité avant de l'activer")
+    
     await db.advertising.update_one(
         {"id": ad_id},
         {"$set": {"is_active": not ad['is_active']}}
     )
-    return {"message": "Statut modifié"}
+    return {"message": "Statut modifié", "is_active": not ad['is_active']}
 
 @api_router.delete("/enterprise/advertising/{ad_id}")
 async def delete_advertising(ad_id: str, current_user: dict = Depends(get_current_user)):
