@@ -253,39 +253,67 @@ const EnterpriseDashboard = () => {
     <div className="min-h-screen bg-[#050505] pt-20" data-testid="enterprise-dashboard">
       <div className="flex">
         {/* Sidebar */}
-        <aside className="w-64 min-h-screen bg-[#0A0A0A] border-r border-white/5 fixed left-0 top-20 bottom-0 overflow-y-auto hidden lg:block">
+        <aside className="w-72 min-h-screen bg-[#0A0A0A] border-r border-white/5 fixed left-0 top-20 bottom-0 overflow-y-auto hidden lg:block">
           <div className="p-4">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-[#0047AB]/20 flex items-center justify-center">
-                <Building2 className="w-5 h-5 text-[#0047AB]" />
+            {/* Enterprise Header */}
+            <div className="flex items-center gap-3 mb-4 pb-4 border-b border-white/10">
+              <div className="w-10 h-10 rounded-xl bg-[#0047AB]/20 flex items-center justify-center overflow-hidden">
+                {enterprise?.logo ? (
+                  <img src={enterprise.logo} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <Building2 className="w-5 h-5 text-[#0047AB]" />
+                )}
               </div>
-              <div>
-                <p className="font-semibold text-white text-sm truncate max-w-[140px]">
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-white text-sm truncate">
                   {enterprise?.business_name || 'Mon Entreprise'}
                 </p>
                 <p className="text-xs text-gray-500">Espace entreprise</p>
               </div>
             </div>
 
-            <nav className="space-y-1">
-              {menuItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
-                    activeTab === item.id
-                      ? 'bg-[#0047AB]/20 text-[#0047AB]'
-                      : 'text-gray-400 hover:bg-white/5 hover:text-white'
-                  }`}
-                >
-                  <item.icon className="w-4 h-4" />
-                  {item.label}
-                  {item.id === 'stock' && stock.alerts.length > 0 && (
-                    <span className="ml-auto w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                      {stock.alerts.length}
-                    </span>
-                  )}
-                </button>
+            {/* Search Bar */}
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <input 
+                type="text" 
+                placeholder="Rechercher..." 
+                className="w-full pl-9 pr-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-[#0047AB]/50"
+              />
+            </div>
+
+            {/* Menu Sections */}
+            <nav className="space-y-4">
+              {menuSections.map((section) => (
+                <div key={section.title}>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider px-3 mb-2">{section.title}</p>
+                  <div className="space-y-0.5">
+                    {section.items.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => setActiveTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
+                          activeTab === item.id
+                            ? 'bg-[#0047AB]/20 text-[#0047AB]'
+                            : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        <item.icon className="w-4 h-4 flex-shrink-0" />
+                        <span className="truncate">{item.label}</span>
+                        {item.id === 'stock' && stock.alerts.length > 0 && (
+                          <span className="ml-auto w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center flex-shrink-0">
+                            {stock.alerts.length}
+                          </span>
+                        )}
+                        {item.id === 'orders' && orders.filter(o => o.status === 'pending').length > 0 && (
+                          <span className="ml-auto w-5 h-5 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center flex-shrink-0">
+                            {orders.filter(o => o.status === 'pending').length}
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ))}
             </nav>
           </div>
