@@ -18,6 +18,7 @@ import EnterprisesPage from './pages/EnterprisesPage';
 import EnterprisePage from './pages/EnterprisePage';
 import EnterpriseDashboard from './pages/EnterpriseDashboard';
 import ClientDashboard from './pages/ClientDashboard';
+import InfluencerDashboard from './pages/InfluencerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import CartPage from './pages/CartPage';
 import OrdersPage from './pages/OrdersPage';
