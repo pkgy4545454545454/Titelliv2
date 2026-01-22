@@ -170,7 +170,7 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 | Enterprise | spa.luxury@titelli.com | Demo123! |
 
 ## Live URL
-https://titelli-market.preview.emergentagent.com
+https://lausanne-biz.preview.emergentagent.com
 
 ## Recent Changes (January 21, 2026)
 
@@ -212,4 +212,4 @@ https://titelli-market.preview.emergentagent.com
 
 ## Notes
 - Stripe Checkout requires opening the site directly (not in iframe)
-- For testing payments, open: https://titelli-market.preview.emergentagent.com in a new tab
+- For testing payments, open: https://lausanne-biz.preview.emergentagent.com in a new tab
