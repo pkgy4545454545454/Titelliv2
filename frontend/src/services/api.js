@@ -201,6 +201,14 @@ export const advertisingAPI = {
   delete: (id) => axios.delete(`${API}/enterprise/advertising/${id}`, { headers: getAuthHeaders() }),
 };
 
+// Notifications
+export const notificationsAPI = {
+  list: (unreadOnly = false) => axios.get(`${API}/notifications`, { params: { unread_only: unreadOnly }, headers: getAuthHeaders() }),
+  markRead: (id) => axios.put(`${API}/notifications/${id}/read`, null, { headers: getAuthHeaders() }),
+  markAllRead: () => axios.put(`${API}/notifications/read-all`, null, { headers: getAuthHeaders() }),
+  delete: (id) => axios.delete(`${API}/notifications/${id}`, { headers: getAuthHeaders() }),
+};
+
 export default {
   auth: authAPI,
   enterprise: enterpriseAPI,
@@ -225,4 +233,5 @@ export default {
   development: developmentAPI,
   finances: financesAPI,
   advertising: advertisingAPI,
+  notifications: notificationsAPI,
 };
