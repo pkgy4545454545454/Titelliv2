@@ -59,6 +59,7 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 - ✅ Category filtering
 - ✅ Search functionality
 - ✅ Add to cart buttons on all item cards
+- ✅ **Detail page** for services/products with full info, quantity selector, add to cart (NEW)
 
 #### Client Dashboard
 - ✅ Welcome message with user name
