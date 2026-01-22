@@ -2882,6 +2882,201 @@ async def upload_image_base64(data: dict, current_user: dict = Depends(get_curre
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Erreur lors de l'upload: {str(e)}")
 
+# ============ INFLUENCER PROFILE ROUTES ============
+
+class InfluencerProfileCreate(BaseModel):
+    category: str
+    bio: Optional[str] = None
+    instagram: Optional[str] = None
+    tiktok: Optional[str] = None
+    facebook: Optional[str] = None
+    followers_count: Optional[str] = None
+    price: float = 500
+
+class InfluencerProfileUpdate(BaseModel):
+    name: Optional[str] = None
+    category: Optional[str] = None
+    bio: Optional[str] = None
+    instagram: Optional[str] = None
+    tiktok: Optional[str] = None
+    facebook: Optional[str] = None
+    price: Optional[float] = None
+    image: Optional[str] = None
+
+@api_router.get("/influencer/profile")
+async def get_influencer_profile(current_user: dict = Depends(get_current_user)):
+    """Get current user's influencer profile"""
+    profile = await db.influencer_profiles.find_one({"user_id": current_user['id']}, {"_id": 0})
+    if not profile:
+        # Create a default profile if none exists
+        user = await db.users.find_one({"id": current_user['id']}, {"_id": 0})
+        profile = {
+            "id": str(uuid.uuid4()),
+            "user_id": current_user['id'],
+            "name": f"{user.get('first_name', '')} {user.get('last_name', '')}".strip() or "Influenceur",
+            "category": "Lifestyle",
+            "followers": 0,
+            "engagement_rate": 0,
+            "price": 500,
+            "bio": "",
+            "instagram": "",
+            "tiktok": "",
+            "facebook": "",
+            "image": user.get('avatar', ''),
+            "total_views": 0,
+            "total_likes": 0,
+            "total_shares": 0,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.influencer_profiles.insert_one(profile)
+    
+    # Get collaborations for this influencer
+    collaborations = await db.influencer_collaborations.find(
+        {"influencer_id": profile['id']}, 
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(50)
+    
+    # Calculate stats
+    total_investment = sum(c.get('budget', 0) for c in collaborations if c.get('status') == 'active')
+    total_collaborations = len([c for c in collaborations if c.get('status') == 'completed'])
+    
+    return {
+        "profile": profile,
+        "collaborations": collaborations,
+        "stats": {
+            "total_investment": total_investment,
+            "total_collaborations": total_collaborations,
+            "active_collaborations": len([c for c in collaborations if c.get('status') == 'active']),
+            "pending_requests": len([c for c in collaborations if c.get('status') == 'pending'])
+        }
+    }
+
+@api_router.put("/influencer/profile")
+async def update_influencer_profile(profile_data: InfluencerProfileUpdate, current_user: dict = Depends(get_current_user)):
+    """Update influencer profile"""
+    profile = await db.influencer_profiles.find_one({"user_id": current_user['id']})
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profil influenceur non trouvé")
+    
+    update_data = {k: v for k, v in profile_data.model_dump().items() if v is not None}
+    if update_data:
+        await db.influencer_profiles.update_one(
+            {"user_id": current_user['id']},
+            {"$set": update_data}
+        )
+    
+    updated_profile = await db.influencer_profiles.find_one({"user_id": current_user['id']}, {"_id": 0})
+    return updated_profile
+
+@api_router.post("/influencer/profile")
+async def create_influencer_profile(profile_data: InfluencerProfileCreate, current_user: dict = Depends(get_current_user)):
+    """Create influencer profile for current user"""
+    existing = await db.influencer_profiles.find_one({"user_id": current_user['id']})
+    if existing:
+        raise HTTPException(status_code=400, detail="Profil influenceur existe déjà")
+    
+    user = await db.users.find_one({"id": current_user['id']}, {"_id": 0})
+    
+    # Estimate followers from followers_count range
+    followers_map = {
+        "1k-5k": 3000,
+        "5k-10k": 7500,
+        "10k-50k": 30000,
+        "50k-100k": 75000,
+        "100k+": 150000
+    }
+    followers = followers_map.get(profile_data.followers_count, 5000)
+    
+    profile = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user['id'],
+        "name": f"{user.get('first_name', '')} {user.get('last_name', '')}".strip() or "Influenceur",
+        "category": profile_data.category,
+        "followers": followers,
+        "engagement_rate": round(3 + random.random() * 4, 1),  # Random engagement 3-7%
+        "price": profile_data.price,
+        "bio": profile_data.bio or "",
+        "instagram": profile_data.instagram or "",
+        "tiktok": profile_data.tiktok or "",
+        "facebook": profile_data.facebook or "",
+        "image": user.get('avatar', ''),
+        "total_views": random.randint(50000, 200000),
+        "total_likes": random.randint(5000, 15000),
+        "total_shares": random.randint(500, 2000),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.influencer_profiles.insert_one(profile)
+    
+    # Also add to the public influencers list
+    influencer_entry = {
+        "id": profile['id'],
+        "name": profile['name'],
+        "image": profile['image'] or f"https://ui-avatars.com/api/?name={profile['name']}&background=D4AF37&color=fff",
+        "category": profile['category'],
+        "followers": profile['followers'],
+        "engagement_rate": profile['engagement_rate'],
+        "price": profile['price'],
+        "bio": profile['bio'],
+        "instagram": profile['instagram'],
+        "is_available": True,
+        "created_at": profile['created_at']
+    }
+    await db.influencers.insert_one(influencer_entry)
+    
+    profile.pop('_id', None)
+    return profile
+
+@api_router.put("/influencer/collaborations/{collab_id}/respond")
+async def respond_to_collaboration(collab_id: str, accept: bool, current_user: dict = Depends(get_current_user)):
+    """Accept or decline a collaboration request"""
+    profile = await db.influencer_profiles.find_one({"user_id": current_user['id']})
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profil influenceur non trouvé")
+    
+    collab = await db.influencer_collaborations.find_one({"id": collab_id, "influencer_id": profile['id']})
+    if not collab:
+        raise HTTPException(status_code=404, detail="Collaboration non trouvée")
+    
+    new_status = "active" if accept else "declined"
+    await db.influencer_collaborations.update_one(
+        {"id": collab_id},
+        {"$set": {"status": new_status, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"message": f"Collaboration {'acceptée' if accept else 'déclinée'}", "status": new_status}
+
+@api_router.get("/influencer/collaborations")
+async def get_influencer_collaborations_list(current_user: dict = Depends(get_current_user)):
+    """Get collaborations for the current influencer"""
+    profile = await db.influencer_profiles.find_one({"user_id": current_user['id']})
+    if not profile:
+        return {"collaborations": [], "stats": {}}
+    
+    collaborations = await db.influencer_collaborations.find(
+        {"influencer_id": profile['id']}, 
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    # Enrich with enterprise data
+    for collab in collaborations:
+        enterprise = await db.enterprises.find_one({"id": collab.get('enterprise_id')}, {"_id": 0})
+        if enterprise:
+            collab['enterprise_name'] = enterprise.get('business_name', 'Entreprise')
+            collab['enterprise_logo'] = enterprise.get('logo', '')
+    
+    total_investment = sum(c.get('budget', 0) for c in collaborations if c.get('status') in ['active', 'completed'])
+    
+    return {
+        "collaborations": collaborations,
+        "stats": {
+            "total_investment": total_investment,
+            "total_collaborations": len(collaborations),
+            "active_collaborations": len([c for c in collaborations if c.get('status') == 'active']),
+            "pending_requests": len([c for c in collaborations if c.get('status') == 'pending'])
+        }
+    }
+
 # ============ ROOT ROUTE ============
 
 @api_router.get("/")
