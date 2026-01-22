@@ -213,6 +213,8 @@ export const financesAPI = {
 export const advertisingAPI = {
   list: () => axios.get(`${API}/enterprise/advertising`, { headers: getAuthHeaders() }),
   create: (data) => axios.post(`${API}/enterprise/advertising`, data, { headers: getAuthHeaders() }),
+  pay: (id) => axios.post(`${API}/enterprise/advertising/${id}/pay`, null, { headers: getAuthHeaders() }),
+  activate: (id, sessionId) => axios.post(`${API}/enterprise/advertising/${id}/activate`, null, { params: { session_id: sessionId }, headers: getAuthHeaders() }),
   toggle: (id) => axios.put(`${API}/enterprise/advertising/${id}/toggle`, null, { headers: getAuthHeaders() }),
   delete: (id) => axios.delete(`${API}/enterprise/advertising/${id}`, { headers: getAuthHeaders() }),
 };
