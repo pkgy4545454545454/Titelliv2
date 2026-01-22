@@ -655,6 +655,419 @@ const EnterpriseDashboard = () => {
               </div>
             </div>
           )}
+
+          {/* Fil d'actualité - Avis clients */}
+          {activeTab === 'feed' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Mon fil d'actualité
+              </h1>
+              <p className="text-gray-400">Les expériences partagées par vos clients</p>
+              <div className="card-service rounded-xl p-8 text-center">
+                <Rss className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+                <p className="text-gray-400 mb-2">Aucune publication récente</p>
+                <p className="text-sm text-gray-500">Les avis et partages de vos clients apparaîtront ici</p>
+              </div>
+            </div>
+          )}
+
+          {/* Feed entreprises */}
+          {activeTab === 'business_feed' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Mon feed entreprises
+              </h1>
+              <p className="text-gray-400">Actualités et partages des autres entreprises</p>
+              <div className="card-service rounded-xl p-8 text-center">
+                <Newspaper className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+                <p className="text-gray-400 mb-2">Aucune publication</p>
+                <p className="text-sm text-gray-500">Suivez d'autres entreprises pour voir leur actualité</p>
+              </div>
+            </div>
+          )}
+
+          {/* Livraisons */}
+          {activeTab === 'deliveries' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Mes livraisons
+                </h1>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div className="card-service rounded-xl p-4 text-center">
+                  <p className="text-2xl font-bold text-white">{orders.filter(o => o.status === 'pending').length}</p>
+                  <p className="text-sm text-gray-400">En attente</p>
+                </div>
+                <div className="card-service rounded-xl p-4 text-center">
+                  <p className="text-2xl font-bold text-orange-500">{orders.filter(o => o.status === 'confirmed').length}</p>
+                  <p className="text-sm text-gray-400">En cours</p>
+                </div>
+                <div className="card-service rounded-xl p-4 text-center">
+                  <p className="text-2xl font-bold text-green-500">{orders.filter(o => o.status === 'completed').length}</p>
+                  <p className="text-sm text-gray-400">Livrées</p>
+                </div>
+                <div className="card-service rounded-xl p-4 text-center">
+                  <p className="text-2xl font-bold text-red-500">{orders.filter(o => o.status === 'cancelled').length}</p>
+                  <p className="text-sm text-gray-400">Annulées</p>
+                </div>
+              </div>
+              {orders.filter(o => o.items?.some(i => i.is_delivery)).length === 0 ? (
+                <div className="card-service rounded-xl p-8 text-center">
+                  <Truck className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+                  <p className="text-gray-400">Aucune livraison en cours</p>
+                </div>
+              ) : (
+                <div className="card-service rounded-xl divide-y divide-white/5">
+                  {orders.filter(o => o.items?.some(i => i.is_delivery)).map((order) => (
+                    <div key={order.id} className="p-4 flex items-center justify-between">
+                      <div>
+                        <p className="text-white font-medium">#{order.id.slice(0, 8)}</p>
+                        <p className="text-sm text-gray-400">{order.delivery_address || 'Adresse non spécifiée'}</p>
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-xs ${order.status === 'completed' ? 'bg-green-500/20 text-green-400' : 'bg-orange-500/20 text-orange-400'}`}>
+                        {order.status === 'pending' ? 'En attente' : order.status === 'confirmed' ? 'En cours' : order.status === 'completed' ? 'Livré' : 'Annulé'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Activités */}
+          {activeTab === 'activities' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Mes activités
+              </h1>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div className="card-service rounded-xl p-4">
+                  <Activity className="w-6 h-6 text-green-500 mb-2" />
+                  <p className="text-2xl font-bold text-white">{orders.filter(o => o.status === 'completed').length}</p>
+                  <p className="text-sm text-gray-400">Ventes terminées</p>
+                </div>
+                <div className="card-service rounded-xl p-4">
+                  <Clock className="w-6 h-6 text-orange-500 mb-2" />
+                  <p className="text-2xl font-bold text-white">{orders.filter(o => o.status === 'confirmed').length}</p>
+                  <p className="text-sm text-gray-400">En cours</p>
+                </div>
+                <div className="card-service rounded-xl p-4">
+                  <AlertTriangle className="w-6 h-6 text-yellow-500 mb-2" />
+                  <p className="text-2xl font-bold text-white">{orders.filter(o => o.status === 'pending').length}</p>
+                  <p className="text-sm text-gray-400">En attente</p>
+                </div>
+                <div className="card-service rounded-xl p-4">
+                  <ClipboardList className="w-6 h-6 text-[#0047AB] mb-2" />
+                  <p className="text-2xl font-bold text-white">{permanentOrders.length}</p>
+                  <p className="text-sm text-gray-400">Permanentes</p>
+                </div>
+              </div>
+              <div className="card-service rounded-xl p-6">
+                <h2 className="text-lg font-semibold text-white mb-4">Activité récente</h2>
+                {orders.length > 0 ? (
+                  <div className="space-y-3">
+                    {orders.slice(0, 10).map((order) => (
+                      <div key={order.id} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-2 h-2 rounded-full ${order.status === 'completed' ? 'bg-green-500' : order.status === 'pending' ? 'bg-yellow-500' : 'bg-orange-500'}`} />
+                          <div>
+                            <p className="text-white text-sm">{order.items?.length || 0} article(s) - {order.total?.toFixed(2)} CHF</p>
+                            <p className="text-xs text-gray-500">{new Date(order.created_at).toLocaleDateString('fr-FR')}</p>
+                          </div>
+                        </div>
+                        <span className="text-sm text-gray-400 capitalize">{order.status}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-400 text-center py-4">Aucune activité récente</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Geste commercial */}
+          {activeTab === 'commercial_gesture' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Geste commercial
+              </h1>
+              <p className="text-gray-400">Offrez un geste commercial à vos nouveaux clients pour les fidéliser</p>
+              <div className="card-service rounded-xl p-6">
+                <h2 className="text-lg font-semibold text-white mb-4">Créer une offre de bienvenue</h2>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-1">Type d'offre</label>
+                    <select className="input-dark w-full">
+                      <option>Réduction en pourcentage</option>
+                      <option>Montant fixe offert</option>
+                      <option>Service gratuit</option>
+                      <option>Produit offert</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-1">Valeur</label>
+                    <input type="number" placeholder="Ex: 10" className="input-dark w-full" />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-1">Conditions</label>
+                    <textarea placeholder="Ex: Valable pour la première commande" className="input-dark w-full" rows={3} />
+                  </div>
+                  <button className="btn-primary">
+                    <Gift className="w-4 h-4 mr-2" />
+                    Créer le geste commercial
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Tendances */}
+          {activeTab === 'tendances' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Tendances actuelles
+              </h1>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {['Bien-être', 'Éco-responsable', 'Digital', 'Local', 'Premium'].map((trend, i) => (
+                  <div key={i} className="card-service rounded-xl p-6">
+                    <TrendingUp className="w-8 h-8 text-[#0047AB] mb-3" />
+                    <h3 className="text-white font-semibold mb-2">{trend}</h3>
+                    <p className="text-sm text-gray-400">Tendance forte dans votre secteur</p>
+                    <div className="mt-4 flex items-center gap-2">
+                      <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+                        <div className="h-full bg-[#0047AB]" style={{ width: `${70 + i * 5}%` }} />
+                      </div>
+                      <span className="text-sm text-[#0047AB]">{70 + i * 5}%</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Guests du moment */}
+          {activeTab === 'guests' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Guests du moment
+              </h1>
+              <p className="text-gray-400">Les entreprises et personnalités mises en avant ce mois-ci</p>
+              <div className="card-service rounded-xl p-8 text-center">
+                <Star className="w-12 h-12 text-[#D4AF37] mx-auto mb-4" />
+                <p className="text-gray-400 mb-2">Bientôt disponible</p>
+                <p className="text-sm text-gray-500">Découvrez les guests du moment prochainement</p>
+              </div>
+            </div>
+          )}
+
+          {/* Cartes de paiement */}
+          {activeTab === 'cards' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Mes cartes
+              </h1>
+              <div className="card-service rounded-xl p-8 text-center">
+                <CreditCard className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+                <p className="text-gray-400 mb-4">Aucune carte de paiement enregistrée</p>
+                <button className="btn-secondary">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Ajouter une carte
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Donations */}
+          {activeTab === 'donations' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Donations
+              </h1>
+              <p className="text-gray-400">Gérez vos dons et contributions caritatives</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="card-service rounded-xl p-6">
+                  <Heart className="w-8 h-8 text-red-500 mb-3" />
+                  <h3 className="text-white font-semibold mb-2">Faire un don</h3>
+                  <p className="text-sm text-gray-400 mb-4">Soutenez une cause qui vous tient à cœur</p>
+                  <button className="btn-secondary w-full">Faire un don</button>
+                </div>
+                <div className="card-service rounded-xl p-6">
+                  <FileText className="w-8 h-8 text-[#0047AB] mb-3" />
+                  <h3 className="text-white font-semibold mb-2">Historique</h3>
+                  <p className="text-sm text-gray-400 mb-4">Consultez vos donations passées</p>
+                  <p className="text-2xl font-bold text-white">0 CHF</p>
+                  <p className="text-xs text-gray-500">Total des dons</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Business News */}
+          {activeTab === 'business_news' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Business News
+                </h1>
+                <div className="flex gap-2">
+                  <select className="input-dark text-sm px-3 py-1">
+                    <option>Tous les secteurs</option>
+                    <option>Mon secteur</option>
+                    <option>Finance</option>
+                    <option>Marketing</option>
+                    <option>Technologie</option>
+                  </select>
+                </div>
+              </div>
+              <div className="space-y-4">
+                {[
+                  { title: 'Les nouvelles tendances du commerce local', category: 'Commerce', date: 'Aujourd\'hui' },
+                  { title: 'Comment optimiser sa présence en ligne', category: 'Digital', date: 'Hier' },
+                  { title: 'Les aides aux entreprises en 2026', category: 'Finance', date: 'Il y a 2 jours' },
+                ].map((news, i) => (
+                  <div key={i} className="card-service rounded-xl p-4 flex items-start gap-4">
+                    <div className="w-16 h-16 bg-[#0047AB]/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Newspaper className="w-8 h-8 text-[#0047AB]" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-white font-medium mb-1">{news.title}</h3>
+                      <div className="flex items-center gap-3 text-sm">
+                        <span className="text-[#0047AB]">{news.category}</span>
+                        <span className="text-gray-500">{news.date}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Messagerie */}
+          {activeTab === 'messages' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Messagerie
+              </h1>
+              <div className="card-service rounded-xl p-8 text-center">
+                <MessageSquare className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+                <p className="text-gray-400 mb-2">Aucun message</p>
+                <p className="text-sm text-gray-500">Vos conversations avec les clients apparaîtront ici</p>
+              </div>
+            </div>
+          )}
+
+          {/* Contacts */}
+          {activeTab === 'contacts' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Contacts
+                </h1>
+                <button className="btn-primary">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Ajouter
+                </button>
+              </div>
+              <div className="card-service rounded-xl p-8 text-center">
+                <Phone className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+                <p className="text-gray-400 mb-2">Aucun contact enregistré</p>
+                <p className="text-sm text-gray-500">Ajoutez vos fournisseurs, partenaires et clients importants</p>
+              </div>
+            </div>
+          )}
+
+          {/* Support */}
+          {activeTab === 'support' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Service client
+              </h1>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="card-service rounded-xl p-6">
+                  <MessageSquare className="w-8 h-8 text-[#0047AB] mb-3" />
+                  <h3 className="text-white font-semibold mb-2">Chat en direct</h3>
+                  <p className="text-sm text-gray-400 mb-4">Discutez avec notre équipe support</p>
+                  <button className="btn-primary w-full">Démarrer un chat</button>
+                </div>
+                <div className="card-service rounded-xl p-6">
+                  <Phone className="w-8 h-8 text-green-500 mb-3" />
+                  <h3 className="text-white font-semibold mb-2">Nous appeler</h3>
+                  <p className="text-sm text-gray-400 mb-4">Du lundi au vendredi, 9h-18h</p>
+                  <p className="text-lg font-medium text-white">+41 21 123 45 67</p>
+                </div>
+              </div>
+              <div className="card-service rounded-xl p-6">
+                <h3 className="text-white font-semibold mb-4">Questions fréquentes</h3>
+                <div className="space-y-3">
+                  {['Comment modifier mon profil ?', 'Comment gérer mes commandes ?', 'Comment recevoir mes paiements ?'].map((q, i) => (
+                    <div key={i} className="p-3 bg-white/5 rounded-lg hover:bg-white/10 cursor-pointer transition-colors">
+                      <p className="text-gray-300">{q}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Partenaires */}
+          {activeTab === 'partners' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Partenaires
+              </h1>
+              <div className="card-service rounded-xl p-6">
+                <h2 className="text-lg font-semibold text-white mb-4">Nos partenaires</h2>
+                <p className="text-gray-400 mb-6">Découvrez les entreprises partenaires de Titelli</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="aspect-video bg-white/5 rounded-lg flex items-center justify-center">
+                      <Handshake className="w-8 h-8 text-gray-500" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Link to="/mentions-legales" className="card-service rounded-xl p-4 flex items-center gap-3 hover:bg-white/10 transition-colors">
+                  <FileText className="w-5 h-5 text-gray-400" />
+                  <span className="text-gray-300">Mentions légales</span>
+                </Link>
+                <Link to="/cgv" className="card-service rounded-xl p-4 flex items-center gap-3 hover:bg-white/10 transition-colors">
+                  <FileText className="w-5 h-5 text-gray-400" />
+                  <span className="text-gray-300">CGV</span>
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* À propos */}
+          {activeTab === 'about' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                À propos
+              </h1>
+              <div className="card-service rounded-xl p-6">
+                <h2 className="text-lg font-semibold text-white mb-4">Titelli</h2>
+                <p className="text-gray-400 mb-4">
+                  Titelli est la marketplace de référence pour les prestataires de services et commerces locaux de la région lausannoise.
+                </p>
+                <p className="text-gray-400 mb-6">
+                  Notre mission : connecter les entreprises locales avec leur communauté et faciliter le commerce de proximité.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Link to="/conditions-generales" className="card-service rounded-xl p-4 flex items-center gap-3 hover:bg-white/10 transition-colors">
+                    <FileText className="w-5 h-5 text-gray-400" />
+                    <span className="text-gray-300">Conditions générales</span>
+                  </Link>
+                  <Link to="/politique-confidentialite" className="card-service rounded-xl p-4 flex items-center gap-3 hover:bg-white/10 transition-colors">
+                    <FileText className="w-5 h-5 text-gray-400" />
+                    <span className="text-gray-300">Politique de confidentialité</span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
 
