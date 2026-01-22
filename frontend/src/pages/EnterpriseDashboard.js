@@ -3213,12 +3213,14 @@ const InfluencersSection = () => {
 // Invitations Clients Section
 const InvitationsSection = () => {
   const [invitations, setInvitations] = useState([]);
+  const [stats, setStats] = useState({ total_sent: 0, total_opened: 0, total_responses: 0, open_rate: 0, response_rate: 0 });
   const [showCreate, setShowCreate] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     type: 'question',
     title: '',
     message: '',
-    targetAudience: 'all',
+    target_audience: 'all',
     incentive: ''
   });
 
@@ -3229,20 +3231,56 @@ const InvitationsSection = () => {
     { id: 'reminder', name: 'Rappel personnalisé', desc: 'Rappelez un service ou produit', icon: Bell },
   ];
 
-  const createInvitation = () => {
-    const newInvitation = {
-      id: Date.now(),
-      ...formData,
-      sent: Math.floor(Math.random() * 500) + 100,
-      opened: Math.floor(Math.random() * 300) + 50,
-      responded: Math.floor(Math.random() * 100) + 20,
-      created_at: new Date().toISOString()
-    };
-    setInvitations([newInvitation, ...invitations]);
-    setShowCreate(false);
-    setFormData({ type: 'question', title: '', message: '', targetAudience: 'all', incentive: '' });
-    toast.success('Invitation envoyée');
+  useEffect(() => {
+    fetchInvitations();
+  }, []);
+
+  const fetchInvitations = async () => {
+    try {
+      const response = await clientInvitationsAPI.list();
+      setInvitations(response.data.invitations || []);
+      setStats(response.data.stats || {});
+    } catch (error) {
+      console.error('Error fetching invitations:', error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const createInvitation = async () => {
+    if (!formData.title || !formData.message) {
+      toast.error('Veuillez remplir le titre et le message');
+      return;
+    }
+    try {
+      const response = await clientInvitationsAPI.create(formData);
+      setInvitations([response.data, ...invitations]);
+      setShowCreate(false);
+      setFormData({ type: 'question', title: '', message: '', target_audience: 'all', incentive: '' });
+      toast.success('Invitation envoyée avec succès !');
+      fetchInvitations();
+    } catch (error) {
+      toast.error('Erreur lors de l\'envoi de l\'invitation');
+    }
+  };
+
+  const deleteInvitation = async (id) => {
+    try {
+      await clientInvitationsAPI.delete(id);
+      setInvitations(invitations.filter(i => i.id !== id));
+      toast.success('Invitation supprimée');
+    } catch (error) {
+      toast.error('Erreur lors de la suppression');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="w-10 h-10 border-4 border-[#0047AB] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6" data-testid="invitations-section">
@@ -3262,19 +3300,19 @@ const InvitationsSection = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="card-service rounded-xl p-4">
           <p className="text-sm text-gray-400">Invitations envoyées</p>
-          <p className="text-2xl font-bold text-[#0047AB]">1,234</p>
+          <p className="text-2xl font-bold text-[#0047AB]">{stats.total_sent?.toLocaleString()}</p>
         </div>
         <div className="card-service rounded-xl p-4">
           <p className="text-sm text-gray-400">Taux d'ouverture</p>
-          <p className="text-2xl font-bold text-green-400">68%</p>
+          <p className="text-2xl font-bold text-green-400">{stats.open_rate || 0}%</p>
         </div>
         <div className="card-service rounded-xl p-4">
           <p className="text-sm text-gray-400">Réponses</p>
-          <p className="text-2xl font-bold text-[#D4AF37]">423</p>
+          <p className="text-2xl font-bold text-[#D4AF37]">{stats.total_responses?.toLocaleString()}</p>
         </div>
         <div className="card-service rounded-xl p-4">
-          <p className="text-sm text-gray-400">Conversions</p>
-          <p className="text-2xl font-bold text-purple-400">89</p>
+          <p className="text-sm text-gray-400">Taux de réponse</p>
+          <p className="text-2xl font-bold text-purple-400">{stats.response_rate || 0}%</p>
         </div>
       </div>
 
@@ -3308,12 +3346,15 @@ const InvitationsSection = () => {
                     <span className="text-white font-medium">{inv.title}</span>
                     <span className="text-xs bg-[#0047AB]/20 text-[#0047AB] px-2 py-1 rounded">{invitationTypes.find(t => t.id === inv.type)?.name}</span>
                   </div>
+                  <button onClick={() => deleteInvitation(inv.id)} className="p-1 text-red-400 hover:bg-red-500/20 rounded">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
                 <p className="text-sm text-gray-400 mb-3">{inv.message}</p>
                 <div className="flex gap-4 text-sm">
-                  <span className="text-gray-400">Envoyées: <span className="text-white">{inv.sent}</span></span>
-                  <span className="text-gray-400">Ouvertes: <span className="text-green-400">{inv.opened}</span></span>
-                  <span className="text-gray-400">Réponses: <span className="text-[#D4AF37]">{inv.responded}</span></span>
+                  <span className="text-gray-400">Envoyées: <span className="text-white">{inv.sent_count}</span></span>
+                  <span className="text-gray-400">Ouvertes: <span className="text-green-400">{inv.opened_count}</span></span>
+                  <span className="text-gray-400">Réponses: <span className="text-[#D4AF37]">{inv.response_count}</span></span>
                 </div>
               </div>
             ))}
@@ -3343,7 +3384,7 @@ const InvitationsSection = () => {
               </div>
 
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Titre</label>
+                <label className="block text-sm text-gray-400 mb-2">Titre *</label>
                 <input
                   type="text"
                   value={formData.title}
@@ -3354,7 +3395,7 @@ const InvitationsSection = () => {
               </div>
 
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Message</label>
+                <label className="block text-sm text-gray-400 mb-2">Message *</label>
                 <textarea
                   value={formData.message}
                   onChange={(e) => setFormData({...formData, message: e.target.value})}
@@ -3365,7 +3406,7 @@ const InvitationsSection = () => {
 
               <div>
                 <label className="block text-sm text-gray-400 mb-2">Audience cible</label>
-                <select value={formData.targetAudience} onChange={(e) => setFormData({...formData, targetAudience: e.target.value})} className="input-dark w-full">
+                <select value={formData.target_audience} onChange={(e) => setFormData({...formData, target_audience: e.target.value})} className="input-dark w-full">
                   <option value="all">Tous les clients</option>
                   <option value="new">Nouveaux clients</option>
                   <option value="loyal">Clients fidèles</option>
