@@ -9,13 +9,13 @@ import {
   FolderOpen, BookOpen, Wallet, Target, BarChart3, PlayCircle, Pause,
   UserPlus, ClipboardList, AlertTriangle, Box, ArrowUpDown, Upload, Image, X,
   Search, Rss, Newspaper, Truck, Activity, Phone, Heart, HelpCircle, Info,
-  Handshake, UserCircle, Receipt, Send
+  Handshake, UserCircle, Receipt, Send, Crown, Zap, Check, ChevronDown
 } from 'lucide-react';
 import { 
   enterpriseAPI, servicesProductsAPI, orderAPI, paymentAPI, offersAPI,
   trainingsAPI, jobsAPI, realEstateAPI, investmentsAPI, stockAPI,
   agendaAPI, teamAPI, permanentOrdersAPI, documentsAPI, financesAPI, advertisingAPI,
-  uploadAPI
+  uploadAPI, subscriptionsAPI
 } from '../services/api';
 import { toast } from 'sonner';
 
