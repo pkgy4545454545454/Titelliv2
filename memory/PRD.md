@@ -136,6 +136,40 @@ Le menu entreprise a été entièrement restructuré avec les sections suivantes
 - ✅ Success/Cancel pages
 - ⚠️ Note: Stripe requires opening site in new tab (not iframe)
 
+#### Système d'Abonnements (NOUVEAU - January 22, 2026)
+Le système d'abonnements complet a été implémenté avec :
+
+**FORFAITS DE BASE**
+- ✅ Standard (200 CHF/mois) - Exposition standard, 1 pub/mois, Cash-Back, Gestion stocks
+- ✅ Guest (250 CHF/mois) - Profil pro, Référencement préférentiel, Pubs illimitées
+
+**FORFAITS PREMIUM**
+- ✅ Premium (500 CHF/mois) - 4 pubs/mois, Investisseurs, Livraison 24/24, Personnel
+- ✅ Premium MVP (1'000 CHF/mois) - 5 pubs + 1 vidéo, Fournisseurs, Local 24/24
+
+**OPTIMISATION D'ENTREPRISE**
+- ✅ Starter 2K (2'000 CHF/mois) - 8 pubs, Formations, Immobilier, Expert
+- ✅ Starter+ 3K (3'000 CHF/mois) - 15 pubs, 5h prestations OU 2 déjeuners
+- ✅ Opti 5K (5'000 CHF/mois) - 10h prestations, 3'000 CHF liquidés
+- ✅ Opti 10K (10'000 CHF/mois) - 20h prestations, 7'000 CHF liquidés, Fiscaliste
+- ✅ Opti 20K (20'000 CHF/mois) - 25 pubs, 40h prestations, 15'000 CHF liquidés
+- ✅ Opti 50K (50'000 CHF/mois) - 80h prestations, 40'000 CHF liquidés
+
+**OPTIONS À LA CARTE**
+- ✅ Options mensuelles : Pubs extra (200 CHF), Investisseurs (300 CHF), Livraison 24/24 (300 CHF), Local (300 CHF), Fournisseurs (500 CHF), Formations (200 CHF), Recrutement (200 CHF), Immobilier (200 CHF), Expert conseil (1'000 CHF), Fiscaliste (4'000 CHF), Prestations liquidées (1'000 CHF)
+- ✅ Options ponctuelles : Expert labellisation (400 CHF), 20h Prestations (1'000 CHF), 20 déjeuners équipe (2'000 CHF)
+
+**FEATURES INCLUSES DANS TOUS LES FORFAITS**
+- Fiches exigences clients
+- Calendrier client
+- Agenda interne
+- Espace de formation, documents, finance
+- Accès aux publicités spontanées
+- Messagerie
+- Fil d'actualités clients
+- Feed des entreprises régionales
+- Gestion des contacts
+
 #### UI/UX
 - ✅ Dark theme modern design
 - ✅ Responsive layout (desktop + mobile)
