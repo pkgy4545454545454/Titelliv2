@@ -142,62 +142,97 @@ const ClientDashboard = () => {
 
   return (
     <div className="min-h-screen bg-[#050505] pt-20" data-testid="client-dashboard">
+      {/* Mobile Menu Button */}
+      <button 
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        className="lg:hidden fixed bottom-6 right-6 z-50 w-14 h-14 bg-[#0047AB] rounded-full flex items-center justify-center shadow-lg"
+      >
+        {mobileMenuOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
+      </button>
+
       <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-64 min-h-screen bg-[#0A0A0A] border-r border-white/5 fixed left-0 top-20 bottom-0 overflow-y-auto hidden lg:block">
-          <div className="p-6">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-12 h-12 rounded-full bg-[#0047AB] flex items-center justify-center text-white font-bold">
+        {/* Sidebar - Desktop & Mobile */}
+        <aside className={`w-64 min-h-screen bg-[#0A0A0A] border-r border-white/5 fixed left-0 top-20 bottom-0 overflow-y-auto z-40 transition-transform duration-300 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+          <div className="p-4 hide-scrollbar">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-full bg-[#0047AB] flex items-center justify-center text-white font-bold text-sm">
                 {user?.first_name?.[0]}{user?.last_name?.[0]}
               </div>
               <div>
-                <p className="font-semibold text-white">{user?.first_name} {user?.last_name}</p>
+                <p className="font-semibold text-white text-sm">{user?.first_name} {user?.last_name}</p>
                 <p className="text-xs text-gray-500">Espace client</p>
               </div>
             </div>
 
-            <nav className="space-y-1">
-              {menuItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                    activeTab === item.id
-                      ? 'bg-[#0047AB]/20 text-[#0047AB]'
-                      : 'text-gray-400 hover:bg-white/5 hover:text-white'
-                  }`}
-                  data-testid={`menu-${item.id}`}
-                >
-                  <item.icon className="w-5 h-5" />
-                  {item.label}
-                </button>
+            {/* Search Bar */}
+            <div className="relative mb-6">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <input 
+                type="text" 
+                placeholder="Rechercher..."
+                className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-gray-500 focus:border-[#0047AB]/50 focus:outline-none"
+              />
+            </div>
+
+            <nav className="space-y-4">
+              {menuSections.map((section) => (
+                <div key={section.title}>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-3">
+                    {section.title}
+                  </h3>
+                  <div className="space-y-0.5">
+                    {section.items.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => { setActiveTab(item.id); setMobileMenuOpen(false); }}
+                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                          activeTab === item.id
+                            ? 'bg-[#0047AB]/20 text-[#0047AB]'
+                            : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                        }`}
+                        data-testid={`menu-${item.id}`}
+                      >
+                        <item.icon className="w-4 h-4" />
+                        <span className="truncate">{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ))}
             </nav>
           </div>
         </aside>
 
+        {/* Overlay for mobile */}
+        {mobileMenuOpen && (
+          <div 
+            className="lg:hidden fixed inset-0 bg-black/50 z-30"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+        )}
+
         {/* Main Content */}
-        <main className="flex-1 lg:ml-64 p-6 lg:p-8">
+        <main className="flex-1 lg:ml-64 p-4 md:p-6 lg:p-8">
           {/* Overview Tab */}
           {activeTab === 'overview' && (
-            <div className="space-y-8">
-              <div className="flex items-center justify-between">
+            <div className="space-y-6 md:space-y-8">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <h1 className="text-2xl md:text-3xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
                     Bonjour, {user?.first_name} !
                   </h1>
-                  <p className="text-gray-400 mt-1">Bienvenue sur votre espace Titelli</p>
+                  <p className="text-gray-400 mt-1 text-sm md:text-base">Bienvenue sur votre espace Titelli</p>
                 </div>
-                <Link to="/" className="btn-primary flex items-center gap-2">
-                  <Search className="w-5 h-5" />
+                <Link to="/" className="btn-primary flex items-center justify-center gap-2 text-sm md:text-base">
+                  <Search className="w-4 h-4 md:w-5 md:h-5" />
                   Explorer
                 </Link>
               </div>
 
               {/* Quick Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 {quickStats.map((stat, index) => (
-                  <div key={index} className="card-service rounded-xl p-6">
+                  <div key={index} className="card-service rounded-xl p-4 md:p-6">
                     <div className={`p-3 rounded-xl bg-white/5 w-fit mb-4 ${stat.color}`}>
                       <stat.icon className="w-5 h-5" />
                     </div>
