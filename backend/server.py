@@ -2725,6 +2725,7 @@ async def create_commercial_gesture(gesture_data: CommercialGestureCreate, curre
     gesture_dict['created_at'] = gesture_dict['created_at'].isoformat()
     await db.commercial_gestures.insert_one(gesture_dict)
     
+    gesture_dict.pop('_id', None)
     return gesture_dict
 
 @api_router.put("/enterprise/commercial-gestures/{gesture_id}/toggle")
