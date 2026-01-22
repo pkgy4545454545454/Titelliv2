@@ -119,6 +119,16 @@ function AppRoutes() {
         } 
       />
 
+      {/* Protected Influencer Routes */}
+      <Route 
+        path="/dashboard/influencer/*" 
+        element={
+          <ProtectedRoute allowedTypes={['influencer']}>
+            <DashboardLayout><InfluencerDashboard /></DashboardLayout>
+          </ProtectedRoute>
+        } 
+      />
+
       {/* Admin Route */}
       <Route 
         path="/admin/*" 
