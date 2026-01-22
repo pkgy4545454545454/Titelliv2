@@ -4,7 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import { 
   LayoutDashboard, User, Heart, ShoppingCart, CreditCard, Wallet, Calendar, 
   MessageSquare, FileText, Settings, Gift, Crown, TrendingUp, MapPin,
-  ChevronRight, Star, Bell, Search
+  ChevronRight, Star, Bell, Search, Rss, Newspaper, PieChart, Briefcase,
+  GraduationCap, FolderOpen, Phone, Truck, Package, Users, HelpCircle, 
+  Handshake, Info, Target, Building2, Menu, X
 } from 'lucide-react';
 import { orderAPI, cashbackAPI, featuredAPI } from '../services/api';
 import { toast } from 'sonner';
@@ -18,6 +20,7 @@ const ClientDashboard = () => {
   const [cashback, setCashback] = useState(0);
   const [tendances, setTendances] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!isClient) {
@@ -44,18 +47,82 @@ const ClientDashboard = () => {
     fetchData();
   }, [isClient, navigate]);
 
-  const menuItems = [
-    { id: 'overview', label: 'Tableau de bord', icon: LayoutDashboard },
-    { id: 'profile', label: 'Mon Profil', icon: User },
-    { id: 'mode_vie', label: 'Mon mode de vie', icon: Heart },
-    { id: 'orders', label: 'Mes commandes', icon: ShoppingCart },
-    { id: 'cashback', label: 'Mon cash-back', icon: Wallet },
-    { id: 'premium', label: 'Mon Premium', icon: Crown },
-    { id: 'agenda', label: 'Mon agenda', icon: Calendar },
-    { id: 'cartes', label: 'Mes cartes', icon: CreditCard },
-    { id: 'finances', label: 'Mes finances', icon: FileText },
-    { id: 'messages', label: 'Messagerie', icon: MessageSquare },
-    { id: 'settings', label: 'Paramètres', icon: Settings },
+  // Menu restructuré selon le cahier des charges
+  const menuSections = [
+    {
+      title: 'Principal',
+      items: [
+        { id: 'overview', label: 'Accueil', icon: LayoutDashboard },
+        { id: 'profile', label: 'Mon Profil', icon: User },
+        { id: 'mode_vie', label: 'Mon mode de vie', icon: Heart },
+        { id: 'feed', label: 'Mon fil d\'actualité', icon: Rss },
+        { id: 'my_feed', label: 'Mon feed', icon: Newspaper },
+      ]
+    },
+    {
+      title: 'Avantages',
+      items: [
+        { id: 'cashback', label: 'Mon cash-back', icon: Wallet },
+        { id: 'premium', label: 'Mon Premium', icon: Crown },
+        { id: 'invitations', label: 'Mes invitations prestataires', icon: Gift },
+        { id: 'offres', label: 'Mes offres du moment', icon: Target },
+        { id: 'guests', label: 'Mes guests du moment', icon: Star },
+        { id: 'tendances', label: 'Mes tendances actuelles', icon: TrendingUp },
+        { id: 'cadeaux', label: 'Mes cadeaux du mois', icon: Gift },
+      ]
+    },
+    {
+      title: 'Investissements & Emplois',
+      items: [
+        { id: 'investments', label: 'Mes investissements', icon: PieChart },
+        { id: 'business_news', label: 'Mon local business news', icon: Newspaper },
+        { id: 'jobs', label: 'Mes emplois', icon: Briefcase },
+        { id: 'formations', label: 'Mes formations', icon: GraduationCap },
+      ]
+    },
+    {
+      title: 'Gestion',
+      items: [
+        { id: 'agenda', label: 'Mon agenda', icon: Calendar },
+        { id: 'cartes', label: 'Mes cartes', icon: CreditCard },
+        { id: 'finances', label: 'Mes finances', icon: FileText },
+        { id: 'donations', label: 'Mes donations', icon: Heart },
+        { id: 'documents', label: 'Mes documents', icon: FolderOpen },
+      ]
+    },
+    {
+      title: 'Communication',
+      items: [
+        { id: 'messages', label: 'Messagerie', icon: MessageSquare },
+        { id: 'contacts', label: 'Contacts', icon: Phone },
+        { id: 'entrepreneur', label: 'Compte entrepreneur', icon: Building2 },
+      ]
+    },
+    {
+      title: 'Recommandations',
+      items: [
+        { id: 'suggestions', label: 'Suggestions de mes contacts', icon: Users },
+        { id: 'prestataires', label: 'Mes prestataires personnels', icon: Star },
+        { id: 'wishlist', label: 'Ma liste de souhaits', icon: Heart },
+      ]
+    },
+    {
+      title: 'Commandes',
+      items: [
+        { id: 'orders', label: 'Mes commandes', icon: ShoppingCart },
+        { id: 'panier', label: 'Mon panier', icon: ShoppingCart },
+        { id: 'livraisons', label: 'Livraison', icon: Truck },
+      ]
+    },
+    {
+      title: 'Aide & Informations',
+      items: [
+        { id: 'support', label: 'Service client', icon: HelpCircle },
+        { id: 'partners', label: 'Partenaires', icon: Handshake },
+        { id: 'about', label: 'À propos', icon: Info },
+        { id: 'settings', label: 'Paramètres', icon: Settings },
+      ]
+    },
   ];
 
   const quickStats = [
