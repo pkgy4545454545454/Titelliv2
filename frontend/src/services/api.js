@@ -19,6 +19,7 @@ export const authAPI = {
 export const enterpriseAPI = {
   list: (params) => axios.get(`${API}/enterprises`, { params }),
   get: (id) => axios.get(`${API}/enterprises/${id}`),
+  getById: (id) => axios.get(`${API}/enterprises/${id}`),
   create: (data) => axios.post(`${API}/enterprises`, data, { headers: getAuthHeaders() }),
   update: (id, data) => axios.put(`${API}/enterprises/${id}`, data, { headers: getAuthHeaders() }),
 };
@@ -91,6 +92,115 @@ export const cashbackAPI = {
   balance: () => axios.get(`${API}/cashback/balance`, { headers: getAuthHeaders() }),
 };
 
+// ============ ENTERPRISE MANAGEMENT APIs ============
+
+// Offers/Promotions
+export const offersAPI = {
+  list: () => axios.get(`${API}/enterprise/offers`, { headers: getAuthHeaders() }),
+  create: (data) => axios.post(`${API}/enterprise/offers`, data, { headers: getAuthHeaders() }),
+  update: (id, data) => axios.put(`${API}/enterprise/offers/${id}`, data, { headers: getAuthHeaders() }),
+  delete: (id) => axios.delete(`${API}/enterprise/offers/${id}`, { headers: getAuthHeaders() }),
+};
+
+// Trainings/Formations
+export const trainingsAPI = {
+  list: () => axios.get(`${API}/enterprise/trainings`, { headers: getAuthHeaders() }),
+  listAll: (params) => axios.get(`${API}/trainings`, { params }),
+  create: (data) => axios.post(`${API}/enterprise/trainings`, data, { headers: getAuthHeaders() }),
+  delete: (id) => axios.delete(`${API}/enterprise/trainings/${id}`, { headers: getAuthHeaders() }),
+};
+
+// Jobs/Emplois
+export const jobsAPI = {
+  list: () => axios.get(`${API}/enterprise/jobs`, { headers: getAuthHeaders() }),
+  listAll: (params) => axios.get(`${API}/jobs`, { params }),
+  create: (data) => axios.post(`${API}/enterprise/jobs`, data, { headers: getAuthHeaders() }),
+  delete: (id) => axios.delete(`${API}/enterprise/jobs/${id}`, { headers: getAuthHeaders() }),
+};
+
+// Real Estate/Immobilier
+export const realEstateAPI = {
+  list: () => axios.get(`${API}/enterprise/real-estate`, { headers: getAuthHeaders() }),
+  listAll: (params) => axios.get(`${API}/real-estate`, { params }),
+  create: (data) => axios.post(`${API}/enterprise/real-estate`, data, { headers: getAuthHeaders() }),
+  delete: (id) => axios.delete(`${API}/enterprise/real-estate/${id}`, { headers: getAuthHeaders() }),
+};
+
+// Investments
+export const investmentsAPI = {
+  list: () => axios.get(`${API}/enterprise/investments`, { headers: getAuthHeaders() }),
+  listAll: (params) => axios.get(`${API}/investments`, { params }),
+  create: (data) => axios.post(`${API}/enterprise/investments`, data, { headers: getAuthHeaders() }),
+  delete: (id) => axios.delete(`${API}/enterprise/investments/${id}`, { headers: getAuthHeaders() }),
+};
+
+// Stock Management
+export const stockAPI = {
+  list: () => axios.get(`${API}/enterprise/stock`, { headers: getAuthHeaders() }),
+  add: (data) => axios.post(`${API}/enterprise/stock`, data, { headers: getAuthHeaders() }),
+  movement: (data) => axios.post(`${API}/enterprise/stock/movement`, data, { headers: getAuthHeaders() }),
+  history: () => axios.get(`${API}/enterprise/stock/history`, { headers: getAuthHeaders() }),
+};
+
+// Agenda/Calendar
+export const agendaAPI = {
+  list: (params) => axios.get(`${API}/enterprise/agenda`, { params, headers: getAuthHeaders() }),
+  create: (data) => axios.post(`${API}/enterprise/agenda`, data, { headers: getAuthHeaders() }),
+  update: (id, data) => axios.put(`${API}/enterprise/agenda/${id}`, data, { headers: getAuthHeaders() }),
+  delete: (id) => axios.delete(`${API}/enterprise/agenda/${id}`, { headers: getAuthHeaders() }),
+};
+
+// Team/Personnel
+export const teamAPI = {
+  list: () => axios.get(`${API}/enterprise/team`, { headers: getAuthHeaders() }),
+  add: (data) => axios.post(`${API}/enterprise/team`, data, { headers: getAuthHeaders() }),
+  update: (id, data) => axios.put(`${API}/enterprise/team/${id}`, data, { headers: getAuthHeaders() }),
+  delete: (id) => axios.delete(`${API}/enterprise/team/${id}`, { headers: getAuthHeaders() }),
+  // Team Orders
+  listOrders: () => axios.get(`${API}/enterprise/team/orders`, { headers: getAuthHeaders() }),
+  createOrder: (data) => axios.post(`${API}/enterprise/team/orders`, data, { headers: getAuthHeaders() }),
+  updateOrderStatus: (id, status) => axios.put(`${API}/enterprise/team/orders/${id}/status`, null, { params: { status }, headers: getAuthHeaders() }),
+};
+
+// Permanent Orders
+export const permanentOrdersAPI = {
+  list: () => axios.get(`${API}/enterprise/permanent-orders`, { headers: getAuthHeaders() }),
+  create: (data) => axios.post(`${API}/enterprise/permanent-orders`, data, { headers: getAuthHeaders() }),
+  toggle: (id) => axios.put(`${API}/enterprise/permanent-orders/${id}/toggle`, null, { headers: getAuthHeaders() }),
+  delete: (id) => axios.delete(`${API}/enterprise/permanent-orders/${id}`, { headers: getAuthHeaders() }),
+};
+
+// Documents
+export const documentsAPI = {
+  list: (category) => axios.get(`${API}/enterprise/documents`, { params: { category }, headers: getAuthHeaders() }),
+  add: (data) => axios.post(`${API}/enterprise/documents`, data, { headers: getAuthHeaders() }),
+  delete: (id) => axios.delete(`${API}/enterprise/documents/${id}`, { headers: getAuthHeaders() }),
+};
+
+// Development/Formation
+export const developmentAPI = {
+  list: () => axios.get(`${API}/enterprise/development`, { headers: getAuthHeaders() }),
+  updateProgress: (resourceId, isCompleted) => axios.post(`${API}/enterprise/development/progress`, null, { 
+    params: { resource_id: resourceId, is_completed: isCompleted }, 
+    headers: getAuthHeaders() 
+  }),
+};
+
+// Finances
+export const financesAPI = {
+  get: (params) => axios.get(`${API}/enterprise/finances`, { params, headers: getAuthHeaders() }),
+  addTransaction: (data) => axios.post(`${API}/enterprise/finances/transactions`, data, { headers: getAuthHeaders() }),
+  deleteTransaction: (id) => axios.delete(`${API}/enterprise/finances/transactions/${id}`, { headers: getAuthHeaders() }),
+};
+
+// Advertising
+export const advertisingAPI = {
+  list: () => axios.get(`${API}/enterprise/advertising`, { headers: getAuthHeaders() }),
+  create: (data) => axios.post(`${API}/enterprise/advertising`, data, { headers: getAuthHeaders() }),
+  toggle: (id) => axios.put(`${API}/enterprise/advertising/${id}/toggle`, null, { headers: getAuthHeaders() }),
+  delete: (id) => axios.delete(`${API}/enterprise/advertising/${id}`, { headers: getAuthHeaders() }),
+};
+
 export default {
   auth: authAPI,
   enterprise: enterpriseAPI,
@@ -102,4 +212,17 @@ export default {
   payment: paymentAPI,
   admin: adminAPI,
   cashback: cashbackAPI,
+  offers: offersAPI,
+  trainings: trainingsAPI,
+  jobs: jobsAPI,
+  realEstate: realEstateAPI,
+  investments: investmentsAPI,
+  stock: stockAPI,
+  agenda: agendaAPI,
+  team: teamAPI,
+  permanentOrders: permanentOrdersAPI,
+  documents: documentsAPI,
+  development: developmentAPI,
+  finances: financesAPI,
+  advertising: advertisingAPI,
 };
