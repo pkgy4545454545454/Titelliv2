@@ -143,6 +143,14 @@ const EnterpriseDashboard = () => {
       ]
     },
     {
+      title: 'IA & Marketing',
+      items: [
+        { id: 'ia_clients', label: 'IA Ciblage clients', icon: Target },
+        { id: 'influencers', label: 'Influenceurs', icon: Users },
+        { id: 'invitations', label: 'Invitations clients', icon: Send },
+      ]
+    },
+    {
       title: 'Ressources Humaines',
       items: [
         { id: 'team', label: 'Mon personnel', icon: Users },
