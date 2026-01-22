@@ -1824,6 +1824,73 @@ async def delete_notification(notification_id: str, current_user: dict = Depends
         raise HTTPException(status_code=404, detail="Notification non trouvée")
     return {"message": "Notification supprimée"}
 
+# ============ IMAGE UPLOAD ROUTES ============
+
+ALLOWED_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.webp'}
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+
+@api_router.post("/upload/image")
+async def upload_image(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
+    """Upload an image file and return the URL"""
+    # Check file extension
+    file_ext = Path(file.filename).suffix.lower()
+    if file_ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=400, detail=f"Type de fichier non autorisé. Utilisez: {', '.join(ALLOWED_EXTENSIONS)}")
+    
+    # Check file size
+    contents = await file.read()
+    if len(contents) > MAX_FILE_SIZE:
+        raise HTTPException(status_code=400, detail="Fichier trop volumineux (max 5MB)")
+    
+    # Generate unique filename
+    unique_filename = f"{uuid.uuid4()}{file_ext}"
+    file_path = UPLOADS_DIR / unique_filename
+    
+    # Save file
+    with open(file_path, "wb") as f:
+        f.write(contents)
+    
+    # Return URL
+    image_url = f"/api/uploads/{unique_filename}"
+    return {"url": image_url, "filename": unique_filename}
+
+@api_router.post("/upload/image-base64")
+async def upload_image_base64(data: dict, current_user: dict = Depends(get_current_user)):
+    """Upload an image from base64 data"""
+    try:
+        base64_data = data.get("image", "")
+        filename = data.get("filename", "image.jpg")
+        
+        # Remove data URL prefix if present
+        if "," in base64_data:
+            base64_data = base64_data.split(",")[1]
+        
+        # Decode base64
+        image_bytes = base64.b64decode(base64_data)
+        
+        # Check file size
+        if len(image_bytes) > MAX_FILE_SIZE:
+            raise HTTPException(status_code=400, detail="Fichier trop volumineux (max 5MB)")
+        
+        # Get extension
+        file_ext = Path(filename).suffix.lower()
+        if file_ext not in ALLOWED_EXTENSIONS:
+            file_ext = ".jpg"
+        
+        # Generate unique filename
+        unique_filename = f"{uuid.uuid4()}{file_ext}"
+        file_path = UPLOADS_DIR / unique_filename
+        
+        # Save file
+        with open(file_path, "wb") as f:
+            f.write(image_bytes)
+        
+        # Return URL
+        image_url = f"/api/uploads/{unique_filename}"
+        return {"url": image_url, "filename": unique_filename}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Erreur lors de l'upload: {str(e)}")
+
 # ============ ROOT ROUTE ============
 
 @api_router.get("/")
@@ -1838,6 +1905,9 @@ async def health_check():
 
 # Include the router in the main app
 app.include_router(api_router)
+
+# Mount uploads folder for serving static images
+app.mount("/api/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
 app.add_middleware(
     CORSMiddleware,
