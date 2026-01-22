@@ -213,7 +213,7 @@ Le menu entreprise a été entièrement restructuré avec les sections suivantes
 | Enterprise | spa.luxury@titelli.com | Demo123! |
 
 ## Live URL
-https://lausanne-biz.preview.emergentagent.com
+https://marketplace-revamp-2.preview.emergentagent.com
 
 ## Recent Changes (January 22, 2026)
 
@@ -254,5 +254,5 @@ https://lausanne-biz.preview.emergentagent.com
 
 ## Notes
 - Stripe Checkout requires opening the site directly (not in iframe)
-- For testing payments, open: https://lausanne-biz.preview.emergentagent.com in a new tab
+- For testing payments, open: https://marketplace-revamp-2.preview.emergentagent.com in a new tab
 - Notifications auto-refresh every 30 seconds

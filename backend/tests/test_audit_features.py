@@ -7,7 +7,7 @@ import requests
 import os
 import time
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://lausanne-biz.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://marketplace-revamp-2.preview.emergentagent.com').rstrip('/')
 
 # Test credentials
 ENTERPRISE_EMAIL = "spa.luxury@titelli.com"
