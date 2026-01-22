@@ -202,10 +202,12 @@ class TestAdvertisingAPI:
         ad_data = {
             "title": "TEST_Promo Été 2026",
             "description": "Découvrez nos offres spéciales été",
-            "ad_type": "pub_flash_offres",
+            "ad_type": "banner",
+            "placement": "homepage",
             "budget": 100.0,
             "target_audience": "all",
-            "duration_days": 7
+            "start_date": "2026-01-22",
+            "end_date": "2026-01-29"
         }
         response = requests.post(f"{BASE_URL}/api/enterprise/advertising", json=ad_data, headers=headers)
         assert response.status_code == 200
