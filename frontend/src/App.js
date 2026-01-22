@@ -13,6 +13,7 @@ import HomePage from './pages/HomePage';
 import AuthPage from './pages/AuthPage';
 import ServicesPage from './pages/ServicesPage';
 import ProductsPage from './pages/ProductsPage';
+import ServiceProductDetailPage from './pages/ServiceProductDetailPage';
 import EnterprisesPage from './pages/EnterprisesPage';
 import EnterprisePage from './pages/EnterprisePage';
 import EnterpriseDashboard from './pages/EnterpriseDashboard';
