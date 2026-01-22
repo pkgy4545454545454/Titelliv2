@@ -177,6 +177,7 @@ const EnterpriseDashboard = () => {
     {
       title: 'Documents & Paramètres',
       items: [
+        { id: 'subscriptions', label: 'Abonnements', icon: Crown },
         { id: 'documents', label: 'Documents', icon: FolderOpen },
         { id: 'realestate', label: 'Immobilier', icon: Home },
         { id: 'settings', label: 'Paramètres', icon: Settings },
