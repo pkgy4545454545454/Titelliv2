@@ -636,22 +636,45 @@ const EnterpriseDashboard = () => {
               
               <div className="card-service rounded-xl p-6">
                 <h2 className="text-lg font-semibold text-white mb-4">Abonnement</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4 bg-white/5 rounded-xl">
-                    <h3 className="text-white font-medium mb-2">Standard</h3>
-                    <p className="text-2xl font-bold text-white mb-2">250 CHF<span className="text-sm text-gray-400">/an</span></p>
-                    <button onClick={() => handleSubscribe('annual')} className="btn-secondary w-full">Choisir</button>
-                  </div>
-                  <div className="p-4 bg-[#D4AF37]/10 rounded-xl border border-[#D4AF37]/30">
-                    <h3 className="text-[#D4AF37] font-medium mb-2">Premium Annuel</h3>
-                    <p className="text-2xl font-bold text-white mb-2">540 CHF<span className="text-sm text-gray-400">/an</span></p>
-                    <button onClick={() => handleSubscribe('premium_annual')} className="btn-primary w-full">Choisir</button>
-                  </div>
-                  <div className="p-4 bg-white/5 rounded-xl">
-                    <h3 className="text-white font-medium mb-2">Premium Mensuel</h3>
-                    <p className="text-2xl font-bold text-white mb-2">45 CHF<span className="text-sm text-gray-400">/mois</span></p>
-                    <button onClick={() => handleSubscribe('premium_monthly')} className="btn-secondary w-full">Choisir</button>
-                  </div>
+                <p className="text-gray-400 mb-4">Gérez votre abonnement et vos options</p>
+                <button 
+                  onClick={() => setActiveTab('subscriptions')} 
+                  className="btn-primary flex items-center gap-2"
+                >
+                  <Crown className="w-4 h-4" />
+                  Gérer mon abonnement
+                </button>
+              </div>
+
+              <div className="card-service rounded-xl p-6">
+                <h2 className="text-lg font-semibold text-white mb-4">Notifications</h2>
+                <div className="space-y-3">
+                  <label className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                    <span className="text-gray-300">Notifications par email</span>
+                    <input type="checkbox" defaultChecked className="w-5 h-5 accent-[#0047AB]" />
+                  </label>
+                  <label className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                    <span className="text-gray-300">Notifications push</span>
+                    <input type="checkbox" defaultChecked className="w-5 h-5 accent-[#0047AB]" />
+                  </label>
+                  <label className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                    <span className="text-gray-300">Résumé hebdomadaire</span>
+                    <input type="checkbox" className="w-5 h-5 accent-[#0047AB]" />
+                  </label>
+                </div>
+              </div>
+
+              <div className="card-service rounded-xl p-6">
+                <h2 className="text-lg font-semibold text-white mb-4">Sécurité</h2>
+                <div className="space-y-4">
+                  <button className="w-full p-3 bg-white/5 rounded-lg text-left hover:bg-white/10 transition-colors">
+                    <p className="text-white font-medium">Changer le mot de passe</p>
+                    <p className="text-sm text-gray-400">Sécurisez votre compte</p>
+                  </button>
+                  <button className="w-full p-3 bg-white/5 rounded-lg text-left hover:bg-white/10 transition-colors">
+                    <p className="text-white font-medium">Authentification à deux facteurs</p>
+                    <p className="text-sm text-gray-400">Ajouter une couche de sécurité</p>
+                  </button>
                 </div>
               </div>
             </div>
