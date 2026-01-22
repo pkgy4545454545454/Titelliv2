@@ -2697,6 +2697,7 @@ const FormModal = ({ type, item, onClose, onSuccess }) => {
 // IA Ciblage Clients Section
 const IAClientsSection = () => {
   const [targetAudience, setTargetAudience] = useState({
+    name: '',
     age_range: '25-45',
     gender: 'all',
     interests: [],
@@ -2705,7 +2706,9 @@ const IAClientsSection = () => {
     behavior: []
   });
   const [campaigns, setCampaigns] = useState([]);
+  const [stats, setStats] = useState({ total_reach: 0, total_engagement: 0, total_conversions: 0, engagement_rate: 0 });
   const [showCreate, setShowCreate] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const interests = [
     'Bien-être', 'Mode', 'Gastronomie', 'Sport', 'Technologie', 
@@ -2716,6 +2719,22 @@ const IAClientsSection = () => {
     'Acheteurs fréquents', 'Nouveaux clients', 'Clients fidèles',
     'Abandons de panier', 'Visiteurs réguliers', 'Clients premium'
   ];
+
+  useEffect(() => {
+    fetchCampaigns();
+  }, []);
+
+  const fetchCampaigns = async () => {
+    try {
+      const response = await iaCampaignsAPI.list();
+      setCampaigns(response.data.campaigns || []);
+      setStats(response.data.stats || {});
+    } catch (error) {
+      console.error('Error fetching campaigns:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInterestToggle = (interest) => {
     setTargetAudience(prev => ({
@@ -2735,19 +2754,56 @@ const IAClientsSection = () => {
     }));
   };
 
-  const createCampaign = () => {
-    const newCampaign = {
-      id: Date.now(),
-      ...targetAudience,
-      status: 'active',
-      reach: Math.floor(Math.random() * 5000) + 1000,
-      engagement: Math.floor(Math.random() * 500) + 100,
-      created_at: new Date().toISOString()
-    };
-    setCampaigns([newCampaign, ...campaigns]);
-    setShowCreate(false);
-    toast.success('Campagne IA créée avec succès');
+  const createCampaign = async () => {
+    if (!targetAudience.name) {
+      toast.error('Veuillez donner un nom à votre campagne');
+      return;
+    }
+    try {
+      const response = await iaCampaignsAPI.create(targetAudience);
+      setCampaigns([response.data, ...campaigns]);
+      setShowCreate(false);
+      setTargetAudience({ name: '', age_range: '25-45', gender: 'all', interests: [], location: 'lausanne', budget: 'medium', behavior: [] });
+      toast.success('Campagne IA créée avec succès');
+      fetchCampaigns();
+    } catch (error) {
+      toast.error('Erreur lors de la création de la campagne');
+    }
   };
+
+  const toggleCampaign = async (campaignId) => {
+    try {
+      await iaCampaignsAPI.toggle(campaignId);
+      fetchCampaigns();
+      toast.success('Statut de la campagne mis à jour');
+    } catch (error) {
+      toast.error('Erreur lors de la mise à jour');
+    }
+  };
+
+  const deleteCampaign = async (campaignId) => {
+    try {
+      await iaCampaignsAPI.delete(campaignId);
+      setCampaigns(campaigns.filter(c => c.id !== campaignId));
+      toast.success('Campagne supprimée');
+    } catch (error) {
+      toast.error('Erreur lors de la suppression');
+    }
+  };
+
+  const formatNumber = (num) => {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    return num?.toString() || '0';
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="w-10 h-10 border-4 border-[#0047AB] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6" data-testid="ia-clients-section">
@@ -2771,7 +2827,11 @@ const IAClientsSection = () => {
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
           {['Nouveaux clients', 'Clients fidèles', 'Clients premium', 'Clients locaux'].map((type) => (
-            <button key={type} className="p-3 bg-white/5 rounded-lg text-white hover:bg-[#D4AF37]/20 hover:border-[#D4AF37]/50 border border-transparent transition-all text-sm">
+            <button 
+              key={type} 
+              onClick={() => { setTargetAudience({...targetAudience, name: type, behavior: [type]}); setShowCreate(true); }}
+              className="p-3 bg-white/5 rounded-lg text-white hover:bg-[#D4AF37]/20 hover:border-[#D4AF37]/50 border border-transparent transition-all text-sm"
+            >
               {type}
             </button>
           ))}
@@ -2781,38 +2841,46 @@ const IAClientsSection = () => {
       {/* Stats IA */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="card-service rounded-xl p-4">
-          <p className="text-sm text-gray-400">Portée estimée</p>
-          <p className="text-2xl font-bold text-[#0047AB]">12.5K</p>
+          <p className="text-sm text-gray-400">Portée totale</p>
+          <p className="text-2xl font-bold text-[#0047AB]">{formatNumber(stats.total_reach)}</p>
         </div>
         <div className="card-service rounded-xl p-4">
           <p className="text-sm text-gray-400">Taux d'engagement</p>
-          <p className="text-2xl font-bold text-green-400">4.2%</p>
+          <p className="text-2xl font-bold text-green-400">{stats.engagement_rate || 0}%</p>
         </div>
         <div className="card-service rounded-xl p-4">
           <p className="text-sm text-gray-400">Conversions</p>
-          <p className="text-2xl font-bold text-[#D4AF37]">234</p>
+          <p className="text-2xl font-bold text-[#D4AF37]">{formatNumber(stats.total_conversions)}</p>
         </div>
         <div className="card-service rounded-xl p-4">
-          <p className="text-sm text-gray-400">ROI estimé</p>
-          <p className="text-2xl font-bold text-purple-400">320%</p>
+          <p className="text-sm text-gray-400">Campagnes actives</p>
+          <p className="text-2xl font-bold text-purple-400">{stats.active_campaigns || 0}</p>
         </div>
       </div>
 
       {/* Campagnes actives */}
       <div className="card-service rounded-xl p-6">
-        <h2 className="text-lg font-semibold text-white mb-4">Campagnes IA actives</h2>
+        <h2 className="text-lg font-semibold text-white mb-4">Mes campagnes IA</h2>
         {campaigns.length > 0 ? (
           <div className="space-y-3">
             {campaigns.map((campaign) => (
               <div key={campaign.id} className="p-4 bg-white/5 rounded-xl flex items-center justify-between">
                 <div>
-                  <p className="text-white font-medium">Ciblage: {campaign.age_range} ans • {campaign.location}</p>
-                  <p className="text-sm text-gray-400">{campaign.interests.join(', ')}</p>
+                  <p className="text-white font-medium">{campaign.name || `Ciblage: ${campaign.age_range} ans`} • {campaign.location}</p>
+                  <p className="text-sm text-gray-400">{campaign.interests?.join(', ') || 'Tous les intérêts'}</p>
                 </div>
                 <div className="flex items-center gap-4 text-sm">
-                  <span className="text-[#0047AB]">{campaign.reach} portée</span>
-                  <span className="text-green-400">{campaign.engagement} engagements</span>
-                  <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded">Actif</span>
+                  <span className="text-[#0047AB]">{formatNumber(campaign.reach)} portée</span>
+                  <span className="text-green-400">{formatNumber(campaign.engagement)} engagements</span>
+                  <button 
+                    onClick={() => toggleCampaign(campaign.id)}
+                    className={`px-2 py-1 rounded text-xs ${campaign.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}
+                  >
+                    {campaign.status === 'active' ? 'Actif' : 'En pause'}
+                  </button>
+                  <button onClick={() => deleteCampaign(campaign.id)} className="p-1 text-red-400 hover:bg-red-500/20 rounded">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             ))}
@@ -2833,6 +2901,17 @@ const IAClientsSection = () => {
             <h3 className="text-lg font-semibold text-white mb-6">Créer un ciblage IA</h3>
             
             <div className="space-y-6">
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Nom de la campagne *</label>
+                <input
+                  type="text"
+                  value={targetAudience.name}
+                  onChange={(e) => setTargetAudience({...targetAudience, name: e.target.value})}
+                  placeholder="Ex: Campagne été 2026"
+                  className="input-dark w-full"
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm text-gray-400 mb-2">Tranche d'âge</label>
@@ -2860,6 +2939,7 @@ const IAClientsSection = () => {
                   {interests.map((interest) => (
                     <button
                       key={interest}
+                      type="button"
                       onClick={() => handleInterestToggle(interest)}
                       className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
                         targetAudience.interests.includes(interest)
@@ -2879,6 +2959,7 @@ const IAClientsSection = () => {
                   {behaviors.map((behavior) => (
                     <button
                       key={behavior}
+                      type="button"
                       onClick={() => handleBehaviorToggle(behavior)}
                       className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
                         targetAudience.behavior.includes(behavior)
