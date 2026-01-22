@@ -319,6 +319,80 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Job Offers Section */}
+      <section className="py-16 md:py-24 bg-gradient-to-b from-[#050505] to-[#0A0A0A]" data-testid="jobs-section">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          <div className="flex items-center justify-between mb-10">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-[#0047AB]/20">
+                <Briefcase className="w-6 h-6 text-[#0047AB]" />
+              </div>
+              <div>
+                <h2 className="text-2xl md:text-3xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Offres d'emploi
+                </h2>
+                <p className="text-gray-400 mt-1 text-sm md:text-base">Opportunités chez nos prestataires</p>
+              </div>
+            </div>
+            <Link to="/emplois" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors">
+              Voir toutes les offres
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {jobs.length > 0 ? (
+              jobs.slice(0, 6).map((job, index) => (
+                <Link 
+                  key={job.id} 
+                  to={`/emploi/${job.id}`}
+                  className={`card-service rounded-xl p-5 hover:border-[#0047AB]/30 transition-all animate-fade-in stagger-${index + 1}`}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-lg bg-[#0047AB]/10 flex items-center justify-center">
+                        <Briefcase className="w-6 h-6 text-[#0047AB]" />
+                      </div>
+                      <div>
+                        <h3 className="text-white font-semibold text-sm md:text-base">{job.title}</h3>
+                        <p className="text-[#D4AF37] text-sm">{job.enterprise_name || 'Entreprise'}</p>
+                      </div>
+                    </div>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      job.type === 'CDI' ? 'bg-green-500/20 text-green-400' :
+                      job.type === 'Stage' ? 'bg-purple-500/20 text-purple-400' :
+                      'bg-blue-500/20 text-blue-400'
+                    }`}>
+                      {job.type || 'CDI'}
+                    </span>
+                  </div>
+                  <p className="text-gray-400 text-sm line-clamp-2 mb-4">{job.description}</p>
+                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <span className="flex items-center gap-1">
+                      <MapPin className="w-3 h-3" /> {job.location || 'Lausanne'}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> {job.salary || 'À discuter'}
+                    </span>
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <Briefcase className="w-16 h-16 text-gray-700 mx-auto mb-4" />
+                <p className="text-gray-500">Aucune offre d'emploi pour le moment</p>
+                <p className="text-sm text-gray-600 mt-1">Les offres de nos prestataires apparaîtront ici</p>
+              </div>
+            )}
+          </div>
+
+          <Link to="/emplois" className="md:hidden flex items-center justify-center gap-2 mt-8 text-[#0047AB] font-medium">
+            Voir toutes les offres
+            <ArrowRight className="w-5 h-5" />
+          </Link>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-20 md:py-28" data-testid="cta-section">
         <div className="max-w-4xl mx-auto px-4 md:px-8 text-center">
