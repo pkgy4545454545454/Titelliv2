@@ -820,11 +820,922 @@ async def get_premium():
     ).sort("rating", -1).limit(6).to_list(6)
     return enterprises
 
+# ============ OFFERS/PROMOTIONS ROUTES ============
+
+class OfferCreate(BaseModel):
+    title: str
+    description: str
+    discount_type: str = "percentage"  # percentage or fixed
+    discount_value: float
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    applicable_to: List[str] = []  # service/product IDs
+    min_purchase: float = 0
+    max_uses: Optional[int] = None
+    code: Optional[str] = None
+
+@api_router.get("/enterprise/offers")
+async def get_enterprise_offers(current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return []
+    offers = await db.offers.find({"enterprise_id": enterprise['id']}, {"_id": 0}).to_list(100)
+    return offers
+
+@api_router.post("/enterprise/offers")
+async def create_offer(offer: OfferCreate, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    offer_doc = {
+        "id": str(uuid.uuid4()),
+        "enterprise_id": enterprise['id'],
+        **offer.model_dump(),
+        "is_active": True,
+        "uses_count": 0,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.offers.insert_one(offer_doc)
+    del offer_doc['_id']
+    return offer_doc
+
+@api_router.put("/enterprise/offers/{offer_id}")
+async def update_offer(offer_id: str, offer: OfferCreate, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    await db.offers.update_one(
+        {"id": offer_id, "enterprise_id": enterprise['id']},
+        {"$set": offer.model_dump()}
+    )
+    return {"message": "Offre mise à jour"}
+
+@api_router.delete("/enterprise/offers/{offer_id}")
+async def delete_offer(offer_id: str, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    await db.offers.delete_one({"id": offer_id, "enterprise_id": enterprise['id']})
+    return {"message": "Offre supprimée"}
+
+# ============ TRAININGS/FORMATIONS ROUTES ============
+
+class TrainingCreate(BaseModel):
+    title: str
+    description: str
+    duration: str  # e.g., "2 heures", "1 jour"
+    price: float
+    max_participants: Optional[int] = None
+    location: Optional[str] = None
+    is_online: bool = False
+    schedule: Optional[str] = None
+    prerequisites: Optional[str] = None
+    certificate: bool = False
+
+@api_router.get("/enterprise/trainings")
+async def get_enterprise_trainings(current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return []
+    trainings = await db.trainings.find({"enterprise_id": enterprise['id']}, {"_id": 0}).to_list(100)
+    return trainings
+
+@api_router.post("/enterprise/trainings")
+async def create_training(training: TrainingCreate, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    training_doc = {
+        "id": str(uuid.uuid4()),
+        "enterprise_id": enterprise['id'],
+        "enterprise_name": enterprise['business_name'],
+        **training.model_dump(),
+        "is_active": True,
+        "enrollments": 0,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.trainings.insert_one(training_doc)
+    del training_doc['_id']
+    return training_doc
+
+@api_router.delete("/enterprise/trainings/{training_id}")
+async def delete_training(training_id: str, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    await db.trainings.delete_one({"id": training_id, "enterprise_id": enterprise['id']})
+    return {"message": "Formation supprimée"}
+
+@api_router.get("/trainings")
+async def get_all_trainings(category: Optional[str] = None, limit: int = 50):
+    query = {"is_active": True}
+    trainings = await db.trainings.find(query, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
+    return trainings
+
+# ============ JOBS/EMPLOIS ROUTES ============
+
+class JobCreate(BaseModel):
+    title: str
+    description: str
+    job_type: str = "full_time"  # full_time, part_time, freelance, internship
+    salary_min: Optional[float] = None
+    salary_max: Optional[float] = None
+    salary_type: str = "monthly"  # hourly, monthly, yearly
+    location: str
+    remote: bool = False
+    requirements: Optional[str] = None
+    benefits: Optional[str] = None
+    contact_email: Optional[str] = None
+
+@api_router.get("/enterprise/jobs")
+async def get_enterprise_jobs(current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return []
+    jobs = await db.jobs.find({"enterprise_id": enterprise['id']}, {"_id": 0}).to_list(100)
+    return jobs
+
+@api_router.post("/enterprise/jobs")
+async def create_job(job: JobCreate, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    job_doc = {
+        "id": str(uuid.uuid4()),
+        "enterprise_id": enterprise['id'],
+        "enterprise_name": enterprise['business_name'],
+        **job.model_dump(),
+        "is_active": True,
+        "applications": 0,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.jobs.insert_one(job_doc)
+    del job_doc['_id']
+    return job_doc
+
+@api_router.delete("/enterprise/jobs/{job_id}")
+async def delete_job(job_id: str, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    await db.jobs.delete_one({"id": job_id, "enterprise_id": enterprise['id']})
+    return {"message": "Offre d'emploi supprimée"}
+
+@api_router.get("/jobs")
+async def get_all_jobs(job_type: Optional[str] = None, limit: int = 50):
+    query = {"is_active": True}
+    if job_type:
+        query["job_type"] = job_type
+    jobs = await db.jobs.find(query, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
+    return jobs
+
+# ============ REAL ESTATE/IMMOBILIER ROUTES ============
+
+class RealEstateCreate(BaseModel):
+    title: str
+    description: str
+    property_type: str = "commercial"  # commercial, office, storage, land
+    transaction_type: str = "rent"  # rent, sale
+    price: float
+    price_period: Optional[str] = "monthly"  # monthly, yearly, one_time
+    surface: Optional[float] = None  # m²
+    address: str
+    city: str = "Lausanne"
+    features: List[str] = []
+    images: List[str] = []
+
+@api_router.get("/enterprise/real-estate")
+async def get_enterprise_real_estate(current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return []
+    properties = await db.real_estate.find({"enterprise_id": enterprise['id']}, {"_id": 0}).to_list(100)
+    return properties
+
+@api_router.post("/enterprise/real-estate")
+async def create_real_estate(property_data: RealEstateCreate, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    property_doc = {
+        "id": str(uuid.uuid4()),
+        "enterprise_id": enterprise['id'],
+        "enterprise_name": enterprise['business_name'],
+        **property_data.model_dump(),
+        "is_active": True,
+        "views": 0,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.real_estate.insert_one(property_doc)
+    del property_doc['_id']
+    return property_doc
+
+@api_router.delete("/enterprise/real-estate/{property_id}")
+async def delete_real_estate(property_id: str, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    await db.real_estate.delete_one({"id": property_id, "enterprise_id": enterprise['id']})
+    return {"message": "Bien immobilier supprimé"}
+
+@api_router.get("/real-estate")
+async def get_all_real_estate(property_type: Optional[str] = None, transaction_type: Optional[str] = None, limit: int = 50):
+    query = {"is_active": True}
+    if property_type:
+        query["property_type"] = property_type
+    if transaction_type:
+        query["transaction_type"] = transaction_type
+    properties = await db.real_estate.find(query, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
+    return properties
+
+# ============ INVESTMENTS ROUTES ============
+
+class InvestmentCreate(BaseModel):
+    title: str
+    description: str
+    investment_type: str = "shares"  # shares, profit_sharing, bonds
+    min_investment: float
+    max_investment: Optional[float] = None
+    expected_return: Optional[float] = None  # percentage
+    duration: Optional[str] = None  # e.g., "12 mois"
+    total_shares: Optional[int] = None
+    available_shares: Optional[int] = None
+    risk_level: str = "medium"  # low, medium, high
+
+@api_router.get("/enterprise/investments")
+async def get_enterprise_investments(current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return []
+    investments = await db.investments.find({"enterprise_id": enterprise['id']}, {"_id": 0}).to_list(100)
+    return investments
+
+@api_router.post("/enterprise/investments")
+async def create_investment(investment: InvestmentCreate, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    investment_doc = {
+        "id": str(uuid.uuid4()),
+        "enterprise_id": enterprise['id'],
+        "enterprise_name": enterprise['business_name'],
+        **investment.model_dump(),
+        "is_active": True,
+        "investors_count": 0,
+        "total_raised": 0,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.investments.insert_one(investment_doc)
+    del investment_doc['_id']
+    return investment_doc
+
+@api_router.delete("/enterprise/investments/{investment_id}")
+async def delete_investment(investment_id: str, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    await db.investments.delete_one({"id": investment_id, "enterprise_id": enterprise['id']})
+    return {"message": "Investissement supprimé"}
+
+@api_router.get("/investments")
+async def get_all_investments(investment_type: Optional[str] = None, limit: int = 50):
+    query = {"is_active": True}
+    if investment_type:
+        query["investment_type"] = investment_type
+    investments = await db.investments.find(query, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
+    return investments
+
+# ============ STOCK MANAGEMENT ROUTES ============
+
+class StockItemCreate(BaseModel):
+    product_id: str
+    product_name: str
+    sku: Optional[str] = None
+    quantity: int = 0
+    min_quantity: int = 5  # Alert threshold
+    max_quantity: Optional[int] = None
+    unit: str = "pièce"  # pièce, kg, litre, etc.
+    location: Optional[str] = None
+    cost_price: Optional[float] = None
+
+class StockMovement(BaseModel):
+    product_id: str
+    quantity: int
+    movement_type: str  # in, out, adjustment
+    reason: Optional[str] = None
+
+@api_router.get("/enterprise/stock")
+async def get_enterprise_stock(current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return {"items": [], "alerts": []}
+    
+    stock = await db.stock.find({"enterprise_id": enterprise['id']}, {"_id": 0}).to_list(500)
+    alerts = [s for s in stock if s['quantity'] <= s['min_quantity']]
+    
+    return {"items": stock, "alerts": alerts}
+
+@api_router.post("/enterprise/stock")
+async def add_stock_item(item: StockItemCreate, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    stock_doc = {
+        "id": str(uuid.uuid4()),
+        "enterprise_id": enterprise['id'],
+        **item.model_dump(),
+        "last_updated": datetime.now(timezone.utc).isoformat()
+    }
+    await db.stock.insert_one(stock_doc)
+    del stock_doc['_id']
+    return stock_doc
+
+@api_router.post("/enterprise/stock/movement")
+async def record_stock_movement(movement: StockMovement, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    stock_item = await db.stock.find_one({"product_id": movement.product_id, "enterprise_id": enterprise['id']})
+    if not stock_item:
+        raise HTTPException(status_code=404, detail="Produit non trouvé dans le stock")
+    
+    # Calculate new quantity
+    if movement.movement_type == "in":
+        new_quantity = stock_item['quantity'] + movement.quantity
+    elif movement.movement_type == "out":
+        new_quantity = stock_item['quantity'] - movement.quantity
+    else:  # adjustment
+        new_quantity = movement.quantity
+    
+    # Update stock
+    await db.stock.update_one(
+        {"product_id": movement.product_id, "enterprise_id": enterprise['id']},
+        {"$set": {"quantity": new_quantity, "last_updated": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    # Record movement history
+    movement_doc = {
+        "id": str(uuid.uuid4()),
+        "enterprise_id": enterprise['id'],
+        "product_id": movement.product_id,
+        "quantity": movement.quantity,
+        "movement_type": movement.movement_type,
+        "reason": movement.reason,
+        "previous_quantity": stock_item['quantity'],
+        "new_quantity": new_quantity,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.stock_movements.insert_one(movement_doc)
+    
+    return {"message": "Mouvement enregistré", "new_quantity": new_quantity}
+
+@api_router.get("/enterprise/stock/history")
+async def get_stock_history(current_user: dict = Depends(get_current_user), limit: int = 100):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return []
+    
+    movements = await db.stock_movements.find(
+        {"enterprise_id": enterprise['id']}, {"_id": 0}
+    ).sort("created_at", -1).limit(limit).to_list(limit)
+    return movements
+
+# ============ AGENDA/CALENDAR ROUTES ============
+
+class AgendaEventCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    event_type: str = "appointment"  # appointment, availability, blocked, task
+    start_datetime: str
+    end_datetime: str
+    all_day: bool = False
+    recurring: bool = False
+    recurring_pattern: Optional[str] = None  # daily, weekly, monthly
+    client_id: Optional[str] = None
+    client_name: Optional[str] = None
+    service_id: Optional[str] = None
+    location: Optional[str] = None
+    notes: Optional[str] = None
+    color: str = "#0047AB"
+
+@api_router.get("/enterprise/agenda")
+async def get_enterprise_agenda(
+    current_user: dict = Depends(get_current_user),
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None
+):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return []
+    
+    query = {"enterprise_id": enterprise['id']}
+    if start_date:
+        query["start_datetime"] = {"$gte": start_date}
+    if end_date:
+        if "start_datetime" in query:
+            query["start_datetime"]["$lte"] = end_date
+        else:
+            query["start_datetime"] = {"$lte": end_date}
+    
+    events = await db.agenda.find(query, {"_id": 0}).sort("start_datetime", 1).to_list(500)
+    return events
+
+@api_router.post("/enterprise/agenda")
+async def create_agenda_event(event: AgendaEventCreate, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    event_doc = {
+        "id": str(uuid.uuid4()),
+        "enterprise_id": enterprise['id'],
+        **event.model_dump(),
+        "status": "scheduled",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.agenda.insert_one(event_doc)
+    del event_doc['_id']
+    return event_doc
+
+@api_router.put("/enterprise/agenda/{event_id}")
+async def update_agenda_event(event_id: str, event: AgendaEventCreate, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    await db.agenda.update_one(
+        {"id": event_id, "enterprise_id": enterprise['id']},
+        {"$set": event.model_dump()}
+    )
+    return {"message": "Événement mis à jour"}
+
+@api_router.delete("/enterprise/agenda/{event_id}")
+async def delete_agenda_event(event_id: str, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    await db.agenda.delete_one({"id": event_id, "enterprise_id": enterprise['id']})
+    return {"message": "Événement supprimé"}
+
+# ============ TEAM/PERSONNEL ROUTES ============
+
+class TeamMemberCreate(BaseModel):
+    first_name: str
+    last_name: str
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    role: str
+    department: Optional[str] = None
+    hire_date: Optional[str] = None
+    salary: Optional[float] = None
+    working_hours: Optional[str] = None
+    photo: Optional[str] = None
+    skills: List[str] = []
+    is_active: bool = True
+
+class TeamOrderCreate(BaseModel):
+    member_id: str
+    title: str
+    description: str
+    priority: str = "normal"  # low, normal, high, urgent
+    due_date: Optional[str] = None
+    recurring: bool = False
+    recurring_pattern: Optional[str] = None
+
+@api_router.get("/enterprise/team")
+async def get_enterprise_team(current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return []
+    
+    team = await db.team_members.find({"enterprise_id": enterprise['id']}, {"_id": 0}).to_list(100)
+    return team
+
+@api_router.post("/enterprise/team")
+async def add_team_member(member: TeamMemberCreate, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    member_doc = {
+        "id": str(uuid.uuid4()),
+        "enterprise_id": enterprise['id'],
+        **member.model_dump(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.team_members.insert_one(member_doc)
+    del member_doc['_id']
+    return member_doc
+
+@api_router.put("/enterprise/team/{member_id}")
+async def update_team_member(member_id: str, member: TeamMemberCreate, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    await db.team_members.update_one(
+        {"id": member_id, "enterprise_id": enterprise['id']},
+        {"$set": member.model_dump()}
+    )
+    return {"message": "Membre mis à jour"}
+
+@api_router.delete("/enterprise/team/{member_id}")
+async def delete_team_member(member_id: str, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    await db.team_members.delete_one({"id": member_id, "enterprise_id": enterprise['id']})
+    return {"message": "Membre supprimé"}
+
+# Team Orders
+@api_router.get("/enterprise/team/orders")
+async def get_team_orders(current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return []
+    
+    orders = await db.team_orders.find({"enterprise_id": enterprise['id']}, {"_id": 0}).to_list(200)
+    return orders
+
+@api_router.post("/enterprise/team/orders")
+async def create_team_order(order: TeamOrderCreate, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    order_doc = {
+        "id": str(uuid.uuid4()),
+        "enterprise_id": enterprise['id'],
+        **order.model_dump(),
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.team_orders.insert_one(order_doc)
+    del order_doc['_id']
+    return order_doc
+
+@api_router.put("/enterprise/team/orders/{order_id}/status")
+async def update_team_order_status(order_id: str, status: str, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    await db.team_orders.update_one(
+        {"id": order_id, "enterprise_id": enterprise['id']},
+        {"$set": {"status": status}}
+    )
+    return {"message": "Statut mis à jour"}
+
+# ============ PERMANENT ORDERS ROUTES ============
+
+class PermanentOrderCreate(BaseModel):
+    client_id: Optional[str] = None
+    client_name: str
+    client_email: Optional[str] = None
+    client_phone: Optional[str] = None
+    items: List[Dict[str, Any]]
+    frequency: str = "weekly"  # daily, weekly, biweekly, monthly
+    delivery_day: Optional[str] = None  # monday, tuesday, etc.
+    delivery_time: Optional[str] = None
+    delivery_address: Optional[str] = None
+    total: float
+    notes: Optional[str] = None
+    start_date: str
+    end_date: Optional[str] = None
+
+@api_router.get("/enterprise/permanent-orders")
+async def get_permanent_orders(current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return []
+    
+    orders = await db.permanent_orders.find({"enterprise_id": enterprise['id']}, {"_id": 0}).to_list(100)
+    return orders
+
+@api_router.post("/enterprise/permanent-orders")
+async def create_permanent_order(order: PermanentOrderCreate, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    order_doc = {
+        "id": str(uuid.uuid4()),
+        "enterprise_id": enterprise['id'],
+        **order.model_dump(),
+        "is_active": True,
+        "last_executed": None,
+        "executions_count": 0,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.permanent_orders.insert_one(order_doc)
+    del order_doc['_id']
+    return order_doc
+
+@api_router.put("/enterprise/permanent-orders/{order_id}/toggle")
+async def toggle_permanent_order(order_id: str, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    order = await db.permanent_orders.find_one({"id": order_id, "enterprise_id": enterprise['id']})
+    if not order:
+        raise HTTPException(status_code=404, detail="Commande non trouvée")
+    
+    await db.permanent_orders.update_one(
+        {"id": order_id},
+        {"$set": {"is_active": not order['is_active']}}
+    )
+    return {"message": "Statut modifié", "is_active": not order['is_active']}
+
+@api_router.delete("/enterprise/permanent-orders/{order_id}")
+async def delete_permanent_order(order_id: str, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    await db.permanent_orders.delete_one({"id": order_id, "enterprise_id": enterprise['id']})
+    return {"message": "Commande permanente supprimée"}
+
+# ============ DOCUMENTS ROUTES ============
+
+class DocumentCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    category: str = "other"  # legal, financial, contract, certificate, other
+    file_url: str
+    file_type: str  # pdf, doc, image, etc.
+    file_size: Optional[int] = None
+    expiry_date: Optional[str] = None
+    is_important: bool = False
+
+@api_router.get("/enterprise/documents")
+async def get_enterprise_documents(current_user: dict = Depends(get_current_user), category: Optional[str] = None):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return []
+    
+    query = {"enterprise_id": enterprise['id']}
+    if category:
+        query["category"] = category
+    
+    documents = await db.documents.find(query, {"_id": 0}).sort("created_at", -1).to_list(200)
+    return documents
+
+@api_router.post("/enterprise/documents")
+async def add_document(doc: DocumentCreate, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    doc_record = {
+        "id": str(uuid.uuid4()),
+        "enterprise_id": enterprise['id'],
+        **doc.model_dump(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.documents.insert_one(doc_record)
+    del doc_record['_id']
+    return doc_record
+
+@api_router.delete("/enterprise/documents/{doc_id}")
+async def delete_document(doc_id: str, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    await db.documents.delete_one({"id": doc_id, "enterprise_id": enterprise['id']})
+    return {"message": "Document supprimé"}
+
+# ============ DEVELOPMENT/FORMATION ROUTES ============
+
+class DevelopmentResourceCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    resource_type: str = "article"  # article, video, course, webinar, ebook
+    category: str
+    url: Optional[str] = None
+    content: Optional[str] = None
+    duration: Optional[str] = None
+    is_completed: bool = False
+
+@api_router.get("/enterprise/development")
+async def get_development_resources(current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return {"resources": [], "progress": []}
+    
+    # Get available resources
+    resources = await db.development_resources.find({}, {"_id": 0}).to_list(100)
+    
+    # Get enterprise progress
+    progress = await db.development_progress.find(
+        {"enterprise_id": enterprise['id']}, {"_id": 0}
+    ).to_list(100)
+    
+    return {"resources": resources, "progress": progress}
+
+@api_router.post("/enterprise/development/progress")
+async def update_development_progress(
+    resource_id: str, 
+    is_completed: bool = True,
+    current_user: dict = Depends(get_current_user)
+):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    await db.development_progress.update_one(
+        {"enterprise_id": enterprise['id'], "resource_id": resource_id},
+        {"$set": {
+            "is_completed": is_completed,
+            "completed_at": datetime.now(timezone.utc).isoformat() if is_completed else None
+        }},
+        upsert=True
+    )
+    return {"message": "Progression mise à jour"}
+
+# ============ FINANCES ROUTES ============
+
+class FinanceTransactionCreate(BaseModel):
+    transaction_type: str  # income, expense, transfer
+    category: str  # sales, subscription, advertising, salary, supplies, other
+    amount: float
+    description: str
+    date: str
+    reference: Optional[str] = None
+    payment_method: Optional[str] = None
+
+@api_router.get("/enterprise/finances")
+async def get_enterprise_finances(
+    current_user: dict = Depends(get_current_user),
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None
+):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return {"transactions": [], "summary": {}}
+    
+    query = {"enterprise_id": enterprise['id']}
+    if start_date:
+        query["date"] = {"$gte": start_date}
+    if end_date:
+        if "date" in query:
+            query["date"]["$lte"] = end_date
+        else:
+            query["date"] = {"$lte": end_date}
+    
+    transactions = await db.finance_transactions.find(query, {"_id": 0}).sort("date", -1).to_list(500)
+    
+    # Calculate summary
+    total_income = sum(t['amount'] for t in transactions if t['transaction_type'] == 'income')
+    total_expenses = sum(t['amount'] for t in transactions if t['transaction_type'] == 'expense')
+    
+    # Get orders revenue
+    orders = await db.orders.find({"enterprise_id": enterprise['id'], "status": "completed"}, {"_id": 0}).to_list(1000)
+    orders_revenue = sum(o.get('total', 0) for o in orders)
+    
+    summary = {
+        "total_income": total_income + orders_revenue,
+        "total_expenses": total_expenses,
+        "net_profit": total_income + orders_revenue - total_expenses,
+        "orders_revenue": orders_revenue,
+        "commission_paid": orders_revenue * 0.05  # 5% commission
+    }
+    
+    return {"transactions": transactions, "summary": summary}
+
+@api_router.post("/enterprise/finances/transactions")
+async def add_finance_transaction(transaction: FinanceTransactionCreate, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    transaction_doc = {
+        "id": str(uuid.uuid4()),
+        "enterprise_id": enterprise['id'],
+        **transaction.model_dump(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.finance_transactions.insert_one(transaction_doc)
+    del transaction_doc['_id']
+    return transaction_doc
+
+@api_router.delete("/enterprise/finances/transactions/{transaction_id}")
+async def delete_finance_transaction(transaction_id: str, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    await db.finance_transactions.delete_one({"id": transaction_id, "enterprise_id": enterprise['id']})
+    return {"message": "Transaction supprimée"}
+
+# ============ ADVERTISING ROUTES ============
+
+class AdvertisingCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    ad_type: str = "banner"  # banner, featured, spotlight, premium_listing, video, popup
+    placement: str = "homepage"  # homepage, category, search, sidebar
+    target_audience: Optional[str] = None
+    budget: float
+    start_date: str
+    end_date: str
+    image_url: Optional[str] = None
+    video_url: Optional[str] = None
+    link_url: Optional[str] = None
+    cta_text: Optional[str] = None
+
+@api_router.get("/enterprise/advertising")
+async def get_enterprise_advertising(current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return {"campaigns": [], "stats": {}}
+    
+    campaigns = await db.advertising.find({"enterprise_id": enterprise['id']}, {"_id": 0}).to_list(100)
+    
+    # Calculate stats
+    total_spent = sum(c.get('spent', 0) for c in campaigns)
+    total_impressions = sum(c.get('impressions', 0) for c in campaigns)
+    total_clicks = sum(c.get('clicks', 0) for c in campaigns)
+    
+    stats = {
+        "total_campaigns": len(campaigns),
+        "active_campaigns": len([c for c in campaigns if c.get('is_active')]),
+        "total_spent": total_spent,
+        "total_impressions": total_impressions,
+        "total_clicks": total_clicks,
+        "ctr": (total_clicks / total_impressions * 100) if total_impressions > 0 else 0
+    }
+    
+    return {"campaigns": campaigns, "stats": stats}
+
+@api_router.post("/enterprise/advertising")
+async def create_advertising_campaign(ad: AdvertisingCreate, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    ad_doc = {
+        "id": str(uuid.uuid4()),
+        "enterprise_id": enterprise['id'],
+        "enterprise_name": enterprise['business_name'],
+        **ad.model_dump(),
+        "is_active": True,
+        "is_approved": False,  # Requires admin approval
+        "impressions": 0,
+        "clicks": 0,
+        "spent": 0,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.advertising.insert_one(ad_doc)
+    del ad_doc['_id']
+    return ad_doc
+
+@api_router.put("/enterprise/advertising/{ad_id}/toggle")
+async def toggle_advertising(ad_id: str, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    ad = await db.advertising.find_one({"id": ad_id, "enterprise_id": enterprise['id']})
+    if not ad:
+        raise HTTPException(status_code=404, detail="Publicité non trouvée")
+    
+    await db.advertising.update_one(
+        {"id": ad_id},
+        {"$set": {"is_active": not ad['is_active']}}
+    )
+    return {"message": "Statut modifié"}
+
+@api_router.delete("/enterprise/advertising/{ad_id}")
+async def delete_advertising(ad_id: str, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    await db.advertising.delete_one({"id": ad_id, "enterprise_id": enterprise['id']})
+    return {"message": "Publicité supprimée"}
+
 # ============ ROOT ROUTE ============
 
 @api_router.get("/")
 async def root():
-    return {"message": "Bienvenue sur l'API Titelli", "version": "1.0.0"}
+    return {"message": "Bienvenue sur l'API Titelli", "version": "2.0.0"}
 
 # ============ HEALTH CHECK ============
 
