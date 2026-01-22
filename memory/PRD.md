@@ -20,6 +20,14 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 - ✅ User type differentiation (client, enterprise, admin)
 - ✅ Beautiful login page with split layout
 
+#### Notifications System (NEW - January 22, 2026)
+- ✅ **Real-time notifications** in header with badge counter
+- ✅ **Auto-notifications** when orders are created (enterprise receives notification)
+- ✅ **Dropdown** with notification list, time formatting ("À l'instant", "Il y a X min")
+- ✅ **Mark as read** (single and all)
+- ✅ **Notification types**: order, alert, promotion, info
+- ✅ **30-second polling** for new notifications
+
 #### Shopping Cart System
 - ✅ CartContext for global cart state
 - ✅ Add to cart from services/products pages
@@ -43,12 +51,13 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 - ✅ Certification/Labelling badges system
 - ✅ Premium status management
 
-#### Services & Products
+#### Services & Products (Forms Fixed - January 22, 2026)
 - ✅ CRUD operations for services/products
+- ✅ **FormModal with all required fields**: Name, Description, Type, Category, Price, Delivery
+- ✅ **Category dropdown** with 13 service categories and 7 product categories
+- ✅ **Validation** for required fields (name, description, price, category)
 - ✅ Category filtering
 - ✅ Search functionality
-- ✅ Price management (CHF currency)
-- ✅ Delivery flag support
 - ✅ Add to cart buttons on all item cards
 
 #### Client Dashboard
@@ -60,7 +69,7 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 
 #### Enterprise Dashboard (FULLY TESTED - January 22, 2026)
 - ✅ Business statistics (views, orders, revenue, rating)
-- ✅ Services/products management
+- ✅ Services/products management with improved forms
 - ✅ Order management with status updates
 - ✅ Customer reviews
 - ✅ Financial overview with commission calculation (5%)
@@ -70,12 +79,12 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 - ✅ **Gestion des stocks** - Stock management with alerts
 - ✅ **Finances** - Income/expense tracking, transactions
 - ✅ **Documents** - File storage by category (Legal, Financial, Contracts, Certificates)
-- ✅ **Offres d'emploi** - Job postings with full details
-- ✅ **Formations** - Training/courses offered
+- ✅ **Offres d'emploi** - Job postings with full form (title, description, type, location, salary)
+- ✅ **Formations** - Training courses with form (title, description, duration, price, category, online)
 - ✅ **Immobilier** - Real estate listings
 - ✅ **Investissements** - Investment opportunities
 - ✅ **Publicités** - Advertising campaigns with stats
-- ✅ **Offres & Promotions** - Special offers and discounts
+- ✅ **Offres & Promotions** - Special offers with discount percentage and date range
 - ✅ **Commandes permanentes** - Recurring orders
 - ✅ **Développement** - Training resources for business development
 
@@ -97,48 +106,10 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 - ✅ Responsive layout (desktop + mobile)
 - ✅ Toast notifications (sonner)
 - ✅ Loading states and spinners
-- ✅ Modal dialogs
+- ✅ Modal dialogs with proper forms
 - ✅ Category badges (Certified, Labeled, Premium)
 - ✅ Playfair Display font for headings
-
-## Files Structure
-
-```
-/app/
-├── backend/
-│   ├── server.py              # FastAPI application (1600+ lines)
-│   ├── requirements.txt       # Python dependencies
-│   ├── tests/
-│   │   └── test_enterprise_dashboard.py  # 27 tests
-│   └── .env                   # Environment config
-└── frontend/
-    ├── src/
-    │   ├── App.js             # Main app with routes
-    │   ├── context/
-    │   │   ├── AuthContext.js # Authentication state
-    │   │   └── CartContext.js # Shopping cart state
-    │   ├── pages/
-    │   │   ├── HomePage.js
-    │   │   ├── AuthPage.js
-    │   │   ├── ServicesPage.js
-    │   │   ├── ProductsPage.js
-    │   │   ├── EnterprisesPage.js
-    │   │   ├── EnterprisePage.js
-    │   │   ├── CartPage.js
-    │   │   ├── OrdersPage.js
-    │   │   ├── ClientDashboard.js
-    │   │   ├── EnterpriseDashboard.js (1400+ lines)
-    │   │   ├── AdminDashboard.js
-    │   │   └── PaymentPages.js
-    │   ├── components/
-    │   │   ├── Header.js      # With cart badge
-    │   │   ├── Footer.js
-    │   │   ├── EnterpriseCard.js
-    │   │   └── ServiceProductCard.js
-    │   └── services/
-    │       └── api.js         # API functions
-    └── package.json
-```
+- ✅ Notification bell with red badge counter
 
 ## API Endpoints
 
@@ -146,6 +117,13 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 - POST `/api/auth/register`
 - POST `/api/auth/login`
 - GET `/api/auth/me`
+
+### Notifications (NEW)
+- GET `/api/notifications` - List notifications with unread_count
+- GET `/api/notifications?unread_only=true` - Get unread only
+- PUT `/api/notifications/{id}/read` - Mark single as read
+- PUT `/api/notifications/read-all` - Mark all as read
+- DELETE `/api/notifications/{id}` - Delete notification
 
 ### Enterprises
 - GET `/api/enterprises`
@@ -155,12 +133,14 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 
 ### Services/Products
 - GET `/api/services-products`
+- GET `/api/services-products/:id`
 - POST `/api/services-products`
+- PUT `/api/services-products/:id`
 - DELETE `/api/services-products/:id`
 
 ### Orders
 - GET `/api/orders` - List user orders
-- POST `/api/orders` - Create order from cart
+- POST `/api/orders` - Create order from cart (auto-creates notification)
 - PUT `/api/orders/:id/status` - Update order status
 
 ### Reviews
@@ -176,7 +156,7 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 - GET `/api/admin/users`
 - PUT `/api/admin/users/:id/verify`
 
-### Enterprise Management (NEW - All tested)
+### Enterprise Management
 - `/api/enterprise/team` - Team management (GET, POST, PUT, DELETE)
 - `/api/enterprise/agenda` - Calendar/agenda (GET, POST, PUT, DELETE)
 - `/api/enterprise/finances` - Finance tracking (GET, POST transactions)
@@ -203,48 +183,34 @@ https://lausanne-biz.preview.emergentagent.com
 
 ## Recent Changes (January 22, 2026)
 
+### New Features
+1. **Notifications System** - Real-time notifications with auto-creation on orders
+2. **Improved Forms** - All modal forms now have proper labels, validation, and category dropdowns
+
 ### Bug Fixes
 1. **Enterprise Dashboard Fix** - Fixed enterprise lookup to use user_id instead of email search
-2. **All Enterprise Features Tested** - 27/27 API tests passed
+2. **Form Validation** - Added client-side validation for all required fields
+3. **Category Selection** - Services/products now properly save category
 
-### New Features Implemented & Tested
-1. **Team Management** - Add/edit/delete team members with role and department
-2. **Agenda System** - Create appointments, availability slots, blocked times
-3. **Stock Management** - Track inventory with alerts for low stock
-4. **Finance Tracking** - Record income/expenses, view summaries
-5. **Document Storage** - Organize files by category
-6. **Job Postings** - Create employment opportunities
-7. **Training Courses** - Offer educational content
-8. **Real Estate Listings** - Property management
-9. **Investment Opportunities** - Crowdfunding features
-10. **Advertising System** - Campaign management with stats
-11. **Promotions/Offers** - Special deals and discounts
-12. **Permanent Orders** - Recurring order management
-
-## Testing
-
-### Backend Tests
-- Location: `/app/backend/tests/test_enterprise_dashboard.py`
-- Tests: 27 passing
-- Coverage: Auth, Team, Agenda, Finances, Stock, Documents, Jobs, Investments, Advertising
-
-### Test Reports
-- `/app/test_reports/iteration_3.json` - Latest test results
+### Test Results
+- Backend: 24/24 tests passed (notifications_and_forms.py)
+- Backend: 27/27 tests passed (enterprise_dashboard.py)
+- Frontend: All tests passed
 
 ## Backlog / Future Tasks
 
 ### P1 - High Priority
 - [ ] Image upload for enterprises (logo, photos)
-- [ ] Real-time order notifications
-- [ ] Email notifications (order confirmation, etc.)
 - [ ] Client agenda/booking system (request appointments)
 - [ ] Client wishlist feature
+- [ ] Real-time WebSocket notifications (replace polling)
 
 ### P2 - Medium Priority
 - [ ] Video support for enterprise profiles
 - [ ] Advanced search with location filtering
 - [ ] Admin certification/labeling workflow improvements
 - [ ] Analytics dashboard with charts
+- [ ] Email notifications (order confirmation, etc.)
 
 ### P3 - Low Priority
 - [ ] Multi-language support
@@ -255,3 +221,4 @@ https://lausanne-biz.preview.emergentagent.com
 ## Notes
 - Stripe Checkout requires opening the site directly (not in iframe)
 - For testing payments, open: https://lausanne-biz.preview.emergentagent.com in a new tab
+- Notifications auto-refresh every 30 seconds
