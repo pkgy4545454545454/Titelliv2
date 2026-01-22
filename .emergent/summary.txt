@@ -1,113 +1,102 @@
 <analysis>**original_problem_statement:**
-The user provided a very detailed cahier des charges (CDC) outlining a major visual and functional overhaul for the Titelli marketplace platform. The key requirements from the CDC include:
+The user has provided a series of extensive cahiers des charges (CDC) detailing a major overhaul of the Titelli marketplace. The requirements span UI/UX redesign, new feature implementation, and making existing mocked features fully functional.
 
-**PRODUCT REQUIREMENTS:**
--   **Homepage Redesign:**
-    -   A panoramic welcome video.
-    -   Specific header/footer navigation categories (, , ,  at the top; , , ,  at the bottom).
-    -   A clean, elegant, sober, and refined visual style.
-    -   Horizontal sliders for showcasing businesses, products, and services.
-    -   A specific footer layout with copyright attribution to Yousee.H.
--   **Provider/Business Profiles:**
-    -   Detailed profile pages with a portrait photo, a panoramic background media (video/image), labels (e.g., Certifié), and scrolling comments/reviews.
-    -   Distinct layouts for product-based vs. service-based providers.
-    -   Indicators for skills, monthly profit, influence, potential, performance, and evolution.
--   **Product/Service Detail Pages:**
-    -   Implement two distinct visual layouts: one with image and text side-by-side, and another with text below the image.
-    -   Include a welcome video on category pages.
--   **Advertising System Rework:**
-    -   Businesses must pay via Stripe **before** their advertisement can be activated. The current implementation activates ads immediately upon creation.
--   **Enterprise Dashboard Menu:**
-    -   The user provided a complete, definitive list of all sections required in the enterprise dashboard menu.
--   **Client-Facing Features (AI/Marketing):**
-    -   Features for businesses to target specific client demographics (Quel type de public cible aujourd’hui ?).
+**PRODUCT REQUIREMENTS (latest additions in bold):**
+-   **Homepage Redesign:** A panoramic welcome video, specific header/footer navigation, horizontal sliders, and **a new Job Offers section**.
+-   **Dashboard Menu Overhaul:** **A complete, definitive restructuring of both the Client and Enterprise dashboard menus as specified by the user.**
+-   **Provider/Business Profiles:** Detailed pages with panoramic media, scrolling comments, performance indicators, **the ability to change the cover photo, a new Job Offers section, and mini-labels on listings to show counts of available items (products, formations, etc.).**
+-   **AI/Marketing Tools (Now require production-ready backend):**
+    -   Features for businesses to target client demographics (Quel type de public cible aujourd’hui ?).
     -   An influencer section.
     -   A feature for businesses to offer a geste commercial (commercial gesture/free offer).
-    -   A system for businesses to send direct invitations or suggestive marketing questions to clients.
--   **Security & UX:**
-    -   Secure the enterprise registration process to prevent unauthorized access.
-    -   Improve the elegance and UX of the registration pages.
-    -   Implement a full-screen filter and calendar view.
+    -   A system for businesses to send direct invitations to clients.
+-   **Influencer Module:** **A complete, dedicated profile creation flow and dashboard for influencers to manage their stats, collaborations, and profile.**
+-   **Job Offers System:** **A full CRUD system for enterprises to post job offers, which will appear on the homepage and enterprise profiles, with notifications sent to clients.**
+-   **Real Data:** **All mocked data (profile views, review counts, etc.) must be replaced with real, tracked data from the backend.**
+-   **Full Responsiveness:** **The entire website must be made 100% responsive and optimized for mobile viewing.**
+-   **Advertising System:** Businesses must pay via Stripe before their ad is activated.
+-   **Registration UX:** Improve the elegance and security of the registration pages.
 
 **User's preferred language**: The user's primary language is **French**. The next agent MUST respond in French only.
 
 **what currently exists?**
-The application is a full-stack FastAPI/React/MongoDB platform. The agent has successfully implemented and stabilized a comprehensive enterprise dashboard, a notification system, image uploads for services/products, and dynamic detail pages for those items.
-
-Following the user's submission of a new, highly detailed cahier des charges (CDC), the agent began a major overhaul. The agent has already:
-1.  Implemented the logic for mandatory Stripe payment before activating advertisements.
-2.  Completely restructured the enterprise dashboard sidebar menu to match the user's new specifications.
-3.  Begun a complete redesign of the  by overwriting the file with new code, though styling and testing are pending.
+The application is a full-stack FastAPI/React/MongoDB platform. The agent has successfully implemented several major features from the user's requests.
+-   A complete, multi-tiered subscription system is now live in the Enterprise Dashboard, allowing businesses to purchase different plans and add-ons.
+-   The AI & Marketing tools (Client Targeting, Influencers, Client Invitations) have been converted from frontend mocks to fully functional features with dedicated backend APIs and MongoDB data persistence.
+-   The user registration and login pages have been redesigned into a more elegant, multi-step process.
+-   A bug preventing enterprise logos from displaying correctly on public profile pages has been fixed.
+-   Work has begun on the latest set of user requests: the Client Dashboard menu has been restructured, and a new route and file have been created for the upcoming Influencer Dashboard.
 
 **Last working item**:
--   **Last item agent was working**: Implementing the new  design based on the user's detailed CDC. The agent overwrote the existing  file with a new structure and added some initial CSS to .
+-   **Last item agent was working**: The agent was in the initial stages of implementing a massive new set of requirements from the user (message #289). The work started with restructuring the application to accommodate these changes. Specifically, the agent:
+    1.  Restructured the menu definitions in .
+    2.  Added a new route for  in .
+    3.  Created the placeholder file .
+    4.  Began planning the backend changes needed to track profile views to make site statistics real.
 -   **Status**: IN PROGRESS
 -   **Agent Testing Done**: N
--   **Which testing method agent to use?**: Frontend testing agent. Take a screenshot of  to verify the new homepage structure and identify missing styles or broken components.
+-   **Which testing method agent to use?**: both. The scope of changes is massive. Use screenshots for incremental UI verification and  after completing a major module (e.g., the full Influencer Dashboard, the Job Offers feature).
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1 (P0)**: The newly implemented advertising payment flow is untested. The backend logic was changed to require payment before activation, but the full end-to-end flow (create ad -> redirect to Stripe -> confirm payment -> activate ad) has not been verified.
-
-  **Issues Detail**:
-  - **Issue 1**: Test and debug the advertising payment flow.
-     - **Attempted fixes**: The backend code in  and the frontend  in  were modified to support the payment flow. No testing has been performed since the changes.
-     - **Next debug checklist**:
-        1.  Log in as the enterprise user ( / ).
-        2.  Navigate to the Mes publicités section of the enterprise dashboard.
-        3.  Create a new advertisement.
-        4.  Verify the ad appears as Inactif and Non payé.
-        5.  Click the Payer et Activer button and confirm it redirects to a Stripe checkout session.
-        6.  (Simulate successful payment if possible, or check backend logs).
-        7.  Verify the ad status updates to Actif and Payé on the dashboard.
-     - **Why fix this issue?**: It's a direct and critical requirement from the user to ensure businesses are charged for ads.
-     - **Status**: NOT STARTED
-     - **Is recurring issue?**: N
-     - **Should Test frontend/backend/both after fix?**: Both.
-     - **Blocked on other issue**: None.
+-   **Issue 1 (P0)**: The mandatory payment flow for advertisements is untested.
+    **Issues Detail**:
+    -   **Issue 1**: Test and debug the advertising payment flow.
+        -   **Attempted fixes**: The backend logic was changed to require payment before activating an ad, but the end-to-end user flow has never been verified.
+        -   **Next debug checklist**:
+            1.  Log in as an enterprise user ( / ).
+            2.  Navigate to Mes publicités and create a new ad.
+            3.  Verify the ad appears as Inactif and Non payé.
+            4.  Click Payer et Activer, confirm redirection to Stripe, and simulate payment.
+            5.  Verify the ad status updates to Actif and Payé on the dashboard.
+        -   **Why fix this issue?**: It's a critical, core business requirement to ensure revenue from advertising.
+        -   **Status**: NOT STARTED
+        -   **Is recurring issue?**: N
+        -   **Should Test frontend/backend/both after fix?**: Both.
+        -   **Blocked on other issue**: None.
 
 **In progress Task List**:
--   **Task 1 (P0)**: Complete the Homepage Redesign.
-     - **Where to resume**: The file  has been overwritten with a new structure. The next step is to add the necessary CSS to style it according to the user's vision (panoramic video, elegant layout, etc.) and ensure all components render correctly. The agent also added  to .
-     - **What will be achieved with this?**: A new, visually appealing homepage that matches the user's CDC.
+-   **Task 1 (P0)**: Complete the massive feature implementation from user message #289.
+     - **Where to resume**: The agent just created the file for the Influencer Dashboard. The immediate next step is to build out this component () and its corresponding backend APIs. After that, proceed with the other tasks from the Upcoming Tasks list below.
+     - **What will be achieved with this?**: Fulfills the user's latest and most extensive set of requirements, fundamentally reshaping the application's features and navigation.
      - **Status**: IN PROGRESS
-     - **Should Test frontend/backend/both after fix?**: Frontend.
+     - **Should Test frontend/backend/both after fix?**: Both.
      - **Blocked on something**: None.
 
 **Upcoming and Future Tasks**
--   **Upcoming Tasks (P1 - From the CDC):**
-    -   **Provider Profile Page:** Implement the detailed provider profile page with a panoramic background, portrait photo, labels, and scrolling comments.
-    -   **Product/Service Layouts:** Create the two specified display variants (text-beside-image and text-below-image) for product/service detail pages.
-    -   **Full-Screen Filters:** Implement the full-screen filter/calendar view requested by the user.
-    -   **Client Dashboard Sections:** Implement the missing sections in the client dashboard: , , , .
+-   **Upcoming Tasks (P0 - Sequenced from user request #289):**
+    1.  **Influencer Module:** Build the complete  and supporting backend APIs. Update the registration page to allow influencer sign-ups.
+    2.  **Enterprise Menu Overhaul:** Rework the  sidebar menu to match the new structure specified by the user.
+    3.  **Job Offers Feature:**
+        -   Implement backend CRUD APIs for job offers.
+        -   Add a Mes offres d’emplois management section to the Enterprise Dashboard.
+        -   Display job offers on the public Enterprise Page and add a new section for them on the .
+        -   Create a notification system for clients about new job postings.
+    4.  **Make Stats Real:** Implement backend logic and API endpoints to track and retrieve real profile views, review counts, etc., and replace all mocked data on the frontend.
+    5.  **Profile Enhancements:** Implement the ability to change a profile's cover photo and add mini-labels to enterprise listings.
+    6.  **Full Responsiveness:** Conduct a full-site audit and apply necessary CSS changes to make every page mobile-friendly.
 
--   **Future Tasks (P2 - From the CDC):**
-    -   **Client-Facing AI/Marketing tools:**
-        -   IA client targeting feature.
-        -   Influencer profiles.
-        -   Geste commercial (free offer) publishing tool.
-        -   Client invitation system.
-        -   Suggestive marketing questions feature.
-    -   **Registration Security & UX:** Enhance the elegance and security of the registration pages.
-    -   **Music for Video Ads:** Integrate a music selection feature for video posts.
-    -   **Social Feeds:** Implement Mon fil d’actualité (for client experiences) and Mon feed (for business-to-business communication).
+-   **Future Tasks (P1 - From original CDC):**
+    -   **Homepage Video:** Implement the panoramic welcome video on the .
+    -   **Provider Profile Details:** Add scrolling comments/reviews to provider pages.
+    -   **Product/Service Layouts:** Create the two alternate display variants for product pages.
 
 **Completed work in this session**
--   **Enterprise Dashboard Rework (DONE):**
-    -   **Stabilization:** Fixed bugs preventing the addition of new services/products by adding missing form fields ( in ).
-    -   **Menu Restructure:** Completely reorganized the enterprise dashboard sidebar menu into logical groups (, , , etc.) as per user request.
-    -   **Logo Upload:** Added image upload functionality to the Profil entreprise section.
--   **Notifications System (DONE):**
-    -   Implemented backend endpoints () and frontend UI (header icon with badge and dropdown) for user notifications.
-    -   Integrated automatic notification creation when a new order is placed.
--   **Product/Service Detail Pages (DONE):**
-    -   Created a new page () to display detailed information when a user clicks on a product or service.
-    -   Fixed routing and API calls to fetch and display the correct item.
--   **Image Upload for Products/Services (DONE):**
-    -   Added a backend endpoint () and a file upload component to the  in the enterprise dashboard, allowing businesses to add images to their listings.
--   **Full Site Audit & Fixes (DONE):**
-    -   Verified and fixed the delete functionality for services in the enterprise dashboard.
-    -   Implemented missing sections (, ) in the .
+-   **Subscription System (DONE):**
+    -   Implemented a full-featured subscription system with multiple tiers and à la carte options in the Enterprise Dashboard, backed by a new  endpoint.
+-   **AI/Marketing Tools moved to Production (DONE):**
+    -   Replaced all mocked data for Client Targeting, Influencers, and Invitations with real backend APIs and MongoDB collections (, , , ).
+    -   Fixed  serialization errors in the backend API responses.
+    -   Ran extensive tests () to confirm full CRUD functionality.
+-   **UI/UX Enhancements (DONE):**
+    -   **Auth Pages:** Redesigned the login/registration flow into a modern, multi-step form.
+    -   **Homepage Layout:** Reverted the homepage to a previous, user-approved design and correctly positioned the navigation menu.
+-   **Bug Fixes (DONE):**
+    -   **Enterprise Logo:** Fixed a critical bug where enterprise logos did not display on public profile pages by creating a  utility to construct absolute URLs.
+
+**Earlier issues found/mentioned but not fixed**
+   - **Issue 1**: The user's original request for a **panoramic welcome video** on the homepage has not been implemented. The homepage was reverted to an older design.
+   - **Issue 2**: The detailed provider profile pages with **scrolling comments/reviews** and performance indicators from the CDC have not been started.
 
 **Code Architecture**
 
@@ -115,75 +104,81 @@ Following the user's submission of a new, highly detailed cahier des charges (CD
 **Key Technical Concepts**
 -   **Backend**: FastAPI, Pydantic, Motor (async MongoDB), JWT for auth.
 -   **Frontend**: React, , , Shadcn/UI, .
--   **File Storage**: Images are now stored locally in the  directory and served statically via FastAPI.
--   **Payments**: Stripe Checkout for order and ad payments.
+-   **Backend Logic**: The agent successfully moved complex business logic (AI stats, subscriptions) from frontend mocks to robust backend services.
+-   **Debugging**: Successfully identified and fixed a common MongoDB  serialization error when returning data from Pydantic models.
 
 **key DB schema**
--   : 
--   : 
--   : 
--   : 
--   : 
--   :  (schema updated)
+-   , , , , , 
+-   **New Collections Added:**
+    -   : 
+    -   :  (seeded with data)
+    -   : 
+    -   : 
 
 **All files of reference**
--   : Modified to support image uploads, static file serving, and the new ad payment flow.
--   : Heavily modified to include the new sidebar menu structure and updated advertising section.
--   : Overwritten and needs immediate attention for styling and functionality.
--   : Updated with new API functions for ad payments.
--   : New file for displaying item details.
--   : Partially completed, requires implementation of several new sections.
+-    (Heavily modified)
+-    (Heavily modified)
+-    (Modified)
+-    (Heavily modified)
+-    (Overwritten)
+-    (Newly created)
+-    (Modified)
+-    (Updated)
+-    (New)
+-    (New)
+
+**Areas that need refactoring**:
+-    is over 3400 lines long and is unmaintainable. The large functional sections (, , , etc.) MUST be extracted into separate component files.
+-    has become a monolith. The API logic should be broken down into separate FastAPI routers (e.g., , ) to improve organization.
 
 **key api endpoints**
--    (POST): New endpoint for uploading files.
--    (GET): New static path to serve uploaded images.
--    (POST): Logic updated to set  and  by default.
--    (POST): New endpoint to initiate Stripe payment for an ad.
--    (PUT): Logic updated to prevent activation if not paid.
+-    (GET)
+-    (GET, POST, PUT, DELETE)
+-    (GET)
+-    (GET)
+-    (GET, POST)
+-    (GET, POST, PUT, DELETE)
 
 **Critical Info for New Agent**
--   **Follow the CDC:** The user has provided an extremely detailed cahier des charges (CDC) in chat message #312. This document is now the primary source of truth for all new development. Your top priority is to systematically implement the features outlined in it.
--   **Immediate Priorities:**
-    1.  **Finish Homepage Redesign:** The  file has been overwritten but is unstyled and untested. You must complete this first.
-    2.  **Test Ad Payment Flow:** The logic for mandatory payment for ads was implemented but not tested. This is a critical business requirement that needs immediate verification.
--   **Work Methodically:** Given the scale of the user's request, propose a clear, step-by-step plan based on the CDC, get user confirmation, and implement features one by one, ensuring each is tested and stable before moving to the next.
+-   The user's request in chat message #289 is a massive undertaking and is now the top priority. You must break it down into a clear, step-by-step plan and get user confirmation before proceeding.
+-   **Propose refactoring immediately.** The  and  files are critically oversized. Suggesting a refactor to break them into smaller, manageable modules will be essential for long-term project health.
+-   The agent has started implementing the latest requests by creating the  file. Your next action should be to build out this component and its backend support.
 
 **documents and test reports created in this job**
 -   
 -   
 -   
--    (Updated several times).
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User (CDC):** Provided an extremely long and detailed cahier des charges (CDC) for a complete site overhaul, including visual design, new features, and corrections to existing ones (like ad payments). (IN PROGRESS)
-2.  **Agent:** Proposed a structured plan to tackle the CDC, starting with fixing the ad payment system, then redesigning the homepage, and asked for confirmation. (COMPLETED)
-3.  **User:** Confirmed the agent's plan and instructed to start, emphasizing the need for a full review against the CDC. (COMPLETED)
-4.  **Agent:** Started work on the ad payment fix. (COMPLETED)
-5.  **Agent:** Started work on the homepage redesign. (COMPLETED)
-6.  **Agent:** Finished restructuring the entire enterprise dashboard menu based on a previous user request. (COMPLETED)
-7.  **User:** Provided the definitive list for the enterprise dashboard menu structure. (COMPLETED)
-8.  **Agent:** Completed the audit and implementation of missing client dashboard sections and the enterprise logo upload. (COMPLETED)
-9.  **User:** Instructed the agent to do a full audit of the site, fix all unfinished sections, and make it ready for real use. (COMPLETED)
-10. **Agent:** Completed the image upload feature for products/services. (COMPLETED)
+1.  **User:** Requests making everything production-ready (not test/mocked data) and fixes the enterprise logo not showing on the profile page. (COMPLETED)
+2.  **Agent:** Implements backend APIs for AI/Marketing tools, fixes the  bug, and makes the frontend use real data. (COMPLETED)
+3.  **Agent:** Fixes the enterprise logo display issue. (COMPLETED)
+4.  **Agent:** Runs comprehensive tests with the testing agent, which all pass. (COMPLETED)
+5.  **User:** Acknowledges completion and provides a massive new list of requirements, including a complete overhaul of both client/enterprise menus, a new job offers feature, a full influencer dashboard, making all stats real, and making the site fully responsive. (IN PROGRESS)
+6.  **Agent:** Starts working on the new requests by updating  menu. (IN PROGRESS)
+7.  **Agent:** Adds the route for the new  page. (IN PROGRESS)
+8.  **Agent:** Creates the new  file. (IN PROGRESS)
+9.  **Agent:** Starts planning backend changes for real-time profile view tracking. (IN PROGRESS)
+10. **Agent:** Continues implementation. (IN PROGRESS)
 
 **Project Health Check:**
--   **Broken**: The homepage () is currently broken/unstyled due to being overwritten with new, incomplete code.
--   **Mocked**: Several sections in both the enterprise and client dashboards are placeholders ().
+-   **Broken**: No critical systems are broken.
+-   **Mocked**: Several new dashboard sections specified by the user exist only as menu items and will render a coming soon message. Profile view counts and similar stats are still static and need to be connected to a real tracking system, as per the user's latest request.
 
 **3rd Party Integrations**
--   **Stripe (Payments)**: Used for order and subscription payments. Now also being used for advertisement payments.
+-   **Stripe (Payments)**: Used for orders and subscriptions. The ad payment flow is implemented but untested.
 -   **MongoDB**: Primary database.
 
 **Testing status**
--   **Testing agent used after significant changes**: YES (last used for  before the CDC was provided)
+-   **Testing agent used after significant changes**: YES, last used to validate the production-ready AI/Marketing tools ().
 -   **Troubleshoot agent used after agent stuck in loop**: NO
--   **Test files created**: Yes, multiple test suites were generated by the testing agent in previous steps.
--   **Known regressions**: The homepage is non-functional.
+-   **Test files created**: Yes, the testing agent created  and .
+-   **Known regressions**: None.
 
 **Credentials to test flow:**
 -   **Admin**:  / 
--   **Client**:  /  (or  / )
+-   **Client**:  / 
 -   **Enterprise**:  / 
 
 **What agent forgot to execute**
-The agent was actively implementing the user's massive new set of requirements (the CDC). Nothing was forgotten; the agent is in the middle of a large, multi-step implementation plan. The immediate next steps are to finish styling the  and to test the new advertising payment flow.</analysis>
+The agent has been diligently following the user's cascading requests. The only outstanding forgotten item is the original (and still valid) requirement to test the advertising payment flow, which has been superseded by more recent, larger user requests.</analysis>

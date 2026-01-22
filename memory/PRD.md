@@ -267,7 +267,7 @@ Le système d'abonnements complet a été implémenté avec :
 | Enterprise | spa.luxury@titelli.com | Demo123! |
 
 ## Live URL
-https://marketplace-revamp-2.preview.emergentagent.com
+https://shopfront-pro-3.preview.emergentagent.com
 
 ## Recent Changes (January 22, 2026)
 
@@ -308,5 +308,5 @@ https://marketplace-revamp-2.preview.emergentagent.com
 
 ## Notes
 - Stripe Checkout requires opening the site directly (not in iframe)
-- For testing payments, open: https://marketplace-revamp-2.preview.emergentagent.com in a new tab
+- For testing payments, open: https://shopfront-pro-3.preview.emergentagent.com in a new tab
 - Notifications auto-refresh every 30 seconds
