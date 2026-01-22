@@ -2693,6 +2693,506 @@ const FormModal = ({ type, item, onClose, onSuccess }) => {
   );
 };
 
+// IA Ciblage Clients Section
+const IAClientsSection = () => {
+  const [targetAudience, setTargetAudience] = useState({
+    age_range: '25-45',
+    gender: 'all',
+    interests: [],
+    location: 'lausanne',
+    budget: 'medium',
+    behavior: []
+  });
+  const [campaigns, setCampaigns] = useState([]);
+  const [showCreate, setShowCreate] = useState(false);
+
+  const interests = [
+    'Bien-être', 'Mode', 'Gastronomie', 'Sport', 'Technologie', 
+    'Voyage', 'Art & Culture', 'Famille', 'Business', 'Écologie'
+  ];
+
+  const behaviors = [
+    'Acheteurs fréquents', 'Nouveaux clients', 'Clients fidèles',
+    'Abandons de panier', 'Visiteurs réguliers', 'Clients premium'
+  ];
+
+  const handleInterestToggle = (interest) => {
+    setTargetAudience(prev => ({
+      ...prev,
+      interests: prev.interests.includes(interest)
+        ? prev.interests.filter(i => i !== interest)
+        : [...prev.interests, interest]
+    }));
+  };
+
+  const handleBehaviorToggle = (behavior) => {
+    setTargetAudience(prev => ({
+      ...prev,
+      behavior: prev.behavior.includes(behavior)
+        ? prev.behavior.filter(b => b !== behavior)
+        : [...prev.behavior, behavior]
+    }));
+  };
+
+  const createCampaign = () => {
+    const newCampaign = {
+      id: Date.now(),
+      ...targetAudience,
+      status: 'active',
+      reach: Math.floor(Math.random() * 5000) + 1000,
+      engagement: Math.floor(Math.random() * 500) + 100,
+      created_at: new Date().toISOString()
+    };
+    setCampaigns([newCampaign, ...campaigns]);
+    setShowCreate(false);
+    toast.success('Campagne IA créée avec succès');
+  };
+
+  return (
+    <div className="space-y-6" data-testid="ia-clients-section">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+            IA Ciblage Clients
+          </h1>
+          <p className="text-gray-400 mt-1">Ciblez intelligemment votre audience idéale</p>
+        </div>
+        <button onClick={() => setShowCreate(true)} className="btn-primary flex items-center gap-2">
+          <Target className="w-4 h-4" /> Nouveau ciblage
+        </button>
+      </div>
+
+      {/* Question du jour */}
+      <div className="card-service rounded-xl p-6 border-[#D4AF37]/30 bg-gradient-to-r from-[#D4AF37]/5 to-transparent">
+        <h2 className="text-lg font-semibold text-[#D4AF37] mb-2 flex items-center gap-2">
+          <Target className="w-5 h-5" />
+          Quel type de public cible aujourd'hui ?
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+          {['Nouveaux clients', 'Clients fidèles', 'Clients premium', 'Clients locaux'].map((type) => (
+            <button key={type} className="p-3 bg-white/5 rounded-lg text-white hover:bg-[#D4AF37]/20 hover:border-[#D4AF37]/50 border border-transparent transition-all text-sm">
+              {type}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Stats IA */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="card-service rounded-xl p-4">
+          <p className="text-sm text-gray-400">Portée estimée</p>
+          <p className="text-2xl font-bold text-[#0047AB]">12.5K</p>
+        </div>
+        <div className="card-service rounded-xl p-4">
+          <p className="text-sm text-gray-400">Taux d'engagement</p>
+          <p className="text-2xl font-bold text-green-400">4.2%</p>
+        </div>
+        <div className="card-service rounded-xl p-4">
+          <p className="text-sm text-gray-400">Conversions</p>
+          <p className="text-2xl font-bold text-[#D4AF37]">234</p>
+        </div>
+        <div className="card-service rounded-xl p-4">
+          <p className="text-sm text-gray-400">ROI estimé</p>
+          <p className="text-2xl font-bold text-purple-400">320%</p>
+        </div>
+      </div>
+
+      {/* Campagnes actives */}
+      <div className="card-service rounded-xl p-6">
+        <h2 className="text-lg font-semibold text-white mb-4">Campagnes IA actives</h2>
+        {campaigns.length > 0 ? (
+          <div className="space-y-3">
+            {campaigns.map((campaign) => (
+              <div key={campaign.id} className="p-4 bg-white/5 rounded-xl flex items-center justify-between">
+                <div>
+                  <p className="text-white font-medium">Ciblage: {campaign.age_range} ans • {campaign.location}</p>
+                  <p className="text-sm text-gray-400">{campaign.interests.join(', ')}</p>
+                </div>
+                <div className="flex items-center gap-4 text-sm">
+                  <span className="text-[#0047AB]">{campaign.reach} portée</span>
+                  <span className="text-green-400">{campaign.engagement} engagements</span>
+                  <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded">Actif</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <Target className="w-12 h-12 text-gray-500 mx-auto mb-3" />
+            <p className="text-gray-400">Aucune campagne IA active</p>
+            <p className="text-sm text-gray-500">Créez votre première campagne de ciblage</p>
+          </div>
+        )}
+      </div>
+
+      {/* Create Modal */}
+      {showCreate && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="card-service rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold text-white mb-6">Créer un ciblage IA</h3>
+            
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Tranche d'âge</label>
+                  <select value={targetAudience.age_range} onChange={(e) => setTargetAudience({...targetAudience, age_range: e.target.value})} className="input-dark w-full">
+                    <option value="18-24">18-24 ans</option>
+                    <option value="25-34">25-34 ans</option>
+                    <option value="25-45">25-45 ans</option>
+                    <option value="35-54">35-54 ans</option>
+                    <option value="55+">55+ ans</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Genre</label>
+                  <select value={targetAudience.gender} onChange={(e) => setTargetAudience({...targetAudience, gender: e.target.value})} className="input-dark w-full">
+                    <option value="all">Tous</option>
+                    <option value="male">Homme</option>
+                    <option value="female">Femme</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Centres d'intérêt</label>
+                <div className="flex flex-wrap gap-2">
+                  {interests.map((interest) => (
+                    <button
+                      key={interest}
+                      onClick={() => handleInterestToggle(interest)}
+                      className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
+                        targetAudience.interests.includes(interest)
+                          ? 'bg-[#0047AB] text-white'
+                          : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                      }`}
+                    >
+                      {interest}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Comportement</label>
+                <div className="flex flex-wrap gap-2">
+                  {behaviors.map((behavior) => (
+                    <button
+                      key={behavior}
+                      onClick={() => handleBehaviorToggle(behavior)}
+                      className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
+                        targetAudience.behavior.includes(behavior)
+                          ? 'bg-[#D4AF37] text-black'
+                          : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                      }`}
+                    >
+                      {behavior}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Budget client cible</label>
+                <select value={targetAudience.budget} onChange={(e) => setTargetAudience({...targetAudience, budget: e.target.value})} className="input-dark w-full">
+                  <option value="low">Budget serré</option>
+                  <option value="medium">Budget moyen</option>
+                  <option value="high">Budget élevé</option>
+                  <option value="premium">Premium / Luxe</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setShowCreate(false)} className="btn-secondary flex-1">Annuler</button>
+              <button onClick={createCampaign} className="btn-primary flex-1">Lancer la campagne IA</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Influenceurs Section
+const InfluencersSection = () => {
+  const [influencers] = useState([
+    { id: 1, name: 'Sophie Martin', followers: '45K', category: 'Lifestyle', engagement: '5.2%', price: '500 CHF', image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100' },
+    { id: 2, name: 'Lucas Dubois', followers: '128K', category: 'Food', engagement: '4.8%', price: '1200 CHF', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100' },
+    { id: 3, name: 'Emma Bernard', followers: '89K', category: 'Beauty', engagement: '6.1%', price: '800 CHF', image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100' },
+    { id: 4, name: 'Thomas Petit', followers: '210K', category: 'Tech', engagement: '3.9%', price: '1500 CHF', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100' },
+  ]);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+
+  const categories = ['all', 'Lifestyle', 'Food', 'Beauty', 'Tech', 'Sport', 'Travel'];
+
+  return (
+    <div className="space-y-6" data-testid="influencers-section">
+      <div>
+        <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+          Influenceurs
+        </h1>
+        <p className="text-gray-400 mt-1">Collaborez avec des influenceurs locaux</p>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="card-service rounded-xl p-4">
+          <p className="text-sm text-gray-400">Influenceurs disponibles</p>
+          <p className="text-2xl font-bold text-[#0047AB]">156</p>
+        </div>
+        <div className="card-service rounded-xl p-4">
+          <p className="text-sm text-gray-400">Collaborations actives</p>
+          <p className="text-2xl font-bold text-green-400">3</p>
+        </div>
+        <div className="card-service rounded-xl p-4">
+          <p className="text-sm text-gray-400">Portée totale</p>
+          <p className="text-2xl font-bold text-[#D4AF37]">472K</p>
+        </div>
+        <div className="card-service rounded-xl p-4">
+          <p className="text-sm text-gray-400">Investissement</p>
+          <p className="text-2xl font-bold text-purple-400">2.5K CHF</p>
+        </div>
+      </div>
+
+      {/* Category Filter */}
+      <div className="flex gap-2 flex-wrap">
+        {categories.map((cat) => (
+          <button
+            key={cat}
+            onClick={() => setSelectedCategory(cat)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              selectedCategory === cat ? 'bg-[#0047AB] text-white' : 'bg-white/5 text-gray-400 hover:text-white'
+            }`}
+          >
+            {cat === 'all' ? 'Tous' : cat}
+          </button>
+        ))}
+      </div>
+
+      {/* Influencers Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {influencers.filter(i => selectedCategory === 'all' || i.category === selectedCategory).map((influencer) => (
+          <div key={influencer.id} className="card-service rounded-xl p-4">
+            <div className="flex gap-4">
+              <img src={influencer.image} alt={influencer.name} className="w-16 h-16 rounded-full object-cover" />
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="text-white font-semibold">{influencer.name}</h3>
+                  <span className="text-xs bg-[#0047AB]/20 text-[#0047AB] px-2 py-1 rounded">{influencer.category}</span>
+                </div>
+                <div className="flex items-center gap-4 text-sm text-gray-400 mb-3">
+                  <span>{influencer.followers} abonnés</span>
+                  <span>{influencer.engagement} engagement</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[#D4AF37] font-semibold">{influencer.price}</span>
+                  <button className="px-4 py-1.5 bg-[#0047AB] text-white rounded-lg text-sm hover:bg-[#2E74D6] transition-colors">
+                    Contacter
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* CTA */}
+      <div className="card-service rounded-xl p-6 border-[#D4AF37]/30 bg-gradient-to-r from-[#D4AF37]/5 to-transparent text-center">
+        <Crown className="w-12 h-12 text-[#D4AF37] mx-auto mb-3" />
+        <h3 className="text-white font-semibold mb-2">Devenez partenaire influenceur</h3>
+        <p className="text-sm text-gray-400 mb-4">Bénéficiez d'un accompagnement personnalisé pour vos campagnes</p>
+        <button className="btn-primary">Découvrir les partenariats</button>
+      </div>
+    </div>
+  );
+};
+
+// Invitations Clients Section
+const InvitationsSection = () => {
+  const [invitations, setInvitations] = useState([]);
+  const [showCreate, setShowCreate] = useState(false);
+  const [formData, setFormData] = useState({
+    type: 'question',
+    title: '',
+    message: '',
+    targetAudience: 'all',
+    incentive: ''
+  });
+
+  const invitationTypes = [
+    { id: 'question', name: 'Question suggestive', desc: 'Posez une question engageante à vos clients', icon: HelpCircle },
+    { id: 'invitation', name: 'Invitation directe', desc: 'Invitez vos clients à un événement ou offre', icon: Send },
+    { id: 'survey', name: 'Sondage', desc: 'Recueillez l\'avis de vos clients', icon: ClipboardList },
+    { id: 'reminder', name: 'Rappel personnalisé', desc: 'Rappelez un service ou produit', icon: Bell },
+  ];
+
+  const createInvitation = () => {
+    const newInvitation = {
+      id: Date.now(),
+      ...formData,
+      sent: Math.floor(Math.random() * 500) + 100,
+      opened: Math.floor(Math.random() * 300) + 50,
+      responded: Math.floor(Math.random() * 100) + 20,
+      created_at: new Date().toISOString()
+    };
+    setInvitations([newInvitation, ...invitations]);
+    setShowCreate(false);
+    setFormData({ type: 'question', title: '', message: '', targetAudience: 'all', incentive: '' });
+    toast.success('Invitation envoyée');
+  };
+
+  return (
+    <div className="space-y-6" data-testid="invitations-section">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+            Invitations Clients
+          </h1>
+          <p className="text-gray-400 mt-1">Envoyez des invitations et questions à vos clients</p>
+        </div>
+        <button onClick={() => setShowCreate(true)} className="btn-primary flex items-center gap-2">
+          <Send className="w-4 h-4" /> Nouvelle invitation
+        </button>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="card-service rounded-xl p-4">
+          <p className="text-sm text-gray-400">Invitations envoyées</p>
+          <p className="text-2xl font-bold text-[#0047AB]">1,234</p>
+        </div>
+        <div className="card-service rounded-xl p-4">
+          <p className="text-sm text-gray-400">Taux d'ouverture</p>
+          <p className="text-2xl font-bold text-green-400">68%</p>
+        </div>
+        <div className="card-service rounded-xl p-4">
+          <p className="text-sm text-gray-400">Réponses</p>
+          <p className="text-2xl font-bold text-[#D4AF37]">423</p>
+        </div>
+        <div className="card-service rounded-xl p-4">
+          <p className="text-sm text-gray-400">Conversions</p>
+          <p className="text-2xl font-bold text-purple-400">89</p>
+        </div>
+      </div>
+
+      {/* Invitation Types */}
+      <div className="card-service rounded-xl p-6">
+        <h2 className="text-lg font-semibold text-white mb-4">Types d'invitations</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {invitationTypes.map((type) => (
+            <button
+              key={type.id}
+              onClick={() => { setFormData({...formData, type: type.id}); setShowCreate(true); }}
+              className="p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors text-left border border-transparent hover:border-[#0047AB]/50"
+            >
+              <type.icon className="w-8 h-8 text-[#0047AB] mb-3" />
+              <h3 className="text-white font-medium mb-1">{type.name}</h3>
+              <p className="text-xs text-gray-400">{type.desc}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Recent Invitations */}
+      <div className="card-service rounded-xl p-6">
+        <h2 className="text-lg font-semibold text-white mb-4">Invitations récentes</h2>
+        {invitations.length > 0 ? (
+          <div className="space-y-3">
+            {invitations.map((inv) => (
+              <div key={inv.id} className="p-4 bg-white/5 rounded-xl">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <span className="text-white font-medium">{inv.title}</span>
+                    <span className="text-xs bg-[#0047AB]/20 text-[#0047AB] px-2 py-1 rounded">{invitationTypes.find(t => t.id === inv.type)?.name}</span>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-400 mb-3">{inv.message}</p>
+                <div className="flex gap-4 text-sm">
+                  <span className="text-gray-400">Envoyées: <span className="text-white">{inv.sent}</span></span>
+                  <span className="text-gray-400">Ouvertes: <span className="text-green-400">{inv.opened}</span></span>
+                  <span className="text-gray-400">Réponses: <span className="text-[#D4AF37]">{inv.responded}</span></span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <Send className="w-12 h-12 text-gray-500 mx-auto mb-3" />
+            <p className="text-gray-400">Aucune invitation envoyée</p>
+          </div>
+        )}
+      </div>
+
+      {/* Create Modal */}
+      {showCreate && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="card-service rounded-xl p-6 w-full max-w-lg">
+            <h3 className="text-lg font-semibold text-white mb-6">Créer une invitation</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Type</label>
+                <select value={formData.type} onChange={(e) => setFormData({...formData, type: e.target.value})} className="input-dark w-full">
+                  {invitationTypes.map((type) => (
+                    <option key={type.id} value={type.id}>{type.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Titre</label>
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => setFormData({...formData, title: e.target.value})}
+                  placeholder="Ex: Envie de découvrir notre nouvelle collection ?"
+                  className="input-dark w-full"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Message</label>
+                <textarea
+                  value={formData.message}
+                  onChange={(e) => setFormData({...formData, message: e.target.value})}
+                  placeholder="Votre message personnalisé..."
+                  className="input-dark w-full h-24"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Audience cible</label>
+                <select value={formData.targetAudience} onChange={(e) => setFormData({...formData, targetAudience: e.target.value})} className="input-dark w-full">
+                  <option value="all">Tous les clients</option>
+                  <option value="new">Nouveaux clients</option>
+                  <option value="loyal">Clients fidèles</option>
+                  <option value="inactive">Clients inactifs</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Incentive (optionnel)</label>
+                <input
+                  type="text"
+                  value={formData.incentive}
+                  onChange={(e) => setFormData({...formData, incentive: e.target.value})}
+                  placeholder="Ex: -10% sur votre prochaine commande"
+                  className="input-dark w-full"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setShowCreate(false)} className="btn-secondary flex-1">Annuler</button>
+              <button onClick={createInvitation} className="btn-primary flex-1">Envoyer</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Subscriptions Section Component
 const SubscriptionsSection = () => {
   const [plans, setPlans] = useState({});
