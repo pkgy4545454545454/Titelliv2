@@ -270,4 +270,5 @@ export default {
   finances: financesAPI,
   advertising: advertisingAPI,
   notifications: notificationsAPI,
+  subscriptions: subscriptionsAPI,
 };
