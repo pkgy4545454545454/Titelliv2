@@ -1920,20 +1920,64 @@ const FinancesSection = ({ finances, onRefresh }) => {
 // Advertising Section Component
 const AdvertisingSection = ({ advertising, onDelete, onRefresh }) => {
   const [showAdd, setShowAdd] = useState(false);
+  const [payingAd, setPayingAd] = useState(null);
   const [formData, setFormData] = useState({
-    title: '', ad_type: 'banner', placement: 'homepage', budget: 0,
+    title: '', ad_type: 'banner', placement: 'homepage', budget: 50,
     start_date: new Date().toISOString().split('T')[0],
-    end_date: new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0]
+    end_date: new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0],
+    schedule_time: '12:00'
   });
+
+  const adPrices = {
+    banner: { name: 'Bannière', price: 50, desc: 'Bannière sur la page d\'accueil' },
+    featured: { name: 'Mise en avant', price: 100, desc: 'Votre annonce en tête de liste' },
+    spotlight: { name: 'Spotlight', price: 200, desc: 'Mise en lumière premium' },
+    video: { name: 'Vidéo publicitaire', price: 150, desc: 'Vidéo de 3-9 secondes' },
+    ia_clients: { name: 'IA Clients', price: 75, desc: 'Ciblage intelligent' },
+    influencer: { name: 'Influenceurs', price: 250, desc: 'Partenariat influenceur' },
+  };
 
   const createAd = async () => {
     try {
-      await advertisingAPI.create(formData);
-      toast.success('Campagne créée');
+      const priceInfo = adPrices[formData.ad_type];
+      const adData = {
+        ...formData,
+        budget: priceInfo?.price || formData.budget
+      };
+      const response = await advertisingAPI.create(adData);
+      toast.success('Campagne créée - Procédez au paiement pour l\'activer');
       setShowAdd(false);
+      setPayingAd(response.data);
       onRefresh();
     } catch (error) {
-      toast.error('Erreur');
+      toast.error('Erreur lors de la création');
+    }
+  };
+
+  const handlePayment = async (adId) => {
+    try {
+      const response = await advertisingAPI.pay(adId);
+      if (response.data.checkout_url) {
+        // Open Stripe checkout in new tab
+        window.open(response.data.checkout_url, '_blank');
+        toast.success('Redirection vers le paiement...');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur lors du paiement');
+    }
+  };
+
+  const handleToggle = async (adId, isPaid) => {
+    if (!isPaid) {
+      toast.error('Vous devez payer cette publicité avant de l\'activer');
+      return;
+    }
+    try {
+      await advertisingAPI.toggle(adId);
+      toast.success('Statut modifié');
+      onRefresh();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur');
     }
   };
 
@@ -1941,7 +1985,7 @@ const AdvertisingSection = ({ advertising, onDelete, onRefresh }) => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
-          Publicités
+          Mes publicités
         </h1>
         <button onClick={() => setShowAdd(true)} className="btn-primary flex items-center gap-2">
           <Plus className="w-4 h-4" /> Nouvelle campagne
@@ -1952,98 +1996,187 @@ const AdvertisingSection = ({ advertising, onDelete, onRefresh }) => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="card-service rounded-xl p-4">
           <p className="text-sm text-gray-400 mb-1">Campagnes actives</p>
-          <p className="text-2xl font-bold text-[#0047AB]">{advertising.stats.active_campaigns || 0}</p>
+          <p className="text-2xl font-bold text-[#0047AB]">{advertising.stats?.active_campaigns || 0}</p>
         </div>
         <div className="card-service rounded-xl p-4">
           <p className="text-sm text-gray-400 mb-1">Impressions</p>
-          <p className="text-2xl font-bold text-white">{advertising.stats.total_impressions || 0}</p>
+          <p className="text-2xl font-bold text-white">{advertising.stats?.total_impressions || 0}</p>
         </div>
         <div className="card-service rounded-xl p-4">
           <p className="text-sm text-gray-400 mb-1">Clics</p>
-          <p className="text-2xl font-bold text-green-400">{advertising.stats.total_clicks || 0}</p>
+          <p className="text-2xl font-bold text-green-400">{advertising.stats?.total_clicks || 0}</p>
         </div>
         <div className="card-service rounded-xl p-4">
           <p className="text-sm text-gray-400 mb-1">Budget dépensé</p>
-          <p className="text-2xl font-bold text-[#D4AF37]">{advertising.stats.total_spent || 0} CHF</p>
+          <p className="text-2xl font-bold text-[#D4AF37]">{advertising.stats?.total_spent || 0} CHF</p>
         </div>
       </div>
 
-      {/* Ad Types */}
+      {/* Ad Types Selection */}
       <div className="card-service rounded-xl p-6">
         <h2 className="text-lg font-semibold text-white mb-4">Types de publicité disponibles</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {[
-            { type: 'banner', name: 'Bannière', price: '50 CHF/jour' },
-            { type: 'featured', name: 'Mise en avant', price: '100 CHF/semaine' },
-            { type: 'spotlight', name: 'Spotlight', price: '200 CHF/semaine' },
-            { type: 'premium_listing', name: 'Listing Premium', price: '150 CHF/mois' },
-            { type: 'video', name: 'Vidéo', price: '300 CHF/semaine' },
-            { type: 'popup', name: 'Popup', price: '250 CHF/semaine' },
-          ].map((ad) => (
-            <div key={ad.type} className="p-4 bg-white/5 rounded-xl">
-              <p className="text-white font-medium">{ad.name}</p>
-              <p className="text-sm text-[#D4AF37]">{ad.price}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Object.entries(adPrices).map(([type, info]) => (
+            <div key={type} className="p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors cursor-pointer border border-transparent hover:border-[#0047AB]/50"
+                 onClick={() => { setFormData({...formData, ad_type: type, budget: info.price}); setShowAdd(true); }}>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-white font-medium">{info.name}</p>
+                <span className="text-[#D4AF37] font-bold">{info.price} CHF</span>
+              </div>
+              <p className="text-sm text-gray-400">{info.desc}</p>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Campaigns */}
+      {/* Campaigns List */}
       {advertising.campaigns?.length > 0 ? (
         <div className="space-y-3">
+          <h2 className="text-lg font-semibold text-white">Mes campagnes</h2>
           {advertising.campaigns.map((campaign) => (
             <div key={campaign.id} className="card-service rounded-xl p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-white font-medium">{campaign.title}</p>
-                  <p className="text-sm text-gray-400">{campaign.ad_type} • {campaign.placement}</p>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-1">
+                    <p className="text-white font-medium">{campaign.title}</p>
+                    {!campaign.is_paid && (
+                      <span className="px-2 py-0.5 rounded-full text-xs bg-red-500/20 text-red-400">
+                        Non payée
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-400">{adPrices[campaign.ad_type]?.name || campaign.ad_type} • {campaign.placement} • {campaign.budget || 0} CHF</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className={`px-2 py-1 rounded-full text-xs ${campaign.is_active ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'}`}>
-                    {campaign.is_active ? 'Active' : 'Inactive'}
-                  </span>
-                  <button onClick={() => onDelete(campaign.id)} className="text-red-400 hover:text-red-300">
+                  {!campaign.is_paid ? (
+                    <button 
+                      onClick={() => handlePayment(campaign.id)} 
+                      className="px-4 py-2 bg-[#D4AF37] text-black rounded-lg text-sm font-medium hover:bg-[#B8860B] transition-colors flex items-center gap-2"
+                    >
+                      <CreditCard className="w-4 h-4" />
+                      Payer pour activer
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => handleToggle(campaign.id, campaign.is_paid)}
+                      className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-2 ${
+                        campaign.is_active 
+                          ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30' 
+                          : 'bg-gray-500/20 text-gray-400 hover:bg-gray-500/30'
+                      }`}
+                    >
+                      {campaign.is_active ? <PlayCircle className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+                      {campaign.is_active ? 'Active' : 'Inactive'}
+                    </button>
+                  )}
+                  <button onClick={() => onDelete(campaign.id)} className="text-red-400 hover:text-red-300 p-2">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>
+              {campaign.is_paid && (
+                <div className="mt-3 pt-3 border-t border-white/10 flex gap-6 text-sm">
+                  <div>
+                    <span className="text-gray-500">Impressions:</span>
+                    <span className="text-white ml-2">{campaign.impressions || 0}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Clics:</span>
+                    <span className="text-white ml-2">{campaign.clicks || 0}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">CTR:</span>
+                    <span className="text-white ml-2">{campaign.impressions > 0 ? ((campaign.clicks / campaign.impressions) * 100).toFixed(1) : 0}%</span>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
       ) : (
         <div className="card-service rounded-xl p-12 text-center">
           <Megaphone className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-          <p className="text-gray-400">Aucune campagne publicitaire</p>
+          <p className="text-gray-400 mb-2">Aucune campagne publicitaire</p>
+          <p className="text-sm text-gray-500">Créez votre première campagne pour augmenter votre visibilité</p>
         </div>
       )}
 
+      {/* Create Ad Modal */}
       {showAdd && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="card-service rounded-xl p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold text-white mb-4">Nouvelle campagne</h3>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="card-service rounded-xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold text-white mb-4">Nouvelle campagne publicitaire</h3>
+            
             <div className="space-y-4">
-              <input type="text" placeholder="Titre de la campagne" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="input-dark w-full" />
-              <select value={formData.ad_type} onChange={(e) => setFormData({...formData, ad_type: e.target.value})} className="input-dark w-full">
-                <option value="banner">Bannière</option>
-                <option value="featured">Mise en avant</option>
-                <option value="spotlight">Spotlight</option>
-                <option value="premium_listing">Listing Premium</option>
-                <option value="video">Vidéo</option>
-              </select>
-              <select value={formData.placement} onChange={(e) => setFormData({...formData, placement: e.target.value})} className="input-dark w-full">
-                <option value="homepage">Page d'accueil</option>
-                <option value="category">Page catégorie</option>
-                <option value="search">Résultats recherche</option>
-                <option value="sidebar">Barre latérale</option>
-              </select>
-              <input type="number" placeholder="Budget (CHF)" value={formData.budget} onChange={(e) => setFormData({...formData, budget: parseFloat(e.target.value)})} className="input-dark w-full" />
-              <div className="grid grid-cols-2 gap-4">
-                <input type="date" value={formData.start_date} onChange={(e) => setFormData({...formData, start_date: e.target.value})} className="input-dark w-full" />
-                <input type="date" value={formData.end_date} onChange={(e) => setFormData({...formData, end_date: e.target.value})} className="input-dark w-full" />
+              {/* Selected Ad Type Info */}
+              <div className="p-4 bg-[#0047AB]/10 border border-[#0047AB]/30 rounded-xl">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-white font-medium">{adPrices[formData.ad_type]?.name}</p>
+                    <p className="text-sm text-gray-400">{adPrices[formData.ad_type]?.desc}</p>
+                  </div>
+                  <p className="text-2xl font-bold text-[#D4AF37]">{adPrices[formData.ad_type]?.price} CHF</p>
+                </div>
               </div>
-              <div className="flex gap-2">
+
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Titre de la campagne *</label>
+                <input type="text" placeholder="Ex: Promotion été 2026" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="input-dark w-full" />
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Type de publicité *</label>
+                <select value={formData.ad_type} onChange={(e) => setFormData({...formData, ad_type: e.target.value, budget: adPrices[e.target.value]?.price || 50})} className="input-dark w-full">
+                  {Object.entries(adPrices).map(([type, info]) => (
+                    <option key={type} value={type}>{info.name} - {info.price} CHF</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Emplacement *</label>
+                <select value={formData.placement} onChange={(e) => setFormData({...formData, placement: e.target.value})} className="input-dark w-full">
+                  <option value="homepage">Page d'accueil</option>
+                  <option value="category">Page catégorie</option>
+                  <option value="search">Résultats recherche</option>
+                  <option value="sidebar">Barre latérale</option>
+                  <option value="feed">Fil d'actualité</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Horaire de diffusion</label>
+                <select value={formData.schedule_time} onChange={(e) => setFormData({...formData, schedule_time: e.target.value})} className="input-dark w-full">
+                  <option value="all_day">Toute la journée</option>
+                  <option value="morning">Matin (6h-12h)</option>
+                  <option value="afternoon">Après-midi (12h-18h)</option>
+                  <option value="evening">Soir (18h-23h)</option>
+                  <option value="peak">Heures de pointe (12h-14h, 18h-20h)</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Date de début</label>
+                  <input type="date" value={formData.start_date} onChange={(e) => setFormData({...formData, start_date: e.target.value})} className="input-dark w-full" />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Date de fin</label>
+                  <input type="date" value={formData.end_date} onChange={(e) => setFormData({...formData, end_date: e.target.value})} className="input-dark w-full" />
+                </div>
+              </div>
+
+              <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                <p className="text-sm text-yellow-400">
+                  <strong>Note :</strong> Votre publicité sera créée mais inactive. Vous devrez procéder au paiement pour l'activer.
+                </p>
+              </div>
+
+              <div className="flex gap-2 pt-2">
                 <button onClick={() => setShowAdd(false)} className="btn-secondary flex-1">Annuler</button>
-                <button onClick={createAd} className="btn-primary flex-1">Créer</button>
+                <button onClick={createAd} disabled={!formData.title} className="btn-primary flex-1 disabled:opacity-50">
+                  Créer la campagne
+                </button>
               </div>
             </div>
           </div>
