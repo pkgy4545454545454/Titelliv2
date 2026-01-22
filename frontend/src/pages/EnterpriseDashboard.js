@@ -55,8 +55,8 @@ const EnterpriseDashboard = () => {
 
   const fetchAllData = async () => {
     try {
-      // Get enterprise
-      const enterpriseRes = await enterpriseAPI.list({ search: user?.email });
+      // Get enterprise by listing all and finding by user_id
+      const enterpriseRes = await enterpriseAPI.list({});
       if (enterpriseRes.data.enterprises.length > 0) {
         const ent = enterpriseRes.data.enterprises.find(e => e.user_id === user?.id);
         if (ent) {
