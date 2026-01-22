@@ -311,9 +311,9 @@ class TestEnterpriseAgenda:
         event_data = {
             "title": "TEST_Journée Portes Ouvertes",
             "description": "Venez découvrir nos nouveaux soins",
-            "event_type": "event",
-            "start_time": "2025-02-15T10:00:00",
-            "end_time": "2025-02-15T18:00:00",
+            "event_type": "appointment",
+            "start_datetime": "2025-02-15T10:00:00",
+            "end_datetime": "2025-02-15T18:00:00",
             "location": "Spa Luxury Lausanne"
         }
         response = requests.post(f"{BASE_URL}/api/enterprise/agenda", json=event_data, headers=self.headers)
@@ -347,7 +347,8 @@ class TestEnterpriseTeam:
     def test_add_team_member(self):
         """Test adding a team member"""
         member_data = {
-            "name": "TEST_Marie Dupont",
+            "first_name": "TEST_Marie",
+            "last_name": "Dupont",
             "role": "Esthéticienne Senior",
             "email": "marie.test@spa.com",
             "phone": "+41 79 123 45 67"
@@ -355,7 +356,7 @@ class TestEnterpriseTeam:
         response = requests.post(f"{BASE_URL}/api/enterprise/team", json=member_data, headers=self.headers)
         assert response.status_code == 200, f"Add team member failed: {response.text}"
         data = response.json()
-        assert data["name"] == member_data["name"]
+        assert data["first_name"] == member_data["first_name"]
         self.created_ids.append(data["id"])
         print(f"✓ Team member added: {data['id']}")
         
