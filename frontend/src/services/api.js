@@ -227,6 +227,24 @@ export const notificationsAPI = {
   delete: (id) => axios.delete(`${API}/notifications/${id}`, { headers: getAuthHeaders() }),
 };
 
+// Subscriptions / Abonnements
+export const subscriptionsAPI = {
+  getPlans: () => axios.get(`${API}/subscriptions/plans`),
+  getCurrent: () => axios.get(`${API}/subscriptions/current`, { headers: getAuthHeaders() }),
+  createCheckout: (planId, addons = []) => axios.post(`${API}/subscriptions/checkout`, null, {
+    params: { plan_id: planId, addons: addons.join(',') || undefined },
+    headers: getAuthHeaders()
+  }),
+  activate: (sessionId) => axios.post(`${API}/subscriptions/activate`, null, {
+    params: { session_id: sessionId },
+    headers: getAuthHeaders()
+  }),
+  createAddonCheckout: (addonId) => axios.post(`${API}/subscriptions/addon/checkout`, null, {
+    params: { addon_id: addonId },
+    headers: getAuthHeaders()
+  }),
+};
+
 export default {
   auth: authAPI,
   enterprise: enterpriseAPI,
