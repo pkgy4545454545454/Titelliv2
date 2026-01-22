@@ -1053,6 +1053,174 @@ async def get_product_categories():
 async def get_service_categories():
     return SERVICE_CATEGORIES
 
+# ============ SUBSCRIPTION ROUTES ============
+
+@api_router.get("/subscriptions/plans")
+async def get_subscription_plans():
+    """Get all subscription plans with their features"""
+    return {
+        "plans": SUBSCRIPTION_PLANS,
+        "addons": ADDON_OPTIONS,
+        "base_features": BASE_FEATURES
+    }
+
+@api_router.get("/subscriptions/current")
+async def get_current_subscription(current_user: dict = Depends(get_current_user)):
+    """Get the current user's subscription"""
+    subscription = await db.subscriptions.find_one(
+        {"user_id": current_user['id'], "is_active": True},
+        {"_id": 0}
+    )
+    return subscription or {"plan": None, "is_active": False}
+
+@api_router.post("/subscriptions/checkout")
+async def create_subscription_checkout(
+    plan_id: str,
+    addons: Optional[List[str]] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Create a Stripe checkout session for subscription"""
+    if plan_id not in SUBSCRIPTION_PLANS:
+        raise HTTPException(status_code=400, detail="Plan invalide")
+    
+    plan = SUBSCRIPTION_PLANS[plan_id]
+    total_amount = plan['price']
+    
+    # Calculate addons
+    addon_details = []
+    if addons:
+        for addon_id in addons:
+            if addon_id in ADDON_OPTIONS:
+                addon = ADDON_OPTIONS[addon_id]
+                total_amount += addon['price']
+                addon_details.append(addon_id)
+    
+    try:
+        stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY)
+        
+        base_url = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+        checkout_request = CheckoutSessionRequest(
+            currency="chf",
+            amount=total_amount,
+            success_url=f"{base_url}/dashboard/entreprise?subscription=success&plan={plan_id}",
+            cancel_url=f"{base_url}/dashboard/entreprise?subscription=cancelled",
+            metadata={
+                "type": "subscription",
+                "plan_id": plan_id,
+                "addons": ",".join(addon_details) if addon_details else "",
+                "user_id": current_user['id']
+            }
+        )
+        
+        response = await stripe_checkout.create_checkout_session(checkout_request)
+        
+        return {"url": response.url, "session_id": response.id}
+    except Exception as e:
+        logger.error(f"Stripe checkout error: {e}")
+        raise HTTPException(status_code=500, detail="Erreur lors de la création du paiement")
+
+@api_router.post("/subscriptions/activate")
+async def activate_subscription(
+    session_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Activate subscription after successful payment"""
+    try:
+        stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY)
+        status = await stripe_checkout.get_checkout_status(session_id)
+        
+        if status.status != "complete":
+            raise HTTPException(status_code=400, detail="Paiement non complété")
+        
+        metadata = status.metadata or {}
+        plan_id = metadata.get('plan_id')
+        addons = metadata.get('addons', '').split(',') if metadata.get('addons') else []
+        
+        if not plan_id or plan_id not in SUBSCRIPTION_PLANS:
+            raise HTTPException(status_code=400, detail="Plan invalide")
+        
+        plan = SUBSCRIPTION_PLANS[plan_id]
+        
+        # Deactivate old subscription
+        await db.subscriptions.update_many(
+            {"user_id": current_user['id'], "is_active": True},
+            {"$set": {"is_active": False, "ended_at": datetime.now(timezone.utc)}}
+        )
+        
+        # Create new subscription
+        subscription = {
+            "id": str(uuid.uuid4()),
+            "user_id": current_user['id'],
+            "plan_id": plan_id,
+            "plan_name": plan['name'],
+            "price": plan['price'],
+            "features": plan['features'],
+            "addons": addons,
+            "tier": plan.get('tier', 'basic'),
+            "is_active": True,
+            "stripe_session_id": session_id,
+            "started_at": datetime.now(timezone.utc),
+            "next_billing_date": datetime.now(timezone.utc),
+            "created_at": datetime.now(timezone.utc)
+        }
+        
+        await db.subscriptions.insert_one(subscription)
+        
+        # Update enterprise profile based on tier
+        enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+        if enterprise:
+            updates = {}
+            if plan.get('tier') in ['premium', 'optimisation']:
+                updates['is_premium'] = True
+            if plan_id.startswith('opti_'):
+                updates['is_labeled'] = True
+            if updates:
+                await db.enterprises.update_one(
+                    {"user_id": current_user['id']},
+                    {"$set": updates}
+                )
+        
+        return {"success": True, "subscription": {k: v for k, v in subscription.items() if k != '_id'}}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Subscription activation error: {e}")
+        raise HTTPException(status_code=500, detail="Erreur lors de l'activation")
+
+@api_router.post("/subscriptions/addon/checkout")
+async def create_addon_checkout(
+    addon_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Create checkout for a single addon"""
+    if addon_id not in ADDON_OPTIONS:
+        raise HTTPException(status_code=400, detail="Option invalide")
+    
+    addon = ADDON_OPTIONS[addon_id]
+    
+    try:
+        stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY)
+        
+        base_url = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+        checkout_request = CheckoutSessionRequest(
+            currency="chf",
+            amount=addon['price'],
+            success_url=f"{base_url}/dashboard/entreprise?addon=success&addon_id={addon_id}",
+            cancel_url=f"{base_url}/dashboard/entreprise?addon=cancelled",
+            metadata={
+                "type": "addon",
+                "addon_id": addon_id,
+                "user_id": current_user['id']
+            }
+        )
+        
+        response = await stripe_checkout.create_checkout_session(checkout_request)
+        
+        return {"url": response.url, "session_id": response.id}
+    except Exception as e:
+        logger.error(f"Stripe addon checkout error: {e}")
+        raise HTTPException(status_code=500, detail="Erreur lors de la création du paiement")
+
 # ============ ADMIN ROUTES ============
 
 @api_router.get("/admin/stats")
