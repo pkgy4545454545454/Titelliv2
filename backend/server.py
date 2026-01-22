@@ -169,6 +169,99 @@ class ReviewCreate(BaseModel):
     rating: int = Field(..., ge=1, le=5)
     comment: str
 
+# IA Marketing Models
+class IACampaign(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    enterprise_id: str
+    name: str
+    age_range: str = "25-45"
+    gender: str = "all"
+    interests: List[str] = []
+    behavior: List[str] = []
+    location: str = "lausanne"
+    budget: str = "medium"
+    status: str = "active"
+    reach: int = 0
+    engagement: int = 0
+    conversions: int = 0
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class IACampaignCreate(BaseModel):
+    name: str
+    age_range: str = "25-45"
+    gender: str = "all"
+    interests: List[str] = []
+    behavior: List[str] = []
+    location: str = "lausanne"
+    budget: str = "medium"
+
+class Influencer(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    image: str
+    category: str
+    followers: int
+    engagement_rate: float
+    price: float
+    bio: Optional[str] = None
+    instagram: Optional[str] = None
+    is_available: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class InfluencerCollaboration(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    enterprise_id: str
+    influencer_id: str
+    status: str = "pending"  # pending, active, completed, cancelled
+    message: Optional[str] = None
+    budget: float = 0
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ClientInvitation(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    enterprise_id: str
+    type: str = "question"  # question, invitation, survey, reminder
+    title: str
+    message: str
+    target_audience: str = "all"
+    incentive: Optional[str] = None
+    sent_count: int = 0
+    opened_count: int = 0
+    response_count: int = 0
+    status: str = "active"
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ClientInvitationCreate(BaseModel):
+    type: str = "question"
+    title: str
+    message: str
+    target_audience: str = "all"
+    incentive: Optional[str] = None
+
+class CommercialGesture(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    enterprise_id: str
+    offer_type: str  # percentage, fixed_amount, free_service, free_product
+    value: float
+    conditions: Optional[str] = None
+    is_active: bool = True
+    uses_count: int = 0
+    max_uses: Optional[int] = None
+    valid_until: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class CommercialGestureCreate(BaseModel):
+    offer_type: str
+    value: float
+    conditions: Optional[str] = None
+    max_uses: Optional[int] = None
+    valid_until: Optional[str] = None
+
 # Order Models
 class OrderItem(BaseModel):
     service_product_id: str
