@@ -7,7 +7,9 @@ import {
   Megaphone, ChevronRight, TrendingUp, DollarSign, Star, Gift, Briefcase,
   Home, PieChart, GraduationCap, Clock, CheckCircle, XCircle, Archive,
   FolderOpen, BookOpen, Wallet, Target, BarChart3, PlayCircle, Pause,
-  UserPlus, ClipboardList, AlertTriangle, Box, ArrowUpDown, Upload, Image, X
+  UserPlus, ClipboardList, AlertTriangle, Box, ArrowUpDown, Upload, Image, X,
+  Search, Rss, Newspaper, Truck, Activity, Phone, Heart, HelpCircle, Info,
+  Handshake, UserCircle, Receipt, Send
 } from 'lucide-react';
 import { 
   enterpriseAPI, servicesProductsAPI, orderAPI, paymentAPI, offersAPI,
