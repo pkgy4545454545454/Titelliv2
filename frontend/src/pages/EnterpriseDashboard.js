@@ -320,7 +320,7 @@ const EnterpriseDashboard = () => {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 lg:ml-64 p-4 md:p-8">
+        <main className="flex-1 lg:ml-72 p-4 md:p-8">
           {/* Mobile Menu */}
           <div className="lg:hidden mb-6 overflow-x-auto">
             <div className="flex gap-2 pb-2">
