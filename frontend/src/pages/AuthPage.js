@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Eye, EyeOff, Building2, User, ArrowLeft, CheckCircle, Lock, Mail, Phone, UserCircle, Shield, Sparkles, Award, Crown } from 'lucide-react';
+import { Eye, EyeOff, Building2, User, ArrowLeft, CheckCircle, Lock, Mail, Phone, UserCircle, Shield, Sparkles, Award, Crown, Star, Instagram, Facebook, Video } from 'lucide-react';
 import { toast } from 'sonner';
 
 const AuthPage = () => {
@@ -12,7 +12,7 @@ const AuthPage = () => {
   const [userType, setUserType] = useState(defaultType);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(1); // Multi-step registration
+  const [step, setStep] = useState(1);
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [formData, setFormData] = useState({
     email: '',
@@ -23,13 +23,18 @@ const AuthPage = () => {
     phone: '',
     acceptTerms: false,
     business_name: '',
-    business_category: ''
+    business_category: '',
+    // Influencer fields
+    instagram_handle: '',
+    tiktok_handle: '',
+    facebook_handle: '',
+    influencer_category: '',
+    followers_count: ''
   });
 
   const { login, register } = useAuth();
   const navigate = useNavigate();
 
-  // Password strength calculator
   useEffect(() => {
     const password = formData.password;
     let strength = 0;
@@ -53,6 +58,16 @@ const AuthPage = () => {
     if (userType === 'entreprise' && !formData.business_name) {
       toast.error("Veuillez entrer le nom de votre entreprise");
       return false;
+    }
+    if (userType === 'influencer') {
+      if (!formData.instagram_handle && !formData.tiktok_handle && !formData.facebook_handle) {
+        toast.error("Veuillez connecter au moins un réseau social");
+        return false;
+      }
+      if (!formData.influencer_category) {
+        toast.error("Veuillez sélectionner votre catégorie");
+        return false;
+      }
     }
     return true;
   };
@@ -96,16 +111,32 @@ const AuthPage = () => {
         loggedUser = await login(formData.email, formData.password);
         toast.success('Connexion réussie !');
       } else {
-        loggedUser = await register({ 
+        const registrationData = { 
           ...formData, 
           user_type: userType,
-          business_name: userType === 'entreprise' ? formData.business_name : undefined
-        });
+          business_name: userType === 'entreprise' ? formData.business_name : undefined,
+          social_accounts: userType === 'influencer' ? {
+            instagram: formData.instagram_handle,
+            tiktok: formData.tiktok_handle,
+            facebook: formData.facebook_handle
+          } : undefined,
+          influencer_data: userType === 'influencer' ? {
+            category: formData.influencer_category,
+            followers_count: formData.followers_count
+          } : undefined
+        };
+        loggedUser = await register(registrationData);
         toast.success('Inscription réussie ! Bienvenue sur Titelli');
       }
       
       const redirectType = loggedUser?.user_type || userType;
-      navigate(redirectType === 'entreprise' ? '/dashboard/entreprise' : '/dashboard/client');
+      if (redirectType === 'entreprise') {
+        navigate('/dashboard/entreprise');
+      } else if (redirectType === 'influencer') {
+        navigate('/influencer-dashboard');
+      } else {
+        navigate('/dashboard/client');
+      }
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Une erreur est survenue');
     } finally {
@@ -131,10 +162,25 @@ const AuthPage = () => {
     { icon: Award, text: 'Profil prestataire professionnel' },
     { icon: Sparkles, text: 'Visibilité auprès de milliers de clients' },
     { icon: Crown, text: 'Outils marketing avancés' },
+  ] : userType === 'influencer' ? [
+    { icon: Star, text: 'Collaborez avec des entreprises locales' },
+    { icon: Sparkles, text: 'Monétisez votre influence' },
+    { icon: Award, text: 'Dashboard personnalisé' },
   ] : [
     { icon: CheckCircle, text: 'Accès aux meilleurs prestataires' },
     { icon: Sparkles, text: 'Offres exclusives et promotions' },
     { icon: Shield, text: 'Paiements sécurisés' },
+  ];
+
+  const influencerCategories = [
+    { value: 'lifestyle', label: 'Lifestyle' },
+    { value: 'food', label: 'Food & Gastronomie' },
+    { value: 'beauty', label: 'Beauté & Mode' },
+    { value: 'tech', label: 'Tech & Gaming' },
+    { value: 'sport', label: 'Sport & Fitness' },
+    { value: 'travel', label: 'Voyage' },
+    { value: 'business', label: 'Business & Entrepreneuriat' },
+    { value: 'art', label: 'Art & Créativité' },
   ];
 
   return (
@@ -148,7 +194,6 @@ const AuthPage = () => {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/60 to-transparent" />
         
-        {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[#0047AB]/20 rounded-full blur-3xl animate-pulse" />
           <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-[#D4AF37]/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
@@ -162,17 +207,24 @@ const AuthPage = () => {
             </span>
           </Link>
           <h1 className="text-4xl font-bold text-white mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
-            {userType === 'entreprise' ? 'Développez votre activité' : 'Les meilleurs prestataires'}
+            {userType === 'entreprise' ? 'Développez votre activité' : 
+             userType === 'influencer' ? 'Monétisez votre influence' :
+             'Les meilleurs prestataires'}
             <br />
-            <span className="gold-gradient">{userType === 'entreprise' ? 'avec Titelli' : 'de la région'}</span>
+            <span className="gold-gradient">
+              {userType === 'entreprise' ? 'avec Titelli' : 
+               userType === 'influencer' ? 'localement' :
+               'de la région'}
+            </span>
           </h1>
           <p className="text-gray-300 text-lg max-w-md mb-8">
             {userType === 'entreprise' 
               ? 'Rejoignez notre marketplace et connectez-vous avec des milliers de clients à Lausanne.'
+              : userType === 'influencer'
+              ? 'Collaborez avec des entreprises locales et développez votre communauté.'
               : 'Découvrez les services et produits de qualité près de chez vous.'}
           </p>
           
-          {/* Benefits */}
           <div className="space-y-4">
             {benefits.map((benefit, index) => (
               <div key={index} className="flex items-center gap-3 text-gray-300">
@@ -189,13 +241,11 @@ const AuthPage = () => {
       {/* Right Side - Auth Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
-          {/* Mobile Back Button */}
           <Link to="/" className="lg:hidden flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors">
             <ArrowLeft className="w-5 h-5" />
             Retour
           </Link>
 
-          {/* Mobile Logo */}
           <div className="lg:hidden flex items-center gap-3 mb-8">
             <div className="logo-circle">T</div>
             <span className="text-xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
@@ -203,7 +253,6 @@ const AuthPage = () => {
             </span>
           </div>
 
-          {/* Title */}
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
               {isLogin ? 'Connexion' : step === 1 ? 'Créer un compte' : 'Sécurité du compte'}
@@ -213,7 +262,6 @@ const AuthPage = () => {
             </p>
           </div>
 
-          {/* Progress Steps (Registration) */}
           {!isLogin && (
             <div className="flex items-center gap-2 mb-8">
               <div className={`flex-1 h-1 rounded-full ${step >= 1 ? 'bg-[#0047AB]' : 'bg-white/10'}`} />
@@ -223,42 +271,51 @@ const AuthPage = () => {
 
           {/* User Type Toggle (Registration only - Step 1) */}
           {!isLogin && step === 1 && (
-            <div className="flex gap-3 mb-8">
+            <div className="grid grid-cols-3 gap-2 mb-8">
               <button
                 type="button"
                 onClick={() => setUserType('client')}
-                className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-xl border transition-all ${
+                className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${
                   userType === 'client'
                     ? 'bg-[#0047AB]/20 border-[#0047AB] text-white'
                     : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'
                 }`}
                 data-testid="type-client-btn"
               >
-                <User className="w-6 h-6" />
-                <span className="font-medium">Client</span>
-                <span className="text-xs text-gray-500">Particulier</span>
+                <User className="w-5 h-5" />
+                <span className="font-medium text-sm">Client</span>
               </button>
               <button
                 type="button"
                 onClick={() => setUserType('entreprise')}
-                className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-xl border transition-all ${
+                className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${
                   userType === 'entreprise'
                     ? 'bg-[#D4AF37]/20 border-[#D4AF37] text-white'
                     : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'
                 }`}
                 data-testid="type-entreprise-btn"
               >
-                <Building2 className="w-6 h-6" />
-                <span className="font-medium">Entreprise</span>
-                <span className="text-xs text-gray-500">Prestataire</span>
+                <Building2 className="w-5 h-5" />
+                <span className="font-medium text-sm">Entreprise</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setUserType('influencer')}
+                className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${
+                  userType === 'influencer'
+                    ? 'bg-purple-500/20 border-purple-500 text-white'
+                    : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'
+                }`}
+                data-testid="type-influencer-btn"
+              >
+                <Star className="w-5 h-5" />
+                <span className="font-medium text-sm">Influenceur</span>
               </button>
             </div>
           )}
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             {isLogin ? (
-              // Login Form
               <>
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
@@ -308,7 +365,6 @@ const AuthPage = () => {
                 </div>
               </>
             ) : step === 1 ? (
-              // Registration Step 1 - Personal Info
               <>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -396,9 +452,111 @@ const AuthPage = () => {
                     </div>
                   </>
                 )}
+
+                {userType === 'influencer' && (
+                  <>
+                    {/* Social Networks Connection */}
+                    <div className="space-y-4">
+                      <label className="block text-sm font-medium text-gray-300">Connectez vos réseaux sociaux *</label>
+                      <p className="text-xs text-gray-500 -mt-2">Connectez au moins un réseau social</p>
+                      
+                      {/* Instagram */}
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center">
+                          <Instagram className="w-5 h-5 text-pink-500" />
+                        </div>
+                        <input
+                          type="text"
+                          name="instagram_handle"
+                          value={formData.instagram_handle}
+                          onChange={handleChange}
+                          className="input-dark w-full pl-12"
+                          placeholder="@votre_instagram"
+                          data-testid="input-instagram"
+                        />
+                        {formData.instagram_handle && (
+                          <CheckCircle className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
+                        )}
+                      </div>
+
+                      {/* TikTok */}
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center">
+                          <Video className="w-5 h-5 text-white" />
+                        </div>
+                        <input
+                          type="text"
+                          name="tiktok_handle"
+                          value={formData.tiktok_handle}
+                          onChange={handleChange}
+                          className="input-dark w-full pl-12"
+                          placeholder="@votre_tiktok"
+                          data-testid="input-tiktok"
+                        />
+                        {formData.tiktok_handle && (
+                          <CheckCircle className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
+                        )}
+                      </div>
+
+                      {/* Facebook */}
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center">
+                          <Facebook className="w-5 h-5 text-blue-500" />
+                        </div>
+                        <input
+                          type="text"
+                          name="facebook_handle"
+                          value={formData.facebook_handle}
+                          onChange={handleChange}
+                          className="input-dark w-full pl-12"
+                          placeholder="Votre page Facebook"
+                          data-testid="input-facebook"
+                        />
+                        {formData.facebook_handle && (
+                          <CheckCircle className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Influencer Category */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Catégorie de contenu *</label>
+                      <select
+                        name="influencer_category"
+                        value={formData.influencer_category}
+                        onChange={handleChange}
+                        required
+                        className="input-dark w-full"
+                        data-testid="input-influencer-category"
+                      >
+                        <option value="">Sélectionnez votre catégorie</option>
+                        {influencerCategories.map(cat => (
+                          <option key={cat.value} value={cat.value}>{cat.label}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Followers Count */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Nombre d'abonnés (total)</label>
+                      <select
+                        name="followers_count"
+                        value={formData.followers_count}
+                        onChange={handleChange}
+                        className="input-dark w-full"
+                      >
+                        <option value="">Sélectionnez une tranche</option>
+                        <option value="1k-5k">1K - 5K</option>
+                        <option value="5k-10k">5K - 10K</option>
+                        <option value="10k-50k">10K - 50K</option>
+                        <option value="50k-100k">50K - 100K</option>
+                        <option value="100k+">100K+</option>
+                      </select>
+                    </div>
+                  </>
+                )}
               </>
             ) : (
-              // Registration Step 2 - Security
               <>
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">Email *</label>
@@ -439,7 +597,6 @@ const AuthPage = () => {
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
-                  {/* Password Strength Indicator */}
                   {formData.password && (
                     <div className="mt-2">
                       <div className="flex gap-1 mb-1">
@@ -478,7 +635,6 @@ const AuthPage = () => {
                   </div>
                 </div>
 
-                {/* Security Info */}
                 <div className="p-4 bg-[#0047AB]/10 rounded-xl border border-[#0047AB]/20">
                   <div className="flex items-center gap-2 text-[#0047AB] mb-2">
                     <Shield className="w-4 h-4" />
@@ -489,7 +645,6 @@ const AuthPage = () => {
                   </p>
                 </div>
 
-                {/* Terms Checkbox */}
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input
                     type="checkbox"
@@ -508,7 +663,6 @@ const AuthPage = () => {
               </>
             )}
 
-            {/* Buttons */}
             <div className="flex gap-3">
               {!isLogin && step === 2 && (
                 <button
@@ -535,7 +689,6 @@ const AuthPage = () => {
             </div>
           </form>
 
-          {/* Toggle Login/Register */}
           <p className="text-center text-gray-400 mt-8">
             {isLogin ? "Pas encore de compte ?" : "Déjà un compte ?"}
             <button
