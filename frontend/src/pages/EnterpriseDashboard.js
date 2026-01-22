@@ -1456,7 +1456,7 @@ const FormModal = ({ type, item, onClose, onSuccess }) => {
     // Initialiser avec des valeurs par défaut selon le type
     switch(type) {
       case 'service':
-        return { type: 'service', category: 'soins_esthetiques', is_delivery: false };
+        return { type: 'service', category: 'soins_esthetiques', is_delivery: false, images: [] };
       case 'offer':
         return { discount_type: 'percentage', is_active: true };
       case 'training':
@@ -1472,6 +1472,9 @@ const FormModal = ({ type, item, onClose, onSuccess }) => {
     }
   });
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
+  const fileInputRef = useRef(null);
 
   const serviceCategories = [
     { id: 'restauration', name: 'Restauration' },
@@ -1498,6 +1501,54 @@ const FormModal = ({ type, item, onClose, onSuccess }) => {
     { id: 'ameublement_deco', name: 'Décoration' },
     { id: 'bricolage_jardinage', name: 'Bricolage' },
   ];
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Type de fichier non autorisé. Utilisez JPG, PNG, GIF ou WEBP.');
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Fichier trop volumineux (max 5MB)');
+      return;
+    }
+
+    // Show preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+
+    // Upload file
+    setUploading(true);
+    try {
+      const response = await uploadAPI.uploadImage(file);
+      const imageUrl = process.env.REACT_APP_BACKEND_URL + response.data.url;
+      setFormData(prev => ({ ...prev, images: [imageUrl] }));
+      toast.success('Image uploadée !');
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Erreur lors de l\'upload de l\'image');
+      setImagePreview(null);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeImage = () => {
+    setImagePreview(null);
+    setFormData(prev => ({ ...prev, images: [] }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -1531,7 +1582,8 @@ const FormModal = ({ type, item, onClose, onSuccess }) => {
             ...formData, 
             currency: 'CHF',
             category: formData.category || 'soins_esthetiques',
-            type: formData.type || 'service'
+            type: formData.type || 'service',
+            images: formData.images || []
           });
           break;
         default:
@@ -1546,6 +1598,51 @@ const FormModal = ({ type, item, onClose, onSuccess }) => {
       setLoading(false);
     }
   };
+
+  // Image Upload Component
+  const ImageUploadSection = () => (
+    <div className="mb-4">
+      <label className="block text-sm text-gray-400 mb-2">Image de l'annonce</label>
+      <div className="border-2 border-dashed border-white/20 rounded-xl p-4 text-center hover:border-[#0047AB]/50 transition-colors">
+        {imagePreview || (formData.images && formData.images.length > 0) ? (
+          <div className="relative inline-block">
+            <img 
+              src={imagePreview || formData.images[0]} 
+              alt="Aperçu" 
+              className="max-h-48 rounded-lg object-cover mx-auto"
+            />
+            <button
+              type="button"
+              onClick={removeImage}
+              className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            {uploading && (
+              <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
+          </div>
+        ) : (
+          <label className="cursor-pointer block">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+            <div className="py-6">
+              <Upload className="w-10 h-10 text-gray-500 mx-auto mb-2" />
+              <p className="text-gray-400 text-sm">Cliquez pour choisir une image</p>
+              <p className="text-gray-500 text-xs mt-1">JPG, PNG, GIF ou WEBP (max 5MB)</p>
+            </div>
+          </label>
+        )}
+      </div>
+    </div>
+  );
 
   const renderForm = () => {
     switch(type) {
