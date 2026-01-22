@@ -3,10 +3,17 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
   LayoutDashboard, Building2, Package, ShoppingCart, Users, MessageSquare, 
-  CreditCard, BarChart3, Settings, Bell, Plus, Edit, Trash2, Eye, 
-  TrendingUp, DollarSign, Star, Calendar, FileText, Megaphone, ChevronRight
+  CreditCard, Settings, Bell, Plus, Edit, Trash2, Eye, Calendar, FileText, 
+  Megaphone, ChevronRight, TrendingUp, DollarSign, Star, Gift, Briefcase,
+  Home, PieChart, GraduationCap, Clock, CheckCircle, XCircle, Archive,
+  FolderOpen, BookOpen, Wallet, Target, BarChart3, PlayCircle, Pause,
+  UserPlus, ClipboardList, AlertTriangle, Box, ArrowUpDown
 } from 'lucide-react';
-import { enterpriseAPI, servicesProductsAPI, orderAPI, paymentAPI } from '../services/api';
+import { 
+  enterpriseAPI, servicesProductsAPI, orderAPI, paymentAPI, offersAPI,
+  trainingsAPI, jobsAPI, realEstateAPI, investmentsAPI, stockAPI,
+  agendaAPI, teamAPI, permanentOrdersAPI, documentsAPI, financesAPI, advertisingAPI
+} from '../services/api';
 import { toast } from 'sonner';
 
 const EnterpriseDashboard = () => {
@@ -14,57 +21,125 @@ const EnterpriseDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [enterprise, setEnterprise] = useState(null);
+  const [loading, setLoading] = useState(true);
+  
+  // Data states
   const [services, setServices] = useState([]);
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [offers, setOffers] = useState([]);
+  const [trainings, setTrainings] = useState([]);
+  const [jobs, setJobs] = useState([]);
+  const [realEstate, setRealEstate] = useState([]);
+  const [investments, setInvestments] = useState([]);
+  const [stock, setStock] = useState({ items: [], alerts: [] });
+  const [agenda, setAgenda] = useState([]);
+  const [team, setTeam] = useState([]);
+  const [teamOrders, setTeamOrders] = useState([]);
+  const [permanentOrders, setPermanentOrders] = useState([]);
+  const [documents, setDocuments] = useState([]);
+  const [finances, setFinances] = useState({ transactions: [], summary: {} });
+  const [advertising, setAdvertising] = useState({ campaigns: [], stats: {} });
+
+  // Modal states
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState('');
+  const [editItem, setEditItem] = useState(null);
 
   useEffect(() => {
     if (!isEnterprise) {
       navigate('/');
       return;
     }
-
-    const fetchData = async () => {
-      try {
-        // Try to get existing enterprise
-        const enterpriseRes = await enterpriseAPI.list({ search: user?.email });
-        if (enterpriseRes.data.enterprises.length > 0) {
-          const ent = enterpriseRes.data.enterprises.find(e => e.user_id === user?.id);
-          if (ent) {
-            setEnterprise(ent);
-            const servicesRes = await servicesProductsAPI.list({ enterprise_id: ent.id });
-            setServices(servicesRes.data.items);
-          }
-        }
-        const ordersRes = await orderAPI.list();
-        setOrders(ordersRes.data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+    fetchAllData();
   }, [isEnterprise, navigate, user]);
+
+  const fetchAllData = async () => {
+    try {
+      // Get enterprise
+      const enterpriseRes = await enterpriseAPI.list({ search: user?.email });
+      if (enterpriseRes.data.enterprises.length > 0) {
+        const ent = enterpriseRes.data.enterprises.find(e => e.user_id === user?.id);
+        if (ent) {
+          setEnterprise(ent);
+          const servicesRes = await servicesProductsAPI.list({ enterprise_id: ent.id });
+          setServices(servicesRes.data.items);
+        }
+      }
+      
+      // Fetch all data in parallel
+      const [ordersRes, offersRes, trainingsRes, jobsRes, realEstateRes, 
+             investmentsRes, stockRes, agendaRes, teamRes, teamOrdersRes,
+             permanentOrdersRes, documentsRes, financesRes, advertisingRes] = await Promise.all([
+        orderAPI.list().catch(() => ({ data: [] })),
+        offersAPI.list().catch(() => ({ data: [] })),
+        trainingsAPI.list().catch(() => ({ data: [] })),
+        jobsAPI.list().catch(() => ({ data: [] })),
+        realEstateAPI.list().catch(() => ({ data: [] })),
+        investmentsAPI.list().catch(() => ({ data: [] })),
+        stockAPI.list().catch(() => ({ data: { items: [], alerts: [] } })),
+        agendaAPI.list().catch(() => ({ data: [] })),
+        teamAPI.list().catch(() => ({ data: [] })),
+        teamAPI.listOrders().catch(() => ({ data: [] })),
+        permanentOrdersAPI.list().catch(() => ({ data: [] })),
+        documentsAPI.list().catch(() => ({ data: [] })),
+        financesAPI.get().catch(() => ({ data: { transactions: [], summary: {} } })),
+        advertisingAPI.list().catch(() => ({ data: { campaigns: [], stats: {} } })),
+      ]);
+
+      setOrders(ordersRes.data || []);
+      setOffers(offersRes.data || []);
+      setTrainings(trainingsRes.data || []);
+      setJobs(jobsRes.data || []);
+      setRealEstate(realEstateRes.data || []);
+      setInvestments(investmentsRes.data || []);
+      setStock(stockRes.data || { items: [], alerts: [] });
+      setAgenda(agendaRes.data || []);
+      setTeam(teamRes.data || []);
+      setTeamOrders(teamOrdersRes.data || []);
+      setPermanentOrders(permanentOrdersRes.data || []);
+      setDocuments(documentsRes.data || []);
+      setFinances(financesRes.data || { transactions: [], summary: {} });
+      setAdvertising(advertisingRes.data || { campaigns: [], stats: {} });
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const menuItems = [
     { id: 'overview', label: 'Tableau de bord', icon: LayoutDashboard },
     { id: 'profile', label: 'Profil entreprise', icon: Building2 },
     { id: 'services', label: 'Services & Produits', icon: Package },
     { id: 'orders', label: 'Commandes', icon: ShoppingCart },
-    { id: 'publicites', label: 'Mes publicités', icon: Megaphone },
-    { id: 'finances', label: 'Mes finances', icon: CreditCard },
-    { id: 'personnel', label: 'Mon personnel', icon: Users },
-    { id: 'messages', label: 'Messagerie', icon: MessageSquare },
+    { id: 'offers', label: 'Offres & Promotions', icon: Gift },
+    { id: 'trainings', label: 'Formations', icon: GraduationCap },
+    { id: 'jobs', label: 'Offres d\'emploi', icon: Briefcase },
+    { id: 'realestate', label: 'Immobilier', icon: Home },
+    { id: 'investments', label: 'Investissements', icon: PieChart },
+    { id: 'stock', label: 'Gestion des stocks', icon: Box },
+    { id: 'agenda', label: 'Agenda', icon: Calendar },
+    { id: 'team', label: 'Mon équipe', icon: Users },
+    { id: 'permanent', label: 'Commandes permanentes', icon: ClipboardList },
+    { id: 'documents', label: 'Documents', icon: FolderOpen },
+    { id: 'development', label: 'Développement', icon: BookOpen },
+    { id: 'finances', label: 'Finances', icon: Wallet },
+    { id: 'advertising', label: 'Publicités', icon: Megaphone },
     { id: 'settings', label: 'Paramètres', icon: Settings },
   ];
 
   const stats = [
     { label: 'Vues ce mois', value: '1,234', icon: Eye, trend: '+12%', color: 'text-[#0047AB]' },
     { label: 'Commandes', value: orders.length.toString(), icon: ShoppingCart, trend: '+5%', color: 'text-green-500' },
-    { label: 'Revenus', value: '2,450 CHF', icon: DollarSign, trend: '+18%', color: 'text-[#D4AF37]' },
+    { label: 'Revenus', value: `${finances.summary.total_income?.toFixed(0) || 0} CHF`, icon: DollarSign, trend: '+18%', color: 'text-[#D4AF37]' },
     { label: 'Note moyenne', value: enterprise?.rating?.toFixed(1) || '0.0', icon: Star, trend: '+0.2', color: 'text-yellow-500' },
   ];
+
+  const openModal = (type, item = null) => {
+    setModalType(type);
+    setEditItem(item);
+    setShowModal(true);
+  };
 
   const handleSubscribe = async (plan) => {
     try {
@@ -72,6 +147,30 @@ const EnterpriseDashboard = () => {
       window.location.href = response.data.url;
     } catch (error) {
       toast.error('Erreur lors de la création du paiement');
+    }
+  };
+
+  // Generic delete handler
+  const handleDelete = async (type, id) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cet élément ?')) return;
+    
+    try {
+      switch(type) {
+        case 'offer': await offersAPI.delete(id); setOffers(offers.filter(o => o.id !== id)); break;
+        case 'training': await trainingsAPI.delete(id); setTrainings(trainings.filter(t => t.id !== id)); break;
+        case 'job': await jobsAPI.delete(id); setJobs(jobs.filter(j => j.id !== id)); break;
+        case 'realestate': await realEstateAPI.delete(id); setRealEstate(realEstate.filter(r => r.id !== id)); break;
+        case 'investment': await investmentsAPI.delete(id); setInvestments(investments.filter(i => i.id !== id)); break;
+        case 'team': await teamAPI.delete(id); setTeam(team.filter(t => t.id !== id)); break;
+        case 'permanent': await permanentOrdersAPI.delete(id); setPermanentOrders(permanentOrders.filter(p => p.id !== id)); break;
+        case 'document': await documentsAPI.delete(id); setDocuments(documents.filter(d => d.id !== id)); break;
+        case 'advertising': await advertisingAPI.delete(id); fetchAllData(); break;
+        case 'service': await servicesProductsAPI.delete(id); setServices(services.filter(s => s.id !== id)); break;
+        default: break;
+      }
+      toast.success('Supprimé avec succès');
+    } catch (error) {
+      toast.error('Erreur lors de la suppression');
     }
   };
 
@@ -88,13 +187,13 @@ const EnterpriseDashboard = () => {
       <div className="flex">
         {/* Sidebar */}
         <aside className="w-64 min-h-screen bg-[#0A0A0A] border-r border-white/5 fixed left-0 top-20 bottom-0 overflow-y-auto hidden lg:block">
-          <div className="p-6">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-12 h-12 rounded-xl bg-[#0047AB]/20 flex items-center justify-center">
-                <Building2 className="w-6 h-6 text-[#0047AB]" />
+          <div className="p-4">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-[#0047AB]/20 flex items-center justify-center">
+                <Building2 className="w-5 h-5 text-[#0047AB]" />
               </div>
               <div>
-                <p className="font-semibold text-white truncate max-w-[140px]">
+                <p className="font-semibold text-white text-sm truncate max-w-[140px]">
                   {enterprise?.business_name || 'Mon Entreprise'}
                 </p>
                 <p className="text-xs text-gray-500">Espace entreprise</p>
@@ -106,15 +205,19 @@ const EnterpriseDashboard = () => {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
                     activeTab === item.id
                       ? 'bg-[#0047AB]/20 text-[#0047AB]'
                       : 'text-gray-400 hover:bg-white/5 hover:text-white'
                   }`}
-                  data-testid={`menu-${item.id}`}
                 >
-                  <item.icon className="w-5 h-5" />
+                  <item.icon className="w-4 h-4" />
                   {item.label}
+                  {item.id === 'stock' && stock.alerts.length > 0 && (
+                    <span className="ml-auto w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                      {stock.alerts.length}
+                    </span>
+                  )}
                 </button>
               ))}
             </nav>
@@ -122,137 +225,119 @@ const EnterpriseDashboard = () => {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 lg:ml-64 p-6 lg:p-8">
+        <main className="flex-1 lg:ml-64 p-4 md:p-8">
+          {/* Mobile Menu */}
+          <div className="lg:hidden mb-6 overflow-x-auto">
+            <div className="flex gap-2 pb-2">
+              {menuItems.slice(0, 8).map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm whitespace-nowrap ${
+                    activeTab === item.id
+                      ? 'bg-[#0047AB] text-white'
+                      : 'bg-white/5 text-gray-400'
+                  }`}
+                >
+                  <item.icon className="w-4 h-4" />
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Overview Tab */}
           {activeTab === 'overview' && (
-            <div className="space-y-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-2xl md:text-3xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
-                    Bonjour, {user?.first_name} !
-                  </h1>
-                  <p className="text-gray-400 mt-1">Voici un aperçu de votre activité</p>
-                </div>
-                <button className="btn-primary flex items-center gap-2" data-testid="add-service-btn">
-                  <Plus className="w-5 h-5" />
-                  Ajouter
-                </button>
-              </div>
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Tableau de bord
+              </h1>
 
-              {/* Stats Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {stats.map((stat, index) => (
-                  <div key={index} className="card-service rounded-xl p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className={`p-3 rounded-xl bg-white/5 ${stat.color}`}>
-                        <stat.icon className="w-5 h-5" />
-                      </div>
-                      <span className="text-green-500 text-sm font-medium">{stat.trend}</span>
-                    </div>
-                    <p className="text-2xl font-bold text-white">{stat.value}</p>
-                    <p className="text-sm text-gray-400 mt-1">{stat.label}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Quick Actions */}
               {!enterprise && (
-                <div className="card-service rounded-xl p-8 text-center">
-                  <Building2 className="w-16 h-16 text-[#0047AB] mx-auto mb-4" />
-                  <h2 className="text-xl font-bold text-white mb-2">Créez votre profil entreprise</h2>
-                  <p className="text-gray-400 mb-6">Commencez à exposer vos services aux clients de Lausanne</p>
-                  <button 
-                    onClick={() => setActiveTab('profile')}
-                    className="btn-primary"
-                    data-testid="create-profile-btn"
-                  >
+                <div className="card-service rounded-xl p-6 border-[#D4AF37] text-center">
+                  <Building2 className="w-12 h-12 text-[#D4AF37] mx-auto mb-4" />
+                  <h2 className="text-xl font-semibold text-white mb-2">Créez votre profil entreprise</h2>
+                  <p className="text-gray-400 mb-4">Pour accéder à toutes les fonctionnalités</p>
+                  <button onClick={() => setActiveTab('profile')} className="btn-primary">
                     Créer mon profil
                   </button>
                 </div>
               )}
 
-              {/* Subscription Plans */}
-              <div className="card-service rounded-xl p-6">
-                <h2 className="text-xl font-bold text-white mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>
-                  Abonnements
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-6 bg-white/5 rounded-xl border border-white/10">
-                    <h3 className="font-semibold text-white mb-2">Annuel</h3>
-                    <p className="text-3xl font-bold text-white mb-4">250 <span className="text-sm text-gray-400">CHF/an</span></p>
-                    <ul className="text-sm text-gray-400 space-y-2 mb-6">
-                      <li>• Profil entreprise complet</li>
-                      <li>• Exposition de vos services</li>
-                      <li>• Réception de commandes</li>
-                    </ul>
-                    <button onClick={() => handleSubscribe('annual')} className="btn-secondary w-full" data-testid="subscribe-annual">
-                      S'abonner
-                    </button>
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {stats.map((stat, index) => (
+                  <div key={index} className="card-service rounded-xl p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                      <span className="text-xs text-green-400">{stat.trend}</span>
+                    </div>
+                    <p className="text-2xl font-bold text-white">{stat.value}</p>
+                    <p className="text-xs text-gray-400">{stat.label}</p>
                   </div>
-                  <div className="p-6 bg-gradient-to-br from-[#0047AB]/20 to-[#D4AF37]/20 rounded-xl border border-[#D4AF37]/30 relative">
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-[#D4AF37] text-black text-xs font-bold rounded-full">
-                      POPULAIRE
-                    </span>
-                    <h3 className="font-semibold text-white mb-2">Premium Annuel</h3>
-                    <p className="text-3xl font-bold text-white mb-4">540 <span className="text-sm text-gray-400">CHF/an</span></p>
-                    <ul className="text-sm text-gray-400 space-y-2 mb-6">
-                      <li>• Tout de l'abonnement Annuel</li>
-                      <li>• Référencement préférentiel</li>
-                      <li>• Badge Premium</li>
-                      <li>• Support prioritaire</li>
-                    </ul>
-                    <button onClick={() => handleSubscribe('premium_annual')} className="btn-primary w-full" data-testid="subscribe-premium-annual">
-                      S'abonner
-                    </button>
+                ))}
+              </div>
+
+              {/* Alerts */}
+              {stock.alerts.length > 0 && (
+                <div className="card-service rounded-xl p-4 border-red-500/50">
+                  <div className="flex items-center gap-2 text-red-400 mb-2">
+                    <AlertTriangle className="w-5 h-5" />
+                    <span className="font-semibold">Alertes Stock</span>
                   </div>
-                  <div className="p-6 bg-white/5 rounded-xl border border-white/10">
-                    <h3 className="font-semibold text-white mb-2">Premium Mensuel</h3>
-                    <p className="text-3xl font-bold text-white mb-4">45 <span className="text-sm text-gray-400">CHF/mois</span></p>
-                    <ul className="text-sm text-gray-400 space-y-2 mb-6">
-                      <li>• Mêmes avantages que Premium</li>
-                      <li>• Flexibilité mensuelle</li>
-                      <li>• Sans engagement</li>
-                    </ul>
-                    <button onClick={() => handleSubscribe('premium_monthly')} className="btn-secondary w-full" data-testid="subscribe-premium-monthly">
-                      S'abonner
-                    </button>
-                  </div>
+                  <p className="text-gray-400 text-sm">{stock.alerts.length} produit(s) en stock faible</p>
                 </div>
+              )}
+
+              {/* Quick Actions */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <button onClick={() => { setActiveTab('services'); openModal('service'); }} className="card-service rounded-xl p-4 hover:border-[#0047AB]/50 transition-colors text-left">
+                  <Package className="w-8 h-8 text-[#0047AB] mb-2" />
+                  <p className="text-white font-medium">Ajouter service</p>
+                </button>
+                <button onClick={() => { setActiveTab('offers'); openModal('offer'); }} className="card-service rounded-xl p-4 hover:border-[#D4AF37]/50 transition-colors text-left">
+                  <Gift className="w-8 h-8 text-[#D4AF37] mb-2" />
+                  <p className="text-white font-medium">Créer offre</p>
+                </button>
+                <button onClick={() => { setActiveTab('jobs'); openModal('job'); }} className="card-service rounded-xl p-4 hover:border-green-500/50 transition-colors text-left">
+                  <Briefcase className="w-8 h-8 text-green-500 mb-2" />
+                  <p className="text-white font-medium">Publier emploi</p>
+                </button>
+                <button onClick={() => setActiveTab('agenda')} className="card-service rounded-xl p-4 hover:border-purple-500/50 transition-colors text-left">
+                  <Calendar className="w-8 h-8 text-purple-500 mb-2" />
+                  <p className="text-white font-medium">Voir agenda</p>
+                </button>
               </div>
 
               {/* Recent Orders */}
               <div className="card-service rounded-xl p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
-                    Commandes récentes
-                  </h2>
-                  <button onClick={() => setActiveTab('orders')} className="text-[#0047AB] text-sm font-medium flex items-center gap-1">
-                    Voir tout <ChevronRight className="w-4 h-4" />
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-white">Dernières commandes</h2>
+                  <button onClick={() => setActiveTab('orders')} className="text-[#0047AB] text-sm hover:underline">
+                    Voir tout
                   </button>
                 </div>
                 {orders.length > 0 ? (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {orders.slice(0, 5).map((order) => (
-                      <div key={order.id} className="flex items-center justify-between p-4 bg-white/5 rounded-xl">
+                      <div key={order.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
                         <div>
-                          <p className="text-white font-medium">Commande #{order.id.slice(0, 8)}</p>
-                          <p className="text-sm text-gray-400">{order.items?.length || 0} articles</p>
+                          <p className="text-white font-medium">#{order.id.slice(0, 8)}</p>
+                          <p className="text-xs text-gray-400">{order.items?.length || 0} article(s)</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-white font-medium">{order.total?.toFixed(2)} CHF</p>
-                          <span className={`text-xs px-2 py-1 rounded-full ${
-                            order.status === 'completed' ? 'bg-green-500/20 text-green-500' :
-                            order.status === 'pending' ? 'bg-yellow-500/20 text-yellow-500' :
-                            'bg-gray-500/20 text-gray-500'
+                          <p className="text-[#D4AF37] font-semibold">{order.total?.toFixed(2)} CHF</p>
+                          <span className={`text-xs px-2 py-0.5 rounded-full ${
+                            order.status === 'completed' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'
                           }`}>
-                            {order.status}
+                            {order.status === 'completed' ? 'Terminée' : 'En cours'}
                           </span>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-center py-8">Aucune commande pour le moment</p>
+                  <p className="text-gray-400 text-center py-8">Aucune commande</p>
                 )}
               </div>
             </div>
@@ -260,379 +345,1262 @@ const EnterpriseDashboard = () => {
 
           {/* Profile Tab */}
           {activeTab === 'profile' && (
-            <EnterpriseProfileForm enterprise={enterprise} setEnterprise={setEnterprise} />
+            <ProfileSection enterprise={enterprise} onUpdate={() => fetchAllData()} />
           )}
 
           {/* Services Tab */}
           {activeTab === 'services' && (
-            <ServicesTab services={services} setServices={setServices} enterpriseId={enterprise?.id} />
+            <ServicesSection services={services} onAdd={() => openModal('service')} onDelete={(id) => handleDelete('service', id)} onRefresh={fetchAllData} />
           )}
 
           {/* Orders Tab */}
           {activeTab === 'orders' && (
-            <OrdersTab orders={orders} />
+            <OrdersSection orders={orders} onRefresh={fetchAllData} />
           )}
 
-          {/* Other tabs show coming soon */}
-          {['publicites', 'finances', 'personnel', 'messages', 'settings'].includes(activeTab) && (
-            <div className="card-service rounded-xl p-12 text-center">
-              <h2 className="text-xl font-bold text-white mb-4">
-                {menuItems.find(m => m.id === activeTab)?.label}
-              </h2>
-              <p className="text-gray-400">Cette section sera bientôt disponible</p>
+          {/* Offers Tab */}
+          {activeTab === 'offers' && (
+            <GenericSection
+              title="Offres & Promotions"
+              icon={Gift}
+              items={offers}
+              onAdd={() => openModal('offer')}
+              onDelete={(id) => handleDelete('offer', id)}
+              emptyText="Aucune offre créée"
+              renderItem={(item) => (
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-white font-medium">{item.title}</p>
+                    <p className="text-sm text-gray-400">{item.discount_value}% de réduction</p>
+                  </div>
+                  <span className={`px-2 py-1 rounded-full text-xs ${item.is_active ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'}`}>
+                    {item.is_active ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+              )}
+            />
+          )}
+
+          {/* Trainings Tab */}
+          {activeTab === 'trainings' && (
+            <GenericSection
+              title="Formations"
+              icon={GraduationCap}
+              items={trainings}
+              onAdd={() => openModal('training')}
+              onDelete={(id) => handleDelete('training', id)}
+              emptyText="Aucune formation proposée"
+              renderItem={(item) => (
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-white font-medium">{item.title}</p>
+                    <p className="text-sm text-gray-400">{item.duration} • {item.is_online ? 'En ligne' : 'Présentiel'}</p>
+                  </div>
+                  <p className="text-[#D4AF37] font-semibold">{item.price} CHF</p>
+                </div>
+              )}
+            />
+          )}
+
+          {/* Jobs Tab */}
+          {activeTab === 'jobs' && (
+            <GenericSection
+              title="Offres d'emploi"
+              icon={Briefcase}
+              items={jobs}
+              onAdd={() => openModal('job')}
+              onDelete={(id) => handleDelete('job', id)}
+              emptyText="Aucune offre d'emploi"
+              renderItem={(item) => (
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-white font-medium">{item.title}</p>
+                    <p className="text-sm text-gray-400">{item.location} • {item.job_type}</p>
+                  </div>
+                  {item.salary_min && <p className="text-green-400">{item.salary_min} - {item.salary_max} CHF</p>}
+                </div>
+              )}
+            />
+          )}
+
+          {/* Real Estate Tab */}
+          {activeTab === 'realestate' && (
+            <GenericSection
+              title="Immobilier"
+              icon={Home}
+              items={realEstate}
+              onAdd={() => openModal('realestate')}
+              onDelete={(id) => handleDelete('realestate', id)}
+              emptyText="Aucun bien immobilier"
+              renderItem={(item) => (
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-white font-medium">{item.title}</p>
+                    <p className="text-sm text-gray-400">{item.surface} m² • {item.city}</p>
+                  </div>
+                  <p className="text-[#D4AF37] font-semibold">{item.price} CHF/{item.price_period}</p>
+                </div>
+              )}
+            />
+          )}
+
+          {/* Investments Tab */}
+          {activeTab === 'investments' && (
+            <GenericSection
+              title="Investissements"
+              icon={PieChart}
+              items={investments}
+              onAdd={() => openModal('investment')}
+              onDelete={(id) => handleDelete('investment', id)}
+              emptyText="Aucune opportunité d'investissement"
+              renderItem={(item) => (
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-white font-medium">{item.title}</p>
+                    <p className="text-sm text-gray-400">Min: {item.min_investment} CHF • {item.expected_return}% retour</p>
+                  </div>
+                  <span className={`px-2 py-1 rounded-full text-xs ${
+                    item.risk_level === 'low' ? 'bg-green-500/20 text-green-400' :
+                    item.risk_level === 'medium' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'
+                  }`}>
+                    Risque {item.risk_level}
+                  </span>
+                </div>
+              )}
+            />
+          )}
+
+          {/* Stock Tab */}
+          {activeTab === 'stock' && (
+            <StockSection stock={stock} services={services} onRefresh={fetchAllData} />
+          )}
+
+          {/* Agenda Tab */}
+          {activeTab === 'agenda' && (
+            <AgendaSection agenda={agenda} onRefresh={fetchAllData} />
+          )}
+
+          {/* Team Tab */}
+          {activeTab === 'team' && (
+            <TeamSection team={team} teamOrders={teamOrders} onDelete={(id) => handleDelete('team', id)} onRefresh={fetchAllData} />
+          )}
+
+          {/* Permanent Orders Tab */}
+          {activeTab === 'permanent' && (
+            <GenericSection
+              title="Commandes permanentes"
+              icon={ClipboardList}
+              items={permanentOrders}
+              onAdd={() => openModal('permanent')}
+              onDelete={(id) => handleDelete('permanent', id)}
+              emptyText="Aucune commande permanente"
+              renderItem={(item) => (
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-white font-medium">{item.client_name}</p>
+                    <p className="text-sm text-gray-400">{item.frequency} • {item.items?.length || 0} article(s)</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-[#D4AF37] font-semibold">{item.total} CHF</p>
+                    <span className={`px-2 py-1 rounded-full text-xs ${item.is_active ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'}`}>
+                      {item.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                </div>
+              )}
+            />
+          )}
+
+          {/* Documents Tab */}
+          {activeTab === 'documents' && (
+            <DocumentsSection documents={documents} onDelete={(id) => handleDelete('document', id)} onRefresh={fetchAllData} />
+          )}
+
+          {/* Development Tab */}
+          {activeTab === 'development' && (
+            <DevelopmentSection />
+          )}
+
+          {/* Finances Tab */}
+          {activeTab === 'finances' && (
+            <FinancesSection finances={finances} onRefresh={fetchAllData} />
+          )}
+
+          {/* Advertising Tab */}
+          {activeTab === 'advertising' && (
+            <AdvertisingSection advertising={advertising} onDelete={(id) => handleDelete('advertising', id)} onRefresh={fetchAllData} />
+          )}
+
+          {/* Settings Tab */}
+          {activeTab === 'settings' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Paramètres
+              </h1>
+              
+              <div className="card-service rounded-xl p-6">
+                <h2 className="text-lg font-semibold text-white mb-4">Abonnement</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 bg-white/5 rounded-xl">
+                    <h3 className="text-white font-medium mb-2">Standard</h3>
+                    <p className="text-2xl font-bold text-white mb-2">250 CHF<span className="text-sm text-gray-400">/an</span></p>
+                    <button onClick={() => handleSubscribe('annual')} className="btn-secondary w-full">Choisir</button>
+                  </div>
+                  <div className="p-4 bg-[#D4AF37]/10 rounded-xl border border-[#D4AF37]/30">
+                    <h3 className="text-[#D4AF37] font-medium mb-2">Premium Annuel</h3>
+                    <p className="text-2xl font-bold text-white mb-2">540 CHF<span className="text-sm text-gray-400">/an</span></p>
+                    <button onClick={() => handleSubscribe('premium_annual')} className="btn-primary w-full">Choisir</button>
+                  </div>
+                  <div className="p-4 bg-white/5 rounded-xl">
+                    <h3 className="text-white font-medium mb-2">Premium Mensuel</h3>
+                    <p className="text-2xl font-bold text-white mb-2">45 CHF<span className="text-sm text-gray-400">/mois</span></p>
+                    <button onClick={() => handleSubscribe('premium_monthly')} className="btn-secondary w-full">Choisir</button>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </main>
       </div>
+
+      {/* Modal */}
+      {showModal && (
+        <FormModal type={modalType} item={editItem} onClose={() => setShowModal(false)} onSuccess={() => { setShowModal(false); fetchAllData(); }} />
+      )}
     </div>
   );
 };
 
-// Enterprise Profile Form Component
-const EnterpriseProfileForm = ({ enterprise, setEnterprise }) => {
+// Profile Section Component
+const ProfileSection = ({ enterprise, onUpdate }) => {
   const [formData, setFormData] = useState({
     business_name: enterprise?.business_name || '',
     slogan: enterprise?.slogan || '',
     description: enterprise?.description || '',
-    category: enterprise?.category || '',
-    address: enterprise?.address || '',
     phone: enterprise?.phone || '',
     email: enterprise?.email || '',
-    website: enterprise?.website || ''
+    address: enterprise?.address || '',
+    city: enterprise?.city || 'Lausanne',
+    website: enterprise?.website || '',
+    category: enterprise?.category || '',
   });
-  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setSaving(true);
     try {
       if (enterprise) {
         await enterpriseAPI.update(enterprise.id, formData);
-        toast.success('Profil mis à jour !');
       } else {
-        const response = await enterpriseAPI.create(formData);
-        setEnterprise(response.data);
-        toast.success('Profil créé !');
+        await enterpriseAPI.create(formData);
       }
+      toast.success('Profil enregistré !');
+      onUpdate();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Erreur');
+      toast.error('Erreur lors de l\'enregistrement');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
   return (
-    <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
-        {enterprise ? 'Modifier le profil' : 'Créer le profil entreprise'}
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+        Profil Entreprise
       </h1>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Nom de l'entreprise *</label>
-          <input
-            type="text"
-            value={formData.business_name}
-            onChange={(e) => setFormData({ ...formData, business_name: e.target.value })}
-            required
-            className="input-dark w-full"
-            data-testid="input-business-name"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Slogan</label>
-          <input
-            type="text"
-            value={formData.slogan}
-            onChange={(e) => setFormData({ ...formData, slogan: e.target.value })}
-            className="input-dark w-full"
-            placeholder="Votre slogan accrocheur"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Description *</label>
-          <textarea
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            required
-            rows={4}
-            className="input-dark w-full resize-none"
-            data-testid="input-description"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Catégorie *</label>
-          <input
-            type="text"
-            value={formData.category}
-            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-            required
-            className="input-dark w-full"
-            placeholder="ex: Restauration, Soins esthétiques..."
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="card-service rounded-xl p-6 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Adresse *</label>
-            <input
-              type="text"
-              value={formData.address}
-              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              required
-              className="input-dark w-full"
-            />
+            <label className="block text-sm text-gray-400 mb-1">Nom de l'entreprise *</label>
+            <input type="text" value={formData.business_name} onChange={(e) => setFormData({...formData, business_name: e.target.value})} className="input-dark w-full" required />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Téléphone *</label>
-            <input
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              required
-              className="input-dark w-full"
-            />
+            <label className="block text-sm text-gray-400 mb-1">Slogan</label>
+            <input type="text" value={formData.slogan} onChange={(e) => setFormData({...formData, slogan: e.target.value})} className="input-dark w-full" />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm text-gray-400 mb-1">Description *</label>
+          <textarea value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="input-dark w-full h-24" required />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Email *</label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              required
-              className="input-dark w-full"
-            />
+            <label className="block text-sm text-gray-400 mb-1">Téléphone *</label>
+            <input type="tel" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} className="input-dark w-full" required />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Site web</label>
-            <input
-              type="url"
-              value={formData.website}
-              onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-              className="input-dark w-full"
-              placeholder="https://..."
-            />
+            <label className="block text-sm text-gray-400 mb-1">Email *</label>
+            <input type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="input-dark w-full" required />
           </div>
         </div>
-        <button type="submit" disabled={loading} className="btn-primary w-full py-4" data-testid="submit-profile">
-          {loading ? 'Chargement...' : enterprise ? 'Mettre à jour' : 'Créer le profil'}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Adresse *</label>
+            <input type="text" value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} className="input-dark w-full" required />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Site web</label>
+            <input type="url" value={formData.website} onChange={(e) => setFormData({...formData, website: e.target.value})} className="input-dark w-full" />
+          </div>
+        </div>
+        <button type="submit" disabled={saving} className="btn-primary">
+          {saving ? 'Enregistrement...' : 'Enregistrer'}
         </button>
       </form>
     </div>
   );
 };
 
-// Services Tab Component
-const ServicesTab = ({ services, setServices, enterpriseId }) => {
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    price: '',
-    category: '',
-    type: 'service',
-    is_delivery: false
-  });
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!enterpriseId) {
-      toast.error('Créez d\'abord votre profil entreprise');
-      return;
-    }
-    setLoading(true);
-    try {
-      const response = await servicesProductsAPI.create({
-        ...formData,
-        price: parseFloat(formData.price)
-      });
-      setServices([...services, response.data]);
-      setShowForm(false);
-      setFormData({ name: '', description: '', price: '', category: '', type: 'service', is_delivery: false });
-      toast.success('Service/Produit ajouté !');
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Erreur');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm('Supprimer ce service/produit ?')) return;
-    try {
-      await servicesProductsAPI.delete(id);
-      setServices(services.filter(s => s.id !== id));
-      toast.success('Supprimé !');
-    } catch (error) {
-      toast.error('Erreur lors de la suppression');
-    }
-  };
-
+// Services Section Component
+const ServicesSection = ({ services, onAdd, onDelete, onRefresh }) => {
   return (
-    <div>
-      <div className="flex items-center justify-between mb-8">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
           Services & Produits
         </h1>
-        <button onClick={() => setShowForm(!showForm)} className="btn-primary flex items-center gap-2">
-          <Plus className="w-5 h-5" />
-          Ajouter
+        <button onClick={onAdd} className="btn-primary flex items-center gap-2">
+          <Plus className="w-4 h-4" /> Ajouter
         </button>
       </div>
-
-      {showForm && (
-        <form onSubmit={handleSubmit} className="card-service rounded-xl p-6 mb-8 space-y-4">
-          <div className="flex gap-4 mb-4">
-            <button
-              type="button"
-              onClick={() => setFormData({ ...formData, type: 'service' })}
-              className={`flex-1 py-3 rounded-xl font-medium transition-all ${
-                formData.type === 'service' ? 'bg-[#0047AB] text-white' : 'bg-white/5 text-gray-400'
-              }`}
-            >
-              Service
-            </button>
-            <button
-              type="button"
-              onClick={() => setFormData({ ...formData, type: 'product' })}
-              className={`flex-1 py-3 rounded-xl font-medium transition-all ${
-                formData.type === 'product' ? 'bg-[#D4AF37] text-black' : 'bg-white/5 text-gray-400'
-              }`}
-            >
-              Produit
-            </button>
-          </div>
-          <input
-            type="text"
-            placeholder="Nom"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            required
-            className="input-dark w-full"
-          />
-          <textarea
-            placeholder="Description"
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            required
-            className="input-dark w-full resize-none"
-            rows={3}
-          />
-          <div className="grid grid-cols-2 gap-4">
-            <input
-              type="number"
-              step="0.01"
-              placeholder="Prix (CHF)"
-              value={formData.price}
-              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-              required
-              className="input-dark w-full"
-            />
-            <input
-              type="text"
-              placeholder="Catégorie"
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              required
-              className="input-dark w-full"
-            />
-          </div>
-          <label className="flex items-center gap-3 text-gray-300">
-            <input
-              type="checkbox"
-              checked={formData.is_delivery}
-              onChange={(e) => setFormData({ ...formData, is_delivery: e.target.checked })}
-              className="w-5 h-5 rounded bg-white/5 border-white/10"
-            />
-            Livraison disponible
-          </label>
-          <div className="flex gap-4">
-            <button type="button" onClick={() => setShowForm(false)} className="btn-secondary flex-1">
-              Annuler
-            </button>
-            <button type="submit" disabled={loading} className="btn-primary flex-1">
-              {loading ? 'Ajout...' : 'Ajouter'}
-            </button>
-          </div>
-        </form>
-      )}
-
       {services.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {services.map((item) => (
             <div key={item.id} className="card-service rounded-xl p-4">
-              <div className="flex items-start justify-between mb-3">
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  item.type === 'service' ? 'bg-[#0047AB]/20 text-[#0047AB]' : 'bg-[#D4AF37]/20 text-[#D4AF37]'
-                }`}>
+              <div className="flex items-start justify-between mb-2">
+                <span className={`px-2 py-1 rounded-full text-xs ${item.type === 'service' ? 'bg-[#0047AB]/20 text-[#0047AB]' : 'bg-[#D4AF37]/20 text-[#D4AF37]'}`}>
                   {item.type === 'service' ? 'Service' : 'Produit'}
                 </span>
-                <button onClick={() => handleDelete(item.id)} className="text-red-500 hover:text-red-400">
+                <button onClick={() => onDelete(item.id)} className="text-red-400 hover:text-red-300">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-              <h3 className="text-white font-semibold mb-2">{item.name}</h3>
-              <p className="text-sm text-gray-400 mb-3 line-clamp-2">{item.description}</p>
-              <p className="text-lg font-bold text-white">{item.price?.toFixed(2)} CHF</p>
+              <h3 className="text-white font-medium mb-1">{item.name}</h3>
+              <p className="text-sm text-gray-400 line-clamp-2 mb-2">{item.description}</p>
+              <p className="text-lg font-bold text-[#D4AF37]">{item.price} CHF</p>
             </div>
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 text-gray-500">
-          <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p>Aucun service ou produit</p>
+        <div className="card-service rounded-xl p-12 text-center">
+          <Package className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+          <p className="text-gray-400">Aucun service ou produit</p>
         </div>
       )}
     </div>
   );
 };
 
-// Orders Tab Component
-const OrdersTab = ({ orders }) => {
+// Orders Section Component
+const OrdersSection = ({ orders, onRefresh }) => {
+  const updateStatus = async (orderId, status) => {
+    try {
+      await orderAPI.updateStatus(orderId, status);
+      toast.success('Statut mis à jour');
+      onRefresh();
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
         Commandes
       </h1>
       {orders.length > 0 ? (
         <div className="space-y-4">
           {orders.map((order) => (
-            <div key={order.id} className="card-service rounded-xl p-6">
+            <div key={order.id} className="card-service rounded-xl p-4">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <p className="text-white font-semibold">Commande #{order.id.slice(0, 8)}</p>
+                  <p className="text-white font-medium">Commande #{order.id.slice(0, 8)}</p>
                   <p className="text-sm text-gray-400">{new Date(order.created_at).toLocaleDateString('fr-FR')}</p>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  order.status === 'completed' ? 'bg-green-500/20 text-green-500' :
-                  order.status === 'pending' ? 'bg-yellow-500/20 text-yellow-500' :
-                  'bg-gray-500/20 text-gray-500'
-                }`}>
-                  {order.status === 'pending' ? 'En attente' : order.status === 'completed' ? 'Terminée' : order.status}
-                </span>
+                <div className="flex items-center gap-2">
+                  <select 
+                    value={order.status} 
+                    onChange={(e) => updateStatus(order.id, e.target.value)}
+                    className="input-dark text-sm"
+                  >
+                    <option value="pending">En attente</option>
+                    <option value="confirmed">Confirmée</option>
+                    <option value="completed">Terminée</option>
+                    <option value="cancelled">Annulée</option>
+                  </select>
+                </div>
               </div>
               <div className="space-y-2 mb-4">
                 {order.items?.map((item, i) => (
                   <div key={i} className="flex justify-between text-sm">
-                    <span className="text-gray-400">{item.name} x{item.quantity}</span>
+                    <span className="text-gray-400">{item.quantity}x {item.name}</span>
                     <span className="text-white">{(item.price * item.quantity).toFixed(2)} CHF</span>
                   </div>
                 ))}
               </div>
-              <div className="flex justify-between pt-4 border-t border-white/10">
+              <div className="flex justify-between items-center pt-4 border-t border-white/10">
                 <span className="text-gray-400">Total</span>
-                <span className="text-xl font-bold text-white">{order.total?.toFixed(2)} CHF</span>
+                <span className="text-xl font-bold text-[#D4AF37]">{order.total?.toFixed(2)} CHF</span>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 text-gray-500">
-          <ShoppingCart className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p>Aucune commande pour le moment</p>
+        <div className="card-service rounded-xl p-12 text-center">
+          <ShoppingCart className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+          <p className="text-gray-400">Aucune commande</p>
         </div>
       )}
+    </div>
+  );
+};
+
+// Generic Section Component for similar layouts
+const GenericSection = ({ title, icon: Icon, items, onAdd, onDelete, emptyText, renderItem }) => {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+          {title}
+        </h1>
+        <button onClick={onAdd} className="btn-primary flex items-center gap-2">
+          <Plus className="w-4 h-4" /> Ajouter
+        </button>
+      </div>
+      {items.length > 0 ? (
+        <div className="space-y-3">
+          {items.map((item) => (
+            <div key={item.id} className="card-service rounded-xl p-4">
+              <div className="flex items-center gap-4">
+                <div className="flex-1">{renderItem(item)}</div>
+                <button onClick={() => onDelete(item.id)} className="text-red-400 hover:text-red-300">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="card-service rounded-xl p-12 text-center">
+          <Icon className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+          <p className="text-gray-400">{emptyText}</p>
+          <button onClick={onAdd} className="btn-secondary mt-4">Ajouter</button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Stock Section Component
+const StockSection = ({ stock, services, onRefresh }) => {
+  const [showAdd, setShowAdd] = useState(false);
+  const [formData, setFormData] = useState({ product_id: '', product_name: '', quantity: 0, min_quantity: 5, unit: 'pièce' });
+
+  const addStock = async () => {
+    try {
+      await stockAPI.add(formData);
+      toast.success('Produit ajouté au stock');
+      setShowAdd(false);
+      onRefresh();
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
+  const recordMovement = async (productId, type, qty) => {
+    try {
+      await stockAPI.movement({ product_id: productId, quantity: qty, movement_type: type });
+      toast.success('Mouvement enregistré');
+      onRefresh();
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+          Gestion des stocks
+        </h1>
+        <button onClick={() => setShowAdd(true)} className="btn-primary flex items-center gap-2">
+          <Plus className="w-4 h-4" /> Ajouter produit
+        </button>
+      </div>
+
+      {stock.alerts.length > 0 && (
+        <div className="card-service rounded-xl p-4 border-red-500/50">
+          <h3 className="text-red-400 font-medium mb-2 flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5" /> Alertes stock faible
+          </h3>
+          <div className="space-y-2">
+            {stock.alerts.map((item) => (
+              <div key={item.id} className="flex justify-between text-sm">
+                <span className="text-white">{item.product_name}</span>
+                <span className="text-red-400">{item.quantity} / {item.min_quantity} {item.unit}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {stock.items.length > 0 ? (
+        <div className="space-y-3">
+          {stock.items.map((item) => (
+            <div key={item.id} className="card-service rounded-xl p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-white font-medium">{item.product_name}</p>
+                  <p className="text-sm text-gray-400">SKU: {item.sku || 'N/A'}</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-center">
+                    <p className={`text-xl font-bold ${item.quantity <= item.min_quantity ? 'text-red-400' : 'text-green-400'}`}>
+                      {item.quantity}
+                    </p>
+                    <p className="text-xs text-gray-400">{item.unit}</p>
+                  </div>
+                  <div className="flex gap-1">
+                    <button onClick={() => recordMovement(item.product_id, 'in', 1)} className="p-2 bg-green-500/20 text-green-400 rounded hover:bg-green-500/30">
+                      <Plus className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => recordMovement(item.product_id, 'out', 1)} className="p-2 bg-red-500/20 text-red-400 rounded hover:bg-red-500/30">
+                      <ArrowUpDown className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="card-service rounded-xl p-12 text-center">
+          <Box className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+          <p className="text-gray-400">Aucun produit en stock</p>
+        </div>
+      )}
+
+      {showAdd && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="card-service rounded-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-white mb-4">Ajouter au stock</h3>
+            <div className="space-y-4">
+              <select 
+                value={formData.product_id} 
+                onChange={(e) => {
+                  const product = services.find(s => s.id === e.target.value);
+                  setFormData({...formData, product_id: e.target.value, product_name: product?.name || ''});
+                }}
+                className="input-dark w-full"
+              >
+                <option value="">Sélectionner un produit</option>
+                {services.filter(s => s.type === 'product').map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+              <input type="number" placeholder="Quantité" value={formData.quantity} onChange={(e) => setFormData({...formData, quantity: parseInt(e.target.value)})} className="input-dark w-full" />
+              <input type="number" placeholder="Quantité minimum" value={formData.min_quantity} onChange={(e) => setFormData({...formData, min_quantity: parseInt(e.target.value)})} className="input-dark w-full" />
+              <div className="flex gap-2">
+                <button onClick={() => setShowAdd(false)} className="btn-secondary flex-1">Annuler</button>
+                <button onClick={addStock} className="btn-primary flex-1">Ajouter</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Agenda Section Component
+const AgendaSection = ({ agenda, onRefresh }) => {
+  const [showAdd, setShowAdd] = useState(false);
+  const [formData, setFormData] = useState({
+    title: '', description: '', event_type: 'appointment', start_datetime: '', end_datetime: '', color: '#0047AB'
+  });
+
+  const addEvent = async () => {
+    try {
+      await agendaAPI.create(formData);
+      toast.success('Événement ajouté');
+      setShowAdd(false);
+      setFormData({ title: '', description: '', event_type: 'appointment', start_datetime: '', end_datetime: '', color: '#0047AB' });
+      onRefresh();
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
+  const deleteEvent = async (id) => {
+    try {
+      await agendaAPI.delete(id);
+      toast.success('Événement supprimé');
+      onRefresh();
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+          Agenda
+        </h1>
+        <button onClick={() => setShowAdd(true)} className="btn-primary flex items-center gap-2">
+          <Plus className="w-4 h-4" /> Ajouter
+        </button>
+      </div>
+
+      {agenda.length > 0 ? (
+        <div className="space-y-3">
+          {agenda.map((event) => (
+            <div key={event.id} className="card-service rounded-xl p-4" style={{ borderLeftColor: event.color, borderLeftWidth: '4px' }}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-white font-medium">{event.title}</p>
+                  <p className="text-sm text-gray-400">
+                    {new Date(event.start_datetime).toLocaleString('fr-FR')}
+                  </p>
+                  {event.client_name && <p className="text-sm text-[#0047AB]">Client: {event.client_name}</p>}
+                </div>
+                <button onClick={() => deleteEvent(event.id)} className="text-red-400 hover:text-red-300">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="card-service rounded-xl p-12 text-center">
+          <Calendar className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+          <p className="text-gray-400">Aucun événement</p>
+        </div>
+      )}
+
+      {showAdd && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="card-service rounded-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-white mb-4">Ajouter un événement</h3>
+            <div className="space-y-4">
+              <input type="text" placeholder="Titre" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="input-dark w-full" />
+              <select value={formData.event_type} onChange={(e) => setFormData({...formData, event_type: e.target.value})} className="input-dark w-full">
+                <option value="appointment">Rendez-vous</option>
+                <option value="availability">Disponibilité</option>
+                <option value="blocked">Bloqué</option>
+                <option value="task">Tâche</option>
+              </select>
+              <input type="datetime-local" value={formData.start_datetime} onChange={(e) => setFormData({...formData, start_datetime: e.target.value})} className="input-dark w-full" />
+              <input type="datetime-local" value={formData.end_datetime} onChange={(e) => setFormData({...formData, end_datetime: e.target.value})} className="input-dark w-full" />
+              <div className="flex gap-2">
+                <button onClick={() => setShowAdd(false)} className="btn-secondary flex-1">Annuler</button>
+                <button onClick={addEvent} className="btn-primary flex-1">Ajouter</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Team Section Component
+const TeamSection = ({ team, teamOrders, onDelete, onRefresh }) => {
+  const [showAdd, setShowAdd] = useState(false);
+  const [formData, setFormData] = useState({ first_name: '', last_name: '', email: '', phone: '', role: '', department: '' });
+
+  const addMember = async () => {
+    try {
+      await teamAPI.add(formData);
+      toast.success('Membre ajouté');
+      setShowAdd(false);
+      setFormData({ first_name: '', last_name: '', email: '', phone: '', role: '', department: '' });
+      onRefresh();
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+          Mon équipe
+        </h1>
+        <button onClick={() => setShowAdd(true)} className="btn-primary flex items-center gap-2">
+          <UserPlus className="w-4 h-4" /> Ajouter
+        </button>
+      </div>
+
+      {team.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {team.map((member) => (
+            <div key={member.id} className="card-service rounded-xl p-4">
+              <div className="flex items-start justify-between mb-3">
+                <div className="w-10 h-10 rounded-full bg-[#0047AB]/20 flex items-center justify-center text-[#0047AB] font-semibold">
+                  {member.first_name[0]}{member.last_name[0]}
+                </div>
+                <button onClick={() => onDelete(member.id)} className="text-red-400 hover:text-red-300">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+              <h3 className="text-white font-medium">{member.first_name} {member.last_name}</h3>
+              <p className="text-sm text-[#D4AF37]">{member.role}</p>
+              {member.department && <p className="text-xs text-gray-400">{member.department}</p>}
+              {member.email && <p className="text-xs text-gray-400 mt-2">{member.email}</p>}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="card-service rounded-xl p-12 text-center">
+          <Users className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+          <p className="text-gray-400">Aucun membre d'équipe</p>
+        </div>
+      )}
+
+      {showAdd && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="card-service rounded-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-white mb-4">Ajouter un membre</h3>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <input type="text" placeholder="Prénom" value={formData.first_name} onChange={(e) => setFormData({...formData, first_name: e.target.value})} className="input-dark w-full" />
+                <input type="text" placeholder="Nom" value={formData.last_name} onChange={(e) => setFormData({...formData, last_name: e.target.value})} className="input-dark w-full" />
+              </div>
+              <input type="email" placeholder="Email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="input-dark w-full" />
+              <input type="tel" placeholder="Téléphone" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} className="input-dark w-full" />
+              <input type="text" placeholder="Poste/Rôle" value={formData.role} onChange={(e) => setFormData({...formData, role: e.target.value})} className="input-dark w-full" />
+              <input type="text" placeholder="Département" value={formData.department} onChange={(e) => setFormData({...formData, department: e.target.value})} className="input-dark w-full" />
+              <div className="flex gap-2">
+                <button onClick={() => setShowAdd(false)} className="btn-secondary flex-1">Annuler</button>
+                <button onClick={addMember} className="btn-primary flex-1">Ajouter</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Documents Section Component
+const DocumentsSection = ({ documents, onDelete, onRefresh }) => {
+  const [showAdd, setShowAdd] = useState(false);
+  const [formData, setFormData] = useState({ title: '', category: 'other', file_url: '', file_type: 'pdf', is_important: false });
+
+  const addDocument = async () => {
+    try {
+      await documentsAPI.add(formData);
+      toast.success('Document ajouté');
+      setShowAdd(false);
+      onRefresh();
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
+  const categories = [
+    { id: 'legal', name: 'Juridique', icon: FileText },
+    { id: 'financial', name: 'Financier', icon: Wallet },
+    { id: 'contract', name: 'Contrats', icon: ClipboardList },
+    { id: 'certificate', name: 'Certificats', icon: CheckCircle },
+    { id: 'other', name: 'Autre', icon: FolderOpen },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+          Documents
+        </h1>
+        <button onClick={() => setShowAdd(true)} className="btn-primary flex items-center gap-2">
+          <Plus className="w-4 h-4" /> Ajouter
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        {categories.map((cat) => (
+          <div key={cat.id} className="card-service rounded-xl p-4 text-center">
+            <cat.icon className="w-8 h-8 text-[#0047AB] mx-auto mb-2" />
+            <p className="text-white text-sm font-medium">{cat.name}</p>
+            <p className="text-xs text-gray-400">{documents.filter(d => d.category === cat.id).length} fichier(s)</p>
+          </div>
+        ))}
+      </div>
+
+      {documents.length > 0 ? (
+        <div className="space-y-3">
+          {documents.map((doc) => (
+            <div key={doc.id} className="card-service rounded-xl p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <FileText className="w-8 h-8 text-gray-400" />
+                  <div>
+                    <p className="text-white font-medium">{doc.title}</p>
+                    <p className="text-xs text-gray-400">{doc.file_type.toUpperCase()} • {doc.category}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {doc.is_important && <Star className="w-4 h-4 text-[#D4AF37]" />}
+                  <a href={doc.file_url} target="_blank" rel="noopener noreferrer" className="btn-secondary text-sm">Voir</a>
+                  <button onClick={() => onDelete(doc.id)} className="text-red-400 hover:text-red-300">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="card-service rounded-xl p-12 text-center">
+          <FolderOpen className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+          <p className="text-gray-400">Aucun document</p>
+        </div>
+      )}
+
+      {showAdd && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="card-service rounded-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-white mb-4">Ajouter un document</h3>
+            <div className="space-y-4">
+              <input type="text" placeholder="Titre" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="input-dark w-full" />
+              <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="input-dark w-full">
+                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+              <input type="url" placeholder="URL du fichier" value={formData.file_url} onChange={(e) => setFormData({...formData, file_url: e.target.value})} className="input-dark w-full" />
+              <label className="flex items-center gap-2 text-gray-400">
+                <input type="checkbox" checked={formData.is_important} onChange={(e) => setFormData({...formData, is_important: e.target.checked})} />
+                Document important
+              </label>
+              <div className="flex gap-2">
+                <button onClick={() => setShowAdd(false)} className="btn-secondary flex-1">Annuler</button>
+                <button onClick={addDocument} className="btn-primary flex-1">Ajouter</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Development Section Component
+const DevelopmentSection = () => {
+  const resources = [
+    { id: '1', title: 'Guide du marketing digital', type: 'article', category: 'Marketing', duration: '15 min' },
+    { id: '2', title: 'Optimisation fiscale pour entreprises', type: 'video', category: 'Finance', duration: '45 min' },
+    { id: '3', title: 'Gestion de la relation client', type: 'course', category: 'Ventes', duration: '2 heures' },
+    { id: '4', title: 'Réseaux sociaux pour les entreprises', type: 'webinar', category: 'Marketing', duration: '1 heure' },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+        Développement & Formation
+      </h1>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {resources.map((resource) => (
+          <div key={resource.id} className="card-service rounded-xl p-4">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-lg bg-[#0047AB]/20 flex items-center justify-center">
+                {resource.type === 'video' ? <PlayCircle className="w-6 h-6 text-[#0047AB]" /> : <BookOpen className="w-6 h-6 text-[#0047AB]" />}
+              </div>
+              <div className="flex-1">
+                <h3 className="text-white font-medium">{resource.title}</h3>
+                <p className="text-sm text-gray-400">{resource.category} • {resource.duration}</p>
+                <span className="inline-block mt-2 px-2 py-1 bg-white/5 text-xs text-gray-400 rounded">{resource.type}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Finances Section Component
+const FinancesSection = ({ finances, onRefresh }) => {
+  const [showAdd, setShowAdd] = useState(false);
+  const [formData, setFormData] = useState({ transaction_type: 'income', category: 'other', amount: 0, description: '', date: new Date().toISOString().split('T')[0] });
+
+  const addTransaction = async () => {
+    try {
+      await financesAPI.addTransaction(formData);
+      toast.success('Transaction ajoutée');
+      setShowAdd(false);
+      onRefresh();
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+          Finances
+        </h1>
+        <button onClick={() => setShowAdd(true)} className="btn-primary flex items-center gap-2">
+          <Plus className="w-4 h-4" /> Transaction
+        </button>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="card-service rounded-xl p-4">
+          <p className="text-sm text-gray-400 mb-1">Revenus totaux</p>
+          <p className="text-2xl font-bold text-green-400">{finances.summary.total_income?.toFixed(2) || 0} CHF</p>
+        </div>
+        <div className="card-service rounded-xl p-4">
+          <p className="text-sm text-gray-400 mb-1">Dépenses totales</p>
+          <p className="text-2xl font-bold text-red-400">{finances.summary.total_expenses?.toFixed(2) || 0} CHF</p>
+        </div>
+        <div className="card-service rounded-xl p-4">
+          <p className="text-sm text-gray-400 mb-1">Bénéfice net</p>
+          <p className="text-2xl font-bold text-[#D4AF37]">{finances.summary.net_profit?.toFixed(2) || 0} CHF</p>
+        </div>
+        <div className="card-service rounded-xl p-4">
+          <p className="text-sm text-gray-400 mb-1">Commissions Titelli</p>
+          <p className="text-2xl font-bold text-gray-400">{finances.summary.commission_paid?.toFixed(2) || 0} CHF</p>
+        </div>
+      </div>
+
+      {/* Transactions */}
+      <div className="card-service rounded-xl p-6">
+        <h2 className="text-lg font-semibold text-white mb-4">Dernières transactions</h2>
+        {finances.transactions?.length > 0 ? (
+          <div className="space-y-3">
+            {finances.transactions.slice(0, 10).map((t) => (
+              <div key={t.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                <div>
+                  <p className="text-white">{t.description}</p>
+                  <p className="text-xs text-gray-400">{t.date} • {t.category}</p>
+                </div>
+                <p className={`font-semibold ${t.transaction_type === 'income' ? 'text-green-400' : 'text-red-400'}`}>
+                  {t.transaction_type === 'income' ? '+' : '-'}{t.amount.toFixed(2)} CHF
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-400 text-center py-8">Aucune transaction</p>
+        )}
+      </div>
+
+      {showAdd && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="card-service rounded-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-white mb-4">Ajouter une transaction</h3>
+            <div className="space-y-4">
+              <select value={formData.transaction_type} onChange={(e) => setFormData({...formData, transaction_type: e.target.value})} className="input-dark w-full">
+                <option value="income">Revenu</option>
+                <option value="expense">Dépense</option>
+              </select>
+              <input type="number" placeholder="Montant" value={formData.amount} onChange={(e) => setFormData({...formData, amount: parseFloat(e.target.value)})} className="input-dark w-full" />
+              <input type="text" placeholder="Description" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="input-dark w-full" />
+              <input type="date" value={formData.date} onChange={(e) => setFormData({...formData, date: e.target.value})} className="input-dark w-full" />
+              <div className="flex gap-2">
+                <button onClick={() => setShowAdd(false)} className="btn-secondary flex-1">Annuler</button>
+                <button onClick={addTransaction} className="btn-primary flex-1">Ajouter</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Advertising Section Component
+const AdvertisingSection = ({ advertising, onDelete, onRefresh }) => {
+  const [showAdd, setShowAdd] = useState(false);
+  const [formData, setFormData] = useState({
+    title: '', ad_type: 'banner', placement: 'homepage', budget: 0,
+    start_date: new Date().toISOString().split('T')[0],
+    end_date: new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0]
+  });
+
+  const createAd = async () => {
+    try {
+      await advertisingAPI.create(formData);
+      toast.success('Campagne créée');
+      setShowAdd(false);
+      onRefresh();
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+          Publicités
+        </h1>
+        <button onClick={() => setShowAdd(true)} className="btn-primary flex items-center gap-2">
+          <Plus className="w-4 h-4" /> Nouvelle campagne
+        </button>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="card-service rounded-xl p-4">
+          <p className="text-sm text-gray-400 mb-1">Campagnes actives</p>
+          <p className="text-2xl font-bold text-[#0047AB]">{advertising.stats.active_campaigns || 0}</p>
+        </div>
+        <div className="card-service rounded-xl p-4">
+          <p className="text-sm text-gray-400 mb-1">Impressions</p>
+          <p className="text-2xl font-bold text-white">{advertising.stats.total_impressions || 0}</p>
+        </div>
+        <div className="card-service rounded-xl p-4">
+          <p className="text-sm text-gray-400 mb-1">Clics</p>
+          <p className="text-2xl font-bold text-green-400">{advertising.stats.total_clicks || 0}</p>
+        </div>
+        <div className="card-service rounded-xl p-4">
+          <p className="text-sm text-gray-400 mb-1">Budget dépensé</p>
+          <p className="text-2xl font-bold text-[#D4AF37]">{advertising.stats.total_spent || 0} CHF</p>
+        </div>
+      </div>
+
+      {/* Ad Types */}
+      <div className="card-service rounded-xl p-6">
+        <h2 className="text-lg font-semibold text-white mb-4">Types de publicité disponibles</h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {[
+            { type: 'banner', name: 'Bannière', price: '50 CHF/jour' },
+            { type: 'featured', name: 'Mise en avant', price: '100 CHF/semaine' },
+            { type: 'spotlight', name: 'Spotlight', price: '200 CHF/semaine' },
+            { type: 'premium_listing', name: 'Listing Premium', price: '150 CHF/mois' },
+            { type: 'video', name: 'Vidéo', price: '300 CHF/semaine' },
+            { type: 'popup', name: 'Popup', price: '250 CHF/semaine' },
+          ].map((ad) => (
+            <div key={ad.type} className="p-4 bg-white/5 rounded-xl">
+              <p className="text-white font-medium">{ad.name}</p>
+              <p className="text-sm text-[#D4AF37]">{ad.price}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Campaigns */}
+      {advertising.campaigns?.length > 0 ? (
+        <div className="space-y-3">
+          {advertising.campaigns.map((campaign) => (
+            <div key={campaign.id} className="card-service rounded-xl p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-white font-medium">{campaign.title}</p>
+                  <p className="text-sm text-gray-400">{campaign.ad_type} • {campaign.placement}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className={`px-2 py-1 rounded-full text-xs ${campaign.is_active ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'}`}>
+                    {campaign.is_active ? 'Active' : 'Inactive'}
+                  </span>
+                  <button onClick={() => onDelete(campaign.id)} className="text-red-400 hover:text-red-300">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="card-service rounded-xl p-12 text-center">
+          <Megaphone className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+          <p className="text-gray-400">Aucune campagne publicitaire</p>
+        </div>
+      )}
+
+      {showAdd && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="card-service rounded-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-white mb-4">Nouvelle campagne</h3>
+            <div className="space-y-4">
+              <input type="text" placeholder="Titre de la campagne" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="input-dark w-full" />
+              <select value={formData.ad_type} onChange={(e) => setFormData({...formData, ad_type: e.target.value})} className="input-dark w-full">
+                <option value="banner">Bannière</option>
+                <option value="featured">Mise en avant</option>
+                <option value="spotlight">Spotlight</option>
+                <option value="premium_listing">Listing Premium</option>
+                <option value="video">Vidéo</option>
+              </select>
+              <select value={formData.placement} onChange={(e) => setFormData({...formData, placement: e.target.value})} className="input-dark w-full">
+                <option value="homepage">Page d'accueil</option>
+                <option value="category">Page catégorie</option>
+                <option value="search">Résultats recherche</option>
+                <option value="sidebar">Barre latérale</option>
+              </select>
+              <input type="number" placeholder="Budget (CHF)" value={formData.budget} onChange={(e) => setFormData({...formData, budget: parseFloat(e.target.value)})} className="input-dark w-full" />
+              <div className="grid grid-cols-2 gap-4">
+                <input type="date" value={formData.start_date} onChange={(e) => setFormData({...formData, start_date: e.target.value})} className="input-dark w-full" />
+                <input type="date" value={formData.end_date} onChange={(e) => setFormData({...formData, end_date: e.target.value})} className="input-dark w-full" />
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => setShowAdd(false)} className="btn-secondary flex-1">Annuler</button>
+                <button onClick={createAd} className="btn-primary flex-1">Créer</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Form Modal Component for adding items
+const FormModal = ({ type, item, onClose, onSuccess }) => {
+  const [formData, setFormData] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      switch(type) {
+        case 'offer':
+          await offersAPI.create({ ...formData, discount_type: 'percentage' });
+          break;
+        case 'training':
+          await trainingsAPI.create(formData);
+          break;
+        case 'job':
+          await jobsAPI.create(formData);
+          break;
+        case 'realestate':
+          await realEstateAPI.create(formData);
+          break;
+        case 'investment':
+          await investmentsAPI.create(formData);
+          break;
+        case 'service':
+          await servicesProductsAPI.create({ ...formData, currency: 'CHF' });
+          break;
+        default:
+          break;
+      }
+      toast.success('Créé avec succès');
+      onSuccess();
+    } catch (error) {
+      toast.error('Erreur lors de la création');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderForm = () => {
+    switch(type) {
+      case 'offer':
+        return (
+          <>
+            <input type="text" placeholder="Titre de l'offre" onChange={(e) => setFormData({...formData, title: e.target.value})} className="input-dark w-full" />
+            <textarea placeholder="Description" onChange={(e) => setFormData({...formData, description: e.target.value})} className="input-dark w-full" />
+            <input type="number" placeholder="Réduction (%)" onChange={(e) => setFormData({...formData, discount_value: parseFloat(e.target.value)})} className="input-dark w-full" />
+          </>
+        );
+      case 'training':
+        return (
+          <>
+            <input type="text" placeholder="Titre de la formation" onChange={(e) => setFormData({...formData, title: e.target.value})} className="input-dark w-full" />
+            <textarea placeholder="Description" onChange={(e) => setFormData({...formData, description: e.target.value})} className="input-dark w-full" />
+            <input type="text" placeholder="Durée (ex: 2 heures)" onChange={(e) => setFormData({...formData, duration: e.target.value})} className="input-dark w-full" />
+            <input type="number" placeholder="Prix (CHF)" onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value)})} className="input-dark w-full" />
+            <label className="flex items-center gap-2 text-gray-400">
+              <input type="checkbox" onChange={(e) => setFormData({...formData, is_online: e.target.checked})} /> En ligne
+            </label>
+          </>
+        );
+      case 'job':
+        return (
+          <>
+            <input type="text" placeholder="Titre du poste" onChange={(e) => setFormData({...formData, title: e.target.value})} className="input-dark w-full" />
+            <textarea placeholder="Description" onChange={(e) => setFormData({...formData, description: e.target.value})} className="input-dark w-full" />
+            <select onChange={(e) => setFormData({...formData, job_type: e.target.value})} className="input-dark w-full">
+              <option value="full_time">Temps plein</option>
+              <option value="part_time">Temps partiel</option>
+              <option value="freelance">Freelance</option>
+              <option value="internship">Stage</option>
+            </select>
+            <input type="text" placeholder="Lieu" onChange={(e) => setFormData({...formData, location: e.target.value})} className="input-dark w-full" />
+            <div className="grid grid-cols-2 gap-2">
+              <input type="number" placeholder="Salaire min" onChange={(e) => setFormData({...formData, salary_min: parseFloat(e.target.value)})} className="input-dark w-full" />
+              <input type="number" placeholder="Salaire max" onChange={(e) => setFormData({...formData, salary_max: parseFloat(e.target.value)})} className="input-dark w-full" />
+            </div>
+          </>
+        );
+      case 'realestate':
+        return (
+          <>
+            <input type="text" placeholder="Titre" onChange={(e) => setFormData({...formData, title: e.target.value})} className="input-dark w-full" />
+            <textarea placeholder="Description" onChange={(e) => setFormData({...formData, description: e.target.value})} className="input-dark w-full" />
+            <select onChange={(e) => setFormData({...formData, property_type: e.target.value})} className="input-dark w-full">
+              <option value="commercial">Commercial</option>
+              <option value="office">Bureau</option>
+              <option value="storage">Stockage</option>
+              <option value="land">Terrain</option>
+            </select>
+            <input type="number" placeholder="Surface (m²)" onChange={(e) => setFormData({...formData, surface: parseFloat(e.target.value)})} className="input-dark w-full" />
+            <input type="number" placeholder="Prix (CHF)" onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value)})} className="input-dark w-full" />
+            <input type="text" placeholder="Adresse" onChange={(e) => setFormData({...formData, address: e.target.value})} className="input-dark w-full" />
+          </>
+        );
+      case 'investment':
+        return (
+          <>
+            <input type="text" placeholder="Titre" onChange={(e) => setFormData({...formData, title: e.target.value})} className="input-dark w-full" />
+            <textarea placeholder="Description" onChange={(e) => setFormData({...formData, description: e.target.value})} className="input-dark w-full" />
+            <input type="number" placeholder="Investissement minimum (CHF)" onChange={(e) => setFormData({...formData, min_investment: parseFloat(e.target.value)})} className="input-dark w-full" />
+            <input type="number" placeholder="Retour attendu (%)" onChange={(e) => setFormData({...formData, expected_return: parseFloat(e.target.value)})} className="input-dark w-full" />
+            <select onChange={(e) => setFormData({...formData, risk_level: e.target.value})} className="input-dark w-full">
+              <option value="low">Risque faible</option>
+              <option value="medium">Risque moyen</option>
+              <option value="high">Risque élevé</option>
+            </select>
+          </>
+        );
+      case 'service':
+        return (
+          <>
+            <input type="text" placeholder="Nom" onChange={(e) => setFormData({...formData, name: e.target.value})} className="input-dark w-full" />
+            <textarea placeholder="Description" onChange={(e) => setFormData({...formData, description: e.target.value})} className="input-dark w-full" />
+            <select onChange={(e) => setFormData({...formData, type: e.target.value})} className="input-dark w-full">
+              <option value="service">Service</option>
+              <option value="product">Produit</option>
+            </select>
+            <input type="number" placeholder="Prix (CHF)" onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value)})} className="input-dark w-full" />
+            <label className="flex items-center gap-2 text-gray-400">
+              <input type="checkbox" onChange={(e) => setFormData({...formData, is_delivery: e.target.checked})} /> Livraison disponible
+            </label>
+          </>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const titles = {
+    offer: 'Nouvelle offre',
+    training: 'Nouvelle formation',
+    job: 'Nouvelle offre d\'emploi',
+    realestate: 'Nouveau bien immobilier',
+    investment: 'Nouvel investissement',
+    service: 'Nouveau service/produit',
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="card-service rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <h3 className="text-lg font-semibold text-white mb-4">{titles[type]}</h3>
+        <div className="space-y-4">
+          {renderForm()}
+          <div className="flex gap-2 pt-4">
+            <button onClick={onClose} className="btn-secondary flex-1">Annuler</button>
+            <button onClick={handleSubmit} disabled={loading} className="btn-primary flex-1">
+              {loading ? 'Création...' : 'Créer'}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
