@@ -288,6 +288,25 @@ def decode_token(token: str) -> dict:
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Token invalide")
 
+# Helper function to create order notifications
+async def create_order_notification(enterprise_id: str, order_id: str, client_name: str, total: float):
+    enterprise = await db.enterprises.find_one({"id": enterprise_id})
+    if enterprise:
+        notification_doc = {
+            "id": str(uuid.uuid4()),
+            "user_id": enterprise['user_id'],
+            "sender_id": "system",
+            "title": "Nouvelle commande !",
+            "message": f"Vous avez reçu une nouvelle commande de {client_name} pour {total:.2f} CHF",
+            "notification_type": "order",
+            "link": f"/enterprise-dashboard?tab=orders&order={order_id}",
+            "data": {"order_id": order_id, "total": total},
+            "is_read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(notification_doc)
+
+
 async def get_current_user(authorization: Optional[str] = Header(None)) -> dict:
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Non authentifié")
