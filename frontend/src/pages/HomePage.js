@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Star, Award, Crown, CheckCircle, ArrowRight, Play, Sparkles, TrendingUp, Gift, Users } from 'lucide-react';
-import { featuredAPI, categoryAPI, enterpriseAPI, servicesProductsAPI } from '../services/api';
+import { ChevronRight, Star, Award, Crown, CheckCircle, ArrowRight, Play, Sparkles, TrendingUp, Gift, Users, Briefcase, MapPin, Clock } from 'lucide-react';
+import { featuredAPI, categoryAPI, enterpriseAPI, servicesProductsAPI, jobsAPI } from '../services/api';
 import EnterpriseCard from '../components/EnterpriseCard';
 import ServiceProductCard from '../components/ServiceProductCard';
 
@@ -10,6 +10,7 @@ const HomePage = () => {
   const [guests, setGuests] = useState([]);
   const [offres, setOffres] = useState([]);
   const [premium, setPremium] = useState([]);
+  const [jobs, setJobs] = useState([]);
   const [productCategories, setProductCategories] = useState([]);
   const [serviceCategories, setServiceCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,13 +18,14 @@ const HomePage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [tendRes, guestRes, offreRes, premRes, prodCatRes, servCatRes] = await Promise.all([
+        const [tendRes, guestRes, offreRes, premRes, prodCatRes, servCatRes, jobsRes] = await Promise.all([
           featuredAPI.tendances(),
           featuredAPI.guests(),
           featuredAPI.offres(),
           featuredAPI.premium(),
           categoryAPI.products(),
-          categoryAPI.services()
+          categoryAPI.services(),
+          jobsAPI.list().catch(() => ({ data: [] }))
         ]);
         setTendances(tendRes.data);
         setGuests(guestRes.data);
@@ -31,6 +33,7 @@ const HomePage = () => {
         setPremium(premRes.data);
         setProductCategories(prodCatRes.data);
         setServiceCategories(servCatRes.data);
+        setJobs(jobsRes.data || []);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
