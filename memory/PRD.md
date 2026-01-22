@@ -20,7 +20,7 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 - ✅ User type differentiation (client, enterprise, admin)
 - ✅ Beautiful login page with split layout
 
-#### Shopping Cart System (NEW)
+#### Shopping Cart System
 - ✅ CartContext for global cart state
 - ✅ Add to cart from services/products pages
 - ✅ Add to cart from enterprise profile page
@@ -29,7 +29,7 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 - ✅ Cart persistence in localStorage
 - ✅ Checkout process creating orders
 
-#### Orders System (NEW)
+#### Orders System
 - ✅ OrdersPage showing all user orders
 - ✅ Order details with items, quantities, prices
 - ✅ Order status badges (En attente, Confirmée, Terminée, Annulée)
@@ -58,13 +58,26 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 - ✅ Recent orders list
 - ✅ Navigation sidebar with all sections
 
-#### Enterprise Dashboard
+#### Enterprise Dashboard (FULLY TESTED - January 22, 2026)
 - ✅ Business statistics (views, orders, revenue, rating)
 - ✅ Services/products management
-- ✅ Order management
+- ✅ Order management with status updates
 - ✅ Customer reviews
-- ✅ Financial overview with commission calculation
+- ✅ Financial overview with commission calculation (5%)
 - ✅ Subscription plans (Standard/Premium)
+- ✅ **Mon équipe (Team Management)** - Add/remove team members
+- ✅ **Agenda/Calendar** - Schedule appointments, availability, tasks
+- ✅ **Gestion des stocks** - Stock management with alerts
+- ✅ **Finances** - Income/expense tracking, transactions
+- ✅ **Documents** - File storage by category (Legal, Financial, Contracts, Certificates)
+- ✅ **Offres d'emploi** - Job postings with full details
+- ✅ **Formations** - Training/courses offered
+- ✅ **Immobilier** - Real estate listings
+- ✅ **Investissements** - Investment opportunities
+- ✅ **Publicités** - Advertising campaigns with stats
+- ✅ **Offres & Promotions** - Special offers and discounts
+- ✅ **Commandes permanentes** - Recurring orders
+- ✅ **Développement** - Training resources for business development
 
 #### Admin Panel
 - ✅ Global statistics
@@ -93,15 +106,17 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 ```
 /app/
 ├── backend/
-│   ├── server.py              # FastAPI application
+│   ├── server.py              # FastAPI application (1600+ lines)
 │   ├── requirements.txt       # Python dependencies
+│   ├── tests/
+│   │   └── test_enterprise_dashboard.py  # 27 tests
 │   └── .env                   # Environment config
 └── frontend/
     ├── src/
     │   ├── App.js             # Main app with routes
     │   ├── context/
     │   │   ├── AuthContext.js # Authentication state
-    │   │   └── CartContext.js # Shopping cart state (NEW)
+    │   │   └── CartContext.js # Shopping cart state
     │   ├── pages/
     │   │   ├── HomePage.js
     │   │   ├── AuthPage.js
@@ -109,10 +124,10 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
     │   │   ├── ProductsPage.js
     │   │   ├── EnterprisesPage.js
     │   │   ├── EnterprisePage.js
-    │   │   ├── CartPage.js    # (NEW)
-    │   │   ├── OrdersPage.js  # (NEW)
+    │   │   ├── CartPage.js
+    │   │   ├── OrdersPage.js
     │   │   ├── ClientDashboard.js
-    │   │   ├── EnterpriseDashboard.js
+    │   │   ├── EnterpriseDashboard.js (1400+ lines)
     │   │   ├── AdminDashboard.js
     │   │   └── PaymentPages.js
     │   ├── components/
@@ -143,7 +158,7 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 - POST `/api/services-products`
 - DELETE `/api/services-products/:id`
 
-### Orders (NEW)
+### Orders
 - GET `/api/orders` - List user orders
 - POST `/api/orders` - Create order from cart
 - PUT `/api/orders/:id/status` - Update order status
@@ -161,6 +176,20 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 - GET `/api/admin/users`
 - PUT `/api/admin/users/:id/verify`
 
+### Enterprise Management (NEW - All tested)
+- `/api/enterprise/team` - Team management (GET, POST, PUT, DELETE)
+- `/api/enterprise/agenda` - Calendar/agenda (GET, POST, PUT, DELETE)
+- `/api/enterprise/finances` - Finance tracking (GET, POST transactions)
+- `/api/enterprise/stock` - Stock management (GET, POST, movement)
+- `/api/enterprise/documents` - Document storage (GET, POST, DELETE)
+- `/api/enterprise/jobs` - Job postings (GET, POST, DELETE)
+- `/api/enterprise/trainings` - Training courses (GET, POST, DELETE)
+- `/api/enterprise/real-estate` - Real estate (GET, POST, DELETE)
+- `/api/enterprise/investments` - Investments (GET, POST, DELETE)
+- `/api/enterprise/advertising` - Ad campaigns (GET, POST, toggle, DELETE)
+- `/api/enterprise/offers` - Promotions (GET, POST, DELETE)
+- `/api/enterprise/permanent-orders` - Recurring orders (GET, POST, toggle, DELETE)
+
 ## Test Credentials
 
 | Role | Email | Password |
@@ -172,22 +201,35 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 ## Live URL
 https://lausanne-biz.preview.emergentagent.com
 
-## Recent Changes (January 21, 2026)
+## Recent Changes (January 22, 2026)
 
 ### Bug Fixes
-1. **Cart System** - Implemented complete shopping cart:
-   - Created CartContext.js for global cart state
-   - Created CartPage.js with full cart management
-   - Created OrdersPage.js for order history
-   - Added cart functionality to Header.js
-   - Added onAddToCart to ServiceProductCard.js
-   - Updated ServicesPage.js and ProductsPage.js
-   - Updated EnterprisePage.js with add to cart buttons
-   - Updated App.js with CartProvider and new routes
+1. **Enterprise Dashboard Fix** - Fixed enterprise lookup to use user_id instead of email search
+2. **All Enterprise Features Tested** - 27/27 API tests passed
 
-2. **Cart Badge** - Shows item count in header
+### New Features Implemented & Tested
+1. **Team Management** - Add/edit/delete team members with role and department
+2. **Agenda System** - Create appointments, availability slots, blocked times
+3. **Stock Management** - Track inventory with alerts for low stock
+4. **Finance Tracking** - Record income/expenses, view summaries
+5. **Document Storage** - Organize files by category
+6. **Job Postings** - Create employment opportunities
+7. **Training Courses** - Offer educational content
+8. **Real Estate Listings** - Property management
+9. **Investment Opportunities** - Crowdfunding features
+10. **Advertising System** - Campaign management with stats
+11. **Promotions/Offers** - Special deals and discounts
+12. **Permanent Orders** - Recurring order management
 
-3. **Order Creation** - Cart checkout creates real orders in database
+## Testing
+
+### Backend Tests
+- Location: `/app/backend/tests/test_enterprise_dashboard.py`
+- Tests: 27 passing
+- Coverage: Auth, Team, Agenda, Finances, Stock, Documents, Jobs, Investments, Advertising
+
+### Test Reports
+- `/app/test_reports/iteration_3.json` - Latest test results
 
 ## Backlog / Future Tasks
 
@@ -195,20 +237,20 @@ https://lausanne-biz.preview.emergentagent.com
 - [ ] Image upload for enterprises (logo, photos)
 - [ ] Real-time order notifications
 - [ ] Email notifications (order confirmation, etc.)
+- [ ] Client agenda/booking system (request appointments)
+- [ ] Client wishlist feature
 
 ### P2 - Medium Priority
 - [ ] Video support for enterprise profiles
-- [ ] Advanced search with location
-- [ ] Client investment feature
-- [ ] Staff management for enterprises
-- [ ] Advertising platform
-- [ ] Stock management
+- [ ] Advanced search with location filtering
+- [ ] Admin certification/labeling workflow improvements
+- [ ] Analytics dashboard with charts
 
 ### P3 - Low Priority
 - [ ] Multi-language support
 - [ ] Mobile app (React Native)
-- [ ] Analytics dashboard
-- [ ] Loyalty program
+- [ ] Loyalty/rewards program
+- [ ] Client investment participation
 
 ## Notes
 - Stripe Checkout requires opening the site directly (not in iframe)
