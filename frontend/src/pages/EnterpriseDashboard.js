@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -7,12 +7,13 @@ import {
   Megaphone, ChevronRight, TrendingUp, DollarSign, Star, Gift, Briefcase,
   Home, PieChart, GraduationCap, Clock, CheckCircle, XCircle, Archive,
   FolderOpen, BookOpen, Wallet, Target, BarChart3, PlayCircle, Pause,
-  UserPlus, ClipboardList, AlertTriangle, Box, ArrowUpDown
+  UserPlus, ClipboardList, AlertTriangle, Box, ArrowUpDown, Upload, Image, X
 } from 'lucide-react';
 import { 
   enterpriseAPI, servicesProductsAPI, orderAPI, paymentAPI, offersAPI,
   trainingsAPI, jobsAPI, realEstateAPI, investmentsAPI, stockAPI,
-  agendaAPI, teamAPI, permanentOrdersAPI, documentsAPI, financesAPI, advertisingAPI
+  agendaAPI, teamAPI, permanentOrdersAPI, documentsAPI, financesAPI, advertisingAPI,
+  uploadAPI
 } from '../services/api';
 import { toast } from 'sonner';
 
