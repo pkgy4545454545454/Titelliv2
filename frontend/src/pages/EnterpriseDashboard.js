@@ -1451,38 +1451,96 @@ const AdvertisingSection = ({ advertising, onDelete, onRefresh }) => {
 
 // Form Modal Component for adding items
 const FormModal = ({ type, item, onClose, onSuccess }) => {
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState(() => {
+    // Initialiser avec des valeurs par défaut selon le type
+    switch(type) {
+      case 'service':
+        return { type: 'service', category: 'soins_esthetiques', is_delivery: false };
+      case 'offer':
+        return { discount_type: 'percentage', is_active: true };
+      case 'training':
+        return { is_online: false, category: 'Marketing' };
+      case 'job':
+        return { job_type: 'full_time', location: 'Lausanne' };
+      case 'realestate':
+        return { property_type: 'commercial', city: 'Lausanne', transaction_type: 'rent', price_period: 'month' };
+      case 'investment':
+        return { risk_level: 'medium', investment_type: 'equity' };
+      default:
+        return {};
+    }
+  });
   const [loading, setLoading] = useState(false);
+
+  const serviceCategories = [
+    { id: 'restauration', name: 'Restauration' },
+    { id: 'soins_esthetiques', name: 'Soins esthétiques' },
+    { id: 'coiffure_barber', name: 'Coiffure/Barber' },
+    { id: 'cours_sport', name: 'Cours de sport' },
+    { id: 'activites_loisirs', name: 'Loisirs & Événements' },
+    { id: 'nettoyage', name: 'Nettoyage' },
+    { id: 'multiservices', name: 'Multiservices' },
+    { id: 'petits_travaux', name: 'Petits travaux' },
+    { id: 'formation', name: 'Formation' },
+    { id: 'sante', name: 'Santé' },
+    { id: 'expert_tech', name: 'Technologie' },
+    { id: 'expert_fiscal', name: 'Fiscalité' },
+    { id: 'expert_juridique', name: 'Juridique' },
+  ];
+
+  const productCategories = [
+    { id: 'courses_alimentaires', name: 'Alimentaire' },
+    { id: 'vetements_mode', name: 'Vêtements & Mode' },
+    { id: 'maquillage_beaute', name: 'Beauté' },
+    { id: 'sport', name: 'Sport' },
+    { id: 'electronique', name: 'Électronique' },
+    { id: 'ameublement_deco', name: 'Décoration' },
+    { id: 'bricolage_jardinage', name: 'Bricolage' },
+  ];
 
   const handleSubmit = async () => {
     setLoading(true);
     try {
       switch(type) {
         case 'offer':
-          await offersAPI.create({ ...formData, discount_type: 'percentage' });
+          if (!formData.title) throw new Error('Titre requis');
+          await offersAPI.create({ ...formData, discount_type: 'percentage', is_active: true });
           break;
         case 'training':
-          await trainingsAPI.create(formData);
+          if (!formData.title) throw new Error('Titre requis');
+          await trainingsAPI.create({ ...formData, category: formData.category || 'Marketing' });
           break;
         case 'job':
+          if (!formData.title) throw new Error('Titre requis');
           await jobsAPI.create(formData);
           break;
         case 'realestate':
-          await realEstateAPI.create(formData);
+          if (!formData.title) throw new Error('Titre requis');
+          await realEstateAPI.create({ ...formData, city: formData.city || 'Lausanne' });
           break;
         case 'investment':
-          await investmentsAPI.create(formData);
+          if (!formData.title) throw new Error('Titre requis');
+          await investmentsAPI.create({ ...formData, investment_type: formData.investment_type || 'equity' });
           break;
         case 'service':
-          await servicesProductsAPI.create({ ...formData, currency: 'CHF' });
+          if (!formData.name) throw new Error('Nom requis');
+          if (!formData.description) throw new Error('Description requise');
+          if (!formData.price) throw new Error('Prix requis');
+          await servicesProductsAPI.create({ 
+            ...formData, 
+            currency: 'CHF',
+            category: formData.category || 'soins_esthetiques',
+            type: formData.type || 'service'
+          });
           break;
         default:
           break;
       }
-      toast.success('Créé avec succès');
+      toast.success('Créé avec succès !');
       onSuccess();
     } catch (error) {
-      toast.error('Erreur lors de la création');
+      console.error('Error creating:', error);
+      toast.error(error.message || 'Erreur lors de la création');
     } finally {
       setLoading(false);
     }
@@ -1493,83 +1551,226 @@ const FormModal = ({ type, item, onClose, onSuccess }) => {
       case 'offer':
         return (
           <>
-            <input type="text" placeholder="Titre de l'offre" onChange={(e) => setFormData({...formData, title: e.target.value})} className="input-dark w-full" />
-            <textarea placeholder="Description" onChange={(e) => setFormData({...formData, description: e.target.value})} className="input-dark w-full" />
-            <input type="number" placeholder="Réduction (%)" onChange={(e) => setFormData({...formData, discount_value: parseFloat(e.target.value)})} className="input-dark w-full" />
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Titre de l'offre *</label>
+              <input type="text" placeholder="Ex: Promotion été -20%" value={formData.title || ''} onChange={(e) => setFormData({...formData, title: e.target.value})} className="input-dark w-full" required />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Description</label>
+              <textarea placeholder="Décrivez votre offre" value={formData.description || ''} onChange={(e) => setFormData({...formData, description: e.target.value})} className="input-dark w-full" rows={3} />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Réduction (%) *</label>
+              <input type="number" placeholder="Ex: 20" min="1" max="100" value={formData.discount_value || ''} onChange={(e) => setFormData({...formData, discount_value: parseFloat(e.target.value)})} className="input-dark w-full" required />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Date début</label>
+                <input type="date" value={formData.valid_from || ''} onChange={(e) => setFormData({...formData, valid_from: e.target.value})} className="input-dark w-full" />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Date fin</label>
+                <input type="date" value={formData.valid_until || ''} onChange={(e) => setFormData({...formData, valid_until: e.target.value})} className="input-dark w-full" />
+              </div>
+            </div>
           </>
         );
       case 'training':
         return (
           <>
-            <input type="text" placeholder="Titre de la formation" onChange={(e) => setFormData({...formData, title: e.target.value})} className="input-dark w-full" />
-            <textarea placeholder="Description" onChange={(e) => setFormData({...formData, description: e.target.value})} className="input-dark w-full" />
-            <input type="text" placeholder="Durée (ex: 2 heures)" onChange={(e) => setFormData({...formData, duration: e.target.value})} className="input-dark w-full" />
-            <input type="number" placeholder="Prix (CHF)" onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value)})} className="input-dark w-full" />
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Titre de la formation *</label>
+              <input type="text" placeholder="Ex: Formation Marketing Digital" value={formData.title || ''} onChange={(e) => setFormData({...formData, title: e.target.value})} className="input-dark w-full" required />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Description *</label>
+              <textarea placeholder="Décrivez le contenu de la formation" value={formData.description || ''} onChange={(e) => setFormData({...formData, description: e.target.value})} className="input-dark w-full" rows={3} required />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Durée *</label>
+                <input type="text" placeholder="Ex: 2 heures" value={formData.duration || ''} onChange={(e) => setFormData({...formData, duration: e.target.value})} className="input-dark w-full" required />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Prix (CHF) *</label>
+                <input type="number" placeholder="Ex: 150" min="0" value={formData.price || ''} onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value)})} className="input-dark w-full" required />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Catégorie</label>
+              <select value={formData.category || 'Marketing'} onChange={(e) => setFormData({...formData, category: e.target.value})} className="input-dark w-full">
+                <option value="Marketing">Marketing</option>
+                <option value="Finance">Finance</option>
+                <option value="Management">Management</option>
+                <option value="Ventes">Ventes</option>
+                <option value="Technologie">Technologie</option>
+                <option value="Communication">Communication</option>
+              </select>
+            </div>
             <label className="flex items-center gap-2 text-gray-400">
-              <input type="checkbox" onChange={(e) => setFormData({...formData, is_online: e.target.checked})} /> En ligne
+              <input type="checkbox" checked={formData.is_online || false} onChange={(e) => setFormData({...formData, is_online: e.target.checked})} className="rounded" /> Formation en ligne
             </label>
           </>
         );
       case 'job':
         return (
           <>
-            <input type="text" placeholder="Titre du poste" onChange={(e) => setFormData({...formData, title: e.target.value})} className="input-dark w-full" />
-            <textarea placeholder="Description" onChange={(e) => setFormData({...formData, description: e.target.value})} className="input-dark w-full" />
-            <select onChange={(e) => setFormData({...formData, job_type: e.target.value})} className="input-dark w-full">
-              <option value="full_time">Temps plein</option>
-              <option value="part_time">Temps partiel</option>
-              <option value="freelance">Freelance</option>
-              <option value="internship">Stage</option>
-            </select>
-            <input type="text" placeholder="Lieu" onChange={(e) => setFormData({...formData, location: e.target.value})} className="input-dark w-full" />
-            <div className="grid grid-cols-2 gap-2">
-              <input type="number" placeholder="Salaire min" onChange={(e) => setFormData({...formData, salary_min: parseFloat(e.target.value)})} className="input-dark w-full" />
-              <input type="number" placeholder="Salaire max" onChange={(e) => setFormData({...formData, salary_max: parseFloat(e.target.value)})} className="input-dark w-full" />
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Titre du poste *</label>
+              <input type="text" placeholder="Ex: Développeur Web" value={formData.title || ''} onChange={(e) => setFormData({...formData, title: e.target.value})} className="input-dark w-full" required />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Description *</label>
+              <textarea placeholder="Décrivez le poste et les responsabilités" value={formData.description || ''} onChange={(e) => setFormData({...formData, description: e.target.value})} className="input-dark w-full" rows={3} required />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Type de contrat *</label>
+                <select value={formData.job_type || 'full_time'} onChange={(e) => setFormData({...formData, job_type: e.target.value})} className="input-dark w-full">
+                  <option value="full_time">Temps plein</option>
+                  <option value="part_time">Temps partiel</option>
+                  <option value="freelance">Freelance</option>
+                  <option value="internship">Stage</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Lieu *</label>
+                <input type="text" placeholder="Ex: Lausanne" value={formData.location || 'Lausanne'} onChange={(e) => setFormData({...formData, location: e.target.value})} className="input-dark w-full" required />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Salaire min (CHF)</label>
+                <input type="number" placeholder="Ex: 4000" min="0" value={formData.salary_min || ''} onChange={(e) => setFormData({...formData, salary_min: parseFloat(e.target.value) || null})} className="input-dark w-full" />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Salaire max (CHF)</label>
+                <input type="number" placeholder="Ex: 6000" min="0" value={formData.salary_max || ''} onChange={(e) => setFormData({...formData, salary_max: parseFloat(e.target.value) || null})} className="input-dark w-full" />
+              </div>
             </div>
           </>
         );
       case 'realestate':
         return (
           <>
-            <input type="text" placeholder="Titre" onChange={(e) => setFormData({...formData, title: e.target.value})} className="input-dark w-full" />
-            <textarea placeholder="Description" onChange={(e) => setFormData({...formData, description: e.target.value})} className="input-dark w-full" />
-            <select onChange={(e) => setFormData({...formData, property_type: e.target.value})} className="input-dark w-full">
-              <option value="commercial">Commercial</option>
-              <option value="office">Bureau</option>
-              <option value="storage">Stockage</option>
-              <option value="land">Terrain</option>
-            </select>
-            <input type="number" placeholder="Surface (m²)" onChange={(e) => setFormData({...formData, surface: parseFloat(e.target.value)})} className="input-dark w-full" />
-            <input type="number" placeholder="Prix (CHF)" onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value)})} className="input-dark w-full" />
-            <input type="text" placeholder="Adresse" onChange={(e) => setFormData({...formData, address: e.target.value})} className="input-dark w-full" />
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Titre *</label>
+              <input type="text" placeholder="Ex: Bureau moderne centre-ville" value={formData.title || ''} onChange={(e) => setFormData({...formData, title: e.target.value})} className="input-dark w-full" required />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Description *</label>
+              <textarea placeholder="Décrivez le bien immobilier" value={formData.description || ''} onChange={(e) => setFormData({...formData, description: e.target.value})} className="input-dark w-full" rows={3} required />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Type de bien *</label>
+                <select value={formData.property_type || 'commercial'} onChange={(e) => setFormData({...formData, property_type: e.target.value})} className="input-dark w-full">
+                  <option value="commercial">Commercial</option>
+                  <option value="office">Bureau</option>
+                  <option value="storage">Stockage</option>
+                  <option value="land">Terrain</option>
+                  <option value="apartment">Appartement</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Transaction *</label>
+                <select value={formData.transaction_type || 'rent'} onChange={(e) => setFormData({...formData, transaction_type: e.target.value})} className="input-dark w-full">
+                  <option value="rent">Location</option>
+                  <option value="sale">Vente</option>
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Surface (m²) *</label>
+                <input type="number" placeholder="Ex: 80" min="1" value={formData.surface || ''} onChange={(e) => setFormData({...formData, surface: parseFloat(e.target.value)})} className="input-dark w-full" required />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Prix (CHF) *</label>
+                <input type="number" placeholder="Ex: 2500" min="0" value={formData.price || ''} onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value)})} className="input-dark w-full" required />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Adresse *</label>
+              <input type="text" placeholder="Ex: Rue du Grand-Pont 12" value={formData.address || ''} onChange={(e) => setFormData({...formData, address: e.target.value})} className="input-dark w-full" required />
+            </div>
           </>
         );
       case 'investment':
         return (
           <>
-            <input type="text" placeholder="Titre" onChange={(e) => setFormData({...formData, title: e.target.value})} className="input-dark w-full" />
-            <textarea placeholder="Description" onChange={(e) => setFormData({...formData, description: e.target.value})} className="input-dark w-full" />
-            <input type="number" placeholder="Investissement minimum (CHF)" onChange={(e) => setFormData({...formData, min_investment: parseFloat(e.target.value)})} className="input-dark w-full" />
-            <input type="number" placeholder="Retour attendu (%)" onChange={(e) => setFormData({...formData, expected_return: parseFloat(e.target.value)})} className="input-dark w-full" />
-            <select onChange={(e) => setFormData({...formData, risk_level: e.target.value})} className="input-dark w-full">
-              <option value="low">Risque faible</option>
-              <option value="medium">Risque moyen</option>
-              <option value="high">Risque élevé</option>
-            </select>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Titre *</label>
+              <input type="text" placeholder="Ex: Expansion du restaurant" value={formData.title || ''} onChange={(e) => setFormData({...formData, title: e.target.value})} className="input-dark w-full" required />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Description *</label>
+              <textarea placeholder="Décrivez l'opportunité d'investissement" value={formData.description || ''} onChange={(e) => setFormData({...formData, description: e.target.value})} className="input-dark w-full" rows={3} required />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Investissement min (CHF) *</label>
+                <input type="number" placeholder="Ex: 5000" min="1" value={formData.min_investment || ''} onChange={(e) => setFormData({...formData, min_investment: parseFloat(e.target.value)})} className="input-dark w-full" required />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Retour attendu (%) *</label>
+                <input type="number" placeholder="Ex: 8" min="0" step="0.1" value={formData.expected_return || ''} onChange={(e) => setFormData({...formData, expected_return: parseFloat(e.target.value)})} className="input-dark w-full" required />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Type d'investissement</label>
+                <select value={formData.investment_type || 'equity'} onChange={(e) => setFormData({...formData, investment_type: e.target.value})} className="input-dark w-full">
+                  <option value="equity">Capital</option>
+                  <option value="loan">Prêt</option>
+                  <option value="revenue_share">Partage de revenus</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Niveau de risque *</label>
+                <select value={formData.risk_level || 'medium'} onChange={(e) => setFormData({...formData, risk_level: e.target.value})} className="input-dark w-full">
+                  <option value="low">Risque faible</option>
+                  <option value="medium">Risque moyen</option>
+                  <option value="high">Risque élevé</option>
+                </select>
+              </div>
+            </div>
           </>
         );
       case 'service':
         return (
           <>
-            <input type="text" placeholder="Nom" onChange={(e) => setFormData({...formData, name: e.target.value})} className="input-dark w-full" />
-            <textarea placeholder="Description" onChange={(e) => setFormData({...formData, description: e.target.value})} className="input-dark w-full" />
-            <select onChange={(e) => setFormData({...formData, type: e.target.value})} className="input-dark w-full">
-              <option value="service">Service</option>
-              <option value="product">Produit</option>
-            </select>
-            <input type="number" placeholder="Prix (CHF)" onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value)})} className="input-dark w-full" />
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Nom du service/produit *</label>
+              <input type="text" placeholder="Ex: Massage relaxant 60 min" value={formData.name || ''} onChange={(e) => setFormData({...formData, name: e.target.value})} className="input-dark w-full" required />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Description *</label>
+              <textarea placeholder="Décrivez votre service ou produit en détail" value={formData.description || ''} onChange={(e) => setFormData({...formData, description: e.target.value})} className="input-dark w-full" rows={3} required />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Type *</label>
+                <select value={formData.type || 'service'} onChange={(e) => setFormData({...formData, type: e.target.value})} className="input-dark w-full">
+                  <option value="service">Service</option>
+                  <option value="product">Produit</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Catégorie *</label>
+                <select value={formData.category || 'soins_esthetiques'} onChange={(e) => setFormData({...formData, category: e.target.value})} className="input-dark w-full">
+                  {(formData.type === 'product' ? productCategories : serviceCategories).map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Prix (CHF) *</label>
+              <input type="number" placeholder="Ex: 120" min="0" step="0.01" value={formData.price || ''} onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value)})} className="input-dark w-full" required />
+            </div>
             <label className="flex items-center gap-2 text-gray-400">
-              <input type="checkbox" onChange={(e) => setFormData({...formData, is_delivery: e.target.checked})} /> Livraison disponible
+              <input type="checkbox" checked={formData.is_delivery || false} onChange={(e) => setFormData({...formData, is_delivery: e.target.checked})} className="rounded" /> Livraison disponible
             </label>
           </>
         );
