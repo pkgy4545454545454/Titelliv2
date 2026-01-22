@@ -15,7 +15,8 @@ import {
   enterpriseAPI, servicesProductsAPI, orderAPI, paymentAPI, offersAPI,
   trainingsAPI, jobsAPI, realEstateAPI, investmentsAPI, stockAPI,
   agendaAPI, teamAPI, permanentOrdersAPI, documentsAPI, financesAPI, advertisingAPI,
-  uploadAPI, subscriptionsAPI
+  uploadAPI, subscriptionsAPI, iaCampaignsAPI, influencersAPI, clientInvitationsAPI,
+  commercialGesturesAPI, getImageUrl
 } from '../services/api';
 import { toast } from 'sonner';
 
