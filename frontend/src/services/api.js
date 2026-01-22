@@ -253,6 +253,36 @@ export const subscriptionsAPI = {
   }),
 };
 
+// IA Marketing APIs
+export const iaCampaignsAPI = {
+  list: () => axios.get(`${API}/enterprise/ia-campaigns`, { headers: getAuthHeaders() }),
+  create: (data) => axios.post(`${API}/enterprise/ia-campaigns`, data, { headers: getAuthHeaders() }),
+  toggle: (id) => axios.put(`${API}/enterprise/ia-campaigns/${id}/toggle`, null, { headers: getAuthHeaders() }),
+  delete: (id) => axios.delete(`${API}/enterprise/ia-campaigns/${id}`, { headers: getAuthHeaders() }),
+};
+
+export const influencersAPI = {
+  list: (category = null) => axios.get(`${API}/influencers`, { params: { category } }),
+  getCollaborations: () => axios.get(`${API}/enterprise/influencer-collaborations`, { headers: getAuthHeaders() }),
+  createCollaboration: (influencerId, message = null, budget = 0) => axios.post(`${API}/enterprise/influencer-collaborations`, null, {
+    params: { influencer_id: influencerId, message, budget },
+    headers: getAuthHeaders()
+  }),
+};
+
+export const clientInvitationsAPI = {
+  list: () => axios.get(`${API}/enterprise/invitations`, { headers: getAuthHeaders() }),
+  create: (data) => axios.post(`${API}/enterprise/invitations`, data, { headers: getAuthHeaders() }),
+  delete: (id) => axios.delete(`${API}/enterprise/invitations/${id}`, { headers: getAuthHeaders() }),
+};
+
+export const commercialGesturesAPI = {
+  list: () => axios.get(`${API}/enterprise/commercial-gestures`, { headers: getAuthHeaders() }),
+  create: (data) => axios.post(`${API}/enterprise/commercial-gestures`, data, { headers: getAuthHeaders() }),
+  toggle: (id) => axios.put(`${API}/enterprise/commercial-gestures/${id}/toggle`, null, { headers: getAuthHeaders() }),
+  delete: (id) => axios.delete(`${API}/enterprise/commercial-gestures/${id}`, { headers: getAuthHeaders() }),
+};
+
 export default {
   auth: authAPI,
   enterprise: enterpriseAPI,
