@@ -161,6 +161,63 @@ const Header = () => {
             <button className="p-2 text-gray-400 hover:text-white transition-colors hidden sm:block" data-testid="wishlist-btn">
               <Heart className="w-5 h-5" />
             </button>
+
+            {/* Notifications */}
+            {isAuthenticated && (
+              <DropdownMenu open={notifOpen} onOpenChange={setNotifOpen}>
+                <DropdownMenuTrigger asChild>
+                  <button className="p-2 text-gray-400 hover:text-white transition-colors relative" data-testid="notifications-btn">
+                    <Bell className="w-5 h-5" />
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-80 bg-[#0F0F0F] border-white/10 max-h-96 overflow-y-auto">
+                  <div className="px-3 py-2 border-b border-white/10 flex items-center justify-between">
+                    <p className="text-sm font-medium text-white">Notifications</p>
+                    {unreadCount > 0 && (
+                      <button onClick={handleMarkAllRead} className="text-xs text-[#0047AB] hover:underline flex items-center gap-1">
+                        <CheckCheck className="w-3 h-3" /> Tout lire
+                      </button>
+                    )}
+                  </div>
+                  {notifications.length > 0 ? (
+                    <>
+                      {notifications.slice(0, 10).map((notif) => (
+                        <div
+                          key={notif.id}
+                          onClick={() => handleNotificationClick(notif)}
+                          className={`px-3 py-3 border-b border-white/5 cursor-pointer hover:bg-white/5 transition-colors ${!notif.is_read ? 'bg-[#0047AB]/10' : ''}`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <span className="text-lg">{getNotificationIcon(notif.notification_type)}</span>
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-sm ${!notif.is_read ? 'text-white font-medium' : 'text-gray-300'}`}>
+                                {notif.title}
+                              </p>
+                              <p className="text-xs text-gray-400 line-clamp-2 mt-0.5">{notif.message}</p>
+                              <p className="text-xs text-gray-500 mt-1">{formatTime(notif.created_at)}</p>
+                            </div>
+                            {!notif.is_read && (
+                              <div className="w-2 h-2 bg-[#0047AB] rounded-full flex-shrink-0 mt-1"></div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <div className="px-3 py-8 text-center">
+                      <Bell className="w-8 h-8 text-gray-600 mx-auto mb-2" />
+                      <p className="text-sm text-gray-400">Aucune notification</p>
+                    </div>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+
             <Link to="/cart" className="p-2 text-gray-400 hover:text-white transition-colors relative" data-testid="cart-btn">
               <ShoppingCart className="w-5 h-5" />
               {cartCount > 0 && (
