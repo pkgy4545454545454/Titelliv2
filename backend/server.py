@@ -196,12 +196,320 @@ class OrderCreate(BaseModel):
     delivery_address: Optional[str] = None
     notes: Optional[str] = None
 
-# Subscription Plans
+# Subscription Plans - Forfaits principaux
 SUBSCRIPTION_PLANS = {
-    "annual": {"name": "Abonnement Annuel", "price": 250.0, "duration_months": 12},
-    "premium_annual": {"name": "Premium Annuel", "price": 540.0, "duration_months": 12},
-    "premium_monthly": {"name": "Premium Mensuel", "price": 45.0, "duration_months": 1},
+    "standard": {
+        "name": "Standard",
+        "price": 200.0,
+        "duration_months": 1,
+        "features": [
+            "Exposition standard",
+            "Une publication mensuelle",
+            "Système de Cash-Back",
+            "Système de gestion des stocks"
+        ],
+        "tier": "basic"
+    },
+    "guest": {
+        "name": "Guest",
+        "price": 250.0,
+        "duration_months": 1,
+        "features": [
+            "Profil prestataire professionnel",
+            "Référencement préférentiel",
+            "Publication d'offres illimitées",
+            "Système de Cash-Back",
+            "Système de gestion des stocks"
+        ],
+        "tier": "basic"
+    },
+    "premium": {
+        "name": "Premium",
+        "price": 500.0,
+        "duration_months": 1,
+        "features": [
+            "Profil prestataire professionnel",
+            "4 Publicités par mois",
+            "Accessible aux investisseurs",
+            "Accessible aux livraisons 24/24",
+            "Référencement préférentiel",
+            "Publication d'offres illimitées",
+            "Système de Cash-Back",
+            "Système de gestion des stocks",
+            "Système gestion du personnel"
+        ],
+        "tier": "premium"
+    },
+    "premium_mvp": {
+        "name": "Premium MVP",
+        "price": 1000.0,
+        "duration_months": 1,
+        "features": [
+            "Profil prestataire professionnel",
+            "5 Publicités média par mois",
+            "1 Publicité vidéo par mois",
+            "Accessible aux investisseurs",
+            "Accessible aux livraisons 24/24",
+            "Accès aux fournisseurs",
+            "Accès au local 24/24",
+            "Référencement préférentiel",
+            "Publication d'offres illimitées",
+            "Système de Cash-Back",
+            "Système de gestion des stocks",
+            "Système gestion du personnel"
+        ],
+        "tier": "premium"
+    },
+    "opti_starter_2k": {
+        "name": "Optimisation d'entreprise Starter",
+        "price": 2000.0,
+        "duration_months": 1,
+        "features": [
+            "Profil prestataire professionnel",
+            "8 Publicités média par mois",
+            "1 Publicité vidéo par mois",
+            "Accessible aux investisseurs",
+            "Accessible aux livraisons 24/24",
+            "Accès aux fournisseurs",
+            "Accès au local 24/24",
+            "Accès aux formations premium",
+            "Accès aux recrutements",
+            "Accès à l'espace immobilier",
+            "Un expert offre des conseils d'optimisation d'entreprise",
+            "Un expert vous labellise",
+            "Référencement préférentiel",
+            "Publication d'offres illimitées",
+            "Système de Cash-Back",
+            "Système de gestion des stocks",
+            "Système gestion du personnel"
+        ],
+        "tier": "optimisation"
+    },
+    "opti_starter_3k": {
+        "name": "Optimisation d'entreprise Starter+",
+        "price": 3000.0,
+        "duration_months": 1,
+        "features": [
+            "Profil prestataire professionnel",
+            "15 Publicités à choix par mois",
+            "2 Publicités vidéos par mois",
+            "Accessible aux investisseurs",
+            "Accessible aux livraisons 24/24",
+            "Accès aux fournisseurs",
+            "Accès au local 24/24",
+            "Accès aux formations premium",
+            "Accès aux recrutements",
+            "Accès à l'espace immobilier",
+            "Un expert offre des conseils d'optimisation d'entreprise",
+            "Un expert vous labellise",
+            "Référencement préférentiel",
+            "5h Prestation service entreprise OU 2 déjeuners d'équipe (10 pers.)",
+            "Publication d'offres illimitées",
+            "Système de Cash-Back",
+            "Système de gestion des stocks",
+            "Système gestion du personnel"
+        ],
+        "tier": "optimisation"
+    },
+    "opti_5k": {
+        "name": "Optimisation d'entreprise 5K",
+        "price": 5000.0,
+        "duration_months": 1,
+        "features": [
+            "Profil prestataire professionnel",
+            "15 Publicités à choix par mois",
+            "2 Publicités vidéos par mois",
+            "Accessible aux investisseurs",
+            "Accessible aux livraisons 24/24",
+            "Accès aux fournisseurs",
+            "Accès au local 24/24",
+            "Accès aux formations premium",
+            "Accès aux recrutements",
+            "Accès à l'espace immobilier",
+            "Un expert offre des conseils d'optimisation d'entreprise",
+            "Un expert vous labellise",
+            "Référencement préférentiel",
+            "10h Prestation service entreprise OU 5 déjeuners d'équipe (10 pers.)",
+            "3'000 CHF de prestations liquidées par nos équipes",
+            "Publication d'offres illimitées",
+            "Système de Cash-Back",
+            "Système de gestion des stocks",
+            "Système gestion du personnel"
+        ],
+        "tier": "optimisation"
+    },
+    "opti_10k": {
+        "name": "Optimisation d'entreprise 10K",
+        "price": 10000.0,
+        "duration_months": 1,
+        "features": [
+            "Profil prestataire professionnel",
+            "15 Publicités à choix par mois",
+            "2 Publicités vidéos par mois",
+            "Accessible aux investisseurs",
+            "Accessible aux livraisons 24/24",
+            "Accès aux fournisseurs",
+            "Accès au local 24/24",
+            "Accès aux formations premium",
+            "Accès aux recrutements",
+            "Accès à l'espace immobilier",
+            "Un expert offre des conseils d'optimisation d'entreprise",
+            "Un expert vous labellise",
+            "Référencement préférentiel",
+            "20h Prestation service entreprise OU 8 déjeuners d'équipe (10 pers.)",
+            "7'000 CHF de prestations liquidées par nos équipes",
+            "Fiscaliste inclus",
+            "Publication d'offres illimitées",
+            "Système de Cash-Back",
+            "Système de gestion des stocks",
+            "Système gestion du personnel"
+        ],
+        "tier": "optimisation"
+    },
+    "opti_20k": {
+        "name": "Optimisation d'entreprise 20K",
+        "price": 20000.0,
+        "duration_months": 1,
+        "features": [
+            "Profil prestataire professionnel",
+            "25 Publicités à choix par mois",
+            "4 Publicités vidéos par mois",
+            "Accessible aux investisseurs",
+            "Accessible aux livraisons 24/24",
+            "Accès au local 24/24",
+            "Accès aux formations premium",
+            "Accès aux recrutements",
+            "Accès à l'espace immobilier",
+            "Un expert offre des conseils d'optimisation d'entreprise",
+            "Un expert vous labellise",
+            "Référencement préférentiel",
+            "40h Prestation service entreprise OU 20 déjeuners d'équipe (10 pers.)",
+            "15'000 CHF de prestations liquidées par nos équipes",
+            "Fiscaliste inclus",
+            "Publication d'offres illimitées",
+            "Système de Cash-Back",
+            "Système de gestion des stocks",
+            "Système gestion du personnel"
+        ],
+        "tier": "optimisation"
+    },
+    "opti_50k": {
+        "name": "Optimisation d'entreprise 50K",
+        "price": 50000.0,
+        "duration_months": 1,
+        "features": [
+            "Profil prestataire professionnel",
+            "25 Publicités à choix par mois",
+            "4 Publicités vidéos par mois",
+            "Accessible aux investisseurs",
+            "Accessible aux livraisons 24/24",
+            "Accès au local 24/24",
+            "Accès aux formations premium",
+            "Accès aux recrutements",
+            "Accès à l'espace immobilier",
+            "Un expert offre des conseils d'optimisation d'entreprise",
+            "Un expert vous labellise",
+            "Référencement préférentiel",
+            "80h Prestation service entreprise OU 40 déjeuners d'équipe (10 pers.)",
+            "40'000 CHF de prestations liquidées par nos équipes",
+            "Fiscaliste inclus",
+            "Publication d'offres illimitées",
+            "Système de Cash-Back",
+            "Système de gestion des stocks",
+            "Système gestion du personnel"
+        ],
+        "tier": "optimisation"
+    }
 }
+
+# Options à la carte (add-ons)
+ADDON_OPTIONS = {
+    "pub_extra": {
+        "name": "2 Publicités + 1 vidéo",
+        "price": 200.0,
+        "type": "monthly"
+    },
+    "expert_label": {
+        "name": "Expert labellisation",
+        "price": 400.0,
+        "type": "one_time"
+    },
+    "investors_access": {
+        "name": "Accessible aux investisseurs",
+        "price": 300.0,
+        "type": "monthly"
+    },
+    "delivery_24": {
+        "name": "Livraison 24/24",
+        "price": 300.0,
+        "type": "monthly"
+    },
+    "local_access": {
+        "name": "Accès au local 24/24",
+        "price": 300.0,
+        "type": "monthly"
+    },
+    "suppliers_access": {
+        "name": "Accès aux fournisseurs",
+        "price": 500.0,
+        "type": "monthly"
+    },
+    "premium_trainings": {
+        "name": "Formations premium",
+        "price": 200.0,
+        "type": "monthly"
+    },
+    "instant_recruitment": {
+        "name": "Recrutement instantané",
+        "price": 200.0,
+        "type": "monthly"
+    },
+    "real_estate_access": {
+        "name": "Accès espace immobilier",
+        "price": 200.0,
+        "type": "monthly"
+    },
+    "expert_conseil": {
+        "name": "Expert conseil optimisation",
+        "price": 1000.0,
+        "type": "monthly"
+    },
+    "fiscaliste": {
+        "name": "Fiscaliste",
+        "price": 4000.0,
+        "type": "monthly"
+    },
+    "prestation_20h": {
+        "name": "20h Prestation service entreprise",
+        "price": 1000.0,
+        "type": "one_time"
+    },
+    "dejeuner_equipe": {
+        "name": "20 déjeuners d'équipe (10 pers.)",
+        "price": 2000.0,
+        "type": "one_time"
+    },
+    "prestation_liquidee": {
+        "name": "800 CHF de prestations liquidées",
+        "price": 1000.0,
+        "type": "monthly"
+    }
+}
+
+# Features incluses dans tous les forfaits
+BASE_FEATURES = [
+    "Fiches exigences clients",
+    "Calendrier client",
+    "Agenda interne",
+    "Espace de formation",
+    "Espace documents",
+    "Espace finance",
+    "Accès aux publicités spontanées en tout temps",
+    "Accès à l'espace messagerie",
+    "Accès au fil d'actualités clients",
+    "Accès au feed des entreprises régionales",
+    "Accès à ses contacts"
+]
 
 # Advertising Plans
 AD_PLANS = {
