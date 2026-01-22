@@ -8,6 +8,21 @@ const getAuthHeaders = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
+// Upload
+export const uploadAPI = {
+  uploadImage: async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return axios.post(`${API}/upload/image`, formData, {
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+  uploadBase64: (imageData, filename) => axios.post(`${API}/upload/image-base64`, { image: imageData, filename }, { headers: getAuthHeaders() }),
+};
+
 // Auth
 export const authAPI = {
   login: (data) => axios.post(`${API}/auth/login`, data),
@@ -37,6 +52,7 @@ export const servicesProductsAPI = {
 export const reviewAPI = {
   list: (enterpriseId) => axios.get(`${API}/reviews/${enterpriseId}`),
   create: (data) => axios.post(`${API}/reviews`, data, { headers: getAuthHeaders() }),
+  getByEnterprise: (enterpriseId) => axios.get(`${API}/reviews/${enterpriseId}`),
 };
 
 // Orders
