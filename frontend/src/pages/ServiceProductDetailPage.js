@@ -25,7 +25,7 @@ const ServiceProductDetailPage = () => {
       setError(null);
       try {
         // Fetch the service/product
-        const itemRes = await servicesProductsAPI.getById(id);
+        const itemRes = await servicesProductsAPI.get(id);
         setItem(itemRes.data);
         
         // Fetch the enterprise
