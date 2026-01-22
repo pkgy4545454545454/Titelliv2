@@ -2647,4 +2647,370 @@ const FormModal = ({ type, item, onClose, onSuccess }) => {
   );
 };
 
+// Subscriptions Section Component
+const SubscriptionsSection = () => {
+  const [plans, setPlans] = useState({});
+  const [addons, setAddons] = useState({});
+  const [baseFeatures, setBaseFeatures] = useState([]);
+  const [currentSubscription, setCurrentSubscription] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [selectedAddons, setSelectedAddons] = useState([]);
+  const [showAddons, setShowAddons] = useState(false);
+  const [activeTab, setActiveTab] = useState('basic');
+
+  useEffect(() => {
+    fetchPlansAndSubscription();
+  }, []);
+
+  const fetchPlansAndSubscription = async () => {
+    try {
+      const [plansRes, currentRes] = await Promise.all([
+        subscriptionsAPI.getPlans(),
+        subscriptionsAPI.getCurrent()
+      ]);
+      setPlans(plansRes.data.plans || {});
+      setAddons(plansRes.data.addons || {});
+      setBaseFeatures(plansRes.data.base_features || []);
+      setCurrentSubscription(currentRes.data);
+    } catch (error) {
+      console.error('Error fetching plans:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubscribe = async (planId) => {
+    try {
+      const response = await subscriptionsAPI.createCheckout(planId, selectedAddons);
+      window.location.href = response.data.url;
+    } catch (error) {
+      toast.error('Erreur lors de la création du paiement');
+    }
+  };
+
+  const handleAddonPurchase = async (addonId) => {
+    try {
+      const response = await subscriptionsAPI.createAddonCheckout(addonId);
+      window.location.href = response.data.url;
+    } catch (error) {
+      toast.error('Erreur lors de la création du paiement');
+    }
+  };
+
+  const toggleAddon = (addonId) => {
+    setSelectedAddons(prev => 
+      prev.includes(addonId) 
+        ? prev.filter(id => id !== addonId)
+        : [...prev, addonId]
+    );
+  };
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('fr-CH', { style: 'decimal' }).format(price);
+  };
+
+  const getPlansByTier = (tier) => {
+    return Object.entries(plans).filter(([_, plan]) => plan.tier === tier);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="w-10 h-10 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8" data-testid="subscriptions-section">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+            Abonnements
+          </h1>
+          <p className="text-gray-400 mt-1">Choisissez le forfait adapté à vos besoins</p>
+        </div>
+        {currentSubscription?.is_active && (
+          <div className="px-4 py-2 bg-[#D4AF37]/20 rounded-lg border border-[#D4AF37]/30">
+            <p className="text-sm text-gray-400">Abonnement actuel</p>
+            <p className="text-[#D4AF37] font-semibold">{currentSubscription.plan_name}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Base Features Banner */}
+      <div className="card-service rounded-xl p-6 border-[#0047AB]/30 bg-[#0047AB]/5">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-lg bg-[#0047AB]/20 flex items-center justify-center">
+            <Check className="w-5 h-5 text-[#0047AB]" />
+          </div>
+          <h2 className="text-lg font-semibold text-white">Inclus dans tous nos forfaits</h2>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {baseFeatures.map((feature, index) => (
+            <div key={index} className="flex items-center gap-2 text-sm text-gray-300">
+              <Check className="w-4 h-4 text-[#0047AB] flex-shrink-0" />
+              <span>{feature}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-2 border-b border-white/10 pb-2">
+        <button
+          onClick={() => setActiveTab('basic')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            activeTab === 'basic' ? 'bg-[#0047AB] text-white' : 'text-gray-400 hover:text-white'
+          }`}
+        >
+          Forfaits de base
+        </button>
+        <button
+          onClick={() => setActiveTab('premium')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            activeTab === 'premium' ? 'bg-[#D4AF37] text-black' : 'text-gray-400 hover:text-white'
+          }`}
+        >
+          Premium
+        </button>
+        <button
+          onClick={() => setActiveTab('optimisation')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            activeTab === 'optimisation' ? 'bg-gradient-to-r from-[#D4AF37] to-[#0047AB] text-white' : 'text-gray-400 hover:text-white'
+          }`}
+        >
+          Optimisation d'entreprise
+        </button>
+        <button
+          onClick={() => setActiveTab('addons')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            activeTab === 'addons' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'
+          }`}
+        >
+          Options à la carte
+        </button>
+      </div>
+
+      {/* Basic Plans */}
+      {activeTab === 'basic' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {getPlansByTier('basic').map(([planId, plan]) => (
+            <div 
+              key={planId} 
+              className={`card-service rounded-xl p-6 relative overflow-hidden ${
+                currentSubscription?.plan_id === planId ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/20' : ''
+              }`}
+            >
+              {currentSubscription?.plan_id === planId && (
+                <div className="absolute top-0 right-0 bg-[#D4AF37] text-black text-xs font-bold px-3 py-1 rounded-bl-lg">
+                  ACTUEL
+                </div>
+              )}
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h3 className="text-xl font-bold text-white">{plan.name}</h3>
+                  <p className="text-3xl font-bold text-[#D4AF37] mt-2">
+                    {formatPrice(plan.price)} <span className="text-base text-gray-400 font-normal">CHF/mois</span>
+                  </p>
+                </div>
+                <Star className="w-8 h-8 text-[#0047AB]" />
+              </div>
+              <ul className="space-y-2 mb-6">
+                {plan.features.map((feature, idx) => (
+                  <li key={idx} className="flex items-start gap-2 text-sm text-gray-300">
+                    <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => handleSubscribe(planId)}
+                disabled={currentSubscription?.plan_id === planId}
+                className={`w-full py-3 rounded-lg font-medium transition-all ${
+                  currentSubscription?.plan_id === planId
+                    ? 'bg-white/10 text-gray-500 cursor-not-allowed'
+                    : 'btn-primary'
+                }`}
+              >
+                {currentSubscription?.plan_id === planId ? 'Abonnement actif' : 'Souscrire'}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Premium Plans */}
+      {activeTab === 'premium' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {getPlansByTier('premium').map(([planId, plan]) => (
+            <div 
+              key={planId} 
+              className={`card-service rounded-xl p-6 relative overflow-hidden border-[#D4AF37]/30 ${
+                currentSubscription?.plan_id === planId ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/20' : ''
+              }`}
+            >
+              {currentSubscription?.plan_id === planId && (
+                <div className="absolute top-0 right-0 bg-[#D4AF37] text-black text-xs font-bold px-3 py-1 rounded-bl-lg">
+                  ACTUEL
+                </div>
+              )}
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#D4AF37] to-[#F3CF55]" />
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h3 className="text-xl font-bold text-white">{plan.name}</h3>
+                  <p className="text-3xl font-bold text-[#D4AF37] mt-2">
+                    {formatPrice(plan.price)} <span className="text-base text-gray-400 font-normal">CHF/mois</span>
+                  </p>
+                </div>
+                <Crown className="w-8 h-8 text-[#D4AF37]" />
+              </div>
+              <ul className="space-y-2 mb-6 max-h-64 overflow-y-auto">
+                {plan.features.map((feature, idx) => (
+                  <li key={idx} className="flex items-start gap-2 text-sm text-gray-300">
+                    <Check className="w-4 h-4 text-[#D4AF37] mt-0.5 flex-shrink-0" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => handleSubscribe(planId)}
+                disabled={currentSubscription?.plan_id === planId}
+                className={`w-full py-3 rounded-lg font-medium transition-all ${
+                  currentSubscription?.plan_id === planId
+                    ? 'bg-white/10 text-gray-500 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-[#D4AF37] to-[#F3CF55] text-black hover:opacity-90'
+                }`}
+              >
+                {currentSubscription?.plan_id === planId ? 'Abonnement actif' : 'Souscrire Premium'}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Optimisation Plans */}
+      {activeTab === 'optimisation' && (
+        <div className="space-y-6">
+          <div className="card-service rounded-xl p-4 border-purple-500/30 bg-purple-500/5">
+            <div className="flex items-center gap-2 text-purple-400">
+              <Zap className="w-5 h-5" />
+              <span className="font-medium">Forfaits Optimisation d'entreprise</span>
+            </div>
+            <p className="text-sm text-gray-400 mt-1">
+              Solutions complètes pour maximiser la croissance et l'efficacité de votre entreprise
+            </p>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {getPlansByTier('optimisation').map(([planId, plan]) => (
+              <div 
+                key={planId} 
+                className={`card-service rounded-xl p-6 relative overflow-hidden ${
+                  currentSubscription?.plan_id === planId ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/20' : ''
+                }`}
+              >
+                {currentSubscription?.plan_id === planId && (
+                  <div className="absolute top-0 right-0 bg-[#D4AF37] text-black text-xs font-bold px-3 py-1 rounded-bl-lg">
+                    ACTUEL
+                  </div>
+                )}
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#D4AF37] via-purple-500 to-[#0047AB]" />
+                <div className="mb-4">
+                  <h3 className="text-lg font-bold text-white">{plan.name}</h3>
+                  <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-purple-400 mt-2">
+                    {formatPrice(plan.price)} <span className="text-sm text-gray-400 font-normal">CHF/mois</span>
+                  </p>
+                </div>
+                <ul className="space-y-1.5 mb-6 max-h-48 overflow-y-auto text-xs">
+                  {plan.features.map((feature, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-gray-300">
+                      <Check className="w-3 h-3 text-purple-400 mt-0.5 flex-shrink-0" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  onClick={() => handleSubscribe(planId)}
+                  disabled={currentSubscription?.plan_id === planId}
+                  className={`w-full py-2.5 rounded-lg font-medium text-sm transition-all ${
+                    currentSubscription?.plan_id === planId
+                      ? 'bg-white/10 text-gray-500 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-[#D4AF37] via-purple-500 to-[#0047AB] text-white hover:opacity-90'
+                  }`}
+                >
+                  {currentSubscription?.plan_id === planId ? 'Actif' : 'Souscrire'}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Add-ons */}
+      {activeTab === 'addons' && (
+        <div className="space-y-6">
+          <div className="card-service rounded-xl p-4 border-purple-500/30 bg-purple-500/5">
+            <div className="flex items-center gap-2 text-purple-400">
+              <Plus className="w-5 h-5" />
+              <span className="font-medium">Options à la carte</span>
+            </div>
+            <p className="text-sm text-gray-400 mt-1">
+              Ajoutez des fonctionnalités supplémentaires à votre forfait
+            </p>
+          </div>
+          
+          {/* Monthly Add-ons */}
+          <div>
+            <h3 className="text-lg font-semibold text-white mb-4">Options mensuelles</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Object.entries(addons).filter(([_, addon]) => addon.type === 'monthly').map(([addonId, addon]) => (
+                <div key={addonId} className="card-service rounded-xl p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <h4 className="text-white font-medium">{addon.name}</h4>
+                    <span className="text-xs bg-white/10 px-2 py-1 rounded text-gray-400">Mensuel</span>
+                  </div>
+                  <p className="text-xl font-bold text-[#D4AF37] mb-4">
+                    {formatPrice(addon.price)} <span className="text-sm text-gray-400 font-normal">CHF/mois</span>
+                  </p>
+                  <button
+                    onClick={() => handleAddonPurchase(addonId)}
+                    className="w-full py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition-colors"
+                  >
+                    Ajouter
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* One-time Add-ons */}
+          <div>
+            <h3 className="text-lg font-semibold text-white mb-4">Options ponctuelles</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Object.entries(addons).filter(([_, addon]) => addon.type === 'one_time').map(([addonId, addon]) => (
+                <div key={addonId} className="card-service rounded-xl p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <h4 className="text-white font-medium">{addon.name}</h4>
+                    <span className="text-xs bg-green-500/20 px-2 py-1 rounded text-green-400">Unique</span>
+                  </div>
+                  <p className="text-xl font-bold text-[#D4AF37] mb-4">
+                    {formatPrice(addon.price)} <span className="text-sm text-gray-400 font-normal">CHF</span>
+                  </p>
+                  <button
+                    onClick={() => handleAddonPurchase(addonId)}
+                    className="w-full py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition-colors"
+                  >
+                    Acheter
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default EnterpriseDashboard;
