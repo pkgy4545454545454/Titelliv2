@@ -309,4 +309,8 @@ export default {
   advertising: advertisingAPI,
   notifications: notificationsAPI,
   subscriptions: subscriptionsAPI,
+  iaCampaigns: iaCampaignsAPI,
+  influencers: influencersAPI,
+  clientInvitations: clientInvitationsAPI,
+  commercialGestures: commercialGesturesAPI,
 };
