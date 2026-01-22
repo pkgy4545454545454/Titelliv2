@@ -2677,6 +2677,7 @@ async def create_client_invitation(invitation_data: ClientInvitationCreate, curr
     invitation_dict['created_at'] = invitation_dict['created_at'].isoformat()
     await db.client_invitations.insert_one(invitation_dict)
     
+    invitation_dict.pop('_id', None)
     return invitation_dict
 
 @api_router.delete("/enterprise/invitations/{invitation_id}")
