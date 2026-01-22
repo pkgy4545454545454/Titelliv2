@@ -1725,8 +1725,10 @@ async def create_advertising_campaign(ad: AdvertisingCreate, current_user: dict 
         "enterprise_id": enterprise['id'],
         "enterprise_name": enterprise['business_name'],
         **ad.model_dump(),
-        "is_active": True,
-        "is_approved": False,  # Requires admin approval
+        "is_active": False,  # Inactive until paid
+        "is_paid": False,  # Must pay to activate
+        "is_approved": False,  # Requires admin approval after payment
+        "payment_session_id": None,
         "impressions": 0,
         "clicks": 0,
         "spent": 0,
@@ -1735,6 +1737,126 @@ async def create_advertising_campaign(ad: AdvertisingCreate, current_user: dict 
     await db.advertising.insert_one(ad_doc)
     del ad_doc['_id']
     return ad_doc
+
+@api_router.post("/enterprise/advertising/{ad_id}/pay")
+async def pay_for_advertising(ad_id: str, request: Request, current_user: dict = Depends(get_current_user)):
+    """Initiate payment for an advertising campaign"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    ad = await db.advertising.find_one({"id": ad_id, "enterprise_id": enterprise['id']})
+    if not ad:
+        raise HTTPException(status_code=404, detail="Publicité non trouvée")
+    
+    if ad.get('is_paid'):
+        raise HTTPException(status_code=400, detail="Cette publicité est déjà payée")
+    
+    # Determine price based on ad type
+    ad_type = ad.get('ad_type', 'standard')
+    ad_prices = {
+        'standard': 50,  # 50 CHF
+        'premium': 150,  # 150 CHF  
+        'spotlight': 300,  # 300 CHF
+        'video': 200,  # 200 CHF
+        'banner': 100,  # 100 CHF
+    }
+    amount = ad.get('budget', ad_prices.get(ad_type, 50))
+    
+    host_url = str(request.base_url).rstrip('/')
+    webhook_url = f"{host_url}/api/webhook/stripe"
+    
+    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
+    
+    origin = request.headers.get('origin', host_url.replace('/api', ''))
+    success_url = f"{origin}/payment/success?session_id={{CHECKOUT_SESSION_ID}}&type=advertising&ad_id={ad_id}"
+    cancel_url = f"{origin}/payment/cancel?type=advertising"
+    
+    metadata = {
+        "type": "advertising",
+        "ad_id": ad_id,
+        "enterprise_id": enterprise['id'],
+        "user_id": current_user['id']
+    }
+    
+    checkout_request = CheckoutSessionRequest(
+        amount=float(amount),
+        currency="chf",
+        success_url=success_url,
+        cancel_url=cancel_url,
+        metadata=metadata
+    )
+    
+    session = await stripe_checkout.create_checkout_session(checkout_request)
+    
+    # Store session ID on the ad
+    await db.advertising.update_one(
+        {"id": ad_id},
+        {"$set": {"payment_session_id": session.session_id}}
+    )
+    
+    # Store transaction
+    transaction = {
+        "id": str(uuid.uuid4()),
+        "session_id": session.session_id,
+        "user_id": current_user['id'],
+        "enterprise_id": enterprise['id'],
+        "ad_id": ad_id,
+        "amount": amount,
+        "currency": "CHF",
+        "type": "advertising",
+        "metadata": metadata,
+        "payment_status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.transactions.insert_one(transaction)
+    
+    return {"checkout_url": session.checkout_url, "session_id": session.session_id}
+
+@api_router.post("/enterprise/advertising/{ad_id}/activate")
+async def activate_advertising_after_payment(ad_id: str, session_id: str, current_user: dict = Depends(get_current_user)):
+    """Activate advertising after successful payment verification"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    ad = await db.advertising.find_one({"id": ad_id, "enterprise_id": enterprise['id']})
+    if not ad:
+        raise HTTPException(status_code=404, detail="Publicité non trouvée")
+    
+    # Verify the payment session
+    if ad.get('payment_session_id') != session_id:
+        raise HTTPException(status_code=400, detail="Session de paiement invalide")
+    
+    # Check transaction status
+    transaction = await db.transactions.find_one({"session_id": session_id})
+    if not transaction or transaction.get('payment_status') != 'completed':
+        # Verify with Stripe
+        stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url="")
+        try:
+            status = await stripe_checkout.get_checkout_status(session_id)
+            if status.payment_status == "paid":
+                # Update transaction
+                await db.transactions.update_one(
+                    {"session_id": session_id},
+                    {"$set": {"payment_status": "completed"}}
+                )
+            else:
+                raise HTTPException(status_code=400, detail="Paiement non confirmé")
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Erreur de vérification: {str(e)}")
+    
+    # Activate the ad
+    await db.advertising.update_one(
+        {"id": ad_id},
+        {"$set": {
+            "is_paid": True,
+            "is_active": True,
+            "paid_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"message": "Publicité activée avec succès", "is_active": True}
 
 @api_router.put("/enterprise/advertising/{ad_id}/toggle")
 async def toggle_advertising(ad_id: str, current_user: dict = Depends(get_current_user)):
