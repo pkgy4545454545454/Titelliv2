@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { Search, Menu, X, ShoppingCart, Heart, User, Bell, ChevronDown } from 'lucide-react';
+import { notificationsAPI } from '../services/api';
+import { Search, Menu, X, ShoppingCart, Heart, Bell, ChevronDown, Check, CheckCheck, Trash2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu';
+import { toast } from 'sonner';
 
 const Header = () => {
   const { user, logout, isAuthenticated, isEnterprise } = useAuth();
@@ -18,8 +20,83 @@ const Header = () => {
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifOpen, setNotifOpen] = useState(false);
 
   const cartCount = getItemCount();
+
+  // Fetch notifications
+  const fetchNotifications = useCallback(async () => {
+    if (!isAuthenticated) return;
+    try {
+      const response = await notificationsAPI.list();
+      setNotifications(response.data.notifications || []);
+      setUnreadCount(response.data.unread_count || 0);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    fetchNotifications();
+    // Poll for new notifications every 30 seconds
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [fetchNotifications]);
+
+  const handleMarkRead = async (notifId) => {
+    try {
+      await notificationsAPI.markRead(notifId);
+      setNotifications(notifications.map(n => 
+        n.id === notifId ? { ...n, is_read: true } : n
+      ));
+      setUnreadCount(Math.max(0, unreadCount - 1));
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      await notificationsAPI.markAllRead();
+      setNotifications(notifications.map(n => ({ ...n, is_read: true })));
+      setUnreadCount(0);
+      toast.success('Toutes les notifications lues');
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
+  const handleNotificationClick = (notif) => {
+    if (!notif.is_read) {
+      handleMarkRead(notif.id);
+    }
+    if (notif.link) {
+      navigate(notif.link);
+      setNotifOpen(false);
+    }
+  };
+
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case 'order': return '🛒';
+      case 'alert': return '⚠️';
+      case 'promotion': return '🎁';
+      default: return '📬';
+    }
+  };
+
+  const formatTime = (dateStr) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diff = (now - date) / 1000;
+    
+    if (diff < 60) return 'À l\'instant';
+    if (diff < 3600) return `Il y a ${Math.floor(diff / 60)} min`;
+    if (diff < 86400) return `Il y a ${Math.floor(diff / 3600)} h`;
+    return date.toLocaleDateString('fr-FR');
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
