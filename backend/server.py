@@ -2456,6 +2456,295 @@ async def delete_advertising(ad_id: str, current_user: dict = Depends(get_curren
     await db.advertising.delete_one({"id": ad_id, "enterprise_id": enterprise['id']})
     return {"message": "Publicité supprimée"}
 
+# ============ IA MARKETING ROUTES ============
+
+# --- IA Campaigns ---
+@api_router.get("/enterprise/ia-campaigns")
+async def get_ia_campaigns(current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    campaigns = await db.ia_campaigns.find({"enterprise_id": enterprise['id']}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    # Calculate stats
+    total_reach = sum(c.get('reach', 0) for c in campaigns)
+    total_engagement = sum(c.get('engagement', 0) for c in campaigns)
+    total_conversions = sum(c.get('conversions', 0) for c in campaigns)
+    active_count = len([c for c in campaigns if c.get('status') == 'active'])
+    
+    return {
+        "campaigns": campaigns,
+        "stats": {
+            "total_reach": total_reach,
+            "total_engagement": total_engagement,
+            "total_conversions": total_conversions,
+            "active_campaigns": active_count,
+            "engagement_rate": round((total_engagement / total_reach * 100), 1) if total_reach > 0 else 0,
+            "conversion_rate": round((total_conversions / total_engagement * 100), 1) if total_engagement > 0 else 0
+        }
+    }
+
+@api_router.post("/enterprise/ia-campaigns")
+async def create_ia_campaign(campaign_data: IACampaignCreate, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    # Simulate reach based on targeting
+    base_reach = 5000
+    if campaign_data.gender != 'all':
+        base_reach *= 0.5
+    if len(campaign_data.interests) > 0:
+        base_reach *= (0.3 + (len(campaign_data.interests) * 0.1))
+    if campaign_data.budget == 'high':
+        base_reach *= 1.5
+    elif campaign_data.budget == 'premium':
+        base_reach *= 2
+    
+    campaign = IACampaign(
+        enterprise_id=enterprise['id'],
+        **campaign_data.model_dump(),
+        reach=int(base_reach + random.randint(500, 2000)),
+        engagement=int(base_reach * 0.04 + random.randint(50, 200)),
+        conversions=int(base_reach * 0.01 + random.randint(10, 50))
+    )
+    
+    campaign_dict = campaign.model_dump()
+    campaign_dict['created_at'] = campaign_dict['created_at'].isoformat()
+    await db.ia_campaigns.insert_one(campaign_dict)
+    
+    return campaign_dict
+
+@api_router.put("/enterprise/ia-campaigns/{campaign_id}/toggle")
+async def toggle_ia_campaign(campaign_id: str, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    campaign = await db.ia_campaigns.find_one({"id": campaign_id, "enterprise_id": enterprise['id']})
+    if not campaign:
+        raise HTTPException(status_code=404, detail="Campagne non trouvée")
+    
+    new_status = "paused" if campaign.get('status') == 'active' else 'active'
+    await db.ia_campaigns.update_one({"id": campaign_id}, {"$set": {"status": new_status}})
+    
+    return {"status": new_status}
+
+@api_router.delete("/enterprise/ia-campaigns/{campaign_id}")
+async def delete_ia_campaign(campaign_id: str, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    await db.ia_campaigns.delete_one({"id": campaign_id, "enterprise_id": enterprise['id']})
+    return {"message": "Campagne supprimée"}
+
+# --- Influencers ---
+@api_router.get("/influencers")
+async def get_influencers(category: Optional[str] = None):
+    """Get all available influencers"""
+    query = {"is_available": True}
+    if category and category != 'all':
+        query["category"] = category
+    
+    influencers = await db.influencers.find(query, {"_id": 0}).sort("followers", -1).to_list(100)
+    
+    # If no influencers, seed some default ones
+    if len(influencers) == 0:
+        default_influencers = [
+            {"id": str(uuid.uuid4()), "name": "Sophie Martin", "image": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200", "category": "Lifestyle", "followers": 45000, "engagement_rate": 5.2, "price": 500, "bio": "Passionnée de mode et de lifestyle à Lausanne", "is_available": True},
+            {"id": str(uuid.uuid4()), "name": "Lucas Dubois", "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200", "category": "Food", "followers": 128000, "engagement_rate": 4.8, "price": 1200, "bio": "Chef et critique culinaire suisse", "is_available": True},
+            {"id": str(uuid.uuid4()), "name": "Emma Bernard", "image": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200", "category": "Beauty", "followers": 89000, "engagement_rate": 6.1, "price": 800, "bio": "Maquilleuse professionnelle et consultante beauté", "is_available": True},
+            {"id": str(uuid.uuid4()), "name": "Thomas Petit", "image": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200", "category": "Tech", "followers": 210000, "engagement_rate": 3.9, "price": 1500, "bio": "Tech reviewer et entrepreneur", "is_available": True},
+            {"id": str(uuid.uuid4()), "name": "Julie Rochat", "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200", "category": "Sport", "followers": 67000, "engagement_rate": 7.2, "price": 600, "bio": "Coach fitness et wellness", "is_available": True},
+            {"id": str(uuid.uuid4()), "name": "Marc Favre", "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200", "category": "Travel", "followers": 156000, "engagement_rate": 4.5, "price": 1100, "bio": "Photographe de voyage et aventurier", "is_available": True},
+            {"id": str(uuid.uuid4()), "name": "Clara Meyer", "image": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200", "category": "Lifestyle", "followers": 92000, "engagement_rate": 5.8, "price": 900, "bio": "Blogueuse lifestyle et déco d'intérieur", "is_available": True},
+            {"id": str(uuid.uuid4()), "name": "Antoine Muller", "image": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200", "category": "Food", "followers": 73000, "engagement_rate": 6.4, "price": 700, "bio": "Sommelier et critique gastronomique", "is_available": True},
+        ]
+        for inf in default_influencers:
+            inf['created_at'] = datetime.now(timezone.utc).isoformat()
+            await db.influencers.insert_one(inf)
+        influencers = default_influencers
+    
+    return {"influencers": influencers, "total": len(influencers)}
+
+@api_router.get("/enterprise/influencer-collaborations")
+async def get_influencer_collaborations(current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    collaborations = await db.influencer_collaborations.find({"enterprise_id": enterprise['id']}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    # Enrich with influencer data
+    for collab in collaborations:
+        influencer = await db.influencers.find_one({"id": collab.get('influencer_id')}, {"_id": 0})
+        collab['influencer'] = influencer
+    
+    total_investment = sum(c.get('budget', 0) for c in collaborations if c.get('status') in ['active', 'completed'])
+    active_count = len([c for c in collaborations if c.get('status') == 'active'])
+    
+    return {
+        "collaborations": collaborations,
+        "stats": {
+            "total_collaborations": len(collaborations),
+            "active_collaborations": active_count,
+            "total_investment": total_investment
+        }
+    }
+
+@api_router.post("/enterprise/influencer-collaborations")
+async def create_influencer_collaboration(influencer_id: str, message: Optional[str] = None, budget: float = 0, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    influencer = await db.influencers.find_one({"id": influencer_id})
+    if not influencer:
+        raise HTTPException(status_code=404, detail="Influenceur non trouvé")
+    
+    collab = InfluencerCollaboration(
+        enterprise_id=enterprise['id'],
+        influencer_id=influencer_id,
+        message=message,
+        budget=budget or influencer.get('price', 0)
+    )
+    
+    collab_dict = collab.model_dump()
+    collab_dict['created_at'] = collab_dict['created_at'].isoformat()
+    await db.influencer_collaborations.insert_one(collab_dict)
+    
+    return {**collab_dict, "influencer": influencer}
+
+# --- Client Invitations ---
+@api_router.get("/enterprise/invitations")
+async def get_client_invitations(current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    invitations = await db.client_invitations.find({"enterprise_id": enterprise['id']}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    total_sent = sum(i.get('sent_count', 0) for i in invitations)
+    total_opened = sum(i.get('opened_count', 0) for i in invitations)
+    total_responses = sum(i.get('response_count', 0) for i in invitations)
+    
+    return {
+        "invitations": invitations,
+        "stats": {
+            "total_sent": total_sent,
+            "total_opened": total_opened,
+            "total_responses": total_responses,
+            "open_rate": round((total_opened / total_sent * 100), 1) if total_sent > 0 else 0,
+            "response_rate": round((total_responses / total_opened * 100), 1) if total_opened > 0 else 0
+        }
+    }
+
+@api_router.post("/enterprise/invitations")
+async def create_client_invitation(invitation_data: ClientInvitationCreate, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    # Simulate sending based on target audience
+    base_count = 500
+    if invitation_data.target_audience == 'all':
+        base_count = 1000
+    elif invitation_data.target_audience == 'loyal':
+        base_count = 300
+    elif invitation_data.target_audience == 'inactive':
+        base_count = 400
+    
+    sent_count = base_count + random.randint(50, 200)
+    opened_count = int(sent_count * (0.5 + random.random() * 0.3))
+    response_count = int(opened_count * (0.1 + random.random() * 0.2))
+    
+    invitation = ClientInvitation(
+        enterprise_id=enterprise['id'],
+        **invitation_data.model_dump(),
+        sent_count=sent_count,
+        opened_count=opened_count,
+        response_count=response_count
+    )
+    
+    invitation_dict = invitation.model_dump()
+    invitation_dict['created_at'] = invitation_dict['created_at'].isoformat()
+    await db.client_invitations.insert_one(invitation_dict)
+    
+    return invitation_dict
+
+@api_router.delete("/enterprise/invitations/{invitation_id}")
+async def delete_client_invitation(invitation_id: str, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    await db.client_invitations.delete_one({"id": invitation_id, "enterprise_id": enterprise['id']})
+    return {"message": "Invitation supprimée"}
+
+# --- Commercial Gestures ---
+@api_router.get("/enterprise/commercial-gestures")
+async def get_commercial_gestures(current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    gestures = await db.commercial_gestures.find({"enterprise_id": enterprise['id']}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    active_count = len([g for g in gestures if g.get('is_active')])
+    total_uses = sum(g.get('uses_count', 0) for g in gestures)
+    
+    return {
+        "gestures": gestures,
+        "stats": {
+            "total_gestures": len(gestures),
+            "active_gestures": active_count,
+            "total_uses": total_uses
+        }
+    }
+
+@api_router.post("/enterprise/commercial-gestures")
+async def create_commercial_gesture(gesture_data: CommercialGestureCreate, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    gesture = CommercialGesture(
+        enterprise_id=enterprise['id'],
+        **gesture_data.model_dump()
+    )
+    
+    gesture_dict = gesture.model_dump()
+    gesture_dict['created_at'] = gesture_dict['created_at'].isoformat()
+    await db.commercial_gestures.insert_one(gesture_dict)
+    
+    return gesture_dict
+
+@api_router.put("/enterprise/commercial-gestures/{gesture_id}/toggle")
+async def toggle_commercial_gesture(gesture_id: str, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    gesture = await db.commercial_gestures.find_one({"id": gesture_id, "enterprise_id": enterprise['id']})
+    if not gesture:
+        raise HTTPException(status_code=404, detail="Geste commercial non trouvé")
+    
+    new_status = not gesture.get('is_active', True)
+    await db.commercial_gestures.update_one({"id": gesture_id}, {"$set": {"is_active": new_status}})
+    
+    return {"is_active": new_status}
+
+@api_router.delete("/enterprise/commercial-gestures/{gesture_id}")
+async def delete_commercial_gesture(gesture_id: str, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    await db.commercial_gestures.delete_one({"id": gesture_id, "enterprise_id": enterprise['id']})
+    return {"message": "Geste commercial supprimé"}
+
 # ============ NOTIFICATIONS ROUTES ============
 
 class NotificationCreate(BaseModel):
