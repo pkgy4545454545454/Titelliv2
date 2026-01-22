@@ -2618,7 +2618,9 @@ async def create_influencer_collaboration(influencer_id: str, message: Optional[
     collab_dict['created_at'] = collab_dict['created_at'].isoformat()
     await db.influencer_collaborations.insert_one(collab_dict)
     
-    return {**collab_dict, "influencer": influencer}
+    collab_dict.pop('_id', None)
+    influencer_clean = {k: v for k, v in influencer.items() if k != '_id'}
+    return {**collab_dict, "influencer": influencer_clean}
 
 # --- Client Invitations ---
 @api_router.get("/enterprise/invitations")
