@@ -1069,6 +1069,11 @@ const EnterpriseDashboard = () => {
               </div>
             </div>
           )}
+
+          {/* Subscriptions Tab */}
+          {activeTab === 'subscriptions' && (
+            <SubscriptionsSection />
+          )}
         </main>
       </div>
 
