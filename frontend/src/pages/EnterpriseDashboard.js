@@ -584,8 +584,56 @@ const ProfileSection = ({ enterprise, onUpdate }) => {
     city: enterprise?.city || 'Lausanne',
     website: enterprise?.website || '',
     category: enterprise?.category || '',
+    logo: enterprise?.logo || '',
   });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [logoPreview, setLogoPreview] = useState(enterprise?.logo || null);
+  const logoInputRef = useRef(null);
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Type de fichier non autorisé. Utilisez JPG, PNG, GIF ou WEBP.');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Fichier trop volumineux (max 5MB)');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setLogoPreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+
+    setUploading(true);
+    try {
+      const response = await uploadAPI.uploadImage(file);
+      const logoUrl = process.env.REACT_APP_BACKEND_URL + response.data.url;
+      setFormData(prev => ({ ...prev, logo: logoUrl }));
+      toast.success('Logo uploadé !');
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Erreur lors de l\'upload du logo');
+      setLogoPreview(enterprise?.logo || null);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeLogo = () => {
+    setLogoPreview(null);
+    setFormData(prev => ({ ...prev, logo: '' }));
+    if (logoInputRef.current) {
+      logoInputRef.current.value = '';
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -610,7 +658,55 @@ const ProfileSection = ({ enterprise, onUpdate }) => {
       <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
         Profil Entreprise
       </h1>
-      <form onSubmit={handleSubmit} className="card-service rounded-xl p-6 space-y-4">
+      <form onSubmit={handleSubmit} className="card-service rounded-xl p-6 space-y-6">
+        {/* Logo Upload */}
+        <div>
+          <label className="block text-sm text-gray-400 mb-2">Logo de l'entreprise</label>
+          <div className="flex items-center gap-6">
+            <div className="w-24 h-24 rounded-xl overflow-hidden bg-white/5 flex items-center justify-center border-2 border-dashed border-white/20">
+              {logoPreview || formData.logo ? (
+                <div className="relative w-full h-full">
+                  <img 
+                    src={logoPreview || formData.logo} 
+                    alt="Logo" 
+                    className="w-full h-full object-cover"
+                  />
+                  {uploading && (
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                      <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Image className="w-8 h-8 text-gray-500" />
+              )}
+            </div>
+            <div className="flex-1 space-y-2">
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                onChange={handleLogoUpload}
+                className="hidden"
+                id="logo-upload"
+              />
+              <label 
+                htmlFor="logo-upload" 
+                className="btn-secondary inline-flex items-center gap-2 cursor-pointer"
+              >
+                <Upload className="w-4 h-4" />
+                {formData.logo ? 'Changer le logo' : 'Ajouter un logo'}
+              </label>
+              {(logoPreview || formData.logo) && (
+                <button type="button" onClick={removeLogo} className="text-red-400 hover:text-red-300 text-sm ml-4">
+                  Supprimer
+                </button>
+              )}
+              <p className="text-xs text-gray-500">JPG, PNG, GIF ou WEBP (max 5MB)</p>
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm text-gray-400 mb-1">Nom de l'entreprise *</label>
