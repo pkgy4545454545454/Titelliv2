@@ -2515,6 +2515,8 @@ async def create_ia_campaign(campaign_data: IACampaignCreate, current_user: dict
     campaign_dict['created_at'] = campaign_dict['created_at'].isoformat()
     await db.ia_campaigns.insert_one(campaign_dict)
     
+    # Remove MongoDB _id before returning
+    campaign_dict.pop('_id', None)
     return campaign_dict
 
 @api_router.put("/enterprise/ia-campaigns/{campaign_id}/toggle")
