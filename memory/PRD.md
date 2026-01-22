@@ -11,6 +11,37 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 
 ## What's Been Implemented ✅
 
+### Latest Updates (January 22, 2026)
+
+#### Système d'Abonnements Complet (NEW)
+- ✅ **10 forfaits principaux**: Standard (200 CHF), Guest (250 CHF), Premium (500 CHF), Premium MVP (1000 CHF), Optimisation 2K-50K CHF
+- ✅ **14 options à la carte**: mensuelles et ponctuelles
+- ✅ **11 features de base** incluses dans tous les forfaits
+- ✅ **Interface 4 onglets**: Forfaits de base, Premium, Optimisation d'entreprise, Options à la carte
+- ✅ **Paiement Stripe** intégré pour chaque forfait et option
+- ✅ **API complète**: /api/subscriptions/plans, /api/subscriptions/checkout, /api/subscriptions/current
+
+#### Outils IA & Marketing (NEW)
+- ✅ **IA Ciblage Clients**: Question du jour, ciblage par audience, campagnes IA
+- ✅ **Influenceurs**: Liste d'influenceurs avec filtres par catégorie, stats, tarifs
+- ✅ **Invitations Clients**: Questions suggestives, invitations directes, sondages, rappels
+- ✅ Note: Ces sections utilisent des données de démonstration
+
+#### Page d'Inscription Améliorée (NEW)
+- ✅ Formulaire multi-étapes (Infos personnelles → Sécurité)
+- ✅ Indicateur de force du mot de passe
+- ✅ Choix visuel Client/Entreprise avec icônes
+- ✅ Validation à chaque étape
+- ✅ Barre de progression des étapes
+
+#### Page Profil Prestataire Améliorée (NEW)
+- ✅ **Vidéo/Image panoramique** en fond
+- ✅ **Photo portrait** circulaire avec badges (Certifié, Labellisé, Premium)
+- ✅ **Indicateurs de performance** (Compétences, Profit, Influence, Potentiel, Performance, Évolution)
+- ✅ **Commentaires défilants** avec auto-scroll et navigation
+- ✅ **Variantes d'affichage**: Côte à côte / Texte dessous pour produits/services
+- ✅ **Contrôles vidéo**: Play/Pause, Mute/Unmute
+
 ### Core Features (Completed - January 2026)
 
 #### Authentication System
@@ -20,19 +51,17 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 - ✅ User type differentiation (client, enterprise, admin)
 - ✅ Beautiful login page with split layout
 
-#### Notifications System (NEW - January 22, 2026)
+#### Notifications System
 - ✅ **Real-time notifications** in header with badge counter
-- ✅ **Auto-notifications** when orders are created (enterprise receives notification)
-- ✅ **Dropdown** with notification list, time formatting ("À l'instant", "Il y a X min")
+- ✅ **Auto-notifications** when orders are created
+- ✅ **Dropdown** with notification list, time formatting
 - ✅ **Mark as read** (single and all)
-- ✅ **Notification types**: order, alert, promotion, info
 - ✅ **30-second polling** for new notifications
 
 #### Shopping Cart System
 - ✅ CartContext for global cart state
 - ✅ Add to cart from services/products pages
-- ✅ Add to cart from enterprise profile page
-- ✅ Cart page with item management (+/- quantity, remove)
+- ✅ Cart page with item management
 - ✅ Cart badge in header showing item count
 - ✅ Cart persistence in localStorage
 - ✅ Checkout process creating orders
@@ -40,42 +69,32 @@ Build a large-scale marketplace platform called "Titelli" to showcase local serv
 #### Orders System
 - ✅ OrdersPage showing all user orders
 - ✅ Order details with items, quantities, prices
-- ✅ Order status badges (En attente, Confirmée, Terminée, Annulée)
-- ✅ Order notes display
-- ✅ Link to enterprise from order
+- ✅ Order status badges
 
 #### Enterprise Management
-- ✅ Enterprise profile creation
-- ✅ Profile editing (business name, slogan, description, contact info)
-- ✅ Category assignment
+- ✅ Enterprise profile creation and editing
+- ✅ Logo upload functionality
 - ✅ Certification/Labelling badges system
 - ✅ Premium status management
 
-#### Services & Products (Forms Fixed - January 22, 2026)
+#### Services & Products
 - ✅ CRUD operations for services/products
-- ✅ **FormModal with all required fields**: Name, Description, Type, Category, Price, Delivery
-- ✅ **Category dropdown** with 13 service categories and 7 product categories
-- ✅ **Validation** for required fields (name, description, price, category)
-- ✅ Category filtering
-- ✅ Search functionality
-- ✅ Add to cart buttons on all item cards
-- ✅ **Detail page** for services/products with full info, quantity selector, add to cart (NEW)
+- ✅ **Image upload** for products/services
+- ✅ **FormModal with all required fields**
+- ✅ Category filtering and search
+- ✅ **Detail page** for services/products
 
 #### Client Dashboard
 - ✅ Welcome message with user name
 - ✅ Cashback balance display
 - ✅ Order count statistics
 - ✅ Recent orders list
-- ✅ Navigation sidebar with all sections
 
-#### Enterprise Dashboard (RESTRUCTURÉ - January 22, 2026)
-Le menu entreprise a été entièrement restructuré avec les sections suivantes :
+#### Enterprise Dashboard (Restructuré)
+Le menu entreprise comprend les sections suivantes :
 
 **PRINCIPAL**
-- ✅ Accueil (Tableau de bord avec stats)
-- ✅ Profil entreprise (avec upload logo)
-- ✅ Mon fil d'actualité (avis clients)
-- ✅ Mon feed entreprises
+- ✅ Accueil, Profil entreprise (avec upload logo), Mon fil d'actualité, Mon feed entreprises
 
 **COMMERCIAL**
 - ✅ Services & Produits (CRUD + upload image)
