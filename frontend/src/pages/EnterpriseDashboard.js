@@ -1838,6 +1838,7 @@ const FormModal = ({ type, item, onClose, onSuccess }) => {
       case 'service':
         return (
           <>
+            <ImageUploadSection />
             <div>
               <label className="block text-sm text-gray-400 mb-1">Nom du service/produit *</label>
               <input type="text" placeholder="Ex: Massage relaxant 60 min" value={formData.name || ''} onChange={(e) => setFormData({...formData, name: e.target.value})} className="input-dark w-full" required />
