@@ -553,6 +553,11 @@ async def create_order(data: OrderCreate, current_user: dict = Depends(get_curre
     
     insert_doc = order_dict.copy()
     await db.orders.insert_one(insert_doc)
+    
+    # Create notification for the enterprise
+    client_name = f"{current_user['first_name']} {current_user['last_name']}"
+    await create_order_notification(data.enterprise_id, order_dict['id'], client_name, total)
+    
     return order_dict
 
 @api_router.get("/orders")
