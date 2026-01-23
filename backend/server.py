@@ -4832,7 +4832,7 @@ async def get_client_wishlist(current_user: dict = Depends(get_current_user)):
 
 @api_router.post("/client/wishlist")
 async def add_to_wishlist(item: WishlistItemCreate, current_user: dict = Depends(get_current_user)):
-    """Add item to wishlist"""
+    """Add item to wishlist and update lifestyle/feed"""
     # Check if already in wishlist
     existing = await db.wishlist.find_one({
         "user_id": current_user['id'],
@@ -4848,6 +4848,37 @@ async def add_to_wishlist(item: WishlistItemCreate, current_user: dict = Depends
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.wishlist.insert_one(wishlist_item)
+    
+    # Create activity for friends' feed (visible to friends)
+    user_name = f"{current_user.get('first_name', '')} {current_user.get('last_name', '')}".strip() or 'Utilisateur'
+    activity = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user['id'],
+        "user_name": user_name,
+        "user_avatar": current_user.get('avatar'),
+        "activity_type": "wishlist",
+        "title": f"a ajouté à sa liste de souhaits",
+        "description": None,
+        "item_id": item.item_id,
+        "item_name": item.item_name,
+        "item_price": item.item_price,
+        "enterprise_id": item.enterprise_id,
+        "enterprise_name": item.enterprise_name,
+        "is_public": True,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.activity_posts.insert_one(activity)
+    
+    # Update lifestyle preferences
+    if item.enterprise_id:
+        await db.users.update_one(
+            {"id": current_user['id']},
+            {
+                "$addToSet": {"favorite_enterprises": item.enterprise_id},
+                "$inc": {"wishlist_count": 1}
+            }
+        )
+    
     if '_id' in wishlist_item: del wishlist_item['_id']
     return wishlist_item
 
