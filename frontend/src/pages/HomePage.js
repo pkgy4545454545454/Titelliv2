@@ -109,10 +109,13 @@ const HomePage = () => {
     setSelectedJob(job);
     setApplyForm({ resume_url: '', cover_letter: '' });
     
-    // Fetch user's documents (CVs)
+    // Fetch user's documents (all types that could serve as CV)
     try {
-      const res = await clientDocumentsAPI.list('cv');
-      setUserDocuments(res.data?.documents || res.data || []);
+      const res = await clientDocumentsAPI.list(); // Get all documents, not just CVs
+      const allDocs = res.data?.documents || res.data || [];
+      // Filter to only show CV and general documents (useful for job applications)
+      const cvDocs = allDocs.filter(d => d.category === 'cv' || d.category === 'general' || d.file_type?.includes('pdf'));
+      setUserDocuments(cvDocs.length > 0 ? cvDocs : allDocs); // If no CV/general, show all
     } catch (err) {
       console.error('Error fetching documents:', err);
       setUserDocuments([]);
