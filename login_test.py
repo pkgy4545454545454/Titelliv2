@@ -4,7 +4,7 @@ import sys
 
 def test_specific_login_credentials():
     """Test the specific login credentials mentioned in requirements"""
-    base_url = "https://shopfront-pro-3.preview.emergentagent.com/api"
+    base_url = "https://titelli-market-1.preview.emergentagent.com/api"
     
     # Test credentials from requirements
     test_cases = [
