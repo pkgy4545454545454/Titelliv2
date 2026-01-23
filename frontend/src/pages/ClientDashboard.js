@@ -64,6 +64,11 @@ const ClientDashboard = () => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
+  // Trainings/Formations states
+  const [myTrainings, setMyTrainings] = useState({ enrollments: [], stats: { total: 0, in_progress: 0, completed: 0 } });
+  const [trainingsFilter, setTrainingsFilter] = useState('all'); // 'all', 'in_progress', 'completed'
+  const [loadingTrainings, setLoadingTrainings] = useState(false);
+
   useEffect(() => {
     if (!isClient) {
       navigate('/');
