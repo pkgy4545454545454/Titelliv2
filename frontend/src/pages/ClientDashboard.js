@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -6,14 +6,19 @@ import {
   MessageSquare, FileText, Settings, Gift, Crown, TrendingUp, MapPin,
   ChevronRight, Star, Bell, Search, Rss, Newspaper, PieChart, Briefcase,
   GraduationCap, FolderOpen, Phone, Truck, Package, Users, HelpCircle, 
-  Handshake, Info, Target, Building2, Menu, X
+  Handshake, Info, Target, Building2, Menu, X, Camera, Edit, Trash2, Plus,
+  CheckCircle, XCircle, Send, Linkedin, Eye, UserPlus, ArrowLeftRight,
+  Upload, Clock, ChevronDown
 } from 'lucide-react';
-import { orderAPI, cashbackAPI, featuredAPI } from '../services/api';
+import { 
+  orderAPI, cashbackAPI, featuredAPI, clientProfileAPI, friendsAPI, 
+  paymentCardsAPI, clientDocumentsAPI, messagesAPI, notificationsAPI, uploadAPI
+} from '../services/api';
 import { toast } from 'sonner';
 import EnterpriseCard from '../components/EnterpriseCard';
 
 const ClientDashboard = () => {
-  const { user, isClient } = useAuth();
+  const { user, isClient, updateUser } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [orders, setOrders] = useState([]);
@@ -21,33 +26,292 @@ const ClientDashboard = () => {
   const [tendances, setTendances] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Profile states
+  const [profileStats, setProfileStats] = useState({ profile_views: 0, friends_count: 0, orders_count: 0 });
+  const [editProfile, setEditProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState({});
+  const fileInputRef = useRef(null);
+  
+  // Friends states
+  const [friends, setFriends] = useState([]);
+  const [friendRequests, setFriendRequests] = useState({ received: [], sent: [] });
+  const [suggestedFriends, setSuggestedFriends] = useState([]);
+  
+  // Cards states
+  const [cards, setCards] = useState([]);
+  const [showAddCard, setShowAddCard] = useState(false);
+  const [cardForm, setCardForm] = useState({ card_holder: '', card_number_last4: '', card_type: 'visa', expiry_month: 1, expiry_year: 2026, is_default: false });
+  
+  // Documents states
+  const [documents, setDocuments] = useState([]);
+  const [showAddDocument, setShowAddDocument] = useState(false);
+  const [documentForm, setDocumentForm] = useState({ name: '', category: 'general', url: '' });
+  
+  // Messages states
+  const [conversations, setConversations] = useState([]);
+  const [selectedConversation, setSelectedConversation] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  
+  // Notifications
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     if (!isClient) {
       navigate('/');
       return;
     }
-
-    const fetchData = async () => {
-      try {
-        const [ordersRes, cashbackRes, tendancesRes] = await Promise.all([
-          orderAPI.list(),
-          cashbackAPI.balance(),
-          featuredAPI.tendances()
-        ]);
-        setOrders(ordersRes.data);
-        setCashback(cashbackRes.data.balance);
-        setTendances(tendancesRes.data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+    fetchInitialData();
   }, [isClient, navigate]);
 
-  // Menu restructuré selon le cahier des charges
+  const fetchInitialData = async () => {
+    try {
+      const [ordersRes, cashbackRes, tendancesRes, notifRes] = await Promise.all([
+        orderAPI.list(),
+        cashbackAPI.balance(),
+        featuredAPI.tendances(),
+        notificationsAPI.list()
+      ]);
+      setOrders(ordersRes.data);
+      setCashback(cashbackRes.data.balance);
+      setTendances(tendancesRes.data);
+      setNotifications(notifRes.data.notifications || []);
+      setUnreadCount(notifRes.data.unread_count || 0);
+      setProfileForm(user || {});
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch profile data when switching to profile tab
+  useEffect(() => {
+    if (activeTab === 'profile') {
+      fetchProfileData();
+    } else if (activeTab === 'contacts') {
+      fetchFriendsData();
+    } else if (activeTab === 'cartes') {
+      fetchCards();
+    } else if (activeTab === 'documents') {
+      fetchDocuments();
+    } else if (activeTab === 'messages') {
+      fetchConversations();
+    }
+  }, [activeTab]);
+
+  const fetchProfileData = async () => {
+    try {
+      const res = await clientProfileAPI.get();
+      setProfileStats(res.data.stats || {});
+      setProfileForm(res.data.user || user);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
+
+  const fetchFriendsData = async () => {
+    try {
+      const [friendsRes, requestsRes, suggestionsRes] = await Promise.all([
+        friendsAPI.list(),
+        friendsAPI.getRequests(),
+        friendsAPI.getSuggestions()
+      ]);
+      setFriends(friendsRes.data.friends || []);
+      setFriendRequests(requestsRes.data || { received: [], sent: [] });
+      setSuggestedFriends(suggestionsRes.data.suggestions || []);
+    } catch (error) {
+      console.error('Error fetching friends:', error);
+    }
+  };
+
+  const fetchCards = async () => {
+    try {
+      const res = await paymentCardsAPI.list();
+      setCards(res.data.cards || []);
+    } catch (error) {
+      console.error('Error fetching cards:', error);
+    }
+  };
+
+  const fetchDocuments = async () => {
+    try {
+      const res = await clientDocumentsAPI.list();
+      setDocuments(res.data.documents || []);
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+    }
+  };
+
+  const fetchConversations = async () => {
+    try {
+      const res = await messagesAPI.getConversations();
+      setConversations(res.data.conversations || []);
+    } catch (error) {
+      console.error('Error fetching conversations:', error);
+    }
+  };
+
+  // Profile handlers
+  const handleProfileUpdate = async () => {
+    try {
+      const res = await clientProfileAPI.update(profileForm);
+      if (updateUser) updateUser(res.data);
+      setEditProfile(false);
+      toast.success('Profil mis à jour');
+    } catch (error) {
+      toast.error('Erreur lors de la mise à jour');
+    }
+  };
+
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    try {
+      const res = await uploadAPI.uploadImage(file);
+      const avatarUrl = res.data.url;
+      setProfileForm({ ...profileForm, avatar: avatarUrl });
+      await clientProfileAPI.update({ avatar: avatarUrl });
+      toast.success('Photo de profil mise à jour');
+    } catch (error) {
+      toast.error('Erreur lors de l\'upload');
+    }
+  };
+
+  // Friends handlers
+  const handleSendFriendRequest = async (friendId) => {
+    try {
+      await friendsAPI.sendRequest(friendId);
+      toast.success('Demande d\'ami envoyée');
+      fetchFriendsData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur');
+    }
+  };
+
+  const handleRespondToRequest = async (friendshipId, accept) => {
+    try {
+      await friendsAPI.respond(friendshipId, accept);
+      toast.success(accept ? 'Ami ajouté' : 'Demande refusée');
+      fetchFriendsData();
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
+  const handleRemoveFriend = async (friendshipId) => {
+    try {
+      await friendsAPI.remove(friendshipId);
+      toast.success('Ami supprimé');
+      fetchFriendsData();
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
+  // Cards handlers
+  const handleAddCard = async () => {
+    if (!cardForm.card_holder || !cardForm.card_number_last4) {
+      toast.error('Veuillez remplir tous les champs');
+      return;
+    }
+    try {
+      await paymentCardsAPI.add(cardForm);
+      toast.success('Carte ajoutée');
+      setShowAddCard(false);
+      setCardForm({ card_holder: '', card_number_last4: '', card_type: 'visa', expiry_month: 1, expiry_year: 2026, is_default: false });
+      fetchCards();
+    } catch (error) {
+      toast.error('Erreur lors de l\'ajout');
+    }
+  };
+
+  const handleDeleteCard = async (cardId) => {
+    try {
+      await paymentCardsAPI.delete(cardId);
+      toast.success('Carte supprimée');
+      fetchCards();
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
+  // Documents handlers
+  const handleAddDocument = async () => {
+    if (!documentForm.name || !documentForm.url) {
+      toast.error('Veuillez remplir tous les champs');
+      return;
+    }
+    try {
+      await clientDocumentsAPI.add(documentForm);
+      toast.success('Document ajouté');
+      setShowAddDocument(false);
+      setDocumentForm({ name: '', category: 'general', url: '' });
+      fetchDocuments();
+    } catch (error) {
+      toast.error('Erreur lors de l\'ajout');
+    }
+  };
+
+  const handleDocumentUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    try {
+      const res = await uploadAPI.uploadImage(file);
+      setDocumentForm({ ...documentForm, url: res.data.url, name: documentForm.name || file.name });
+      toast.success('Fichier uploadé');
+    } catch (error) {
+      toast.error('Erreur lors de l\'upload');
+    }
+  };
+
+  const handleDeleteDocument = async (docId) => {
+    try {
+      await clientDocumentsAPI.delete(docId);
+      toast.success('Document supprimé');
+      fetchDocuments();
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
+  // Messages handlers
+  const handleSelectConversation = async (partnerId) => {
+    try {
+      const res = await messagesAPI.getMessages(partnerId);
+      setMessages(res.data.messages || []);
+      setSelectedConversation(res.data.partner);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !selectedConversation) return;
+    
+    try {
+      await messagesAPI.send(selectedConversation.id, newMessage);
+      setNewMessage('');
+      handleSelectConversation(selectedConversation.id);
+    } catch (error) {
+      toast.error('Erreur lors de l\'envoi');
+    }
+  };
+
+  // Switch to entrepreneur account
+  const handleSwitchAccount = () => {
+    if (user?.user_type === 'client') {
+      // If user has an enterprise account, redirect
+      navigate('/dashboard/entreprise');
+    } else {
+      toast.info('Créez un compte particulier pour accéder à cette fonctionnalité');
+    }
+  };
+
   const menuSections = [
     {
       title: 'Principal',
@@ -94,8 +358,8 @@ const ClientDashboard = () => {
       title: 'Communication',
       items: [
         { id: 'messages', label: 'Messagerie', icon: MessageSquare },
-        { id: 'contacts', label: 'Contacts', icon: Phone },
-        { id: 'entrepreneur', label: 'Compte entrepreneur', icon: Building2 },
+        { id: 'contacts', label: 'Contacts & Amis', icon: Users },
+        { id: 'particulier', label: 'Compte particulier', icon: Building2 },
       ]
     },
     {
@@ -128,8 +392,8 @@ const ClientDashboard = () => {
   const quickStats = [
     { label: 'Cash-back disponible', value: `${cashback.toFixed(2)} CHF`, icon: Wallet, color: 'text-green-500' },
     { label: 'Commandes', value: orders.length.toString(), icon: ShoppingCart, color: 'text-[#0047AB]' },
-    { label: 'Favoris', value: '0', icon: Heart, color: 'text-red-500' },
-    { label: 'Points fidélité', value: '0', icon: Star, color: 'text-[#D4AF37]' },
+    { label: 'Vues profil', value: profileStats.profile_views?.toString() || '0', icon: Eye, color: 'text-purple-500' },
+    { label: 'Amis', value: profileStats.friends_count?.toString() || '0', icon: Users, color: 'text-[#D4AF37]' },
   ];
 
   if (loading) {
@@ -151,18 +415,43 @@ const ClientDashboard = () => {
       </button>
 
       <div className="flex">
-        {/* Sidebar - Desktop & Mobile */}
+        {/* Sidebar */}
         <aside className={`w-64 min-h-screen bg-[#0A0A0A] border-r border-white/5 fixed left-0 top-20 bottom-0 overflow-y-auto z-40 transition-transform duration-300 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
           <div className="p-4 hide-scrollbar">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-full bg-[#0047AB] flex items-center justify-center text-white font-bold text-sm">
-                {user?.first_name?.[0]}{user?.last_name?.[0]}
+            {/* Profile Header with Switch Button */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#0047AB] flex items-center justify-center text-white font-bold text-sm overflow-hidden">
+                  {profileForm?.avatar ? (
+                    <img src={profileForm.avatar.startsWith('http') ? profileForm.avatar : `${process.env.REACT_APP_BACKEND_URL}${profileForm.avatar}`} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <>{user?.first_name?.[0]}{user?.last_name?.[0]}</>
+                  )}
+                </div>
+                <div>
+                  <p className="font-semibold text-white text-sm">{user?.first_name} {user?.last_name}</p>
+                  <p className="text-xs text-gray-500">Espace client</p>
+                </div>
               </div>
-              <div>
-                <p className="font-semibold text-white text-sm">{user?.first_name} {user?.last_name}</p>
-                <p className="text-xs text-gray-500">Espace client</p>
-              </div>
+              <button 
+                onClick={handleSwitchAccount}
+                className="p-2 bg-white/5 rounded-lg hover:bg-[#0047AB]/20 transition-colors group"
+                title="Basculer vers compte particulier"
+              >
+                <ArrowLeftRight className="w-4 h-4 text-gray-400 group-hover:text-[#0047AB] transition-colors" />
+              </button>
             </div>
+
+            {/* Notifications Badge */}
+            {unreadCount > 0 && (
+              <div className="mb-4 p-3 bg-[#0047AB]/10 rounded-lg flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Bell className="w-4 h-4 text-[#0047AB]" />
+                  <span className="text-sm text-white">{unreadCount} notification{unreadCount > 1 ? 's' : ''}</span>
+                </div>
+                <span className="w-2 h-2 bg-[#0047AB] rounded-full animate-pulse" />
+              </div>
+            )}
 
             {/* Search Bar */}
             <div className="relative mb-6">
@@ -315,42 +604,708 @@ const ClientDashboard = () => {
             </div>
           )}
 
-          {/* Profile Tab */}
+          {/* Profile Tab - Enhanced */}
           {activeTab === 'profile' && (
             <div className="max-w-2xl">
-              <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
-                Mon Profil
-              </h1>
+              <div className="flex items-center justify-between mb-8">
+                <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Mon Profil
+                </h1>
+                <button 
+                  onClick={() => setEditProfile(!editProfile)}
+                  className="btn-secondary flex items-center gap-2"
+                >
+                  <Edit className="w-4 h-4" />
+                  {editProfile ? 'Annuler' : 'Modifier'}
+                </button>
+              </div>
+              
               <div className="card-service rounded-xl p-8">
+                {/* Avatar Section */}
                 <div className="flex items-center gap-6 mb-8">
-                  <div className="w-20 h-20 rounded-full bg-[#0047AB] flex items-center justify-center text-white text-2xl font-bold">
-                    {user?.first_name?.[0]}{user?.last_name?.[0]}
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-white">{user?.first_name} {user?.last_name}</h2>
-                    <p className="text-gray-400">{user?.email}</p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <MapPin className="w-4 h-4 text-gray-500" />
-                      <span className="text-gray-500">{user?.city || 'Lausanne'}</span>
+                  <div className="relative">
+                    <div className="w-24 h-24 rounded-full bg-[#0047AB] flex items-center justify-center text-white text-2xl font-bold overflow-hidden">
+                      {profileForm?.avatar ? (
+                        <img 
+                          src={profileForm.avatar.startsWith('http') ? profileForm.avatar : `${process.env.REACT_APP_BACKEND_URL}${profileForm.avatar}`} 
+                          alt="" 
+                          className="w-full h-full object-cover" 
+                        />
+                      ) : (
+                        <>{user?.first_name?.[0]}{user?.last_name?.[0]}</>
+                      )}
                     </div>
+                    {editProfile && (
+                      <button 
+                        onClick={() => fileInputRef.current?.click()}
+                        className="absolute -bottom-2 -right-2 p-2 bg-[#0047AB] rounded-full text-white hover:bg-[#0047AB]/80 transition-colors"
+                      >
+                        <Camera className="w-4 h-4" />
+                      </button>
+                    )}
+                    <input 
+                      ref={fileInputRef}
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleAvatarUpload}
+                      className="hidden" 
+                    />
+                  </div>
+                  <div className="flex-1">
+                    {editProfile ? (
+                      <div className="grid grid-cols-2 gap-3">
+                        <input
+                          type="text"
+                          value={profileForm.first_name || ''}
+                          onChange={(e) => setProfileForm({...profileForm, first_name: e.target.value})}
+                          placeholder="Prénom"
+                          className="input-dark"
+                        />
+                        <input
+                          type="text"
+                          value={profileForm.last_name || ''}
+                          onChange={(e) => setProfileForm({...profileForm, last_name: e.target.value})}
+                          placeholder="Nom"
+                          className="input-dark"
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        <h2 className="text-xl font-bold text-white">{user?.first_name} {user?.last_name}</h2>
+                        <p className="text-gray-400">{user?.email}</p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <MapPin className="w-4 h-4 text-gray-500" />
+                          <span className="text-gray-500">{user?.city || 'Lausanne'}</span>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
+
+                {/* Stats Row */}
+                <div className="grid grid-cols-3 gap-4 mb-8 p-4 bg-white/5 rounded-xl">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-white">{profileStats.profile_views || 0}</p>
+                    <p className="text-xs text-gray-500">Vues du profil</p>
+                  </div>
+                  <div className="text-center border-x border-white/10">
+                    <p className="text-2xl font-bold text-white">{profileStats.friends_count || 0}</p>
+                    <p className="text-xs text-gray-500">Amis</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-white">{profileStats.orders_count || 0}</p>
+                    <p className="text-xs text-gray-500">Commandes</p>
+                  </div>
+                </div>
+
+                {/* Profile Details */}
                 <div className="space-y-4">
                   <div className="flex justify-between py-3 border-b border-white/10">
-                    <span className="text-gray-400">Téléphone</span>
-                    <span className="text-white">{user?.phone || 'Non renseigné'}</span>
+                    <span className="text-gray-400">Email</span>
+                    {editProfile ? (
+                      <span className="text-gray-500">{user?.email} (non modifiable)</span>
+                    ) : (
+                      <span className="text-white">{user?.email}</span>
+                    )}
                   </div>
+                  
+                  <div className="flex justify-between py-3 border-b border-white/10">
+                    <span className="text-gray-400">Téléphone</span>
+                    {editProfile ? (
+                      <input
+                        type="tel"
+                        value={profileForm.phone || ''}
+                        onChange={(e) => setProfileForm({...profileForm, phone: e.target.value})}
+                        className="input-dark text-right w-48"
+                        placeholder="+41 XX XXX XX XX"
+                      />
+                    ) : (
+                      <span className="text-white">{user?.phone || 'Non renseigné'}</span>
+                    )}
+                  </div>
+
+                  <div className="flex justify-between py-3 border-b border-white/10">
+                    <span className="text-gray-400 flex items-center gap-2">
+                      <Linkedin className="w-4 h-4" /> LinkedIn
+                    </span>
+                    {editProfile ? (
+                      <input
+                        type="url"
+                        value={profileForm.linkedin || ''}
+                        onChange={(e) => setProfileForm({...profileForm, linkedin: e.target.value})}
+                        className="input-dark text-right w-64"
+                        placeholder="https://linkedin.com/in/..."
+                      />
+                    ) : (
+                      <span className="text-white">
+                        {user?.linkedin ? (
+                          <a href={user.linkedin} target="_blank" rel="noopener noreferrer" className="text-[#0047AB] hover:underline">
+                            Voir le profil
+                          </a>
+                        ) : 'Non connecté'}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex justify-between py-3 border-b border-white/10">
+                    <span className="text-gray-400">Ville</span>
+                    {editProfile ? (
+                      <input
+                        type="text"
+                        value={profileForm.city || ''}
+                        onChange={(e) => setProfileForm({...profileForm, city: e.target.value})}
+                        className="input-dark text-right w-48"
+                        placeholder="Lausanne"
+                      />
+                    ) : (
+                      <span className="text-white">{user?.city || 'Non renseigné'}</span>
+                    )}
+                  </div>
+
                   <div className="flex justify-between py-3 border-b border-white/10">
                     <span className="text-gray-400">Compte Premium</span>
                     <span className={user?.is_premium ? 'text-[#D4AF37]' : 'text-gray-500'}>
                       {user?.is_premium ? 'Actif' : 'Inactif'}
                     </span>
                   </div>
+                  
                   <div className="flex justify-between py-3 border-b border-white/10">
                     <span className="text-gray-400">Cash-back disponible</span>
                     <span className="text-green-500">{cashback.toFixed(2)} CHF</span>
                   </div>
                 </div>
+
+                {editProfile && (
+                  <button onClick={handleProfileUpdate} className="btn-primary w-full mt-6">
+                    Enregistrer les modifications
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Contacts & Friends Tab */}
+          {activeTab === 'contacts' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Contacts & Amis
+              </h1>
+
+              {/* Friend Requests */}
+              {friendRequests.received.length > 0 && (
+                <div className="card-service rounded-xl p-6 border-yellow-500/30">
+                  <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <Bell className="w-5 h-5 text-yellow-500" />
+                    Demandes d'amis ({friendRequests.received.length})
+                  </h2>
+                  <div className="space-y-3">
+                    {friendRequests.received.map((request) => (
+                      <div key={request.id} className="flex items-center justify-between p-4 bg-white/5 rounded-xl">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-full bg-[#0047AB] flex items-center justify-center text-white font-bold">
+                            {request.sender?.first_name?.[0]}{request.sender?.last_name?.[0]}
+                          </div>
+                          <div>
+                            <p className="text-white font-medium">{request.sender?.first_name} {request.sender?.last_name}</p>
+                            <p className="text-sm text-gray-400">{request.message || 'Souhaite vous ajouter'}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleRespondToRequest(request.id, true)}
+                            className="p-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30"
+                          >
+                            <CheckCircle className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={() => handleRespondToRequest(request.id, false)}
+                            className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30"
+                          >
+                            <XCircle className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Friends List */}
+              <div className="card-service rounded-xl p-6">
+                <h2 className="text-lg font-semibold text-white mb-4">Mes amis ({friends.length})</h2>
+                {friends.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {friends.map((friend) => (
+                      <div key={friend.id} className="flex items-center justify-between p-4 bg-white/5 rounded-xl">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-full bg-[#0047AB]/50 flex items-center justify-center text-white font-bold overflow-hidden">
+                            {friend.avatar ? (
+                              <img src={friend.avatar.startsWith('http') ? friend.avatar : `${process.env.REACT_APP_BACKEND_URL}${friend.avatar}`} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <>{friend.first_name?.[0]}{friend.last_name?.[0]}</>
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-white font-medium">{friend.first_name} {friend.last_name}</p>
+                            <p className="text-sm text-gray-400">{friend.city || 'Lausanne'}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => { setSelectedConversation(friend); setActiveTab('messages'); }}
+                            className="p-2 bg-[#0047AB]/20 text-[#0047AB] rounded-lg hover:bg-[#0047AB]/30"
+                          >
+                            <MessageSquare className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleRemoveFriend(friend.friendship_id)}
+                            className="p-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Users className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+                    <p className="text-gray-400">Aucun ami pour le moment</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Suggested Friends */}
+              {suggestedFriends.length > 0 && (
+                <div className="card-service rounded-xl p-6">
+                  <h2 className="text-lg font-semibold text-white mb-4">Suggestions d'amis</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {suggestedFriends.map((suggestion) => (
+                      <div key={suggestion.id} className="p-4 bg-white/5 rounded-xl">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center text-white font-bold">
+                            {suggestion.first_name?.[0]}{suggestion.last_name?.[0]}
+                          </div>
+                          <div>
+                            <p className="text-white font-medium">{suggestion.first_name} {suggestion.last_name}</p>
+                            <p className="text-sm text-gray-400">{suggestion.city || 'Lausanne'}</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleSendFriendRequest(suggestion.id)}
+                          className="w-full btn-secondary text-sm flex items-center justify-center gap-2"
+                        >
+                          <UserPlus className="w-4 h-4" />
+                          Ajouter
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Cards Tab - Fixed */}
+          {activeTab === 'cartes' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Mes Cartes de Paiement
+                </h1>
+                <button onClick={() => setShowAddCard(true)} className="btn-primary flex items-center gap-2">
+                  <Plus className="w-4 h-4" />
+                  Ajouter une carte
+                </button>
+              </div>
+
+              {cards.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {cards.map((card) => (
+                    <div key={card.id} className={`card-service rounded-xl p-6 ${card.is_default ? 'border-[#0047AB]' : ''}`}>
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <CreditCard className={`w-8 h-8 ${card.card_type === 'visa' ? 'text-blue-500' : card.card_type === 'mastercard' ? 'text-orange-500' : 'text-gray-400'}`} />
+                          <div>
+                            <p className="text-white font-medium uppercase">{card.card_type}</p>
+                            {card.is_default && <span className="text-xs text-[#0047AB]">Par défaut</span>}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteCard(card.id)}
+                          className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <p className="text-xl text-white font-mono mb-2">•••• •••• •••• {card.card_number_last4}</p>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-400">{card.card_holder}</span>
+                        <span className="text-gray-400">{String(card.expiry_month).padStart(2, '0')}/{card.expiry_year}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="card-service rounded-xl p-12 text-center">
+                  <CreditCard className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-400 mb-4">Aucune carte enregistrée</p>
+                  <button onClick={() => setShowAddCard(true)} className="btn-secondary">
+                    Ajouter une carte
+                  </button>
+                </div>
+              )}
+
+              {/* Add Card Modal */}
+              {showAddCard && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                  <div className="card-service rounded-xl p-6 w-full max-w-md">
+                    <h3 className="text-lg font-semibold text-white mb-6">Ajouter une carte</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">Nom du titulaire</label>
+                        <input
+                          type="text"
+                          value={cardForm.card_holder}
+                          onChange={(e) => setCardForm({...cardForm, card_holder: e.target.value})}
+                          className="input-dark w-full"
+                          placeholder="JOHN DOE"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">4 derniers chiffres</label>
+                        <input
+                          type="text"
+                          maxLength={4}
+                          value={cardForm.card_number_last4}
+                          onChange={(e) => setCardForm({...cardForm, card_number_last4: e.target.value.replace(/\D/g, '')})}
+                          className="input-dark w-full"
+                          placeholder="1234"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm text-gray-400 mb-2">Mois d'expiration</label>
+                          <select
+                            value={cardForm.expiry_month}
+                            onChange={(e) => setCardForm({...cardForm, expiry_month: parseInt(e.target.value)})}
+                            className="input-dark w-full"
+                          >
+                            {[...Array(12)].map((_, i) => (
+                              <option key={i+1} value={i+1}>{String(i+1).padStart(2, '0')}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm text-gray-400 mb-2">Année</label>
+                          <select
+                            value={cardForm.expiry_year}
+                            onChange={(e) => setCardForm({...cardForm, expiry_year: parseInt(e.target.value)})}
+                            className="input-dark w-full"
+                          >
+                            {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map((year) => (
+                              <option key={year} value={year}>{year}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">Type de carte</label>
+                        <select
+                          value={cardForm.card_type}
+                          onChange={(e) => setCardForm({...cardForm, card_type: e.target.value})}
+                          className="input-dark w-full"
+                        >
+                          <option value="visa">Visa</option>
+                          <option value="mastercard">Mastercard</option>
+                          <option value="amex">American Express</option>
+                        </select>
+                      </div>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={cardForm.is_default}
+                          onChange={(e) => setCardForm({...cardForm, is_default: e.target.checked})}
+                          className="w-4 h-4 accent-[#0047AB]"
+                        />
+                        <span className="text-sm text-gray-400">Définir comme carte par défaut</span>
+                      </label>
+                    </div>
+                    <div className="flex gap-3 mt-6">
+                      <button onClick={() => setShowAddCard(false)} className="btn-secondary flex-1">Annuler</button>
+                      <button onClick={handleAddCard} className="btn-primary flex-1">Ajouter</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Documents Tab - Fixed */}
+          {activeTab === 'documents' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Mes Documents
+                </h1>
+                <button onClick={() => setShowAddDocument(true)} className="btn-primary flex items-center gap-2">
+                  <Upload className="w-4 h-4" />
+                  Ajouter un document
+                </button>
+              </div>
+
+              {documents.length > 0 ? (
+                <div className="space-y-3">
+                  {documents.map((doc) => (
+                    <div key={doc.id} className="card-service rounded-xl p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-[#0047AB]/20 rounded-xl flex items-center justify-center">
+                          <FolderOpen className="w-6 h-6 text-[#0047AB]" />
+                        </div>
+                        <div>
+                          <p className="text-white font-medium">{doc.name}</p>
+                          <p className="text-sm text-gray-500">{doc.category} • {new Date(doc.created_at).toLocaleDateString('fr-FR')}</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <a
+                          href={doc.url.startsWith('http') ? doc.url : `${process.env.REACT_APP_BACKEND_URL}${doc.url}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 bg-[#0047AB]/20 text-[#0047AB] rounded-lg hover:bg-[#0047AB]/30"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </a>
+                        <button
+                          onClick={() => handleDeleteDocument(doc.id)}
+                          className="p-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="card-service rounded-xl p-12 text-center">
+                  <FolderOpen className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-400 mb-4">Aucun document</p>
+                  <button onClick={() => setShowAddDocument(true)} className="btn-secondary">
+                    Ajouter un document
+                  </button>
+                </div>
+              )}
+
+              {/* Add Document Modal */}
+              {showAddDocument && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                  <div className="card-service rounded-xl p-6 w-full max-w-md">
+                    <h3 className="text-lg font-semibold text-white mb-6">Ajouter un document</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">Nom du document</label>
+                        <input
+                          type="text"
+                          value={documentForm.name}
+                          onChange={(e) => setDocumentForm({...documentForm, name: e.target.value})}
+                          className="input-dark w-full"
+                          placeholder="Mon document"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">Catégorie</label>
+                        <select
+                          value={documentForm.category}
+                          onChange={(e) => setDocumentForm({...documentForm, category: e.target.value})}
+                          className="input-dark w-full"
+                        >
+                          <option value="general">Général</option>
+                          <option value="factures">Factures</option>
+                          <option value="contrats">Contrats</option>
+                          <option value="autres">Autres</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">Fichier</label>
+                        <input
+                          type="file"
+                          onChange={handleDocumentUpload}
+                          className="w-full text-gray-400"
+                        />
+                        {documentForm.url && (
+                          <p className="text-sm text-green-400 mt-2">Fichier uploadé ✓</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-3 mt-6">
+                      <button onClick={() => { setShowAddDocument(false); setDocumentForm({ name: '', category: 'general', url: '' }); }} className="btn-secondary flex-1">Annuler</button>
+                      <button onClick={handleAddDocument} className="btn-primary flex-1">Ajouter</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Messages Tab - Production Ready */}
+          {activeTab === 'messages' && (
+            <div className="h-[calc(100vh-180px)]">
+              <h1 className="text-2xl font-bold text-white mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Messagerie
+              </h1>
+              
+              <div className="flex gap-6 h-[calc(100%-60px)]">
+                {/* Conversations List */}
+                <div className="w-80 card-service rounded-xl p-4 overflow-y-auto">
+                  <h3 className="text-sm font-semibold text-gray-400 mb-4">Conversations</h3>
+                  {conversations.length > 0 ? (
+                    <div className="space-y-2">
+                      {conversations.map((conv) => (
+                        <button
+                          key={conv.partner?.id}
+                          onClick={() => handleSelectConversation(conv.partner?.id)}
+                          className={`w-full p-3 rounded-xl text-left transition-colors ${
+                            selectedConversation?.id === conv.partner?.id
+                              ? 'bg-[#0047AB]/20'
+                              : 'bg-white/5 hover:bg-white/10'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-[#0047AB]/50 flex items-center justify-center text-white font-bold text-sm">
+                              {conv.partner?.first_name?.[0]}{conv.partner?.last_name?.[0]}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <p className="text-white font-medium truncate">{conv.partner?.first_name} {conv.partner?.last_name}</p>
+                                {conv.unread_count > 0 && (
+                                  <span className="w-5 h-5 bg-[#0047AB] rounded-full text-xs flex items-center justify-center text-white">
+                                    {conv.unread_count}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-500 truncate">{conv.last_message?.content}</p>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <MessageSquare className="w-10 h-10 text-gray-600 mx-auto mb-2" />
+                      <p className="text-sm text-gray-500">Aucune conversation</p>
+                    </div>
+                  )}
+                  
+                  {/* Start new conversation with friends */}
+                  {friends.length > 0 && (
+                    <div className="mt-6 pt-4 border-t border-white/10">
+                      <h4 className="text-xs font-semibold text-gray-500 mb-3">Démarrer une conversation</h4>
+                      {friends.slice(0, 5).map((friend) => (
+                        <button
+                          key={friend.id}
+                          onClick={() => handleSelectConversation(friend.id)}
+                          className="w-full p-2 rounded-lg text-left bg-white/5 hover:bg-white/10 mb-2 flex items-center gap-2"
+                        >
+                          <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-white text-xs font-bold">
+                            {friend.first_name?.[0]}{friend.last_name?.[0]}
+                          </div>
+                          <span className="text-sm text-gray-300">{friend.first_name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Chat Area */}
+                <div className="flex-1 card-service rounded-xl flex flex-col">
+                  {selectedConversation ? (
+                    <>
+                      {/* Chat Header */}
+                      <div className="p-4 border-b border-white/10 flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-[#0047AB]/50 flex items-center justify-center text-white font-bold">
+                          {selectedConversation.first_name?.[0]}{selectedConversation.last_name?.[0]}
+                        </div>
+                        <div>
+                          <p className="text-white font-medium">{selectedConversation.first_name} {selectedConversation.last_name}</p>
+                          <p className="text-sm text-gray-500">{selectedConversation.user_type === 'entreprise' ? 'Entreprise' : 'Client'}</p>
+                        </div>
+                      </div>
+
+                      {/* Messages */}
+                      <div className="flex-1 p-4 overflow-y-auto space-y-4">
+                        {messages.map((msg) => (
+                          <div
+                            key={msg.id}
+                            className={`flex ${msg.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}
+                          >
+                            <div
+                              className={`max-w-xs px-4 py-2 rounded-2xl ${
+                                msg.sender_id === user?.id
+                                  ? 'bg-[#0047AB] text-white rounded-br-none'
+                                  : 'bg-white/10 text-white rounded-bl-none'
+                              }`}
+                            >
+                              <p>{msg.content}</p>
+                              <p className={`text-xs mt-1 ${msg.sender_id === user?.id ? 'text-white/60' : 'text-gray-500'}`}>
+                                {new Date(msg.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Input */}
+                      <div className="p-4 border-t border-white/10">
+                        <div className="flex gap-3">
+                          <input
+                            type="text"
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                            placeholder="Écrivez votre message..."
+                            className="input-dark flex-1"
+                          />
+                          <button
+                            onClick={handleSendMessage}
+                            disabled={!newMessage.trim()}
+                            className="btn-primary px-4 disabled:opacity-50"
+                          >
+                            <Send className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex-1 flex items-center justify-center">
+                      <div className="text-center">
+                        <MessageSquare className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                        <p className="text-gray-400">Sélectionnez une conversation</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Compte Particulier (Switch) */}
+          {activeTab === 'particulier' && (
+            <div className="max-w-md mx-auto">
+              <h1 className="text-2xl font-bold text-white mb-8 text-center" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Compte Particulier
+              </h1>
+              <div className="card-service rounded-xl p-8 text-center">
+                <Building2 className="w-16 h-16 text-[#0047AB] mx-auto mb-6" />
+                <h2 className="text-xl font-bold text-white mb-4">Créez votre compte particulier</h2>
+                <p className="text-gray-400 mb-6">
+                  Avec un compte particulier, vous pouvez proposer vos propres services sur Titelli.
+                </p>
+                <button 
+                  onClick={() => navigate('/auth?type=entreprise')}
+                  className="btn-primary w-full"
+                >
+                  Créer un compte particulier
+                </button>
               </div>
             </div>
           )}
@@ -425,168 +1380,7 @@ const ClientDashboard = () => {
             </div>
           )}
 
-          {/* Mode de vie */}
-          {activeTab === 'mode_vie' && (
-            <div>
-              <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
-                Mon Mode de Vie
-              </h1>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="card-service rounded-xl p-6">
-                  <Heart className="w-8 h-8 text-red-500 mb-4" />
-                  <h3 className="text-lg font-semibold text-white mb-2">Mes Favoris</h3>
-                  <p className="text-gray-400 text-sm mb-4">Retrouvez vos entreprises et services favoris</p>
-                  <p className="text-3xl font-bold text-white">0</p>
-                  <p className="text-gray-500 text-sm">favoris enregistrés</p>
-                </div>
-                <div className="card-service rounded-xl p-6">
-                  <Star className="w-8 h-8 text-[#D4AF37] mb-4" />
-                  <h3 className="text-lg font-semibold text-white mb-2">Mes Avis</h3>
-                  <p className="text-gray-400 text-sm mb-4">Consultez les avis que vous avez laissés</p>
-                  <p className="text-3xl font-bold text-white">0</p>
-                  <p className="text-gray-500 text-sm">avis publiés</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Premium */}
-          {activeTab === 'premium' && (
-            <div>
-              <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
-                Titelli Premium
-              </h1>
-              <div className="card-service rounded-xl p-8 text-center border-2 border-[#D4AF37]/30">
-                <Crown className="w-16 h-16 text-[#D4AF37] mx-auto mb-6" />
-                <h2 className="text-2xl font-bold text-white mb-4">Passez à Premium</h2>
-                <p className="text-gray-400 mb-8 max-w-lg mx-auto">
-                  Profitez d'avantages exclusifs : cash-back doublé, accès prioritaire, offres spéciales et bien plus !
-                </p>
-                <ul className="text-left max-w-md mx-auto space-y-3 mb-8">
-                  <li className="flex items-center gap-3 text-gray-300">
-                    <div className="w-5 h-5 rounded-full bg-[#D4AF37]/20 flex items-center justify-center">
-                      <span className="text-[#D4AF37] text-xs">✓</span>
-                    </div>
-                    Cash-back doublé sur tous vos achats
-                  </li>
-                  <li className="flex items-center gap-3 text-gray-300">
-                    <div className="w-5 h-5 rounded-full bg-[#D4AF37]/20 flex items-center justify-center">
-                      <span className="text-[#D4AF37] text-xs">✓</span>
-                    </div>
-                    Accès prioritaire aux nouvelles offres
-                  </li>
-                  <li className="flex items-center gap-3 text-gray-300">
-                    <div className="w-5 h-5 rounded-full bg-[#D4AF37]/20 flex items-center justify-center">
-                      <span className="text-[#D4AF37] text-xs">✓</span>
-                    </div>
-                    Réductions exclusives chez nos partenaires
-                  </li>
-                  <li className="flex items-center gap-3 text-gray-300">
-                    <div className="w-5 h-5 rounded-full bg-[#D4AF37]/20 flex items-center justify-center">
-                      <span className="text-[#D4AF37] text-xs">✓</span>
-                    </div>
-                    Support client prioritaire
-                  </li>
-                </ul>
-                <button className="btn-primary bg-gradient-to-r from-[#D4AF37] to-[#B8860B] hover:from-[#B8860B] hover:to-[#D4AF37]">
-                  S'abonner à Premium - 9.90 CHF/mois
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Agenda */}
-          {activeTab === 'agenda' && (
-            <div>
-              <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
-                Mon Agenda
-              </h1>
-              <div className="card-service rounded-xl p-8 text-center">
-                <Calendar className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-                <p className="text-gray-400 mb-4">Aucun rendez-vous à venir</p>
-                <p className="text-sm text-gray-500">
-                  Vos rendez-vous pris chez les prestataires apparaîtront ici
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Cartes */}
-          {activeTab === 'cartes' && (
-            <div>
-              <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
-                Mes Cartes de Paiement
-              </h1>
-              <div className="card-service rounded-xl p-8 text-center">
-                <CreditCard className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-                <p className="text-gray-400 mb-4">Aucune carte enregistrée</p>
-                <button className="btn-secondary">
-                  Ajouter une carte
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Finances */}
-          {activeTab === 'finances' && (
-            <div>
-              <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
-                Mes Finances
-              </h1>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="card-service rounded-xl p-6 text-center">
-                  <p className="text-gray-400 text-sm mb-2">Total dépensé</p>
-                  <p className="text-2xl font-bold text-white">
-                    {orders.reduce((sum, o) => sum + (o.total || 0), 0).toFixed(2)} CHF
-                  </p>
-                </div>
-                <div className="card-service rounded-xl p-6 text-center">
-                  <p className="text-gray-400 text-sm mb-2">Cash-back gagné</p>
-                  <p className="text-2xl font-bold text-green-500">{cashback.toFixed(2)} CHF</p>
-                </div>
-                <div className="card-service rounded-xl p-6 text-center">
-                  <p className="text-gray-400 text-sm mb-2">Économies totales</p>
-                  <p className="text-2xl font-bold text-[#D4AF37]">{cashback.toFixed(2)} CHF</p>
-                </div>
-              </div>
-              <div className="card-service rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">Historique des transactions</h3>
-                {orders.length > 0 ? (
-                  <div className="space-y-3">
-                    {orders.slice(0, 5).map((order) => (
-                      <div key={order.id} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
-                        <div>
-                          <p className="text-white">{order.items?.length || 0} article(s)</p>
-                          <p className="text-sm text-gray-500">{new Date(order.created_at).toLocaleDateString('fr-FR')}</p>
-                        </div>
-                        <p className="text-white font-medium">-{order.total?.toFixed(2)} CHF</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-400 text-center py-8">Aucune transaction</p>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Messages */}
-          {activeTab === 'messages' && (
-            <div>
-              <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
-                Messagerie
-              </h1>
-              <div className="card-service rounded-xl p-8 text-center">
-                <MessageSquare className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-                <p className="text-gray-400 mb-4">Aucun message</p>
-                <p className="text-sm text-gray-500">
-                  Vos conversations avec les prestataires apparaîtront ici
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Settings */}
+          {/* Settings Tab */}
           {activeTab === 'settings' && (
             <div>
               <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
@@ -602,6 +1396,10 @@ const ClientDashboard = () => {
                     </label>
                     <label className="flex items-center justify-between">
                       <span className="text-gray-400">Notifications push</span>
+                      <input type="checkbox" defaultChecked className="toggle" />
+                    </label>
+                    <label className="flex items-center justify-between">
+                      <span className="text-gray-400">Demandes d'amis</span>
                       <input type="checkbox" defaultChecked className="toggle" />
                     </label>
                     <label className="flex items-center justify-between">
@@ -621,6 +1419,10 @@ const ClientDashboard = () => {
                       <span className="text-gray-400">Partager mes avis</span>
                       <input type="checkbox" defaultChecked className="toggle" />
                     </label>
+                    <label className="flex items-center justify-between">
+                      <span className="text-gray-400">Recevoir des suggestions d'amis</span>
+                      <input type="checkbox" defaultChecked className="toggle" />
+                    </label>
                   </div>
                 </div>
                 <div className="card-service rounded-xl p-6">
@@ -630,6 +1432,17 @@ const ClientDashboard = () => {
                   </button>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Default placeholder for other tabs */}
+          {!['overview', 'profile', 'contacts', 'cartes', 'documents', 'messages', 'particulier', 'orders', 'cashback', 'settings'].includes(activeTab) && (
+            <div className="card-service rounded-xl p-12 text-center">
+              <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Clock className="w-8 h-8 text-gray-500" />
+              </div>
+              <h2 className="text-xl font-bold text-white mb-2">Section en cours de développement</h2>
+              <p className="text-gray-400">Cette fonctionnalité sera bientôt disponible.</p>
             </div>
           )}
         </main>
