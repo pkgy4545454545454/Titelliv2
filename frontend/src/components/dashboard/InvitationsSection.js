@@ -77,7 +77,7 @@ const InvitationsSection = () => {
     }
   };
 
-  const useQuickQuestion = (question) => {
+  const handleQuickQuestion = (question) => {
     setFormData({ ...formData, title: 'Question client', message: question, invitation_type: 'survey' });
     setShowCreate(true);
   };
