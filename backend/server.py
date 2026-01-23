@@ -729,6 +729,16 @@ async def get_current_user(authorization: Optional[str] = Header(None)) -> dict:
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
     return user
 
+# ============ TITELLI FEES CONFIG (PRODUCTION) ============
+
+TITELLI_FEES = {
+    "management_fee": 0.10,  # 10% frais de gestion sur les prestataires
+    "transaction_fee": 0.029,  # 2.9% frais de transaction (consommateur)
+    "investment_commission": 0.12,  # 12% commission sur bénéfices investissements
+    "delivery_fee_min": 5.0,  # Frais de livraison minimum
+    "delivery_fee_max": 25.0,  # Frais de livraison maximum
+}
+
 # ============ PREMIUM PLANS CONFIG ============
 
 PREMIUM_PLANS = {
