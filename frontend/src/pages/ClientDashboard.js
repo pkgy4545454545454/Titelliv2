@@ -3155,8 +3155,691 @@ const ClientDashboard = () => {
             </div>
           )}
 
+          {/* Activity Feed Tab - Mon fil d'actualité */}
+          {activeTab === 'feed' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Mon Fil d'Actualité
+              </h1>
+              <p className="text-gray-400">Découvrez ce que font vos contacts</p>
+
+              {activityFeed.length > 0 ? (
+                <div className="space-y-4">
+                  {activityFeed.map((activity, index) => (
+                    <div key={index} className="card-service rounded-xl p-5 hover:border-[#0047AB]/30 transition-colors">
+                      <div className="flex gap-4">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#0047AB] to-[#D4AF37] flex items-center justify-center flex-shrink-0 overflow-hidden">
+                          {activity.user_avatar ? (
+                            <img src={getImageUrl(activity.user_avatar)} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <User className="w-6 h-6 text-white" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-white">
+                            <span className="font-semibold text-[#0047AB]">{activity.user_name}</span>
+                            <span className="text-gray-400 mx-2">{activity.action}</span>
+                            <span className="font-medium text-[#D4AF37]">{activity.target}</span>
+                          </p>
+                          {activity.comment && (
+                            <p className="text-sm text-gray-500 mt-1 italic">"{activity.comment}"</p>
+                          )}
+                          {activity.rating && (
+                            <div className="flex items-center gap-1 mt-2">
+                              {[...Array(5)].map((_, i) => (
+                                <Star key={i} className={`w-4 h-4 ${i < activity.rating ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-gray-600'}`} />
+                              ))}
+                            </div>
+                          )}
+                          {activity.item_price && (
+                            <p className="text-sm text-[#D4AF37] mt-1">{activity.item_price.toFixed(2)} CHF</p>
+                          )}
+                          <p className="text-xs text-gray-500 mt-2">
+                            {new Date(activity.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                          activity.type === 'review' ? 'bg-[#D4AF37]/20' :
+                          activity.type === 'purchase' ? 'bg-green-500/20' :
+                          activity.type === 'training' ? 'bg-purple-500/20' :
+                          'bg-pink-500/20'
+                        }`}>
+                          {activity.type === 'review' && <Star className="w-5 h-5 text-[#D4AF37]" />}
+                          {activity.type === 'purchase' && <ShoppingCart className="w-5 h-5 text-green-500" />}
+                          {activity.type === 'training' && <GraduationCap className="w-5 h-5 text-purple-500" />}
+                          {activity.type === 'wishlist' && <Heart className="w-5 h-5 text-pink-500" />}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="card-service rounded-xl p-12 text-center">
+                  <Rss className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-400 mb-4">Aucune activité récente</p>
+                  <p className="text-sm text-gray-500">Ajoutez des amis pour voir leur activité</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* My Feed Tab - Mon feed personnel */}
+          {activeTab === 'my_feed' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Mon Feed
+              </h1>
+              <p className="text-gray-400">Votre historique d'activité</p>
+
+              {myFeed.length > 0 ? (
+                <div className="space-y-4">
+                  {myFeed.map((activity, index) => (
+                    <div key={index} className="card-service rounded-xl p-5">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                          activity.type === 'review' ? 'bg-[#D4AF37]/20' :
+                          activity.type === 'purchase' ? 'bg-green-500/20' :
+                          activity.type === 'training' ? 'bg-purple-500/20' :
+                          'bg-pink-500/20'
+                        }`}>
+                          {activity.type === 'review' && <Star className="w-6 h-6 text-[#D4AF37]" />}
+                          {activity.type === 'purchase' && <ShoppingCart className="w-6 h-6 text-green-500" />}
+                          {activity.type === 'training' && <GraduationCap className="w-6 h-6 text-purple-500" />}
+                          {activity.type === 'wishlist' && <Heart className="w-6 h-6 text-pink-500" />}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-white">
+                            <span className="text-gray-400">{activity.action}</span>
+                            <span className="font-medium text-[#D4AF37] ml-1">{activity.target}</span>
+                          </p>
+                          {activity.total && <p className="text-sm text-green-500">{activity.total.toFixed(2)} CHF</p>}
+                          {activity.comment && <p className="text-sm text-gray-500 italic mt-1">"{activity.comment}"</p>}
+                          <p className="text-xs text-gray-500 mt-1">
+                            {new Date(activity.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="card-service rounded-xl p-12 text-center">
+                  <Newspaper className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-400 mb-4">Aucune activité</p>
+                  <p className="text-sm text-gray-500">Commencez à explorer et acheter pour voir votre historique</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Mode de vie Tab */}
+          {activeTab === 'mode_vie' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Mon Mode de Vie
+              </h1>
+              <p className="text-gray-400">Vos préférences et centres d'intérêt</p>
+
+              {/* Preferences Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="card-service rounded-xl p-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-pink-500/20 flex items-center justify-center">
+                      <Heart className="w-6 h-6 text-pink-500" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-white">{lifestyle.wishlist?.length || 0}</p>
+                      <p className="text-sm text-gray-400">Articles souhaités</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="card-service rounded-xl p-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-[#D4AF37]/20 flex items-center justify-center">
+                      <Star className="w-6 h-6 text-[#D4AF37]" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-white">{lifestyle.liked_items?.length || 0}</p>
+                      <p className="text-sm text-gray-400">Avis positifs</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="card-service rounded-xl p-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-[#0047AB]/20 flex items-center justify-center">
+                      <Store className="w-6 h-6 text-[#0047AB]" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-white">{lifestyle.personal_providers?.length || 0}</p>
+                      <p className="text-sm text-gray-400">Prestataires favoris</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Top Categories */}
+              {lifestyle.preferences?.top_categories?.length > 0 && (
+                <div className="card-service rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-white mb-4">Vos catégories préférées</h3>
+                  <div className="space-y-3">
+                    {lifestyle.preferences.top_categories.map((cat, index) => (
+                      <div key={index} className="flex items-center justify-between">
+                        <span className="text-white">{cat.name}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-32 h-2 bg-white/10 rounded-full overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-[#0047AB] to-[#D4AF37]" style={{ width: `${Math.min(100, cat.count * 20)}%` }} />
+                          </div>
+                          <span className="text-sm text-gray-400">{cat.count}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Top Enterprises */}
+              {lifestyle.preferences?.top_enterprises?.length > 0 && (
+                <div className="card-service rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-white mb-4">Vos prestataires préférés</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {lifestyle.preferences.top_enterprises.map((ent, index) => (
+                      <Link key={index} to={`/entreprise/${ent.id}`} className="flex items-center gap-3 p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors">
+                        <div className="w-10 h-10 rounded-full bg-[#D4AF37]/20 flex items-center justify-center overflow-hidden">
+                          {ent.logo ? <img src={getImageUrl(ent.logo)} alt="" className="w-full h-full object-cover" /> : <Store className="w-5 h-5 text-[#D4AF37]" />}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-white font-medium">{ent.name}</p>
+                          <p className="text-xs text-gray-400">{ent.visits} visites</p>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-gray-400" />
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Wishlist Preview */}
+              {lifestyle.wishlist?.length > 0 && (
+                <div className="card-service rounded-xl p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-white">Ma liste de souhaits</h3>
+                    <button onClick={() => setActiveTab('wishlist')} className="text-sm text-[#0047AB] hover:underline">Voir tout</button>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {lifestyle.wishlist.slice(0, 4).map((item, index) => (
+                      <div key={index} className="bg-white/5 rounded-lg p-3 text-center">
+                        <Package className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-white truncate">{item.item_name}</p>
+                        <p className="text-xs text-[#D4AF37]">{item.item_price?.toFixed(2)} CHF</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Invitations Tab */}
+          {activeTab === 'invitations' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Mes Invitations Prestataires
+              </h1>
+              <p className="text-gray-400">Offres exclusives des prestataires pour vous</p>
+
+              {invitations.length > 0 ? (
+                <div className="space-y-4">
+                  {invitations.map((inv) => (
+                    <div key={inv.id} className="card-service rounded-xl p-6 border-l-4 border-[#D4AF37]">
+                      <div className="flex items-start justify-between">
+                        <div className="flex gap-4">
+                          <div className="w-14 h-14 rounded-xl bg-[#D4AF37]/20 flex items-center justify-center">
+                            {inv.enterprise?.logo ? (
+                              <img src={getImageUrl(inv.enterprise.logo)} alt="" className="w-full h-full object-cover rounded-xl" />
+                            ) : (
+                              <Gift className="w-7 h-7 text-[#D4AF37]" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-sm text-[#D4AF37] font-medium">{inv.enterprise?.business_name || inv.enterprise_name}</p>
+                            <h3 className="text-lg font-semibold text-white">{inv.title}</h3>
+                            <p className="text-sm text-gray-400 mt-1">{inv.description}</p>
+                            {inv.discount_percent && (
+                              <span className="inline-block mt-2 px-3 py-1 bg-green-500/20 text-green-400 text-sm rounded-full">
+                                -{inv.discount_percent}% de réduction
+                              </span>
+                            )}
+                            {inv.valid_until && (
+                              <p className="text-xs text-gray-500 mt-2">Valable jusqu'au {new Date(inv.valid_until).toLocaleDateString('fr-FR')}</p>
+                            )}
+                          </div>
+                        </div>
+                        {inv.status === 'pending' && (
+                          <div className="flex gap-2">
+                            <button onClick={() => handleRespondToInvitation(inv.id, true)} className="px-4 py-2 bg-[#0047AB] text-white rounded-lg hover:bg-[#2E74D6] text-sm">
+                              Accepter
+                            </button>
+                            <button onClick={() => handleRespondToInvitation(inv.id, false)} className="px-4 py-2 bg-white/10 text-gray-400 rounded-lg hover:bg-white/20 text-sm">
+                              Refuser
+                            </button>
+                          </div>
+                        )}
+                        {inv.status === 'accepted' && (
+                          <span className="px-3 py-1 bg-green-500/20 text-green-400 text-sm rounded-full">Acceptée</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="card-service rounded-xl p-12 text-center">
+                  <Gift className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-400 mb-4">Aucune invitation pour le moment</p>
+                  <p className="text-sm text-gray-500">Les prestataires peuvent vous envoyer des offres exclusives</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Current Offers Tab */}
+          {activeTab === 'offres' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Mes Offres du Moment
+              </h1>
+              <p className="text-gray-400">Promotions et offres spéciales disponibles</p>
+
+              {currentOffers.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {currentOffers.map((offer) => (
+                    <div key={offer.id} className="card-service rounded-xl overflow-hidden group">
+                      <div className="h-32 bg-gradient-to-br from-[#0047AB]/30 to-[#D4AF37]/30 relative">
+                        {offer.discount_percent && (
+                          <div className="absolute top-3 right-3 px-3 py-1 bg-red-500 text-white text-sm font-bold rounded-full">
+                            -{offer.discount_percent}%
+                          </div>
+                        )}
+                        <div className="absolute bottom-3 left-3">
+                          <p className="text-white font-bold text-lg">{offer.title}</p>
+                        </div>
+                      </div>
+                      <div className="p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Store className="w-4 h-4 text-[#D4AF37]" />
+                          <span className="text-sm text-[#D4AF37]">{offer.enterprise?.business_name}</span>
+                        </div>
+                        <p className="text-sm text-gray-400 mb-3">{offer.description}</p>
+                        {offer.valid_until && (
+                          <p className="text-xs text-gray-500">Expire le {new Date(offer.valid_until).toLocaleDateString('fr-FR')}</p>
+                        )}
+                        <Link to={`/entreprise/${offer.enterprise_id}`} className="mt-3 btn-primary w-full text-center block text-sm py-2">
+                          Voir l'offre
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="card-service rounded-xl p-12 text-center">
+                  <Target className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-400 mb-4">Aucune offre disponible</p>
+                  <p className="text-sm text-gray-500">Revenez bientôt pour découvrir de nouvelles promotions</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Guests Tab */}
+          {activeTab === 'guests' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Mes Guests du Moment
+              </h1>
+              <p className="text-gray-400">Profils que vous suivez</p>
+
+              {favoriteGuests.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {favoriteGuests.map((guest) => (
+                    <div key={guest.id} className="card-service rounded-xl p-5 group">
+                      <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#0047AB] to-[#D4AF37] flex items-center justify-center overflow-hidden">
+                          {guest.guest_avatar || guest.current_info?.avatar ? (
+                            <img src={getImageUrl(guest.guest_avatar || guest.current_info?.avatar)} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <User className="w-7 h-7 text-white" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-white font-semibold">{guest.guest_name || `${guest.current_info?.first_name} ${guest.current_info?.last_name}`}</p>
+                          {guest.current_info?.city && (
+                            <p className="text-sm text-gray-400 flex items-center gap-1">
+                              <MapPin className="w-3 h-3" /> {guest.current_info.city}
+                            </p>
+                          )}
+                        </div>
+                        <button onClick={() => handleRemoveGuest(guest.id)} className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      {guest.notes && (
+                        <p className="text-sm text-gray-500 mt-3 italic">"{guest.notes}"</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="card-service rounded-xl p-12 text-center">
+                  <Star className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-400 mb-4">Aucun guest favori</p>
+                  <p className="text-sm text-gray-500">Ajoutez des profils que vous appréciez</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Investments Tab */}
+          {activeTab === 'investments' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Mes Investissements
+                </h1>
+                <button onClick={() => setShowAddInvestment(true)} className="btn-primary flex items-center gap-2">
+                  <Plus className="w-4 h-4" />
+                  Ajouter
+                </button>
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="card-service rounded-xl p-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-[#0047AB]/20 flex items-center justify-center">
+                      <DollarSign className="w-6 h-6 text-[#0047AB]" />
+                    </div>
+                    <div>
+                      <p className="text-xl font-bold text-white">{investments.statistics?.total_invested?.toFixed(0) || 0} CHF</p>
+                      <p className="text-sm text-gray-400">Total investi</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="card-service rounded-xl p-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
+                      <TrendingUp className="w-6 h-6 text-green-500" />
+                    </div>
+                    <div>
+                      <p className="text-xl font-bold text-green-500">{investments.statistics?.total_current_value?.toFixed(0) || 0} CHF</p>
+                      <p className="text-sm text-gray-400">Valeur actuelle</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="card-service rounded-xl p-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-[#D4AF37]/20 flex items-center justify-center">
+                      <PieChart className="w-6 h-6 text-[#D4AF37]" />
+                    </div>
+                    <div>
+                      <p className={`text-xl font-bold ${investments.statistics?.total_roi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                        {investments.statistics?.total_roi >= 0 ? '+' : ''}{investments.statistics?.total_roi?.toFixed(0) || 0} CHF
+                      </p>
+                      <p className="text-sm text-gray-400">ROI Total</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="card-service rounded-xl p-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center">
+                      <Home className="w-6 h-6 text-purple-500" />
+                    </div>
+                    <div>
+                      <p className="text-xl font-bold text-white">{investments.statistics?.investment_count || 0}</p>
+                      <p className="text-sm text-gray-400">Investissements</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Investments List */}
+              {investments.investments?.length > 0 ? (
+                <div className="space-y-4">
+                  {investments.investments.map((inv) => (
+                    <div key={inv.id} className="card-service rounded-xl p-5 group">
+                      <div className="flex items-start justify-between">
+                        <div className="flex gap-4">
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                            inv.investment_type === 'real_estate' ? 'bg-purple-500/20' :
+                            inv.investment_type === 'business' ? 'bg-blue-500/20' : 'bg-gray-500/20'
+                          }`}>
+                            {inv.investment_type === 'real_estate' ? <Home className="w-6 h-6 text-purple-500" /> :
+                             inv.investment_type === 'business' ? <Briefcase className="w-6 h-6 text-blue-500" /> :
+                             <PieChart className="w-6 h-6 text-gray-500" />}
+                          </div>
+                          <div>
+                            <h3 className="text-white font-semibold">{inv.title}</h3>
+                            <p className="text-sm text-gray-400">{inv.description}</p>
+                            {inv.property_address && (
+                              <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
+                                <MapPin className="w-3 h-3" /> {inv.property_address}
+                              </p>
+                            )}
+                            <p className="text-xs text-gray-500 mt-2">
+                              Investi le {new Date(inv.investment_date).toLocaleDateString('fr-FR')}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-white font-semibold">{inv.amount_invested?.toFixed(0)} CHF</p>
+                          {inv.current_value && (
+                            <p className={`text-sm ${inv.current_value >= inv.amount_invested ? 'text-green-500' : 'text-red-500'}`}>
+                              → {inv.current_value.toFixed(0)} CHF
+                            </p>
+                          )}
+                          {inv.roi_percent && (
+                            <p className={`text-sm ${inv.roi_percent >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                              {inv.roi_percent >= 0 ? '+' : ''}{inv.roi_percent}%
+                            </p>
+                          )}
+                          <span className={`inline-block mt-2 px-2 py-0.5 rounded-full text-xs ${
+                            inv.status === 'active' ? 'bg-green-500/20 text-green-400' :
+                            inv.status === 'sold' ? 'bg-gray-500/20 text-gray-400' :
+                            'bg-yellow-500/20 text-yellow-400'
+                          }`}>
+                            {inv.status === 'active' ? 'Actif' : inv.status === 'sold' ? 'Vendu' : 'En attente'}
+                          </span>
+                        </div>
+                        <button onClick={() => handleDeleteInvestment(inv.id)} className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="card-service rounded-xl p-12 text-center">
+                  <PieChart className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-400 mb-4">Aucun investissement</p>
+                  <button onClick={() => setShowAddInvestment(true)} className="btn-secondary">
+                    Ajouter un investissement
+                  </button>
+                </div>
+              )}
+
+              {/* Add Investment Modal */}
+              {showAddInvestment && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                  <div className="card-service rounded-xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+                    <h3 className="text-lg font-semibold text-white mb-6">Nouvel Investissement</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">Type *</label>
+                        <select value={investmentForm.investment_type} onChange={(e) => setInvestmentForm({...investmentForm, investment_type: e.target.value})} className="input-dark w-full">
+                          <option value="real_estate">Immobilier</option>
+                          <option value="business">Business</option>
+                          <option value="other">Autre</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">Titre *</label>
+                        <input type="text" value={investmentForm.title} onChange={(e) => setInvestmentForm({...investmentForm, title: e.target.value})} className="input-dark w-full" placeholder="Ex: Appartement Lausanne" />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">Description</label>
+                        <textarea value={investmentForm.description} onChange={(e) => setInvestmentForm({...investmentForm, description: e.target.value})} className="input-dark w-full h-20 resize-none" placeholder="Détails..." />
+                      </div>
+                      {investmentForm.investment_type === 'real_estate' && (
+                        <div>
+                          <label className="block text-sm text-gray-400 mb-2">Adresse du bien</label>
+                          <input type="text" value={investmentForm.property_address} onChange={(e) => setInvestmentForm({...investmentForm, property_address: e.target.value})} className="input-dark w-full" placeholder="Rue, Ville" />
+                        </div>
+                      )}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm text-gray-400 mb-2">Montant investi (CHF) *</label>
+                          <input type="number" value={investmentForm.amount_invested} onChange={(e) => setInvestmentForm({...investmentForm, amount_invested: e.target.value})} className="input-dark w-full" placeholder="50000" />
+                        </div>
+                        <div>
+                          <label className="block text-sm text-gray-400 mb-2">Valeur actuelle (CHF)</label>
+                          <input type="number" value={investmentForm.current_value} onChange={(e) => setInvestmentForm({...investmentForm, current_value: e.target.value})} className="input-dark w-full" placeholder="55000" />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm text-gray-400 mb-2">Date d'investissement *</label>
+                          <input type="date" value={investmentForm.investment_date} onChange={(e) => setInvestmentForm({...investmentForm, investment_date: e.target.value})} className="input-dark w-full" />
+                        </div>
+                        <div>
+                          <label className="block text-sm text-gray-400 mb-2">ROI (%)</label>
+                          <input type="number" value={investmentForm.roi_percent} onChange={(e) => setInvestmentForm({...investmentForm, roi_percent: e.target.value})} className="input-dark w-full" placeholder="10" />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">Statut</label>
+                        <select value={investmentForm.status} onChange={(e) => setInvestmentForm({...investmentForm, status: e.target.value})} className="input-dark w-full">
+                          <option value="active">Actif</option>
+                          <option value="sold">Vendu</option>
+                          <option value="pending">En attente</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="flex gap-3 mt-6">
+                      <button onClick={() => setShowAddInvestment(false)} className="btn-secondary flex-1">Annuler</button>
+                      <button onClick={handleAddInvestment} className="btn-primary flex-1">Ajouter</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Premium Tab */}
+          {activeTab === 'premium' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Mon Premium
+              </h1>
+
+              {/* Current Status */}
+              <div className={`card-service rounded-xl p-6 border-2 ${
+                premiumData.current_plan === 'vip' ? 'border-[#D4AF37]' :
+                premiumData.current_plan === 'premium' ? 'border-[#0047AB]' : 'border-white/10'
+              }`}>
+                <div className="flex items-center gap-4">
+                  <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
+                    premiumData.current_plan === 'vip' ? 'bg-[#D4AF37]/20' :
+                    premiumData.current_plan === 'premium' ? 'bg-[#0047AB]/20' : 'bg-white/10'
+                  }`}>
+                    <Crown className={`w-8 h-8 ${
+                      premiumData.current_plan === 'vip' ? 'text-[#D4AF37]' :
+                      premiumData.current_plan === 'premium' ? 'text-[#0047AB]' : 'text-gray-500'
+                    }`} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400">Votre abonnement actuel</p>
+                    <p className={`text-2xl font-bold ${
+                      premiumData.current_plan === 'vip' ? 'text-[#D4AF37]' :
+                      premiumData.current_plan === 'premium' ? 'text-[#0047AB]' : 'text-white'
+                    }`}>
+                      {premiumData.current_plan === 'vip' ? 'VIP' :
+                       premiumData.current_plan === 'premium' ? 'Premium' : 'Gratuit'}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">{premiumData.cashback_rate}% de cashback</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Plans */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Free */}
+                <div className={`card-service rounded-xl p-6 ${premiumData.current_plan === 'free' ? 'border-2 border-white/30' : ''}`}>
+                  <h3 className="text-lg font-semibold text-white mb-2">Gratuit</h3>
+                  <p className="text-3xl font-bold text-white mb-4">0 <span className="text-sm font-normal text-gray-400">CHF/mois</span></p>
+                  <ul className="space-y-2 text-sm text-gray-400 mb-6">
+                    {premiumData.benefits?.free?.features?.map((f, i) => (
+                      <li key={i} className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                  {premiumData.current_plan === 'free' && (
+                    <button disabled className="w-full py-2 bg-white/10 text-gray-400 rounded-lg">Plan actuel</button>
+                  )}
+                </div>
+
+                {/* Premium */}
+                <div className={`card-service rounded-xl p-6 border-2 ${premiumData.current_plan === 'premium' ? 'border-[#0047AB]' : 'border-[#0047AB]/30'} relative`}>
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-[#0047AB] text-white text-xs rounded-full">
+                    Populaire
+                  </div>
+                  <h3 className="text-lg font-semibold text-[#0047AB] mb-2">Premium</h3>
+                  <p className="text-3xl font-bold text-white mb-4">9.99 <span className="text-sm font-normal text-gray-400">CHF/mois</span></p>
+                  <ul className="space-y-2 text-sm text-gray-400 mb-6">
+                    {premiumData.benefits?.premium?.features?.map((f, i) => (
+                      <li key={i} className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-[#0047AB]" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                  {premiumData.current_plan === 'premium' ? (
+                    <button disabled className="w-full py-2 bg-[#0047AB]/20 text-[#0047AB] rounded-lg">Plan actuel</button>
+                  ) : (
+                    <button onClick={() => handleUpgradePremium('premium')} className="w-full py-2 bg-[#0047AB] text-white rounded-lg hover:bg-[#2E74D6] transition-colors">
+                      Passer Premium
+                    </button>
+                  )}
+                </div>
+
+                {/* VIP */}
+                <div className={`card-service rounded-xl p-6 border-2 ${premiumData.current_plan === 'vip' ? 'border-[#D4AF37]' : 'border-[#D4AF37]/30'} relative`}>
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-[#D4AF37] text-black text-xs rounded-full font-semibold">
+                    VIP
+                  </div>
+                  <h3 className="text-lg font-semibold text-[#D4AF37] mb-2">VIP</h3>
+                  <p className="text-3xl font-bold text-white mb-4">29.99 <span className="text-sm font-normal text-gray-400">CHF/mois</span></p>
+                  <ul className="space-y-2 text-sm text-gray-400 mb-6">
+                    {premiumData.benefits?.vip?.features?.map((f, i) => (
+                      <li key={i} className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-[#D4AF37]" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                  {premiumData.current_plan === 'vip' ? (
+                    <button disabled className="w-full py-2 bg-[#D4AF37]/20 text-[#D4AF37] rounded-lg">Plan actuel</button>
+                  ) : (
+                    <button onClick={() => handleUpgradePremium('vip')} className="w-full py-2 bg-[#D4AF37] text-black rounded-lg hover:bg-[#E5C048] transition-colors font-semibold">
+                      Passer VIP
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Default placeholder for other tabs */}
-          {!['overview', 'profile', 'contacts', 'cartes', 'documents', 'messages', 'particulier', 'orders', 'cashback', 'settings', 'formations', 'agenda', 'finances', 'donations', 'wishlist', 'suggestions', 'prestataires', 'demandes'].includes(activeTab) && (
+          {!['overview', 'profile', 'contacts', 'cartes', 'documents', 'messages', 'particulier', 'orders', 'cashback', 'settings', 'formations', 'agenda', 'finances', 'donations', 'wishlist', 'suggestions', 'prestataires', 'demandes', 'feed', 'my_feed', 'mode_vie', 'invitations', 'offres', 'guests', 'investments', 'premium'].includes(activeTab) && (
             <div className="card-service rounded-xl p-12 text-center">
               <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Clock className="w-8 h-8 text-gray-500" />
