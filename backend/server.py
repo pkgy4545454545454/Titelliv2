@@ -2557,6 +2557,100 @@ async def get_all_investments(investment_type: Optional[str] = None, limit: int 
     investments = await db.investments.find(query, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
     return investments
 
+@api_router.post("/investments/{investment_id}/invest")
+async def invest_in_enterprise(
+    investment_id: str,
+    amount: float,
+    current_user: dict = Depends(get_current_user)
+):
+    """Client invests in an enterprise offering - 12% commission on returns"""
+    investment = await db.investments.find_one({"id": investment_id, "is_active": True})
+    if not investment:
+        raise HTTPException(status_code=404, detail="Investissement non trouvé ou inactif")
+    
+    if amount < investment.get('min_investment', 0):
+        raise HTTPException(status_code=400, detail=f"Montant minimum: {investment.get('min_investment')} CHF")
+    
+    if investment.get('max_investment') and amount > investment['max_investment']:
+        raise HTTPException(status_code=400, detail=f"Montant maximum: {investment['max_investment']} CHF")
+    
+    # Calculate fees (10% management + 2.9% transaction)
+    management_fee = round(amount * TITELLI_FEES['management_fee'], 2)
+    transaction_fee = round(amount * TITELLI_FEES['transaction_fee'], 2)
+    total_fees = management_fee + transaction_fee
+    net_investment = round(amount - total_fees, 2)
+    
+    # Calculate expected return with 12% commission
+    expected_return_rate = investment.get('expected_return', 0) / 100
+    gross_return = round(amount * expected_return_rate, 2)
+    titelli_commission = round(gross_return * TITELLI_FEES['investment_commission'], 2)  # 12%
+    net_return = round(gross_return - titelli_commission, 2)
+    
+    # Create investment record
+    client_investment = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user['id'],
+        "investment_id": investment_id,
+        "enterprise_id": investment.get('enterprise_id'),
+        "enterprise_name": investment.get('enterprise_name'),
+        "investment_title": investment.get('title'),
+        "investment_type": investment.get('investment_type'),
+        "amount_invested": amount,
+        "net_investment_to_enterprise": net_investment,
+        "management_fee": management_fee,
+        "transaction_fee": transaction_fee,
+        "expected_return_rate": investment.get('expected_return'),
+        "expected_gross_return": gross_return,
+        "titelli_commission_12pct": titelli_commission,
+        "expected_net_return": net_return,
+        "duration": investment.get('duration'),
+        "status": "active",
+        "invested_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.client_investments.insert_one(client_investment)
+    
+    # Update investment stats
+    await db.investments.update_one(
+        {"id": investment_id},
+        {
+            "$inc": {
+                "investors_count": 1,
+                "total_raised": net_investment
+            }
+        }
+    )
+    
+    # Create activity for feed
+    user_name = f"{current_user.get('first_name', '')} {current_user.get('last_name', '')}".strip()
+    activity = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user['id'],
+        "user_name": user_name,
+        "activity_type": "investment",
+        "title": f"a investi dans {investment.get('enterprise_name')}",
+        "item_name": investment.get('title'),
+        "enterprise_id": investment.get('enterprise_id'),
+        "enterprise_name": investment.get('enterprise_name'),
+        "is_public": False,  # Investments are private by default
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.activity_posts.insert_one(activity)
+    
+    client_investment.pop('_id', None)
+    return {
+        "investment": client_investment,
+        "fees_breakdown": {
+            "gross_amount": amount,
+            "management_fee_10pct": management_fee,
+            "transaction_fee_2_9pct": transaction_fee,
+            "net_to_enterprise": net_investment,
+            "expected_gross_return": gross_return,
+            "titelli_commission_12pct": titelli_commission,
+            "expected_net_return_to_you": net_return
+        }
+    }
+
 # ============ STOCK MANAGEMENT ROUTES ============
 
 class StockItemCreate(BaseModel):
