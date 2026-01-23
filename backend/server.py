@@ -57,6 +57,8 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    social_accounts: Optional[dict] = None  # For influencers: {instagram, tiktok, youtube, etc.}
+    niche: Optional[str] = None  # For influencers: beauty, tech, sport, etc.
 
 class UserLogin(BaseModel):
     email: EmailStr
