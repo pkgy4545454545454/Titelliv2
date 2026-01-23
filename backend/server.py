@@ -3478,27 +3478,76 @@ async def create_ia_campaign(campaign_data: IACampaignCreate, current_user: dict
     if not enterprise:
         raise HTTPException(status_code=404, detail="Entreprise non trouvée")
     
-    # Simulate reach based on targeting
-    base_reach = 5000
-    if campaign_data.gender != 'all':
-        base_reach *= 0.5
-    if len(campaign_data.interests) > 0:
-        base_reach *= (0.3 + (len(campaign_data.interests) * 0.1))
-    if campaign_data.budget == 'high':
-        base_reach *= 1.5
+    # REAL targeting algorithm based on actual user database
+    # Build targeting query to count real potential reach
+    target_query = {"user_type": "client"}
+    
+    # Age targeting (if we have birthdate)
+    if campaign_data.age_min and campaign_data.age_max:
+        # Age filtering would require birthdate field
+        pass
+    
+    # Gender targeting
+    if campaign_data.gender and campaign_data.gender != 'all':
+        target_query["gender"] = campaign_data.gender
+    
+    # Location targeting  
+    if campaign_data.location:
+        target_query["city"] = {"$regex": campaign_data.location, "$options": "i"}
+    
+    # Interest targeting - users who have purchased or wishlisted items in these categories
+    interest_filter = None
+    if campaign_data.interests and len(campaign_data.interests) > 0:
+        # Find users who have interacted with products/services in these categories
+        interested_users = await db.orders.aggregate([
+            {"$lookup": {"from": "services", "localField": "items.product_id", "foreignField": "id", "as": "products"}},
+            {"$unwind": {"path": "$products", "preserveNullAndEmptyArrays": True}},
+            {"$match": {"products.category": {"$in": campaign_data.interests}}},
+            {"$group": {"_id": "$user_id"}}
+        ]).to_list(10000)
+        interest_user_ids = [u['_id'] for u in interested_users]
+        if interest_user_ids:
+            target_query["id"] = {"$in": interest_user_ids}
+    
+    # Count REAL potential reach from database
+    real_user_count = await db.users.count_documents(target_query)
+    
+    # Apply budget multiplier for reach estimation
+    budget_multiplier = 1.0
+    if campaign_data.budget == 'low':
+        budget_multiplier = 0.3  # Reach 30% of potential
+    elif campaign_data.budget == 'medium':
+        budget_multiplier = 0.6  # Reach 60% of potential
+    elif campaign_data.budget == 'high':
+        budget_multiplier = 0.85  # Reach 85% of potential
     elif campaign_data.budget == 'premium':
-        base_reach *= 2
+        budget_multiplier = 1.0  # Reach 100% of potential
+    
+    # Calculate real metrics based on actual database
+    estimated_reach = max(int(real_user_count * budget_multiplier), 1)
+    # Industry standard engagement rate: 2-5% for targeted ads
+    engagement_rate = 0.035 if campaign_data.interests else 0.025
+    estimated_engagement = max(int(estimated_reach * engagement_rate), 0)
+    # Conversion rate: 0.5-2% for well-targeted campaigns
+    conversion_rate = 0.015 if campaign_data.interests else 0.008
+    estimated_conversions = max(int(estimated_reach * conversion_rate), 0)
     
     campaign = IACampaign(
         enterprise_id=enterprise['id'],
         **campaign_data.model_dump(),
-        reach=int(base_reach + random.randint(500, 2000)),
-        engagement=int(base_reach * 0.04 + random.randint(50, 200)),
-        conversions=int(base_reach * 0.01 + random.randint(10, 50))
+        reach=estimated_reach,
+        engagement=estimated_engagement,
+        conversions=estimated_conversions
     )
     
     campaign_dict = campaign.model_dump()
     campaign_dict['created_at'] = campaign_dict['created_at'].isoformat()
+    campaign_dict['targeting_details'] = {
+        "total_potential_users": real_user_count,
+        "budget_multiplier": budget_multiplier,
+        "engagement_rate": f"{engagement_rate*100:.1f}%",
+        "conversion_rate": f"{conversion_rate*100:.1f}%"
+    }
     await db.ia_campaigns.insert_one(campaign_dict)
     
     # Remove MongoDB _id before returning
