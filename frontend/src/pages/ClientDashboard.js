@@ -645,6 +645,8 @@ const ClientDashboard = () => {
     try {
       toast.loading('Redirection vers le paiement Stripe...');
       const res = await premiumAPI.checkout(plan);
+      // Store session_id for confirmation after return from Stripe
+      localStorage.setItem('stripe_session_id', res.data.session_id);
       // Redirect to Stripe checkout
       window.location.href = res.data.checkout_url;
     } catch (error) {
