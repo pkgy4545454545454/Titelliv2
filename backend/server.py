@@ -5999,6 +5999,279 @@ async def get_subscription_history(current_user: dict = Depends(get_current_user
     
     return {"subscriptions": subscriptions}
 
+# ============ CERTIFICATION & LABELLISATION SYSTEM ============
+
+class CertificationRequest(BaseModel):
+    certification_type: str  # "quality", "eco", "expert", "premium_partner"
+    description: Optional[str] = None
+
+CERTIFICATIONS = {
+    "quality": {"name": "Qualité Titelli", "price": 199, "duration_months": 12, "badge": "⭐ Qualité Certifiée"},
+    "eco": {"name": "Eco-Responsable", "price": 149, "duration_months": 12, "badge": "🌿 Eco-Certifié"},
+    "expert": {"name": "Expert Vérifié", "price": 299, "duration_months": 12, "badge": "👑 Expert Vérifié"},
+    "premium_partner": {"name": "Partenaire Premium", "price": 499, "duration_months": 12, "badge": "💎 Partenaire Premium"}
+}
+
+@api_router.get("/certifications")
+async def get_available_certifications():
+    """Get all available certifications"""
+    return {"certifications": CERTIFICATIONS}
+
+@api_router.get("/enterprise/certifications")
+async def get_enterprise_certifications(current_user: dict = Depends(get_current_user)):
+    """Get enterprise's certifications"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return {"certifications": []}
+    
+    certs = await db.certifications.find(
+        {"enterprise_id": enterprise['id'], "status": "active"},
+        {"_id": 0}
+    ).to_list(20)
+    return {"certifications": certs}
+
+@api_router.post("/enterprise/certifications/apply")
+async def apply_for_certification(
+    request: CertificationRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Apply for a certification - creates Stripe checkout"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    if request.certification_type not in CERTIFICATIONS:
+        raise HTTPException(status_code=400, detail="Type de certification invalide")
+    
+    cert_info = CERTIFICATIONS[request.certification_type]
+    
+    # Create Stripe checkout
+    try:
+        checkout = StripeCheckout(api_key=STRIPE_API_KEY)
+        session_request = CheckoutSessionRequest(
+            amount=cert_info['price'],
+            currency="chf",
+            quantity=1,
+            success_url=f"{os.environ.get('FRONTEND_URL', 'https://market-overhaul-1.preview.emergentagent.com')}/enterprise-dashboard?tab=certifications&success=true",
+            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://market-overhaul-1.preview.emergentagent.com')}/enterprise-dashboard?tab=certifications&cancelled=true",
+            metadata={
+                "type": "certification",
+                "certification_type": request.certification_type,
+                "enterprise_id": enterprise['id'],
+                "product_name": f"Certification {cert_info['name']}"
+            }
+        )
+        response = await checkout.create_checkout_session(session_request)
+        
+        # Store pending certification
+        pending = {
+            "id": str(uuid.uuid4()),
+            "enterprise_id": enterprise['id'],
+            "certification_type": request.certification_type,
+            "stripe_session_id": response.session_id,
+            "status": "pending",
+            "price": cert_info['price'],
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.pending_certifications.insert_one(pending)
+        
+        return {"checkout_url": response.url, "session_id": response.session_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur paiement: {str(e)}")
+
+@api_router.get("/enterprises/{enterprise_id}/certifications")
+async def get_public_enterprise_certifications(enterprise_id: str):
+    """Get public certifications for an enterprise"""
+    certs = await db.certifications.find(
+        {"enterprise_id": enterprise_id, "status": "active"},
+        {"_id": 0}
+    ).to_list(20)
+    return {"certifications": certs}
+
+# ============ EXPERT OPTIMIZATION SERVICES ============
+
+EXPERT_SERVICES = {
+    "image_optimization": {
+        "name": "Optimisation d'Image",
+        "description": "Analyse et amélioration de votre image de marque",
+        "price": 299,
+        "duration": "1 séance de 2h"
+    },
+    "fiscal_optimization": {
+        "name": "Optimisation Fiscale",
+        "description": "Conseils d'experts pour optimiser votre fiscalité",
+        "price": 399,
+        "duration": "Consultation 1h + rapport"
+    },
+    "marketing_strategy": {
+        "name": "Stratégie Marketing",
+        "description": "Plan marketing personnalisé pour votre entreprise",
+        "price": 499,
+        "duration": "Analyse complète + plan d'action"
+    },
+    "business_starter": {
+        "name": "Optimisation Entreprise Starter",
+        "description": "Pack complet pour démarrer votre présence sur Titelli",
+        "price": 799,
+        "duration": "Accompagnement 1 mois"
+    }
+}
+
+@api_router.get("/expert-services")
+async def get_expert_services():
+    """Get available expert optimization services"""
+    return {"services": EXPERT_SERVICES}
+
+@api_router.post("/expert-services/book")
+async def book_expert_service(
+    service_type: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Book an expert service - creates Stripe checkout"""
+    if service_type not in EXPERT_SERVICES:
+        raise HTTPException(status_code=400, detail="Service non disponible")
+    
+    service = EXPERT_SERVICES[service_type]
+    
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    enterprise_id = enterprise['id'] if enterprise else None
+    
+    try:
+        checkout = StripeCheckout(api_key=STRIPE_API_KEY)
+        session_request = CheckoutSessionRequest(
+            amount=service['price'],
+            currency="chf",
+            quantity=1,
+            success_url=f"{os.environ.get('FRONTEND_URL', 'https://market-overhaul-1.preview.emergentagent.com')}/dashboard?success=expert",
+            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://market-overhaul-1.preview.emergentagent.com')}/dashboard",
+            metadata={
+                "type": "expert_service",
+                "service_type": service_type,
+                "user_id": current_user['id'],
+                "enterprise_id": enterprise_id,
+                "product_name": service['name']
+            }
+        )
+        response = await checkout.create_checkout_session(session_request)
+        
+        # Record booking
+        booking = {
+            "id": str(uuid.uuid4()),
+            "user_id": current_user['id'],
+            "enterprise_id": enterprise_id,
+            "service_type": service_type,
+            "service_name": service['name'],
+            "price": service['price'],
+            "stripe_session_id": response.session_id,
+            "status": "pending",
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.expert_bookings.insert_one(booking)
+        
+        return {"checkout_url": response.url, "session_id": response.session_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur: {str(e)}")
+
+# ============ CLIENT INVOICES/FACTURES ============
+
+@api_router.get("/client/invoices")
+async def get_client_invoices(current_user: dict = Depends(get_current_user)):
+    """Get client's invoices from orders and subscriptions"""
+    invoices = []
+    
+    # Get completed orders as invoices
+    orders = await db.orders.find(
+        {"user_id": current_user['id'], "status": {"$in": ["completed", "delivered"]}},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    for order in orders:
+        invoices.append({
+            "id": f"INV-{order['id'][:8].upper()}",
+            "type": "order",
+            "reference_id": order['id'],
+            "description": f"Commande - {len(order.get('items', []))} article(s)",
+            "subtotal": order.get('subtotal', order.get('total', 0)),
+            "transaction_fee": order.get('transaction_fee', 0),
+            "total": order.get('total', 0),
+            "status": "paid",
+            "date": order.get('created_at')
+        })
+    
+    # Get subscription payments
+    subscriptions = await db.subscriptions.find(
+        {"user_id": current_user['id']},
+        {"_id": 0}
+    ).to_list(50)
+    
+    for sub in subscriptions:
+        invoices.append({
+            "id": f"SUB-{sub['id'][:8].upper()}",
+            "type": "subscription",
+            "reference_id": sub['id'],
+            "description": f"Abonnement {sub.get('plan', 'Premium').capitalize()}",
+            "subtotal": sub.get('price', 0),
+            "transaction_fee": 0,
+            "total": sub.get('price', 0),
+            "status": sub.get('status', 'active'),
+            "date": sub.get('started_at', sub.get('created_at'))
+        })
+    
+    # Get training enrollments
+    enrollments = await db.training_enrollments.find(
+        {"user_id": current_user['id']},
+        {"_id": 0}
+    ).to_list(50)
+    
+    for enroll in enrollments:
+        invoices.append({
+            "id": f"TRN-{enroll['id'][:8].upper()}",
+            "type": "training",
+            "reference_id": enroll['id'],
+            "description": f"Formation: {enroll.get('training_title', 'Formation')}",
+            "subtotal": enroll.get('price_paid', 0),
+            "transaction_fee": round(enroll.get('price_paid', 0) * 0.029, 2),
+            "total": enroll.get('price_paid', 0),
+            "status": enroll.get('status', 'active'),
+            "date": enroll.get('enrolled_at', enroll.get('created_at'))
+        })
+    
+    # Sort by date
+    invoices.sort(key=lambda x: x.get('date', ''), reverse=True)
+    
+    # Calculate totals
+    total_spent = sum(i['total'] for i in invoices if i['status'] in ['paid', 'active', 'completed'])
+    
+    return {
+        "invoices": invoices,
+        "total_invoices": len(invoices),
+        "total_spent": round(total_spent, 2)
+    }
+
+@api_router.post("/client/invoices/add")
+async def add_manual_invoice(
+    title: str,
+    amount: float,
+    category: str = "other",
+    notes: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Add a manual invoice/expense record"""
+    invoice = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user['id'],
+        "type": "manual",
+        "title": title,
+        "amount": amount,
+        "category": category,
+        "notes": notes,
+        "status": "recorded",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.manual_invoices.insert_one(invoice)
+    invoice.pop('_id', None)
+    return invoice
+
 # ============ ROOT ROUTE ============
 
 @api_router.get("/")
