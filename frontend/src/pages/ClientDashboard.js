@@ -94,6 +94,33 @@ const ClientDashboard = () => {
   const [cashbackHistory, setCashbackHistory] = useState([]);
   const [cashbackStats, setCashbackStats] = useState({ total_earned: 0, total_used: 0, cashback_rate: '10%', transaction_count: 0 });
 
+  // Agenda state
+  const [agendaEvents, setAgendaEvents] = useState([]);
+  const [showAddEvent, setShowAddEvent] = useState(false);
+  const [eventForm, setEventForm] = useState({
+    title: '', description: '', start_datetime: '', end_datetime: '',
+    location: '', event_type: 'appointment', notes: ''
+  });
+
+  // Finances state
+  const [finances, setFinances] = useState({ statistics: {}, recent_orders: [], recent_cashback: [] });
+
+  // Donations state
+  const [donations, setDonations] = useState({ donations: [], total_donated: 0, donations_count: 0 });
+  const [showAddDonation, setShowAddDonation] = useState(false);
+  const [donationForm, setDonationForm] = useState({
+    amount: '', recipient_type: 'charity', recipient_id: '', recipient_name: '', message: '', is_anonymous: false
+  });
+
+  // Wishlist state
+  const [wishlistItems, setWishlistItems] = useState([]);
+
+  // Suggestions from friends state
+  const [friendsSuggestions, setFriendsSuggestions] = useState([]);
+
+  // Personal providers state
+  const [personalProviders, setPersonalProviders] = useState([]);
+
   useEffect(() => {
     if (!isClient) {
       navigate('/');
