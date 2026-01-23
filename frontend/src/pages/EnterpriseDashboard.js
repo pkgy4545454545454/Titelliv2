@@ -157,6 +157,7 @@ const EnterpriseDashboard = () => {
       items: [
         { id: 'team', label: 'Mon personnel', icon: Users },
         { id: 'jobs', label: 'Emplois & Stages', icon: Briefcase },
+        { id: 'applications', label: 'Postulations', icon: ClipboardList },
         { id: 'trainings', label: 'Formations', icon: GraduationCap },
       ]
     },
