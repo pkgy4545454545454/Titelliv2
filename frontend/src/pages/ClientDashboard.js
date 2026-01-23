@@ -1470,6 +1470,7 @@ const ClientDashboard = () => {
                           onChange={(e) => setDocumentForm({...documentForm, category: e.target.value})}
                           className="input-dark w-full"
                         >
+                          <option value="cv">📄 CV / Curriculum Vitae</option>
                           <option value="general">Général</option>
                           <option value="factures">Factures</option>
                           <option value="contrats">Contrats</option>
@@ -1482,6 +1483,7 @@ const ClientDashboard = () => {
                           type="file"
                           onChange={handleDocumentUpload}
                           className="w-full text-gray-400"
+                          accept=".pdf,.doc,.docx"
                         />
                         {documentForm.url && (
                           <p className="text-sm text-green-400 mt-2">Fichier uploadé ✓</p>
@@ -1489,7 +1491,7 @@ const ClientDashboard = () => {
                       </div>
                     </div>
                     <div className="flex gap-3 mt-6">
-                      <button onClick={() => { setShowAddDocument(false); setDocumentForm({ name: '', category: 'general', url: '' }); }} className="btn-secondary flex-1">Annuler</button>
+                      <button onClick={() => { setShowAddDocument(false); setDocumentForm({ name: '', category: returnToJobId ? 'cv' : 'general', url: '' }); }} className="btn-secondary flex-1">Annuler</button>
                       <button onClick={handleAddDocument} className="btn-primary flex-1">Ajouter</button>
                     </div>
                   </div>
