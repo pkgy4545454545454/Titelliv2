@@ -27,6 +27,10 @@ const ClientDashboard = () => {
     const tabParam = searchParams.get('tab');
     return tabParam || 'overview';
   });
+  
+  // Get returnToJob parameter for CV upload flow
+  const returnToJobId = searchParams.get('returnToJob');
+  
   const [orders, setOrders] = useState([]);
   const [cashback, setCashback] = useState(0);
   const [tendances, setTendances] = useState([]);
