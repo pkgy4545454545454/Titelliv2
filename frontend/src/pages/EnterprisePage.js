@@ -329,6 +329,19 @@ const EnterprisePage = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-3 md:mt-4">
+            <button 
+              onClick={handleToggleProvider}
+              disabled={providerLoading}
+              data-testid="add-provider-btn"
+              className={`p-3 rounded-full transition-colors flex items-center gap-2 ${
+                isMyProvider 
+                  ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30' 
+                  : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
+              }`}
+              title={isMyProvider ? 'Retirer de mes prestataires' : 'Ajouter à mes prestataires'}
+            >
+              {isMyProvider ? <UserCheck className="w-5 h-5" /> : <UserPlus className="w-5 h-5" />}
+            </button>
             <button className="p-3 bg-white/5 rounded-full text-gray-400 hover:text-red-400 hover:bg-white/10 transition-colors">
               <Heart className="w-5 h-5" />
             </button>
