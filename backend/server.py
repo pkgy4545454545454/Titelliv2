@@ -5471,6 +5471,438 @@ async def like_activity_post(post_id: str, current_user: dict = Depends(get_curr
         await db.activity_posts.update_one({"id": post_id}, {"$inc": {"likes_count": 1}})
         return {"liked": True}
 
+# ============ ENTERPRISE FEED, FAVORITES & ACTIVITY (Like Client Side) ============
+
+class EnterpriseFavoriteCreate(BaseModel):
+    target_enterprise_id: str
+    target_enterprise_name: str
+    category: Optional[str] = None
+    notes: Optional[str] = None
+
+class EnterpriseActivityPostCreate(BaseModel):
+    activity_type: str  # "news", "offer", "event", "achievement", "partnership"
+    title: str
+    description: Optional[str] = None
+    media_url: Optional[str] = None
+    is_public: bool = True
+
+# Helper function to get enterprise subscription benefits
+async def get_enterprise_subscription_tier(enterprise_id: str) -> dict:
+    """Get enterprise subscription tier and available features"""
+    subscription = await db.enterprise_subscriptions.find_one({
+        "enterprise_id": enterprise_id,
+        "status": "active"
+    })
+    
+    if not subscription:
+        return {"tier": "free", "plan": None, "features": []}
+    
+    plan_id = subscription.get('plan_id', 'standard')
+    plan = SUBSCRIPTION_PLANS.get(plan_id, SUBSCRIPTION_PLANS['standard'])
+    
+    return {
+        "tier": plan.get('tier', 'basic'),
+        "plan": plan_id,
+        "plan_name": plan.get('name'),
+        "features": plan.get('features', []),
+        "ads_per_month": 1 if plan_id == 'standard' else (4 if 'premium' in plan_id else 8 if 'opti' in plan_id else 1)
+    }
+
+@api_router.get("/enterprise/subscription-status")
+async def get_enterprise_subscription_status(current_user: dict = Depends(get_current_user)):
+    """Get enterprise's current subscription status and benefits"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    subscription_info = await get_enterprise_subscription_tier(enterprise['id'])
+    
+    # Get active subscription details
+    subscription = await db.enterprise_subscriptions.find_one({
+        "enterprise_id": enterprise['id'],
+        "status": "active"
+    }, {"_id": 0})
+    
+    # Count ads used this month
+    from datetime import datetime, timezone
+    start_of_month = datetime.now(timezone.utc).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    ads_used = await db.advertising.count_documents({
+        "enterprise_id": enterprise['id'],
+        "created_at": {"$gte": start_of_month.isoformat()}
+    })
+    
+    return {
+        "has_subscription": subscription is not None,
+        "subscription": subscription,
+        "tier": subscription_info['tier'],
+        "plan_name": subscription_info.get('plan_name', 'Gratuit'),
+        "features": subscription_info['features'],
+        "ads_limit": subscription_info['ads_per_month'],
+        "ads_used": ads_used,
+        "ads_remaining": max(0, subscription_info['ads_per_month'] - ads_used),
+        "available_plans": SUBSCRIPTION_PLANS
+    }
+
+@api_router.get("/enterprise/favorites")
+async def get_enterprise_favorites(current_user: dict = Depends(get_current_user)):
+    """Get enterprise's favorite/partner enterprises"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return {"favorites": []}
+    
+    favorites = await db.enterprise_favorites.find(
+        {"enterprise_id": enterprise['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    return {"favorites": favorites, "total": len(favorites)}
+
+@api_router.post("/enterprise/favorites")
+async def add_enterprise_favorite(
+    favorite: EnterpriseFavoriteCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Add another enterprise to favorites/partners"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    # Check if already favorited
+    existing = await db.enterprise_favorites.find_one({
+        "enterprise_id": enterprise['id'],
+        "target_enterprise_id": favorite.target_enterprise_id
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="Déjà dans vos favoris")
+    
+    fav_doc = {
+        "id": str(uuid.uuid4()),
+        "enterprise_id": enterprise['id'],
+        "enterprise_name": enterprise.get('business_name'),
+        **favorite.model_dump(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.enterprise_favorites.insert_one(fav_doc)
+    
+    # Create activity for feed
+    activity = {
+        "id": str(uuid.uuid4()),
+        "enterprise_id": enterprise['id'],
+        "enterprise_name": enterprise.get('business_name'),
+        "activity_type": "partnership",
+        "title": f"a ajouté {favorite.target_enterprise_name} à ses partenaires",
+        "target_enterprise_id": favorite.target_enterprise_id,
+        "target_enterprise_name": favorite.target_enterprise_name,
+        "is_public": True,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.enterprise_activity_posts.insert_one(activity)
+    
+    fav_doc.pop('_id', None)
+    return fav_doc
+
+@api_router.delete("/enterprise/favorites/{target_enterprise_id}")
+async def remove_enterprise_favorite(
+    target_enterprise_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Remove enterprise from favorites"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    result = await db.enterprise_favorites.delete_one({
+        "enterprise_id": enterprise['id'],
+        "target_enterprise_id": target_enterprise_id
+    })
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Favori non trouvé")
+    
+    return {"success": True}
+
+@api_router.post("/enterprise/activity-post")
+async def create_enterprise_activity_post(
+    post: EnterpriseActivityPostCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Create an activity post visible to other enterprises and followers"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    activity = {
+        "id": str(uuid.uuid4()),
+        "enterprise_id": enterprise['id'],
+        "enterprise_name": enterprise.get('business_name'),
+        "enterprise_logo": enterprise.get('logo'),
+        "activity_type": post.activity_type,
+        "title": post.title,
+        "description": post.description,
+        "media_url": post.media_url,
+        "is_public": post.is_public,
+        "likes_count": 0,
+        "views_count": 0,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.enterprise_activity_posts.insert_one(activity)
+    activity.pop('_id', None)
+    return activity
+
+@api_router.get("/enterprise/activity-posts")
+async def get_enterprise_activity_posts(current_user: dict = Depends(get_current_user)):
+    """Get enterprise's own activity posts"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return {"posts": []}
+    
+    posts = await db.enterprise_activity_posts.find(
+        {"enterprise_id": enterprise['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(50)
+    
+    return {"posts": posts}
+
+@api_router.get("/enterprise/activity-feed")
+async def get_enterprise_activity_feed(
+    limit: int = 50,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get activity feed showing what partner/favorite enterprises do - REAL algorithm"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return {"activities": [], "message": "Créez votre profil entreprise"}
+    
+    # Get subscription tier for algorithm weighting
+    subscription_info = await get_enterprise_subscription_tier(enterprise['id'])
+    tier = subscription_info['tier']
+    
+    # Get favorite/partner enterprise IDs
+    favorites = await db.enterprise_favorites.find(
+        {"enterprise_id": enterprise['id']},
+        {"target_enterprise_id": 1}
+    ).to_list(500)
+    
+    favorite_ids = [f['target_enterprise_id'] for f in favorites]
+    
+    activities = []
+    
+    # 1. Get activity posts from favorite enterprises
+    if favorite_ids:
+        partner_posts = await db.enterprise_activity_posts.find({
+            "enterprise_id": {"$in": favorite_ids},
+            "is_public": True
+        }).sort("created_at", -1).limit(20).to_list(20)
+        
+        for post in partner_posts:
+            activities.append({
+                "id": post.get('id'),
+                "type": post.get('activity_type', 'post'),
+                "source": "partner",
+                "enterprise_id": post['enterprise_id'],
+                "enterprise_name": post.get('enterprise_name'),
+                "enterprise_logo": post.get('enterprise_logo'),
+                "title": post.get('title'),
+                "description": post.get('description'),
+                "media_url": post.get('media_url'),
+                "likes_count": post.get('likes_count', 0),
+                "created_at": post.get('created_at')
+            })
+    
+    # 2. Get new offers from same category (competitor analysis)
+    enterprise_category = enterprise.get('category')
+    if enterprise_category:
+        category_offers = await db.offers.find({
+            "enterprise_id": {"$ne": enterprise['id']},
+            "category": enterprise_category,
+            "status": "active"
+        }).sort("created_at", -1).limit(10).to_list(10)
+        
+        for offer in category_offers:
+            ent = await db.enterprises.find_one({"id": offer.get('enterprise_id')}, {"_id": 0, "business_name": 1, "logo": 1})
+            activities.append({
+                "id": offer.get('id'),
+                "type": "competitor_offer",
+                "source": "category",
+                "enterprise_id": offer.get('enterprise_id'),
+                "enterprise_name": ent.get('business_name') if ent else 'Entreprise',
+                "enterprise_logo": ent.get('logo') if ent else None,
+                "title": f"Nouvelle offre: {offer.get('title', '')}",
+                "description": f"{offer.get('discount_percent', 0)}% de réduction",
+                "created_at": offer.get('created_at')
+            })
+    
+    # 3. Get new services from same category (market trends)
+    if enterprise_category and tier in ['premium', 'optimisation']:
+        # Premium feature: see competitor services
+        category_services = await db.services_products.find({
+            "enterprise_id": {"$ne": enterprise['id']},
+            "category": enterprise_category
+        }).sort("created_at", -1).limit(5).to_list(5)
+        
+        for svc in category_services:
+            ent = await db.enterprises.find_one({"id": svc.get('enterprise_id')}, {"_id": 0, "business_name": 1})
+            activities.append({
+                "id": svc.get('id'),
+                "type": "market_trend",
+                "source": "category",
+                "enterprise_id": svc.get('enterprise_id'),
+                "enterprise_name": ent.get('business_name') if ent else 'Entreprise',
+                "title": f"Nouveau {svc.get('type', 'service')}: {svc.get('name', '')}",
+                "description": f"Prix: {svc.get('price', 0)} CHF",
+                "created_at": svc.get('created_at')
+            })
+    
+    # 4. Get investment opportunities (premium feature)
+    if tier in ['premium', 'optimisation']:
+        investments = await db.investments.find({
+            "enterprise_id": {"$ne": enterprise['id']},
+            "is_active": True
+        }).sort("created_at", -1).limit(5).to_list(5)
+        
+        for inv in investments:
+            ent = await db.enterprises.find_one({"id": inv.get('enterprise_id')}, {"_id": 0, "business_name": 1})
+            activities.append({
+                "id": inv.get('id'),
+                "type": "investment_opportunity",
+                "source": "market",
+                "enterprise_id": inv.get('enterprise_id'),
+                "enterprise_name": ent.get('business_name') if ent else inv.get('enterprise_name'),
+                "title": f"Opportunité d'investissement: {inv.get('title', '')}",
+                "description": f"Rendement attendu: {inv.get('expected_return', 0)}%",
+                "created_at": inv.get('created_at')
+            })
+    
+    # Sort all activities by date
+    activities.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+    
+    return {
+        "activities": activities[:limit],
+        "total": len(activities),
+        "subscription_tier": tier,
+        "features_available": {
+            "partner_posts": True,
+            "competitor_offers": True,
+            "market_trends": tier in ['premium', 'optimisation'],
+            "investment_opportunities": tier in ['premium', 'optimisation']
+        }
+    }
+
+@api_router.get("/enterprise/suggestions")
+async def get_enterprise_suggestions(current_user: dict = Depends(get_current_user)):
+    """Get suggested enterprises based on category, location, and activity - REAL algorithm"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return {"suggestions": []}
+    
+    # Get subscription tier
+    subscription_info = await get_enterprise_subscription_tier(enterprise['id'])
+    tier = subscription_info['tier']
+    
+    # Get already favorited enterprises
+    favorites = await db.enterprise_favorites.find(
+        {"enterprise_id": enterprise['id']},
+        {"target_enterprise_id": 1}
+    ).to_list(500)
+    excluded_ids = [f['target_enterprise_id'] for f in favorites]
+    excluded_ids.append(enterprise['id'])  # Exclude self
+    
+    suggestions = []
+    
+    # 1. Same category enterprises
+    if enterprise.get('category'):
+        same_category = await db.enterprises.find({
+            "id": {"$nin": excluded_ids},
+            "category": enterprise.get('category'),
+            "is_active": True
+        }, {"_id": 0}).limit(5).to_list(5)
+        
+        for ent in same_category:
+            suggestions.append({
+                "enterprise_id": ent['id'],
+                "enterprise_name": ent.get('business_name'),
+                "category": ent.get('category'),
+                "city": ent.get('city'),
+                "logo": ent.get('logo'),
+                "reason": "Même catégorie",
+                "rating": ent.get('average_rating', 0)
+            })
+    
+    # 2. Same city enterprises
+    if enterprise.get('city'):
+        same_city = await db.enterprises.find({
+            "id": {"$nin": excluded_ids + [s['enterprise_id'] for s in suggestions]},
+            "city": enterprise.get('city'),
+            "is_active": True
+        }, {"_id": 0}).limit(5).to_list(5)
+        
+        for ent in same_city:
+            suggestions.append({
+                "enterprise_id": ent['id'],
+                "enterprise_name": ent.get('business_name'),
+                "category": ent.get('category'),
+                "city": ent.get('city'),
+                "logo": ent.get('logo'),
+                "reason": "Même ville",
+                "rating": ent.get('average_rating', 0)
+            })
+    
+    # 3. Premium feature: enterprises with high ratings
+    if tier in ['premium', 'optimisation']:
+        top_rated = await db.enterprises.find({
+            "id": {"$nin": excluded_ids + [s['enterprise_id'] for s in suggestions]},
+            "average_rating": {"$gte": 4.0},
+            "is_active": True
+        }, {"_id": 0}).sort("average_rating", -1).limit(5).to_list(5)
+        
+        for ent in top_rated:
+            suggestions.append({
+                "enterprise_id": ent['id'],
+                "enterprise_name": ent.get('business_name'),
+                "category": ent.get('category'),
+                "city": ent.get('city'),
+                "logo": ent.get('logo'),
+                "reason": f"Très bien noté ({ent.get('average_rating', 0):.1f}★)",
+                "rating": ent.get('average_rating', 0)
+            })
+    
+    return {
+        "suggestions": suggestions,
+        "total": len(suggestions),
+        "subscription_tier": tier
+    }
+
+@api_router.post("/enterprise/activity-posts/{post_id}/like")
+async def like_enterprise_activity_post(
+    post_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Like an enterprise activity post"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    existing = await db.enterprise_activity_likes.find_one({
+        "post_id": post_id,
+        "enterprise_id": enterprise['id']
+    })
+    
+    if existing:
+        await db.enterprise_activity_likes.delete_one({"_id": existing['_id']})
+        await db.enterprise_activity_posts.update_one({"id": post_id}, {"$inc": {"likes_count": -1}})
+        return {"liked": False}
+    else:
+        like = {
+            "id": str(uuid.uuid4()),
+            "post_id": post_id,
+            "enterprise_id": enterprise['id'],
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.enterprise_activity_likes.insert_one(like)
+        await db.enterprise_activity_posts.update_one({"id": post_id}, {"$inc": {"likes_count": 1}})
+        return {"liked": True}
+
 # ============ ENTERPRISE INVITATIONS TO CLIENTS ============
 
 class InvitationCreate(BaseModel):
