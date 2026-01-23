@@ -1158,11 +1158,15 @@ const ProfileSection = ({ enterprise, onUpdate }) => {
     website: enterprise?.website || '',
     category: enterprise?.category || '',
     logo: enterprise?.logo || '',
+    cover_image: enterprise?.cover_image || '',
   });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
   const [logoPreview, setLogoPreview] = useState(enterprise?.logo || null);
+  const [coverPreview, setCoverPreview] = useState(enterprise?.cover_image || null);
   const logoInputRef = useRef(null);
+  const coverInputRef = useRef(null);
 
   const handleLogoUpload = async (e) => {
     const file = e.target.files[0];
@@ -1197,6 +1201,42 @@ const ProfileSection = ({ enterprise, onUpdate }) => {
       setLogoPreview(enterprise?.logo || null);
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleCoverUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Type de fichier non autorisé. Utilisez JPG, PNG, GIF ou WEBP.');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Fichier trop volumineux (max 10MB)');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setCoverPreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+
+    setUploadingCover(true);
+    try {
+      const response = await uploadAPI.uploadImage(file);
+      const coverUrl = process.env.REACT_APP_BACKEND_URL + response.data.url;
+      setFormData(prev => ({ ...prev, cover_image: coverUrl }));
+      toast.success('Image de couverture uploadée !');
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Erreur lors de l\'upload');
+      setCoverPreview(enterprise?.cover_image || null);
+    } finally {
+      setUploadingCover(false);
     }
   };
 
