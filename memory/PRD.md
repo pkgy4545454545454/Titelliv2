@@ -9,91 +9,86 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
 
 ## ✅ Fonctionnalités Complétées (23 Jan 2026)
 
-### Phase 15 : Avis Formations, Statut En Ligne, Migration (NOUVEAU)
+### Phase 16 : Audit Complet et Corrections (AUJOURD'HUI)
 
-**1. Système d'avis sur les formations**
-- Note de 1 à 5 étoiles avec commentaire optionnel
-- Seuls les utilisateurs ayant terminé une formation peuvent laisser un avis
-- Protection anti-double avis
-- Note moyenne et nombre d'avis sur chaque formation
-- Modal d'avis avec étoiles cliquables dans le dashboard client
+**Bugs corrigés :**
+1. **Route 404 /emplois** → Nouvelle page JobsPage.js créée avec filtres et listing complet
+2. **Route 404 /produits** → Alias ajouté vers ProductsPage
+3. **Flow candidature sans CV** → Amélioration complète:
+   - Redirection vers documents avec `?returnToJob={id}`
+   - Alerte bleue "Vous souhaitez postuler à une offre"
+   - Bouton "Voir l'offre" pour retourner à l'offre
+   - Option "CV" ajoutée en premier dans les catégories de documents
 
-**2. Statut en ligne des contacts**
-- Heartbeat automatique toutes les 60 secondes
-- Badge vert (en ligne) / gris (hors ligne) sur chaque contact
-- Section "En ligne maintenant" avec liste des amis connectés
-- Considéré en ligne si last_seen < 5 minutes
-- Marquage automatique hors ligne à la déconnexion
+**Tests passés : 100% (33/33 backend, 100% frontend)**
 
-**3. Migration des données formations**
-- Endpoint admin `/api/admin/migrate-trainings`
-- Toutes les formations ont maintenant `training_type: online|on_site`
-- Champ `downloadable_files` ajouté aux formations existantes
+### Fonctionnalités vérifiées et fonctionnelles :
 
-### Phase 14 : Système de Formations
+**Pages publiques :**
+- ✅ Homepage (tendances, offres, premium, jobs, formations)
+- ✅ /services avec filtres par catégorie
+- ✅ /produits et /products
+- ✅ /emplois - NOUVELLE PAGE avec 8 offres et filtres
+- ✅ /entreprises avec images de couverture et logos
+- ✅ /entreprise/{id} page de détail
 
-**1. Formulaire de création Entreprise**
-- Choix type: En ligne (fichiers téléchargeables) / Présentiel (dates, lieu)
-- Upload multi-fichiers (vidéos, PDF, images) pour formations online
-- Catégories, prérequis, certificat
+**Dashboard Entreprise :**
+- ✅ Overview avec stats
+- ✅ Création emplois (modal complet)
+- ✅ Création formations (online/présentiel avec fichiers)
+- ✅ Création services et produits
+- ✅ Profil avec upload logo et couverture
+- ✅ Section Postulations avec filtres et actions
+- ✅ IA Ciblage clients avec stats réelles
 
-**2. Dashboard Client "Mes Formations"**
-- Stats (Total, En cours, Terminées)
-- Onglets de filtrage
-- Fichiers téléchargeables pour formations online
-- Bouton "Donner un avis" pour formations terminées
+**Dashboard Client :**
+- ✅ Overview, Profile, Contacts avec statut en ligne
+- ✅ Documents avec option CV et flow retour offre
+- ✅ Messages, Formations, Orders, Cashback
+- ✅ Paramètres
 
-**3. Section "Formations disponibles" sur Homepage**
-- Cartes avec badges type et catégorie
-- Prix et bouton "S'inscrire"
-- Intégration Stripe
+**Dashboard Influencer :**
+- ✅ Stats, réseaux sociaux, collaborations
+
+**Autres :**
+- ✅ Panier et checkout Stripe
+- ✅ Système d'avis sur formations
+- ✅ Statut en ligne des contacts
 
 ---
 
-## APIs Nouvelles (Phase 15)
+## APIs Principales
 
 ```
+# Jobs/Emplois
+GET  /api/jobs - Liste publique
+GET  /api/jobs/{id} - Détail
+POST /api/jobs/{id}/apply - Postuler
+GET  /api/enterprise/jobs - Emplois de l'entreprise
+POST /api/enterprise/jobs - Créer
+PUT  /api/enterprise/jobs/{id} - Modifier
+DELETE /api/enterprise/jobs/{id} - Supprimer
+
+# Trainings/Formations
+GET  /api/trainings - Liste publique
+POST /api/trainings/{id}/purchase - Acheter
+POST /api/trainings/{id}/review - Donner un avis
+GET  /api/enterprise/trainings - Formations de l'entreprise
+POST /api/enterprise/trainings - Créer
+GET  /api/client/trainings - Mes formations
+
 # Online Status
-POST /api/user/heartbeat - Met à jour last_seen et is_online
-POST /api/user/offline - Marque utilisateur hors ligne
-GET  /api/client/friends/online - Liste amis avec statut en ligne
-
-# Training Reviews
-POST /api/trainings/{id}/review - Créer un avis (auth + formation terminée requise)
-GET  /api/trainings/{id}/reviews - Liste avis avec note moyenne
-
-# Migration
-POST /api/admin/migrate-trainings - Migration données formations (admin only)
+POST /api/user/heartbeat - Mettre à jour présence
+GET  /api/client/friends/online - Amis en ligne
 ```
 
 ---
 
-## Schémas DB (Nouveaux)
-
-```javascript
-// training_reviews collection
-{
-  id: string,
-  training_id: string,
-  user_id: string,
-  user_name: string,
-  user_avatar: string,
-  rating: number (1-5),
-  comment: string,
-  created_at: string
-}
-
-// users collection (champs ajoutés)
-{
-  is_online: boolean,
-  last_seen: string (ISO date)
-}
-
-// training_enrollments (champ ajouté)
-{
-  has_reviewed: boolean
-}
-```
+## Credentials de test
+- Client: test@example.com / Test123!
+- Enterprise: spa.luxury@titelli.com / Demo123!
+- Influencer: test_influencer2@example.com / Test123!
+- Admin: admin@titelli.com / Admin123!
 
 ---
 
@@ -101,20 +96,13 @@ POST /api/admin/migrate-trainings - Migration données formations (admin only)
 
 ### 🟡 P1
 - Responsivité mobile complète
-- Refactoring server.py en modules
+- Refactoring server.py en modules (4500+ lignes)
 
 ### 🟢 P2
 - Vidéo panoramique homepage
-- Commentaires défilants
 - Questions suggestives UI
+- Commentaires défilants sur les providers
 
 ---
 
-## Credentials
-- Client: test@example.com / Test123!
-- Enterprise: spa.luxury@titelli.com / Demo123!
-- Admin: admin@titelli.com / Admin123!
-
----
-
-*Mise à jour: 23 Jan 2026 - Avis formations + Statut en ligne*
+*Mise à jour: 23 Jan 2026 - Audit complet et corrections*
