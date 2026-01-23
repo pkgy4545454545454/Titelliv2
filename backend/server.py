@@ -3358,6 +3358,7 @@ async def send_friend_request(request: FriendRequestCreate, current_user: dict =
         "message": f"{sender['first_name']} {sender['last_name']} souhaite vous ajouter comme ami",
         "notification_type": "friend_request",
         "data": {"friendship_id": friendship['id'], "sender_id": current_user['id']},
+        "link": "/dashboard/client?tab=contacts",
         "is_read": False,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
