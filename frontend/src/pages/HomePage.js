@@ -79,6 +79,12 @@ const HomePage = () => {
       );
     }
     
+    if (jobFilters.enterprise) {
+      result = result.filter(job => 
+        (job.enterprise_name || '').toLowerCase().includes(jobFilters.enterprise.toLowerCase())
+      );
+    }
+    
     setFilteredJobs(result);
   }, [jobFilters, jobs]);
   
