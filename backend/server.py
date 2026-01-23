@@ -2895,6 +2895,52 @@ async def delete_permanent_order(order_id: str, current_user: dict = Depends(get
     await db.permanent_orders.delete_one({"id": order_id, "enterprise_id": enterprise['id']})
     return {"message": "Commande permanente supprimée"}
 
+
+# ============ ENTERPRISE SERVICES & ORDERS SHORTCUT ROUTES ============
+
+@api_router.get("/enterprise/services")
+async def get_enterprise_services(current_user: dict = Depends(get_current_user)):
+    """Get all services/products for the current enterprise"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return {"items": [], "total": 0}
+    
+    items = await db.services_products.find(
+        {"enterprise_id": enterprise['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    return {"items": items, "total": len(items)}
+
+
+@api_router.get("/enterprise/orders")
+async def get_enterprise_orders(current_user: dict = Depends(get_current_user)):
+    """Get all orders for the current enterprise"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return {"orders": [], "stats": {}}
+    
+    orders = await db.orders.find(
+        {"enterprise_id": enterprise['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(200)
+    
+    # Calculate stats
+    pending = len([o for o in orders if o.get('status') == 'pending'])
+    completed = len([o for o in orders if o.get('status') in ['completed', 'delivered']])
+    total_revenue = sum(o.get('total', 0) for o in orders if o.get('status') in ['completed', 'delivered'])
+    
+    return {
+        "orders": orders,
+        "stats": {
+            "total": len(orders),
+            "pending": pending,
+            "completed": completed,
+            "total_revenue": round(total_revenue, 2)
+        }
+    }
+
+
 # ============ DOCUMENTS ROUTES ============
 
 class DocumentCreate(BaseModel):
