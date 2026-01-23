@@ -22,6 +22,7 @@ import InfluencerDashboard from './pages/InfluencerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import CartPage from './pages/CartPage';
 import OrdersPage from './pages/OrdersPage';
+import JobDetailPage from './pages/JobDetailPage';
 import { PaymentSuccessPage, PaymentCancelPage } from './pages/PaymentPages';
 
 import './index.css';
