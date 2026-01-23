@@ -121,6 +121,50 @@ export const cashbackAPI = {
   }),
 };
 
+// ============ CLIENT DASHBOARD APIs ============
+
+// Client Agenda
+export const clientAgendaAPI = {
+  list: (startDate, endDate) => axios.get(`${API}/client/agenda`, { 
+    params: { start_date: startDate, end_date: endDate },
+    headers: getAuthHeaders() 
+  }),
+  create: (data) => axios.post(`${API}/client/agenda`, data, { headers: getAuthHeaders() }),
+  update: (id, data) => axios.put(`${API}/client/agenda/${id}`, data, { headers: getAuthHeaders() }),
+  delete: (id) => axios.delete(`${API}/client/agenda/${id}`, { headers: getAuthHeaders() }),
+};
+
+// Client Finances
+export const clientFinancesAPI = {
+  getStats: () => axios.get(`${API}/client/finances`, { headers: getAuthHeaders() }),
+};
+
+// Client Donations
+export const clientDonationsAPI = {
+  list: () => axios.get(`${API}/client/donations`, { headers: getAuthHeaders() }),
+  create: (data) => axios.post(`${API}/client/donations`, data, { headers: getAuthHeaders() }),
+};
+
+// Client Wishlist
+export const wishlistAPI = {
+  list: () => axios.get(`${API}/client/wishlist`, { headers: getAuthHeaders() }),
+  add: (data) => axios.post(`${API}/client/wishlist`, data, { headers: getAuthHeaders() }),
+  remove: (itemId) => axios.delete(`${API}/client/wishlist/${itemId}`, { headers: getAuthHeaders() }),
+  check: (itemId) => axios.get(`${API}/client/wishlist/check/${itemId}`, { headers: getAuthHeaders() }),
+};
+
+// Client Suggestions from Friends
+export const clientSuggestionsAPI = {
+  fromFriends: () => axios.get(`${API}/client/suggestions/from-friends`, { headers: getAuthHeaders() }),
+};
+
+// Client Personal Providers
+export const clientProvidersAPI = {
+  list: () => axios.get(`${API}/client/providers`, { headers: getAuthHeaders() }),
+  add: (data) => axios.post(`${API}/client/providers`, data, { headers: getAuthHeaders() }),
+  remove: (providerId) => axios.delete(`${API}/client/providers/${providerId}`, { headers: getAuthHeaders() }),
+};
+
 // ============ ENTERPRISE MANAGEMENT APIs ============
 
 // Offers/Promotions
