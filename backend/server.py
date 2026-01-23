@@ -3730,7 +3730,7 @@ async def delete_notification(notification_id: str, current_user: dict = Depends
 
 # ============ IMAGE UPLOAD ROUTES ============
 
-ALLOWED_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.webp'}
+ALLOWED_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.pdf', '.doc', '.docx', '.ppt', '.pptx', '.mp4', '.mov', '.avi', '.mp3', '.wav'}
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 
 @api_router.post("/upload/image")
