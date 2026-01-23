@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { ChevronRight, Star, Award, Crown, CheckCircle, ArrowRight, Play, Sparkles, TrendingUp, Gift, Users, Briefcase, MapPin, Clock, X, FileText, Send, Filter } from 'lucide-react';
-import { featuredAPI, categoryAPI, enterpriseAPI, servicesProductsAPI, jobsAPI, clientDocumentsAPI } from '../services/api';
+import { Link, useNavigate } from 'react-router-dom';
+import { ChevronRight, Star, Award, Crown, CheckCircle, ArrowRight, Play, Sparkles, TrendingUp, Gift, Users, Briefcase, MapPin, Clock, X, FileText, Send, Filter, GraduationCap, Calendar } from 'lucide-react';
+import { featuredAPI, categoryAPI, enterpriseAPI, servicesProductsAPI, jobsAPI, clientDocumentsAPI, trainingsAPI } from '../services/api';
 import EnterpriseCard from '../components/EnterpriseCard';
 import ServiceProductCard from '../components/ServiceProductCard';
 import { toast } from 'sonner';
 
 const HomePage = () => {
+  const navigate = useNavigate();
   const [tendances, setTendances] = useState([]);
   const [guests, setGuests] = useState([]);
   const [offres, setOffres] = useState([]);
   const [premium, setPremium] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
+  const [trainings, setTrainings] = useState([]);
   const [productCategories, setProductCategories] = useState([]);
   const [serviceCategories, setServiceCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,18 +36,22 @@ const HomePage = () => {
     cover_letter: ''
   });
   const [applying, setApplying] = useState(false);
+  
+  // Training purchase state
+  const [purchasingTraining, setPurchasingTraining] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [tendRes, guestRes, offreRes, premRes, prodCatRes, servCatRes, jobsRes] = await Promise.all([
+        const [tendRes, guestRes, offreRes, premRes, prodCatRes, servCatRes, jobsRes, trainingsRes] = await Promise.all([
           featuredAPI.tendances(),
           featuredAPI.guests(),
           featuredAPI.offres(),
           featuredAPI.premium(),
           categoryAPI.products(),
           categoryAPI.services(),
-          jobsAPI.listAll().catch(() => ({ data: [] }))
+          jobsAPI.listAll().catch(() => ({ data: [] })),
+          trainingsAPI.listAll({ limit: 6 }).catch(() => ({ data: [] }))
         ]);
         setTendances(tendRes.data);
         setGuests(guestRes.data);
