@@ -1593,6 +1593,7 @@ async def update_application_status(
                 "message": status_messages[status],
                 "notification_type": "job_application_status",
                 "data": {"job_id": job['id'], "application_id": application_id, "status": status},
+                "link": f"/dashboard/client?tab=jobs",
                 "is_read": False,
                 "created_at": datetime.now(timezone.utc).isoformat()
             }
