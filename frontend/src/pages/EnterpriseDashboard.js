@@ -1248,6 +1248,14 @@ const ProfileSection = ({ enterprise, onUpdate }) => {
     }
   };
 
+  const removeCover = () => {
+    setCoverPreview(null);
+    setFormData(prev => ({ ...prev, cover_image: '' }));
+    if (coverInputRef.current) {
+      coverInputRef.current.value = '';
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
