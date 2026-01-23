@@ -607,6 +607,193 @@ const EnterprisePage = () => {
                 </div>
               </div>
             )}
+
+            {/* Photos/Videos Tab */}
+            {activeTab === 'photos' && (
+              <div className="card-service rounded-xl p-6">
+                <h2 className="text-xl font-semibold text-white mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Galerie Photos & Vidéos
+                </h2>
+                
+                {/* Photos Section */}
+                {mediaGallery.photos.length > 0 && (
+                  <div className="mb-8">
+                    <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
+                      <Image className="w-5 h-5 text-[#0047AB]" />
+                      Photos ({mediaGallery.photos.length})
+                    </h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {mediaGallery.photos.map((photo, index) => (
+                        <div 
+                          key={photo.id || index} 
+                          className="aspect-square rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity border border-white/10 hover:border-[#0047AB]/50"
+                          onClick={() => setSelectedMedia({ type: 'photo', url: getImageUrl(photo.url) })}
+                        >
+                          <img 
+                            src={getImageUrl(photo.url)} 
+                            alt={photo.title || `Photo ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Videos Section */}
+                {mediaGallery.videos.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
+                      <Video className="w-5 h-5 text-[#D4AF37]" />
+                      Vidéos ({mediaGallery.videos.length})
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {mediaGallery.videos.map((video, index) => (
+                        <div 
+                          key={video.id || index} 
+                          className="aspect-video rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity border border-white/10 hover:border-[#D4AF37]/50 relative group"
+                          onClick={() => setSelectedMedia({ type: 'video', url: getImageUrl(video.url) })}
+                        >
+                          <video 
+                            src={getImageUrl(video.url)}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/30 transition-colors">
+                            <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                              <Play className="w-8 h-8 text-white fill-white" />
+                            </div>
+                          </div>
+                          {video.title && (
+                            <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                              <p className="text-white text-sm font-medium">{video.title}</p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Empty State */}
+                {mediaGallery.photos.length === 0 && mediaGallery.videos.length === 0 && (
+                  <div className="text-center py-12">
+                    <Image className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                    <p className="text-gray-400 mb-2">Aucune photo ou vidéo disponible</p>
+                    <p className="text-sm text-gray-500">Cette entreprise n'a pas encore ajouté de médias à sa galerie.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Formations Tab */}
+            {activeTab === 'formations' && (
+              <div className="card-service rounded-xl p-6">
+                <h2 className="text-xl font-semibold text-white mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Formations proposées
+                </h2>
+                
+                {trainings.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {trainings.map((training) => (
+                      <Link 
+                        key={training.id} 
+                        to={`/formation/${training.id}`}
+                        className="bg-white/5 rounded-xl overflow-hidden hover:bg-white/10 transition-colors border border-transparent hover:border-[#10B981]/30 group"
+                      >
+                        <div className="aspect-video bg-gradient-to-br from-[#10B981]/20 to-[#0047AB]/20 overflow-hidden relative">
+                          {training.image ? (
+                            <img src={getImageUrl(training.image)} alt={training.title} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <GraduationCap className="w-12 h-12 text-[#10B981]/50" />
+                            </div>
+                          )}
+                          <div className="absolute top-3 right-3">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              training.training_type === 'online' 
+                                ? 'bg-cyan-500/20 text-cyan-400' 
+                                : 'bg-orange-500/20 text-orange-400'
+                            }`}>
+                              {training.training_type === 'online' ? 'En ligne' : 'Présentiel'}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-white font-semibold mb-2 group-hover:text-[#10B981] transition-colors">{training.title}</h3>
+                          <p className="text-sm text-gray-400 line-clamp-2 mb-3">{training.description}</p>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-sm text-gray-500">
+                              <Clock className="w-4 h-4" />
+                              <span>{training.duration}</span>
+                            </div>
+                            <p className="text-lg font-bold text-[#10B981]">{training.price?.toFixed(2)} CHF</p>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <GraduationCap className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                    <p className="text-gray-400 mb-2">Aucune formation disponible</p>
+                    <p className="text-sm text-gray-500">Cette entreprise ne propose pas encore de formations.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Offres d'emploi Tab */}
+            {activeTab === 'emplois' && (
+              <div className="card-service rounded-xl p-6">
+                <h2 className="text-xl font-semibold text-white mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Offres d'emploi
+                </h2>
+                
+                {jobs.length > 0 ? (
+                  <div className="space-y-4">
+                    {jobs.map((job) => (
+                      <Link 
+                        key={job.id} 
+                        to={`/emploi/${job.id}`}
+                        className="block p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors border border-transparent hover:border-[#8B5CF6]/30"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <h3 className="text-white font-semibold mb-1">{job.title}</h3>
+                            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-400 mb-2">
+                              <span className="flex items-center gap-1">
+                                <MapPin className="w-3 h-3" />
+                                {job.location}
+                              </span>
+                              <span className="px-2 py-0.5 bg-[#8B5CF6]/20 text-[#8B5CF6] rounded-full text-xs">
+                                {job.contract_type || 'CDI'}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-400 line-clamp-2">{job.description}</p>
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            {job.salary_min && job.salary_max && (
+                              <p className="text-[#D4AF37] font-semibold">
+                                {job.salary_min} - {job.salary_max} CHF
+                              </p>
+                            )}
+                            <p className="text-xs text-gray-500 mt-1">
+                              {new Date(job.created_at).toLocaleDateString('fr-FR')}
+                            </p>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Briefcase className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                    <p className="text-gray-400 mb-2">Aucune offre d'emploi</p>
+                    <p className="text-sm text-gray-500">Cette entreprise ne recrute pas actuellement.</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}
