@@ -214,8 +214,9 @@ DELETE /api/client/providers/{id}
 - ✅ ~~Bouton "Ajouter prestataire" sur pages entreprises~~ - TERMINÉ (Iteration 21)
 - ✅ ~~Routes enterprise/services et enterprise/orders~~ - TERMINÉ (Iteration 21)
 - ✅ ~~Suppression données random/simulation dans backend~~ - TERMINÉ (Iteration 21)
+- ✅ ~~Audit global A-Z systèmes~~ - TERMINÉ (Iteration 24) - 86% tests passés
 - [ ] Refactoring `server.py` → modules (voir REFACTORING_PLAN.md) - EN COURS
-- [ ] Audit complet responsivité mobile
+- [ ] Audit complet responsivité mobile CSS - À FAIRE
 
 ### 🟡 P2 - Futur
 - [ ] Vidéo panoramique sur la page d'accueil
