@@ -133,7 +133,7 @@ class TestSubscriptionCheckout:
         headers = {"Authorization": f"Bearer {enterprise_token}"}
         response = requests.post(
             f"{BASE_URL}/api/subscriptions/checkout",
-            params={"plan_id": "starter"},
+            params={"plan_id": "standard"},  # Valid plan: standard, guest, premium, etc.
             headers=headers
         )
         assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
