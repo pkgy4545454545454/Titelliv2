@@ -337,35 +337,42 @@ const EnterpriseDashboard = () => {
             </div>
 
             {/* Menu Sections */}
-            <nav className="space-y-4">
+            <nav className="space-y-3">
               {menuSections.map((section) => (
-                <div key={section.title}>
-                  <p className="text-xs text-gray-500 uppercase tracking-wider px-3 mb-2">{section.title}</p>
+                <div key={section.title} className={`rounded-xl p-3 bg-gradient-to-br ${section.gradient} border ${section.borderColor}`}>
+                  <p className="text-xs text-gray-300 uppercase tracking-wider px-2 mb-2">{section.title}</p>
                   <div className="space-y-0.5">
-                    {section.items.map((item) => (
-                      <button
-                        key={item.id}
-                        onClick={() => setActiveTab(item.id)}
-                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
-                          activeTab === item.id
-                            ? 'bg-[#0047AB]/20 text-[#0047AB]'
-                            : 'text-gray-400 hover:bg-white/5 hover:text-white'
-                        }`}
-                      >
-                        <item.icon className="w-4 h-4 flex-shrink-0" />
-                        <span className="truncate">{item.label}</span>
-                        {item.id === 'stock' && stock.alerts.length > 0 && (
-                          <span className="ml-auto w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center flex-shrink-0">
-                            {stock.alerts.length}
-                          </span>
-                        )}
-                        {item.id === 'orders' && orders.filter(o => o.status === 'pending').length > 0 && (
-                          <span className="ml-auto w-5 h-5 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center flex-shrink-0">
-                            {orders.filter(o => o.status === 'pending').length}
-                          </span>
-                        )}
-                      </button>
-                    ))}
+                    {section.items.map((item) => {
+                      const notifCount = item.notifKey ? getNotificationCount(item.notifKey) : 0;
+                      const hasNotif = notifCount > 0;
+                      const stockAlerts = item.id === 'stock' ? stock.alerts.length : 0;
+                      
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => setActiveTab(item.id)}
+                          className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
+                            activeTab === item.id
+                              ? 'bg-white/20 text-white shadow-lg'
+                              : 'text-gray-300 hover:bg-white/10 hover:text-white'
+                          }`}
+                          style={hasNotif || stockAlerts > 0 ? {
+                            boxShadow: '0 0 0 2px rgba(34, 197, 94, 0.5)',
+                            animation: 'pulse-green 2s infinite'
+                          } : {}}
+                        >
+                          <div className="flex items-center gap-3">
+                            <item.icon className="w-4 h-4 flex-shrink-0" />
+                            <span className="truncate">{item.label}</span>
+                          </div>
+                          {(hasNotif || stockAlerts > 0) && (
+                            <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-green-500 text-white text-xs font-bold rounded-full animate-bounce">
+                              {notifCount || stockAlerts}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               ))}
