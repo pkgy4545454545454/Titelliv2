@@ -9,58 +9,136 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
 
 ## ✅ Fonctionnalités Complétées (23 Jan 2026)
 
+### Phase 14 : Système de Formations (NOUVEAU)
+
+**1. Section "Formations disponibles" sur Homepage**
+- Affichage des formations publiques avec badges (En ligne / Présentiel)
+- Infos: titre, entreprise, durée, prix, catégorie, certificat
+- Bouton "S'inscrire" avec redirection auth si non connecté
+- Intégration Stripe pour l'achat
+
+**2. Formulaire de création Entreprise**
+- Choix type: En ligne (fichiers téléchargeables) / Présentiel (dates, lieu)
+- Upload multi-fichiers (vidéos, PDF, images) pour formations online
+- Champs conditionnels selon le type sélectionné
+- Catégories, prérequis, certificat
+
+**3. Dashboard Client "Mes Formations"**
+- Statistiques (Total, En cours, Terminées)
+- Onglets de filtrage (Toutes / En cours / Terminées)
+- Affichage détaillé avec progression
+- Téléchargement des fichiers pour formations online
+- Bouton "Marquer comme terminée"
+
 ### Phase 12-13 : Ciblage IA Réel & Pages Emploi
 
 **1. Système IA Ciblage Clients (RÉEL - pas mock)**
 - Stats basées sur vraies commandes de la BDD
 - Liste des vrais clients avec historique d'achats
 - Filtres : par nom, par type (fidèles/récents), par produit/service
-- Sélection multiple de clients
 - Envoi de questions suggestives via messagerie
-- Notifications automatiques aux clients
 
 **2. Page Détail Offre d'Emploi** (`/emploi/{id}`)
 - Header avec image/vidéo
 - Infos complètes (lieu, type, salaire, début)
-- Description, profil recherché, avantages
 - Bouton "Postuler maintenant" avec modal CV
-- Carte entreprise avec lien
 
-**3. Vidéos Header**
-- Page Entreprises : vidéo réunion business
-- Page Services : vidéo composition florale
-- Page Produits : vidéo shopping boutique
-
-**4. Galerie Média Entreprise**
+**3. Galerie Média Entreprise**
 - Upload photos multiples
 - Ajout vidéos YouTube
-- Suppression individuelle
+- Cover image éditable
 
-**5. Cover Image Entreprise**
-- Upload/modification bannière
-- Affichage sur cartes homepage
+**4. Système de Candidatures**
+- Modal de sélection CV depuis documents client
+- Lettre de motivation optionnelle
+- Gestion des candidatures dans dashboard entreprise
 
 ---
 
-## APIs Ajoutées
+## APIs Formations
 
 ```
-GET  /api/enterprise/customers - Vrais clients avec filtres
-POST /api/enterprise/send-question - Envoyer question suggestive
-GET  /api/jobs/{id} - Détail offre emploi
+GET  /api/trainings - Liste publique avec filtres (limit, training_type)
+GET  /api/trainings/{id} - Détail d'une formation
+POST /api/trainings/{id}/purchase - Créer checkout Stripe
+POST /api/trainings/{id}/enroll - Inscription après paiement
+GET  /api/enterprise/trainings - Formations de l'entreprise
+POST /api/enterprise/trainings - Créer une formation
+PUT  /api/enterprise/trainings/{id} - Modifier
+DELETE /api/enterprise/trainings/{id} - Supprimer
+GET  /api/client/trainings - Formations du client
+PUT  /api/client/trainings/{id}/complete - Marquer terminée
+```
+
+---
+
+## Schémas DB (Formations)
+
+```javascript
+// trainings collection
+{
+  id: string,
+  title: string,
+  description: string,
+  duration: string,
+  price: number,
+  category: string,
+  training_type: "online" | "on_site",
+  // Online fields
+  downloadable_files: [{name, url, type}],
+  // On-site fields
+  location: string,
+  start_date: string,
+  end_date: string,
+  max_participants: number,
+  // Meta
+  enterprise_id: string,
+  enterprise_name: string,
+  enterprise_logo: string,
+  certificate: boolean,
+  prerequisites: string,
+  is_active: boolean,
+  enrollments: number,
+  created_at: string
+}
+
+// training_enrollments collection
+{
+  id: string,
+  training_id: string,
+  user_id: string,
+  training_title: string,
+  training_type: string,
+  enterprise_id: string,
+  enterprise_name: string,
+  price_paid: number,
+  status: "in_progress" | "completed",
+  progress: number,
+  start_date: string,
+  end_date: string,
+  downloadable_files: array, // Copié lors de l'inscription
+  payment_verified: boolean,
+  enrolled_at: string,
+  completed_at: string
+}
 ```
 
 ---
 
 ## Tâches Restantes
 
+### 🔴 P0 (URGENT)
+- Aucune
+
 ### 🟡 P1
 - Responsivité mobile complète
-- Refonte menu Enterprise Dashboard
+- Migration données anciennes formations (ajouter training_type)
+- Refactoring server.py (dette technique critique)
 
 ### 🟢 P2
+- Vidéo panoramique homepage
 - Commentaires défilants
-- Refactoring server.py
+- Questions suggestives UI
 
 ---
 
@@ -71,4 +149,4 @@ GET  /api/jobs/{id} - Détail offre emploi
 
 ---
 
-*Mise à jour: 23 Jan 2026*
+*Mise à jour: 23 Jan 2026 - Système de formations complet*
