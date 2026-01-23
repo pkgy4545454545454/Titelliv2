@@ -85,15 +85,33 @@ const ServicesPage = () => {
 
   return (
     <div className="min-h-screen bg-[#050505] pt-24" data-testid="services-page">
-      {/* Hero */}
-      <div className="section-blue py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
-            Services
-          </h1>
-          <p className="text-lg text-gray-400 max-w-2xl">
-            Découvrez les meilleurs prestataires de services de la région de Lausanne
-          </p>
+      {/* Hero with Video Background */}
+      <div className="relative h-[40vh] min-h-[300px] overflow-hidden">
+        {/* Video Background */}
+        <div className="absolute inset-0">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="w-full h-full object-cover"
+            poster="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=1920&q=80"
+          >
+            <source src="https://assets.mixkit.co/videos/preview/mixkit-hands-of-a-woman-making-a-flower-arrangement-41814-large.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/70 via-[#050505]/50 to-[#050505]" />
+        </div>
+        
+        {/* Content */}
+        <div className="relative h-full flex items-center">
+          <div className="max-w-7xl mx-auto px-4 md:px-8 w-full">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
+              Services
+            </h1>
+            <p className="text-lg md:text-xl text-gray-300 max-w-2xl">
+              Découvrez les meilleurs prestataires de services de la région de Lausanne
+            </p>
+          </div>
         </div>
       </div>
 
