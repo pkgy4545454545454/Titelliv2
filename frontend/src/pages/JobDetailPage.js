@@ -45,9 +45,16 @@ const JobDetailPage = () => {
     }
 
     try {
-      const res = await clientDocumentsAPI.list('cv');
-      setUserDocuments(res.data?.documents || res.data || []);
+      // Fetch all documents (not just CV category)
+      const res = await clientDocumentsAPI.list();
+      const allDocs = res.data?.documents || res.data || [];
+      // Filter to show CV and PDF documents (useful for job applications)
+      const relevantDocs = allDocs.filter(d => 
+        d.category === 'cv' || d.category === 'general' || d.url?.includes('.pdf')
+      );
+      setUserDocuments(relevantDocs.length > 0 ? relevantDocs : allDocs);
     } catch (err) {
+      console.error('Error fetching documents:', err);
       setUserDocuments([]);
     }
     setShowApplyModal(true);
