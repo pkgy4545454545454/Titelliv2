@@ -296,6 +296,78 @@ const ClientDashboard = () => {
     }
   };
 
+  const fetchActivityFeed = async () => {
+    try {
+      const res = await activityFeedAPI.getFeed(50);
+      setActivityFeed(res.data.activities || []);
+    } catch (error) {
+      console.error('Error fetching activity feed:', error);
+    }
+  };
+
+  const fetchMyFeed = async () => {
+    try {
+      const res = await activityFeedAPI.getMyFeed(50);
+      setMyFeed(res.data.activities || []);
+    } catch (error) {
+      console.error('Error fetching my feed:', error);
+    }
+  };
+
+  const fetchLifestyle = async () => {
+    try {
+      const res = await lifestyleAPI.get();
+      setLifestyle(res.data);
+    } catch (error) {
+      console.error('Error fetching lifestyle:', error);
+    }
+  };
+
+  const fetchInvitations = async () => {
+    try {
+      const res = await clientInvitationsAPI.list();
+      setInvitations(res.data.invitations || []);
+    } catch (error) {
+      console.error('Error fetching invitations:', error);
+    }
+  };
+
+  const fetchCurrentOffers = async () => {
+    try {
+      const res = await currentOffersAPI.list();
+      setCurrentOffers(res.data.offers || []);
+    } catch (error) {
+      console.error('Error fetching offers:', error);
+    }
+  };
+
+  const fetchFavoriteGuests = async () => {
+    try {
+      const res = await guestsAPI.list();
+      setFavoriteGuests(res.data.guests || []);
+    } catch (error) {
+      console.error('Error fetching guests:', error);
+    }
+  };
+
+  const fetchInvestments = async () => {
+    try {
+      const res = await investmentsAPI.list();
+      setInvestments(res.data);
+    } catch (error) {
+      console.error('Error fetching investments:', error);
+    }
+  };
+
+  const fetchPremiumStatus = async () => {
+    try {
+      const res = await premiumAPI.getStatus();
+      setPremiumData(res.data);
+    } catch (error) {
+      console.error('Error fetching premium status:', error);
+    }
+  };
+
   const fetchProfileData = async () => {
     try {
       const res = await clientProfileAPI.get();
