@@ -217,13 +217,13 @@ class TestEnterpriseDashboard:
         return response.json()["token"]
     
     def test_get_enterprise_profile(self, enterprise_token):
-        """Test getting enterprise profile"""
+        """Test getting enterprise profile via /auth/me"""
         headers = {"Authorization": f"Bearer {enterprise_token}"}
-        response = requests.get(f"{BASE_URL}/api/enterprise/profile", headers=headers)
+        response = requests.get(f"{BASE_URL}/api/auth/me", headers=headers)
         assert response.status_code == 200, f"Get enterprise profile failed: {response.text}"
         data = response.json()
-        assert "id" in data or "business_name" in data
-        print(f"✓ Enterprise profile: {data.get('business_name', 'N/A')}")
+        assert "id" in data or "email" in data
+        print(f"✓ Enterprise user profile: {data.get('email', 'N/A')}")
     
     def test_get_enterprise_jobs(self, enterprise_token):
         """Test getting enterprise's jobs"""
@@ -287,7 +287,7 @@ class TestClientDashboard:
     def test_get_client_job_applications(self, client_token):
         """Test getting client's job applications"""
         headers = {"Authorization": f"Bearer {client_token}"}
-        response = requests.get(f"{BASE_URL}/api/jobs/applications/my", headers=headers)
+        response = requests.get(f"{BASE_URL}/api/client/job-applications", headers=headers)
         assert response.status_code == 200, f"Get applications failed: {response.text}"
         data = response.json()
         applications = data if isinstance(data, list) else data.get("applications", [])
