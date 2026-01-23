@@ -3879,6 +3879,34 @@ const ClientDashboard = () => {
                   )}
                 </div>
               </div>
+
+              {/* Cancel subscription option for paid plans */}
+              {premiumData.current_plan !== 'free' && (
+                <div className="card-service rounded-xl p-6 mt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-white font-semibold">Gérer l'abonnement</h3>
+                      <p className="text-sm text-gray-400">
+                        Prochain paiement: {premiumData.subscription?.next_billing ? 
+                          new Date(premiumData.subscription.next_billing).toLocaleDateString('fr-FR') : 
+                          'Non défini'}
+                      </p>
+                    </div>
+                    <button 
+                      onClick={handleCancelPremium}
+                      className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors text-sm"
+                    >
+                      Annuler l'abonnement
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Stripe security badge */}
+              <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-500">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                <span>Paiements sécurisés par Stripe</span>
+              </div>
             </div>
           )}
 
