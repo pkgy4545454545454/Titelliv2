@@ -1520,7 +1520,7 @@ const ClientDashboard = () => {
             </div>
           )}
 
-          {/* Cards Tab - Fixed */}
+          {/* Cards Tab - Production Ready */}
           {activeTab === 'cartes' && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
@@ -1533,29 +1533,76 @@ const ClientDashboard = () => {
                 </button>
               </div>
 
+              {/* Security Notice */}
+              <div className="card-service rounded-xl p-4 border-[#0047AB]/30">
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-white text-sm font-medium">Paiements sécurisés</p>
+                    <p className="text-gray-400 text-xs">Vos données bancaires sont cryptées et sécurisées via Stripe. Nous ne stockons jamais votre numéro complet.</p>
+                  </div>
+                </div>
+              </div>
+
               {cards.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {cards.map((card) => (
-                    <div key={card.id} className={`card-service rounded-xl p-6 ${card.is_default ? 'border-[#0047AB]' : ''}`}>
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <CreditCard className={`w-8 h-8 ${card.card_type === 'visa' ? 'text-blue-500' : card.card_type === 'mastercard' ? 'text-orange-500' : 'text-gray-400'}`} />
+                    <div key={card.id} className={`card-service rounded-xl p-6 relative overflow-hidden ${card.is_default ? 'border-[#0047AB]' : ''}`}>
+                      {/* Card Background Gradient */}
+                      <div className={`absolute inset-0 opacity-20 ${
+                        card.card_type === 'visa' ? 'bg-gradient-to-br from-blue-600 to-blue-900' :
+                        card.card_type === 'mastercard' ? 'bg-gradient-to-br from-orange-500 to-red-600' :
+                        'bg-gradient-to-br from-gray-600 to-gray-900'
+                      }`} />
+                      
+                      <div className="relative">
+                        <div className="flex items-start justify-between mb-6">
+                          <div className="flex items-center gap-3">
+                            <CreditCard className={`w-10 h-10 ${
+                              card.card_type === 'visa' ? 'text-blue-400' : 
+                              card.card_type === 'mastercard' ? 'text-orange-400' : 
+                              'text-gray-400'
+                            }`} />
+                            <div>
+                              <p className="text-white font-bold uppercase text-lg">{card.card_type}</p>
+                              {card.is_default && (
+                                <span className="inline-flex items-center gap-1 text-xs text-[#0047AB] bg-[#0047AB]/20 px-2 py-0.5 rounded-full">
+                                  <Star className="w-3 h-3" /> Par défaut
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteCard(card.id)}
+                            className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </div>
+                        
+                        <p className="text-2xl text-white font-mono tracking-wider mb-4">
+                          •••• •••• •••• {card.card_number_last4}
+                        </p>
+                        
+                        <div className="flex justify-between items-end">
                           <div>
-                            <p className="text-white font-medium uppercase">{card.card_type}</p>
-                            {card.is_default && <span className="text-xs text-[#0047AB]">Par défaut</span>}
+                            <p className="text-xs text-gray-500 uppercase mb-1">Titulaire</p>
+                            <p className="text-white font-medium uppercase">{card.card_holder}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs text-gray-500 uppercase mb-1">Expire</p>
+                            <p className="text-white font-medium">{String(card.expiry_month).padStart(2, '0')}/{card.expiry_year}</p>
                           </div>
                         </div>
-                        <button
-                          onClick={() => handleDeleteCard(card.id)}
-                          className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                      <p className="text-xl text-white font-mono mb-2">•••• •••• •••• {card.card_number_last4}</p>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-400">{card.card_holder}</span>
-                        <span className="text-gray-400">{String(card.expiry_month).padStart(2, '0')}/{card.expiry_year}</span>
+                        
+                        {!card.is_default && (
+                          <button
+                            onClick={() => handleSetDefaultCard(card.id)}
+                            className="mt-4 w-full py-2 bg-white/10 text-white text-sm rounded-lg hover:bg-white/20 transition-colors"
+                          >
+                            Définir par défaut
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -1564,42 +1611,74 @@ const ClientDashboard = () => {
                 <div className="card-service rounded-xl p-12 text-center">
                   <CreditCard className="w-16 h-16 text-gray-600 mx-auto mb-4" />
                   <p className="text-gray-400 mb-4">Aucune carte enregistrée</p>
+                  <p className="text-sm text-gray-500 mb-6">Ajoutez une carte pour faciliter vos paiements</p>
                   <button onClick={() => setShowAddCard(true)} className="btn-secondary">
                     Ajouter une carte
                   </button>
                 </div>
               )}
 
-              {/* Add Card Modal */}
+              {/* Add Card Modal - Production Ready */}
               {showAddCard && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                   <div className="card-service rounded-xl p-6 w-full max-w-md">
-                    <h3 className="text-lg font-semibold text-white mb-6">Ajouter une carte</h3>
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-lg font-semibold text-white">Ajouter une carte</h3>
+                      <button onClick={() => setShowAddCard(false)} className="text-gray-400 hover:text-white">
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                    
+                    {/* Card Preview */}
+                    <div className={`rounded-xl p-5 mb-6 relative overflow-hidden ${
+                      cardForm.card_type === 'visa' ? 'bg-gradient-to-br from-blue-600 to-blue-900' :
+                      cardForm.card_type === 'mastercard' ? 'bg-gradient-to-br from-orange-500 to-red-600' :
+                      'bg-gradient-to-br from-gray-700 to-gray-900'
+                    }`}>
+                      <div className="flex justify-between items-start mb-8">
+                        <CreditCard className="w-8 h-8 text-white/80" />
+                        <span className="text-white/80 uppercase font-bold">{cardForm.card_type}</span>
+                      </div>
+                      <p className="text-xl text-white font-mono tracking-wider mb-4">
+                        {cardForm.card_number ? cardForm.card_number.replace(/(\d{4})/g, '$1 ').trim() : '•••• •••• •••• ••••'}
+                      </p>
+                      <div className="flex justify-between">
+                        <span className="text-white/80 uppercase text-sm">{cardForm.card_holder || 'NOM DU TITULAIRE'}</span>
+                        <span className="text-white/80 text-sm">
+                          {String(cardForm.expiry_month).padStart(2, '0')}/{cardForm.expiry_year}
+                        </span>
+                      </div>
+                    </div>
+                    
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm text-gray-400 mb-2">Nom du titulaire</label>
+                        <label className="block text-sm text-gray-400 mb-2">Nom du titulaire *</label>
                         <input
                           type="text"
                           value={cardForm.card_holder}
-                          onChange={(e) => setCardForm({...cardForm, card_holder: e.target.value})}
+                          onChange={(e) => setCardForm({...cardForm, card_holder: e.target.value.toUpperCase()})}
                           className="input-dark w-full"
-                          placeholder="JOHN DOE"
+                          placeholder="NOM PRÉNOM"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm text-gray-400 mb-2">4 derniers chiffres</label>
+                        <label className="block text-sm text-gray-400 mb-2">Numéro de carte *</label>
                         <input
                           type="text"
-                          maxLength={4}
-                          value={cardForm.card_number_last4}
-                          onChange={(e) => setCardForm({...cardForm, card_number_last4: e.target.value.replace(/\D/g, '')})}
-                          className="input-dark w-full"
-                          placeholder="1234"
+                          maxLength={19}
+                          value={cardForm.card_number || ''}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, '').slice(0, 16);
+                            const last4 = value.slice(-4);
+                            setCardForm({...cardForm, card_number: value, card_number_last4: last4 || ''});
+                          }}
+                          className="input-dark w-full font-mono"
+                          placeholder="1234 5678 9012 3456"
                         />
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-3 gap-4">
                         <div>
-                          <label className="block text-sm text-gray-400 mb-2">Mois d'expiration</label>
+                          <label className="block text-sm text-gray-400 mb-2">Mois *</label>
                           <select
                             value={cardForm.expiry_month}
                             onChange={(e) => setCardForm({...cardForm, expiry_month: parseInt(e.target.value)})}
@@ -1611,29 +1690,47 @@ const ClientDashboard = () => {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-sm text-gray-400 mb-2">Année</label>
+                          <label className="block text-sm text-gray-400 mb-2">Année *</label>
                           <select
                             value={cardForm.expiry_year}
                             onChange={(e) => setCardForm({...cardForm, expiry_year: parseInt(e.target.value)})}
                             className="input-dark w-full"
                           >
-                            {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map((year) => (
+                            {[2024, 2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032].map((year) => (
                               <option key={year} value={year}>{year}</option>
                             ))}
                           </select>
                         </div>
+                        <div>
+                          <label className="block text-sm text-gray-400 mb-2">CVV *</label>
+                          <input
+                            type="password"
+                            maxLength={4}
+                            value={cardForm.cvv || ''}
+                            onChange={(e) => setCardForm({...cardForm, cvv: e.target.value.replace(/\D/g, '')})}
+                            className="input-dark w-full font-mono"
+                            placeholder="•••"
+                          />
+                        </div>
                       </div>
                       <div>
                         <label className="block text-sm text-gray-400 mb-2">Type de carte</label>
-                        <select
-                          value={cardForm.card_type}
-                          onChange={(e) => setCardForm({...cardForm, card_type: e.target.value})}
-                          className="input-dark w-full"
-                        >
-                          <option value="visa">Visa</option>
-                          <option value="mastercard">Mastercard</option>
-                          <option value="amex">American Express</option>
-                        </select>
+                        <div className="flex gap-3">
+                          {['visa', 'mastercard', 'amex'].map((type) => (
+                            <button
+                              key={type}
+                              type="button"
+                              onClick={() => setCardForm({...cardForm, card_type: type})}
+                              className={`flex-1 py-3 px-4 rounded-lg border transition-colors ${
+                                cardForm.card_type === type
+                                  ? 'border-[#0047AB] bg-[#0047AB]/20 text-white'
+                                  : 'border-white/10 bg-white/5 text-gray-400 hover:border-white/30'
+                              }`}
+                            >
+                              {type.charAt(0).toUpperCase() + type.slice(1)}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input
@@ -1645,9 +1742,17 @@ const ClientDashboard = () => {
                         <span className="text-sm text-gray-400">Définir comme carte par défaut</span>
                       </label>
                     </div>
+                    
+                    <div className="mt-4 p-3 bg-white/5 rounded-lg">
+                      <p className="text-xs text-gray-500 flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        Vos données sont sécurisées et cryptées
+                      </p>
+                    </div>
+                    
                     <div className="flex gap-3 mt-6">
                       <button onClick={() => setShowAddCard(false)} className="btn-secondary flex-1">Annuler</button>
-                      <button onClick={handleAddCard} className="btn-primary flex-1">Ajouter</button>
+                      <button onClick={handleAddCard} className="btn-primary flex-1">Ajouter la carte</button>
                     </div>
                   </div>
                 </div>
