@@ -91,7 +91,7 @@ const ClientDashboard = () => {
   useEffect(() => {
     if (activeTab === 'profile') {
       fetchProfileData();
-    } else if (activeTab === 'contacts') {
+    } else if (activeTab === 'contacts' || activeTab === 'demandes') {
       fetchFriendsData();
     } else if (activeTab === 'cartes') {
       fetchCards();
