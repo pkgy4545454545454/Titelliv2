@@ -216,6 +216,28 @@ const ClientDashboard = () => {
     }
   };
 
+  // Training review handler
+  const handleSubmitReview = async () => {
+    if (!reviewingTraining) return;
+    setSubmittingReview(true);
+    try {
+      await trainingsAPI.createReview(reviewingTraining.training_id, {
+        training_id: reviewingTraining.training_id,
+        rating: reviewForm.rating,
+        comment: reviewForm.comment
+      });
+      toast.success('Merci pour votre avis !');
+      setShowReviewModal(false);
+      setReviewingTraining(null);
+      setReviewForm({ rating: 5, comment: '' });
+    } catch (error) {
+      const msg = error.response?.data?.detail || 'Erreur lors de l\'envoi';
+      toast.error(msg);
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
   // Refetch trainings when filter changes
   useEffect(() => {
     if (activeTab === 'formations') {
