@@ -17,7 +17,7 @@ import {
   trainingsAPI, onlineStatusAPI, clientAgendaAPI, clientFinancesAPI, 
   clientDonationsAPI, wishlistAPI, clientSuggestionsAPI, clientProvidersAPI,
   activityFeedAPI, lifestyleAPI, clientInvitationsAPI, currentOffersAPI,
-  guestsAPI, investmentsAPI, premiumAPI
+  guestsAPI, clientInvestmentsAPI, premiumAPI
 } from '../services/api';
 import api, { getImageUrl } from '../services/api';
 import { toast } from 'sonner';
