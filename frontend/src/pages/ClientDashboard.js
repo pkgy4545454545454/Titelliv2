@@ -167,6 +167,37 @@ const ClientDashboard = () => {
     }
   };
 
+  // Trainings/Formations handlers
+  const fetchMyTrainings = async () => {
+    setLoadingTrainings(true);
+    try {
+      const statusParam = trainingsFilter === 'all' ? null : trainingsFilter;
+      const res = await trainingsAPI.getMyTrainings(statusParam);
+      setMyTrainings(res.data || { enrollments: [], stats: { total: 0, in_progress: 0, completed: 0 } });
+    } catch (error) {
+      console.error('Error fetching trainings:', error);
+    } finally {
+      setLoadingTrainings(false);
+    }
+  };
+
+  const handleMarkTrainingComplete = async (enrollmentId) => {
+    try {
+      await trainingsAPI.markComplete(enrollmentId);
+      toast.success('Formation marquée comme terminée');
+      fetchMyTrainings();
+    } catch (error) {
+      toast.error('Erreur lors de la mise à jour');
+    }
+  };
+
+  // Refetch trainings when filter changes
+  useEffect(() => {
+    if (activeTab === 'formations') {
+      fetchMyTrainings();
+    }
+  }, [trainingsFilter]);
+
   // Profile handlers
   const handleProfileUpdate = async () => {
     try {
