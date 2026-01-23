@@ -618,26 +618,42 @@ const ClientDashboard = () => {
 
             <nav className="space-y-4">
               {menuSections.map((section) => (
-                <div key={section.title}>
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-3">
+                <div key={section.title} className={`rounded-xl p-3 bg-gradient-to-br ${section.gradient} border ${section.borderColor} mb-3`}>
+                  <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2 px-2">
                     {section.title}
                   </h3>
                   <div className="space-y-0.5">
-                    {section.items.map((item) => (
-                      <button
-                        key={item.id}
-                        onClick={() => { setActiveTab(item.id); setMobileMenuOpen(false); }}
-                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                          activeTab === item.id
-                            ? 'bg-[#0047AB]/20 text-[#0047AB]'
-                            : 'text-gray-400 hover:bg-white/5 hover:text-white'
-                        }`}
-                        data-testid={`menu-${item.id}`}
-                      >
-                        <item.icon className="w-4 h-4" />
-                        <span className="truncate">{item.label}</span>
-                      </button>
-                    ))}
+                    {section.items.map((item) => {
+                      const notifCount = item.notifKey ? getNotificationCount(item.notifKey) : 0;
+                      const hasNotif = notifCount > 0;
+                      
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => { setActiveTab(item.id); setMobileMenuOpen(false); }}
+                          className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all relative ${
+                            activeTab === item.id
+                              ? 'bg-white/20 text-white shadow-lg'
+                              : 'text-gray-300 hover:bg-white/10 hover:text-white'
+                          } ${hasNotif ? 'animate-pulse-border' : ''}`}
+                          data-testid={`menu-${item.id}`}
+                          style={hasNotif ? {
+                            boxShadow: '0 0 0 2px rgba(34, 197, 94, 0.5)',
+                            animation: 'pulse-green 2s infinite'
+                          } : {}}
+                        >
+                          <div className="flex items-center gap-3">
+                            <item.icon className="w-4 h-4" />
+                            <span className="truncate">{item.label}</span>
+                          </div>
+                          {hasNotif && (
+                            <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-green-500 text-white text-xs font-bold rounded-full animate-bounce">
+                              {notifCount}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               ))}
