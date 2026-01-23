@@ -139,7 +139,7 @@ const InvitationsSection = () => {
           {suggestiveQuestions.map((question, i) => (
             <button
               key={i}
-              onClick={() => useQuickQuestion(question)}
+              onClick={() => handleQuickQuestion(question)}
               className="p-3 bg-white/5 rounded-lg text-left text-sm text-gray-300 hover:bg-[#0047AB]/20 hover:text-white transition-all"
             >
               "{question}"
