@@ -729,6 +729,69 @@ async def get_current_user(authorization: Optional[str] = Header(None)) -> dict:
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
     return user
 
+# ============ PREMIUM PLANS CONFIG ============
+
+PREMIUM_PLANS = {
+    "free": {
+        "name": "Gratuit",
+        "price": 0.0,
+        "cashback_rate": 0.01,  # 1%
+        "features": [
+            "Accès aux prestataires",
+            "Messagerie limitée (10/jour)",
+            "1% cashback"
+        ]
+    },
+    "premium": {
+        "name": "Premium",
+        "price": 9.99,
+        "cashback_rate": 0.10,  # 10%
+        "features": [
+            "Accès illimité aux prestataires",
+            "Messagerie illimitée",
+            "10% cashback",
+            "Offres exclusives",
+            "Support prioritaire",
+            "Badge Premium"
+        ]
+    },
+    "vip": {
+        "name": "VIP",
+        "price": 29.99,
+        "cashback_rate": 0.15,  # 15%
+        "features": [
+            "Tous les avantages Premium",
+            "15% cashback",
+            "Invitations événements exclusifs",
+            "Concierge personnel",
+            "Accès anticipé aux nouvelles fonctionnalités",
+            "Badge VIP doré"
+        ]
+    }
+}
+
+async def get_user_cashback_rate(user_id: str) -> float:
+    """Get the cashback rate based on user's subscription plan"""
+    # Check for active subscription
+    subscription = await db.subscriptions.find_one({
+        "user_id": user_id,
+        "status": "active"
+    })
+    
+    if subscription:
+        plan = subscription.get('plan', 'free')
+        return PREMIUM_PLANS.get(plan, PREMIUM_PLANS['free'])['cashback_rate']
+    
+    return PREMIUM_PLANS['free']['cashback_rate']  # Default 1%
+
+async def get_user_plan(user_id: str) -> str:
+    """Get user's current subscription plan"""
+    subscription = await db.subscriptions.find_one({
+        "user_id": user_id,
+        "status": "active"
+    })
+    return subscription.get('plan', 'free') if subscription else 'free'
+
 # ============ AUTH ROUTES ============
 
 @api_router.post("/auth/register")
