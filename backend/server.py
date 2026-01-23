@@ -1551,13 +1551,24 @@ class JobCreate(BaseModel):
     requirements: Optional[str] = None
     benefits: Optional[str] = None
     contact_email: Optional[str] = None
+    deadline: Optional[str] = None
+
+class JobApplication(BaseModel):
+    job_id: str
+    cover_letter: Optional[str] = None
+    resume_url: Optional[str] = None
 
 @api_router.get("/enterprise/jobs")
 async def get_enterprise_jobs(current_user: dict = Depends(get_current_user)):
     enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
     if not enterprise:
         return []
-    jobs = await db.jobs.find({"enterprise_id": enterprise['id']}, {"_id": 0}).to_list(100)
+    jobs = await db.jobs.find({"enterprise_id": enterprise['id']}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    # Add application count for each job
+    for job in jobs:
+        job['applications_count'] = await db.job_applications.count_documents({"job_id": job['id']})
+    
     return jobs
 
 @api_router.post("/enterprise/jobs")
@@ -1570,14 +1581,60 @@ async def create_job(job: JobCreate, current_user: dict = Depends(get_current_us
         "id": str(uuid.uuid4()),
         "enterprise_id": enterprise['id'],
         "enterprise_name": enterprise['business_name'],
+        "enterprise_logo": enterprise.get('logo', ''),
+        "enterprise_category": enterprise.get('category', ''),
         **job.model_dump(),
         "is_active": True,
+        "views": 0,
         "applications": 0,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.jobs.insert_one(job_doc)
+    
+    # Create notification for all clients about new job
+    clients = await db.users.find({"user_type": "client"}, {"id": 1}).to_list(100)
+    for client in clients:
+        notification = {
+            "id": str(uuid.uuid4()),
+            "user_id": client['id'],
+            "title": "Nouvelle offre d'emploi",
+            "message": f"{enterprise['business_name']} recrute : {job.title}",
+            "notification_type": "job",
+            "data": {"job_id": job_doc['id']},
+            "is_read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(notification)
+    
     del job_doc['_id']
     return job_doc
+
+@api_router.put("/enterprise/jobs/{job_id}")
+async def update_job(job_id: str, job: JobCreate, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    await db.jobs.update_one(
+        {"id": job_id, "enterprise_id": enterprise['id']},
+        {"$set": job.model_dump()}
+    )
+    updated_job = await db.jobs.find_one({"id": job_id}, {"_id": 0})
+    return updated_job
+
+@api_router.put("/enterprise/jobs/{job_id}/toggle")
+async def toggle_job(job_id: str, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    job = await db.jobs.find_one({"id": job_id, "enterprise_id": enterprise['id']})
+    if not job:
+        raise HTTPException(status_code=404, detail="Offre non trouvée")
+    
+    new_status = not job.get('is_active', True)
+    await db.jobs.update_one({"id": job_id}, {"$set": {"is_active": new_status}})
+    return {"is_active": new_status}
 
 @api_router.delete("/enterprise/jobs/{job_id}")
 async def delete_job(job_id: str, current_user: dict = Depends(get_current_user)):
@@ -1586,7 +1643,22 @@ async def delete_job(job_id: str, current_user: dict = Depends(get_current_user)
         raise HTTPException(status_code=404, detail="Entreprise non trouvée")
     
     await db.jobs.delete_one({"id": job_id, "enterprise_id": enterprise['id']})
+    await db.job_applications.delete_many({"job_id": job_id})
     return {"message": "Offre d'emploi supprimée"}
+
+@api_router.get("/enterprise/jobs/{job_id}/applications")
+async def get_job_applications(job_id: str, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    applications = await db.job_applications.find({"job_id": job_id}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    for app in applications:
+        applicant = await db.users.find_one({"id": app['user_id']}, {"_id": 0, "password_hash": 0})
+        app['applicant'] = applicant
+    
+    return {"applications": applications}
 
 @api_router.get("/jobs")
 async def get_all_jobs(job_type: Optional[str] = None, limit: int = 50):
@@ -1594,7 +1666,88 @@ async def get_all_jobs(job_type: Optional[str] = None, limit: int = 50):
     if job_type:
         query["job_type"] = job_type
     jobs = await db.jobs.find(query, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    # Add enterprise info for each job
+    for job in jobs:
+        enterprise = await db.enterprises.find_one({"id": job.get('enterprise_id')}, {"_id": 0})
+        if enterprise:
+            job['enterprise'] = {
+                "id": enterprise['id'],
+                "business_name": enterprise['business_name'],
+                "logo": enterprise.get('logo', ''),
+                "category": enterprise.get('category', '')
+            }
+    
     return jobs
+
+@api_router.get("/jobs/{job_id}")
+async def get_job_detail(job_id: str):
+    job = await db.jobs.find_one({"id": job_id}, {"_id": 0})
+    if not job:
+        raise HTTPException(status_code=404, detail="Offre non trouvée")
+    
+    # Increment views
+    await db.jobs.update_one({"id": job_id}, {"$inc": {"views": 1}})
+    
+    enterprise = await db.enterprises.find_one({"id": job.get('enterprise_id')}, {"_id": 0})
+    if enterprise:
+        job['enterprise'] = enterprise
+    
+    return job
+
+@api_router.post("/jobs/{job_id}/apply")
+async def apply_to_job(job_id: str, application: JobApplication, current_user: dict = Depends(get_current_user)):
+    job = await db.jobs.find_one({"id": job_id, "is_active": True})
+    if not job:
+        raise HTTPException(status_code=404, detail="Offre non trouvée ou inactive")
+    
+    # Check if already applied
+    existing = await db.job_applications.find_one({"job_id": job_id, "user_id": current_user['id']})
+    if existing:
+        raise HTTPException(status_code=400, detail="Vous avez déjà postulé à cette offre")
+    
+    app_doc = {
+        "id": str(uuid.uuid4()),
+        "job_id": job_id,
+        "user_id": current_user['id'],
+        "cover_letter": application.cover_letter,
+        "resume_url": application.resume_url,
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.job_applications.insert_one(app_doc)
+    
+    # Update application count
+    await db.jobs.update_one({"id": job_id}, {"$inc": {"applications": 1}})
+    
+    # Notify enterprise
+    enterprise = await db.enterprises.find_one({"id": job['enterprise_id']})
+    if enterprise:
+        user = await db.users.find_one({"id": current_user['id']}, {"_id": 0, "password_hash": 0})
+        notification = {
+            "id": str(uuid.uuid4()),
+            "user_id": enterprise['user_id'],
+            "title": "Nouvelle candidature",
+            "message": f"{user['first_name']} {user['last_name']} a postulé à : {job['title']}",
+            "notification_type": "job_application",
+            "data": {"job_id": job_id, "application_id": app_doc['id']},
+            "is_read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(notification)
+    
+    del app_doc['_id']
+    return app_doc
+
+@api_router.get("/client/job-applications")
+async def get_my_job_applications(current_user: dict = Depends(get_current_user)):
+    applications = await db.job_applications.find({"user_id": current_user['id']}, {"_id": 0}).sort("created_at", -1).to_list(50)
+    
+    for app in applications:
+        job = await db.jobs.find_one({"id": app['job_id']}, {"_id": 0})
+        app['job'] = job
+    
+    return {"applications": applications}
 
 # ============ REAL ESTATE/IMMOBILIER ROUTES ============
 
