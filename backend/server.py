@@ -1874,7 +1874,8 @@ async def enroll_training(training_id: str, session_id: Optional[str] = None, cu
     # Verify payment if session_id provided
     if session_id:
         try:
-            status = await stripe_checkout.get_session_status(session_id)
+            stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY)
+            status = await stripe_checkout.get_checkout_status(session_id)
             if status.payment_status != "paid":
                 raise HTTPException(status_code=400, detail="Paiement non effectué")
         except Exception as e:
