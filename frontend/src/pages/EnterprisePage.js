@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Star, MapPin, Phone, Mail, Globe, Clock, CheckCircle, Award, Crown, ChevronRight, ChevronLeft, ShoppingCart, MessageCircle, Share2, Heart, Play, Pause, Volume2, VolumeX, Users, TrendingUp, BarChart3, Calendar as CalendarIcon, GraduationCap, Briefcase, Image, Video, X } from 'lucide-react';
-import { enterpriseAPI, reviewAPI, servicesProductsAPI, getImageUrl, trainingsAPI, jobsAPI } from '../services/api';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Star, MapPin, Phone, Mail, Globe, Clock, CheckCircle, Award, Crown, ChevronRight, ChevronLeft, ShoppingCart, MessageCircle, Share2, Heart, Play, Pause, Volume2, VolumeX, Users, TrendingUp, BarChart3, Calendar as CalendarIcon, GraduationCap, Briefcase, Image, Video, X, UserPlus, UserCheck } from 'lucide-react';
+import { enterpriseAPI, reviewAPI, servicesProductsAPI, getImageUrl, trainingsAPI, jobsAPI, clientProvidersAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { toast } from 'sonner';
 
 const EnterprisePage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
   const { addItem } = useCart();
   const [enterprise, setEnterprise] = useState(null);
@@ -24,10 +25,61 @@ const EnterprisePage = () => {
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [displayVariant, setDisplayVariant] = useState('side'); // 'side' or 'below'
   const [selectedMedia, setSelectedMedia] = useState(null); // For lightbox
+  const [isMyProvider, setIsMyProvider] = useState(false);
+  const [providerLoading, setProviderLoading] = useState(false);
   const videoRef = useRef(null);
 
   const handleAddToCart = (item) => {
     addItem(item, enterprise);
+  };
+
+  const checkIfMyProvider = async () => {
+    try {
+      const res = await clientProvidersAPI.list();
+      const providers = res.data?.providers || [];
+      const isProvider = providers.some(p => p.enterprise_id === id);
+      setIsMyProvider(isProvider);
+    } catch (e) {
+      // Not logged in or error
+    }
+  };
+
+  const handleToggleProvider = async () => {
+    if (!isAuthenticated) {
+      toast.error('Connectez-vous pour ajouter ce prestataire');
+      navigate('/auth');
+      return;
+    }
+
+    setProviderLoading(true);
+    try {
+      if (isMyProvider) {
+        // Find and remove
+        const res = await clientProvidersAPI.list();
+        const providers = res.data?.providers || [];
+        const provider = providers.find(p => p.enterprise_id === id);
+        if (provider) {
+          await clientProvidersAPI.remove(provider.id);
+          setIsMyProvider(false);
+          toast.success('Prestataire retiré de votre liste');
+        }
+      } else {
+        await clientProvidersAPI.add({
+          enterprise_id: id,
+          enterprise_name: enterprise?.business_name,
+          category: enterprise?.category,
+          city: enterprise?.city,
+          rating: enterprise?.average_rating || enterprise?.rating || 0,
+          logo: enterprise?.logo
+        });
+        setIsMyProvider(true);
+        toast.success('Prestataire ajouté à votre liste !');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur');
+    } finally {
+      setProviderLoading(false);
+    }
   };
 
   useEffect(() => {
