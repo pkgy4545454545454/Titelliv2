@@ -1066,7 +1066,11 @@ async def get_reviews(enterprise_id: str, limit: int = 50, skip: int = 0):
 
 @api_router.post("/orders")
 async def create_order(data: OrderCreate, current_user: dict = Depends(get_current_user)):
-    total = sum(item.price * item.quantity for item in data.items)
+    subtotal = sum(item.price * item.quantity for item in data.items)
+    
+    # Calculate REAL fees based on Titelli configuration
+    transaction_fee = round(subtotal * TITELLI_FEES['transaction_fee'], 2)  # 2.9% frais transaction
+    total = round(subtotal + transaction_fee, 2)
     
     order = Order(
         user_id=current_user['id'],
@@ -1078,6 +1082,9 @@ async def create_order(data: OrderCreate, current_user: dict = Depends(get_curre
     )
     order_dict = order.model_dump()
     order_dict['created_at'] = order_dict['created_at'].isoformat()
+    order_dict['subtotal'] = subtotal
+    order_dict['transaction_fee'] = transaction_fee
+    order_dict['management_fee'] = round(subtotal * TITELLI_FEES['management_fee'], 2)  # 10% for enterprise payout
     
     insert_doc = order_dict.copy()
     await db.orders.insert_one(insert_doc)
@@ -1089,7 +1096,7 @@ async def create_order(data: OrderCreate, current_user: dict = Depends(get_curre
     # Add cashback based on user's subscription plan (Free: 1%, Premium: 10%, VIP: 15%)
     cashback_rate = await get_user_cashback_rate(current_user['id'])
     cashback_percent = int(cashback_rate * 100)
-    cashback_amount = round(total * cashback_rate, 2)
+    cashback_amount = round(subtotal * cashback_rate, 2)  # Cashback on subtotal only, not fees
     if cashback_amount > 0:
         await db.users.update_one(
             {"id": current_user['id']},
