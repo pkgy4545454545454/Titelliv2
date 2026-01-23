@@ -523,6 +523,16 @@ const ClientDashboard = () => {
     }
   };
 
+  const handleSetDefaultCard = async (cardId) => {
+    try {
+      await paymentCardsAPI.setDefault(cardId);
+      toast.success('Carte par défaut mise à jour');
+      fetchCards();
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
   // Documents handlers
   const handleAddDocument = async () => {
     // Auto-set name from uploaded file if empty
