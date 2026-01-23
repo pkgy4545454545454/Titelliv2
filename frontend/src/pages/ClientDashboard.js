@@ -124,6 +124,33 @@ const ClientDashboard = () => {
   // Personal providers state
   const [personalProviders, setPersonalProviders] = useState([]);
 
+  // Activity Feed state
+  const [activityFeed, setActivityFeed] = useState([]);
+  const [myFeed, setMyFeed] = useState([]);
+
+  // Lifestyle state
+  const [lifestyle, setLifestyle] = useState({ wishlist: [], personal_providers: [], liked_items: [], preferences: {} });
+
+  // Invitations state
+  const [invitations, setInvitations] = useState([]);
+
+  // Current offers state
+  const [currentOffers, setCurrentOffers] = useState([]);
+
+  // Guests state
+  const [favoriteGuests, setFavoriteGuests] = useState([]);
+
+  // Investments state
+  const [investments, setInvestments] = useState({ investments: [], statistics: {} });
+  const [showAddInvestment, setShowAddInvestment] = useState(false);
+  const [investmentForm, setInvestmentForm] = useState({
+    investment_type: 'real_estate', title: '', description: '', amount_invested: '',
+    current_value: '', roi_percent: '', investment_date: '', property_address: '', status: 'active'
+  });
+
+  // Premium state
+  const [premiumData, setPremiumData] = useState({ current_plan: 'free', is_premium: false, benefits: {} });
+
   useEffect(() => {
     if (!isClient) {
       navigate('/');
