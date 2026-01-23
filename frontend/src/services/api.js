@@ -130,8 +130,21 @@ export const offersAPI = {
 export const trainingsAPI = {
   list: () => axios.get(`${API}/enterprise/trainings`, { headers: getAuthHeaders() }),
   listAll: (params) => axios.get(`${API}/trainings`, { params }),
+  getById: (id) => axios.get(`${API}/trainings/${id}`),
   create: (data) => axios.post(`${API}/enterprise/trainings`, data, { headers: getAuthHeaders() }),
+  update: (id, data) => axios.put(`${API}/enterprise/trainings/${id}`, data, { headers: getAuthHeaders() }),
   delete: (id) => axios.delete(`${API}/enterprise/trainings/${id}`, { headers: getAuthHeaders() }),
+  // Client training purchases
+  purchase: (trainingId) => axios.post(`${API}/trainings/${trainingId}/purchase`, null, { headers: getAuthHeaders() }),
+  enroll: (trainingId, sessionId = null) => axios.post(`${API}/trainings/${trainingId}/enroll`, null, { 
+    params: sessionId ? { session_id: sessionId } : {},
+    headers: getAuthHeaders() 
+  }),
+  getMyTrainings: (status = null) => axios.get(`${API}/client/trainings`, { 
+    params: status ? { status } : {},
+    headers: getAuthHeaders() 
+  }),
+  markComplete: (enrollmentId) => axios.put(`${API}/client/trainings/${enrollmentId}/complete`, null, { headers: getAuthHeaders() }),
 };
 
 // Jobs/Emplois
