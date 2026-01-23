@@ -3391,6 +3391,7 @@ async def respond_to_friend_request(friendship_id: str, accept: bool, current_us
             "title": "Demande d'ami acceptée",
             "message": f"{user['first_name']} {user['last_name']} a accepté votre demande d'ami",
             "notification_type": "friend_accepted",
+            "link": "/dashboard/client?tab=contacts",
             "is_read": False,
             "created_at": datetime.now(timezone.utc).isoformat()
         }
