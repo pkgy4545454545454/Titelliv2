@@ -6134,7 +6134,7 @@ async def book_expert_service(
     service = EXPERT_SERVICES[service_type]
     
     enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
-    enterprise_id = enterprise['id'] if enterprise else None
+    enterprise_id = enterprise['id'] if enterprise else ""
     
     try:
         checkout = StripeCheckout(api_key=STRIPE_API_KEY)
