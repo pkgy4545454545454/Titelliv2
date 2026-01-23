@@ -110,6 +110,8 @@ const ClientDashboard = () => {
       fetchDocuments();
     } else if (activeTab === 'messages') {
       fetchConversations();
+    } else if (activeTab === 'formations') {
+      fetchMyTrainings();
     }
   }, [activeTab]);
 
