@@ -13,6 +13,9 @@ const EnterprisePage = () => {
   const [enterprise, setEnterprise] = useState(null);
   const [services, setServices] = useState([]);
   const [reviews, setReviews] = useState([]);
+  const [trainings, setTrainings] = useState([]);
+  const [jobs, setJobs] = useState([]);
+  const [mediaGallery, setMediaGallery] = useState({ photos: [], videos: [] });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('presentation');
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
@@ -20,6 +23,7 @@ const EnterprisePage = () => {
   const [videoMuted, setVideoMuted] = useState(true);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [displayVariant, setDisplayVariant] = useState('side'); // 'side' or 'below'
+  const [selectedMedia, setSelectedMedia] = useState(null); // For lightbox
   const videoRef = useRef(null);
 
   const handleAddToCart = (item) => {
