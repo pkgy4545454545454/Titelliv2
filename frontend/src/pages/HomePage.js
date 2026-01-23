@@ -409,7 +409,7 @@ const HomePage = () => {
       {/* Job Offers Section */}
       <section className="py-16 md:py-24 bg-gradient-to-b from-[#050505] to-[#0A0A0A]" data-testid="jobs-section">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="flex items-center justify-between mb-10">
+          <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-xl bg-[#0047AB]/20">
                 <Briefcase className="w-6 h-6 text-[#0047AB]" />
@@ -421,54 +421,126 @@ const HomePage = () => {
                 <p className="text-gray-400 mt-1 text-sm md:text-base">Opportunités chez nos prestataires</p>
               </div>
             </div>
-            <Link to="/emplois" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors">
-              Voir toutes les offres
-              <ArrowRight className="w-5 h-5" />
-            </Link>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${showFilters ? 'bg-[#0047AB] text-white' : 'bg-white/10 text-gray-300 hover:bg-white/20'}`}
+                data-testid="jobs-filter-btn"
+              >
+                <Filter className="w-4 h-4" />
+                <span className="hidden sm:inline">Filtres</span>
+              </button>
+              <Link to="/emplois" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors">
+                Voir toutes les offres
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            </div>
           </div>
+          
+          {/* Filters */}
+          {showFilters && (
+            <div className="mb-6 p-4 bg-white/5 rounded-xl border border-white/10 animate-fade-in" data-testid="jobs-filters">
+              <div className="flex flex-wrap gap-4">
+                <div className="flex-1 min-w-[150px]">
+                  <label className="block text-sm text-gray-400 mb-1">Type de contrat</label>
+                  <select 
+                    value={jobFilters.type}
+                    onChange={(e) => setJobFilters({...jobFilters, type: e.target.value})}
+                    className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white focus:border-[#0047AB] outline-none"
+                    data-testid="jobs-filter-type"
+                  >
+                    <option value="">Tous les types</option>
+                    <option value="CDI">CDI</option>
+                    <option value="CDD">CDD</option>
+                    <option value="Stage">Stage</option>
+                    <option value="Freelance">Freelance</option>
+                    <option value="Apprentissage">Apprentissage</option>
+                  </select>
+                </div>
+                <div className="flex-1 min-w-[150px]">
+                  <label className="block text-sm text-gray-400 mb-1">Localisation</label>
+                  <input 
+                    type="text"
+                    value={jobFilters.location}
+                    onChange={(e) => setJobFilters({...jobFilters, location: e.target.value})}
+                    placeholder="Ex: Lausanne, Genève..."
+                    className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:border-[#0047AB] outline-none"
+                    data-testid="jobs-filter-location"
+                  />
+                </div>
+                <div className="flex items-end">
+                  <button 
+                    onClick={() => setJobFilters({ type: '', location: '' })}
+                    className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                  >
+                    Réinitialiser
+                  </button>
+                </div>
+              </div>
+              {filteredJobs.length !== jobs.length && (
+                <p className="mt-3 text-sm text-[#0047AB]">{filteredJobs.length} résultat(s) sur {jobs.length}</p>
+              )}
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {jobs.length > 0 ? (
-              jobs.slice(0, 6).map((job, index) => (
-                <Link 
+            {filteredJobs.length > 0 ? (
+              filteredJobs.slice(0, 6).map((job, index) => (
+                <div 
                   key={job.id} 
-                  to={`/emploi/${job.id}`}
                   className={`card-service rounded-xl p-5 hover:border-[#0047AB]/30 transition-all animate-fade-in stagger-${index + 1}`}
+                  data-testid={`job-card-${job.id}`}
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-lg bg-[#0047AB]/10 flex items-center justify-center">
-                        <Briefcase className="w-6 h-6 text-[#0047AB]" />
+                  <Link to={`/emploi/${job.id}`} className="block">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-lg bg-[#0047AB]/10 flex items-center justify-center">
+                          <Briefcase className="w-6 h-6 text-[#0047AB]" />
+                        </div>
+                        <div>
+                          <h3 className="text-white font-semibold text-sm md:text-base">{job.title}</h3>
+                          <p className="text-[#D4AF37] text-sm font-medium">{job.enterprise_name || 'Entreprise'}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="text-white font-semibold text-sm md:text-base">{job.title}</h3>
-                        <p className="text-[#D4AF37] text-sm">{job.enterprise_name || 'Entreprise'}</p>
-                      </div>
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        job.type === 'CDI' ? 'bg-green-500/20 text-green-400' :
+                        job.type === 'CDD' ? 'bg-orange-500/20 text-orange-400' :
+                        job.type === 'Stage' ? 'bg-purple-500/20 text-purple-400' :
+                        job.type === 'Freelance' ? 'bg-cyan-500/20 text-cyan-400' :
+                        'bg-blue-500/20 text-blue-400'
+                      }`}>
+                        {job.type || 'CDI'}
+                      </span>
                     </div>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      job.type === 'CDI' ? 'bg-green-500/20 text-green-400' :
-                      job.type === 'Stage' ? 'bg-purple-500/20 text-purple-400' :
-                      'bg-blue-500/20 text-blue-400'
-                    }`}>
-                      {job.type || 'CDI'}
-                    </span>
-                  </div>
-                  <p className="text-gray-400 text-sm line-clamp-2 mb-4">{job.description}</p>
-                  <div className="flex items-center gap-4 text-xs text-gray-500">
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-3 h-3" /> {job.location || 'Lausanne'}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> {job.salary || 'À discuter'}
-                    </span>
-                  </div>
-                </Link>
+                    <p className="text-gray-400 text-sm line-clamp-2 mb-4">{job.description}</p>
+                    <div className="flex items-center gap-4 text-xs text-gray-500 mb-4">
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-3 h-3" /> {job.location || 'Lausanne'}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" /> {job.salary || 'À discuter'}
+                      </span>
+                    </div>
+                  </Link>
+                  <button
+                    onClick={(e) => handleApplyClick(e, job)}
+                    className="w-full bg-[#0047AB] hover:bg-[#0047AB]/80 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                    data-testid={`job-apply-btn-${job.id}`}
+                  >
+                    <Send className="w-4 h-4" />
+                    Postuler
+                  </button>
+                </div>
               ))
             ) : (
               <div className="col-span-full text-center py-12">
                 <Briefcase className="w-16 h-16 text-gray-700 mx-auto mb-4" />
-                <p className="text-gray-500">Aucune offre d'emploi pour le moment</p>
-                <p className="text-sm text-gray-600 mt-1">Les offres de nos prestataires apparaîtront ici</p>
+                <p className="text-gray-500">
+                  {jobs.length === 0 ? "Aucune offre d'emploi pour le moment" : "Aucune offre ne correspond aux filtres"}
+                </p>
+                <p className="text-sm text-gray-600 mt-1">
+                  {jobs.length === 0 ? "Les offres de nos prestataires apparaîtront ici" : "Essayez d'autres critères de recherche"}
+                </p>
               </div>
             )}
           </div>
@@ -479,6 +551,119 @@ const HomePage = () => {
           </Link>
         </div>
       </section>
+      
+      {/* Apply Modal */}
+      {showApplyModal && selectedJob && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" data-testid="apply-modal">
+          <div className="bg-[#0A0A0A] rounded-2xl w-full max-w-lg border border-white/10 max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-white/10">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-white">Postuler à l'offre</h2>
+                <button onClick={() => setShowApplyModal(false)} className="text-gray-400 hover:text-white">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              {/* Job Info */}
+              <div className="bg-white/5 rounded-xl p-4">
+                <h3 className="text-white font-semibold">{selectedJob.title}</h3>
+                <p className="text-[#D4AF37] text-sm">{selectedJob.enterprise_name}</p>
+                <div className="flex items-center gap-4 text-xs text-gray-400 mt-2">
+                  <span>{selectedJob.type}</span>
+                  <span>{selectedJob.location || 'Lausanne'}</span>
+                </div>
+              </div>
+              
+              {/* CV Selection */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">
+                  <FileText className="w-4 h-4 inline mr-2" />
+                  Sélectionnez votre CV *
+                </label>
+                {userDocuments.length > 0 ? (
+                  <div className="space-y-2">
+                    {userDocuments.map((doc) => (
+                      <label 
+                        key={doc.id} 
+                        className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                          applyForm.resume_url === doc.file_path 
+                            ? 'bg-[#0047AB]/20 border border-[#0047AB]' 
+                            : 'bg-white/5 border border-white/10 hover:bg-white/10'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="resume"
+                          value={doc.file_path}
+                          checked={applyForm.resume_url === doc.file_path}
+                          onChange={(e) => setApplyForm({...applyForm, resume_url: e.target.value})}
+                          className="accent-[#0047AB]"
+                        />
+                        <FileText className="w-5 h-5 text-[#0047AB]" />
+                        <span className="text-white text-sm">{doc.file_name}</span>
+                      </label>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center p-6 bg-white/5 rounded-xl">
+                    <FileText className="w-12 h-12 text-gray-500 mx-auto mb-3" />
+                    <p className="text-gray-400 text-sm mb-3">Vous n'avez pas encore de CV enregistré</p>
+                    <Link 
+                      to="/dashboard/client?tab=documents" 
+                      className="text-[#0047AB] hover:underline text-sm"
+                      onClick={() => setShowApplyModal(false)}
+                    >
+                      Ajouter un CV dans mon espace
+                    </Link>
+                  </div>
+                )}
+              </div>
+              
+              {/* Cover Letter */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Lettre de motivation (optionnel)</label>
+                <textarea
+                  value={applyForm.cover_letter}
+                  onChange={(e) => setApplyForm({...applyForm, cover_letter: e.target.value})}
+                  placeholder="Présentez-vous brièvement et expliquez votre motivation..."
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-[#0047AB] outline-none h-32 resize-none"
+                  data-testid="apply-cover-letter"
+                />
+              </div>
+              
+              {/* Submit */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowApplyModal(false)}
+                  className="flex-1 px-4 py-3 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleSubmitApplication}
+                  disabled={applying || !applyForm.resume_url}
+                  className="flex-1 px-4 py-3 rounded-xl bg-[#0047AB] text-white hover:bg-[#0047AB]/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  data-testid="apply-submit-btn"
+                >
+                  {applying ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Envoi...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      Envoyer ma candidature
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* CTA Section */}
       <section className="py-20 md:py-28" data-testid="cta-section">
