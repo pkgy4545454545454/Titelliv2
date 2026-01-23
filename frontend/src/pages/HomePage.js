@@ -62,6 +62,7 @@ const HomePage = () => {
         const jobsData = jobsRes.data || [];
         setJobs(jobsData);
         setFilteredJobs(jobsData);
+        setTrainings(trainingsRes.data || []);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
