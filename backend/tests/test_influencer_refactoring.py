@@ -156,8 +156,10 @@ class TestInfluencersListAPI:
         
         assert response.status_code == 200
         data = response.json()
-        assert isinstance(data, list)
-        print(f"✓ Influencers list retrieved: {len(data)} influencers")
+        # API returns {"influencers": [...], "total": N}
+        assert "influencers" in data
+        assert isinstance(data["influencers"], list)
+        print(f"✓ Influencers list retrieved: {len(data['influencers'])} influencers")
     
     def test_get_influencers_by_category(self):
         """Test filtering influencers by category"""
@@ -165,8 +167,10 @@ class TestInfluencersListAPI:
         
         assert response.status_code == 200
         data = response.json()
-        assert isinstance(data, list)
-        print(f"✓ Influencers filtered by category: {len(data)} results")
+        # API returns {"influencers": [...], "total": N}
+        assert "influencers" in data
+        assert isinstance(data["influencers"], list)
+        print(f"✓ Influencers filtered by category: {len(data['influencers'])} results")
 
 
 class TestIACampaignsAPI:
@@ -286,10 +290,15 @@ class TestInfluencerCollaborationsAPI:
         """Test creating a new collaboration request"""
         # First get an influencer ID
         influencers_response = requests.get(f"{BASE_URL}/api/influencers")
-        if influencers_response.status_code != 200 or not influencers_response.json():
+        if influencers_response.status_code != 200:
             pytest.skip("No influencers available")
         
-        influencer_id = influencers_response.json()[0].get("id")
+        data = influencers_response.json()
+        influencers = data.get("influencers", []) if isinstance(data, dict) else data
+        if not influencers:
+            pytest.skip("No influencers available")
+        
+        influencer_id = influencers[0].get("id")
         
         response = requests.post(
             f"{BASE_URL}/api/enterprise/influencer-collaborations",
