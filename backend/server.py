@@ -3488,11 +3488,6 @@ async def create_ia_campaign(campaign_data: IACampaignCreate, current_user: dict
     # Build targeting query to count real potential reach
     target_query = {"user_type": "client"}
     
-    # Age targeting (if we have birthdate)
-    if campaign_data.age_min and campaign_data.age_max:
-        # Age filtering would require birthdate field
-        pass
-    
     # Gender targeting
     if campaign_data.gender and campaign_data.gender != 'all':
         target_query["gender"] = campaign_data.gender
@@ -3502,7 +3497,6 @@ async def create_ia_campaign(campaign_data: IACampaignCreate, current_user: dict
         target_query["city"] = {"$regex": campaign_data.location, "$options": "i"}
     
     # Interest targeting - users who have purchased or wishlisted items in these categories
-    interest_filter = None
     if campaign_data.interests and len(campaign_data.interests) > 0:
         # Find users who have interacted with products/services in these categories
         interested_users = await db.orders.aggregate([
