@@ -144,14 +144,16 @@ const ClientDashboard = () => {
 
   const fetchFriendsData = async () => {
     try {
-      const [friendsRes, requestsRes, suggestionsRes] = await Promise.all([
+      const [friendsRes, requestsRes, suggestionsRes, onlineRes] = await Promise.all([
         friendsAPI.list(),
         friendsAPI.getRequests(),
-        friendsAPI.getSuggestions()
+        friendsAPI.getSuggestions(),
+        onlineStatusAPI.getFriendsOnline()
       ]);
       setFriends(friendsRes.data.friends || []);
       setFriendRequests(requestsRes.data || { received: [], sent: [] });
       setSuggestedFriends(suggestionsRes.data.suggestions || []);
+      setFriendsOnlineData(onlineRes.data || { friends: [], online_count: 0, total_count: 0 });
     } catch (error) {
       console.error('Error fetching friends:', error);
     }
