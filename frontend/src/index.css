@@ -392,3 +392,271 @@ code, pre {
   --normal-border: rgba(255, 255, 255, 0.1) !important;
   --normal-text: #E5E5E5 !important;
 }
+
+/* ========================================
+   ENHANCED ANIMATIONS & EFFECTS
+   ======================================== */
+
+/* Bounce slow animation */
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 2s ease-in-out infinite;
+}
+
+/* Pulse border animation for cards */
+@keyframes pulse-border {
+  0%, 100% { 
+    box-shadow: 0 0 0 0 rgba(0, 71, 171, 0.4);
+    border-color: rgba(0, 71, 171, 0.3);
+  }
+  50% { 
+    box-shadow: 0 0 20px 4px rgba(0, 71, 171, 0.2);
+    border-color: rgba(0, 71, 171, 0.6);
+  }
+}
+
+.animate-pulse-border-blue {
+  animation: pulse-border 2s ease-in-out infinite;
+}
+
+/* Glow effect */
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(212, 175, 55, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.6); }
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+/* Float animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Scroll reveal animation */
+@keyframes reveal {
+  from { 
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-reveal {
+  animation: reveal 0.6s ease-out forwards;
+}
+
+/* Menu section hover animations */
+.menu-section {
+  transition: all 0.3s ease;
+}
+
+.menu-section:hover {
+  transform: translateX(4px);
+  box-shadow: -4px 0 0 0 rgba(0, 71, 171, 0.5);
+}
+
+.menu-item {
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.menu-item:hover::before {
+  left: 100%;
+}
+
+/* Scrolling comments animation */
+@keyframes scroll-x {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-scroll-x {
+  animation: scroll-x 30s linear infinite;
+}
+
+.animate-scroll-x:hover {
+  animation-play-state: paused;
+}
+
+/* ========================================
+   RESPONSIVE IMPROVEMENTS
+   ======================================== */
+
+/* Mobile-first responsive utilities */
+@media (max-width: 640px) {
+  .btn-primary, .btn-secondary {
+    padding: 10px 24px;
+    font-size: 14px;
+  }
+  
+  .card-service {
+    padding: 16px;
+  }
+  
+  /* Reduce spacing on mobile */
+  .space-y-8 > * + * {
+    margin-top: 1.5rem;
+  }
+  
+  .space-y-6 > * + * {
+    margin-top: 1rem;
+  }
+}
+
+/* Tablet responsive */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .profile-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Dashboard sidebar responsive */
+@media (max-width: 1024px) {
+  .dashboard-sidebar {
+    position: fixed;
+    left: -100%;
+    transition: left 0.3s ease;
+    z-index: 40;
+  }
+  
+  .dashboard-sidebar.open {
+    left: 0;
+  }
+}
+
+/* Mobile menu overlay */
+.mobile-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 30;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ========================================
+   PANORAMIC VIDEO STYLES
+   ======================================== */
+
+.panoramic-video-container {
+  position: relative;
+  width: 100%;
+  min-height: 80vh;
+  overflow: hidden;
+}
+
+.panoramic-video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: cover;
+}
+
+.panoramic-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(5, 5, 5, 0.3) 0%,
+    rgba(5, 5, 5, 0.5) 50%,
+    rgba(5, 5, 5, 0.95) 100%
+  );
+  z-index: 1;
+}
+
+/* ========================================
+   SCROLLING COMMENTS/REVIEWS
+   ======================================== */
+
+.scrolling-container {
+  overflow: hidden;
+  position: relative;
+}
+
+.scrolling-container::before,
+.scrolling-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.scrolling-container::before {
+  left: 0;
+  background: linear-gradient(to right, #050505, transparent);
+}
+
+.scrolling-container::after {
+  right: 0;
+  background: linear-gradient(to left, #050505, transparent);
+}
+
+.scrolling-track {
+  display: flex;
+  gap: 24px;
+  width: max-content;
+}
+
+/* Comment card styles */
+.comment-card {
+  flex-shrink: 0;
+  width: 350px;
+  padding: 24px;
+  background: #0F0F0F;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.comment-card:hover {
+  border-color: rgba(0, 71, 171, 0.3);
+  transform: scale(1.02);
+}
+
+@media (max-width: 640px) {
+  .comment-card {
+    width: 280px;
+    padding: 16px;
+  }
+}
