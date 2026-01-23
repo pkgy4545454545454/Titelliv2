@@ -249,11 +249,53 @@ const EnterpriseDashboard = () => {
   // Flatten menu items for easy lookup
   const menuItems = menuSections.flatMap(section => section.items);
 
+  // Stats cards with colors matching their section categories
   const stats = [
-    { label: 'Vues ce mois', value: '1,234', icon: Eye, trend: '+12%', color: 'text-[#0047AB]' },
-    { label: 'Commandes', value: orders.length.toString(), icon: ShoppingCart, trend: '+5%', color: 'text-green-500' },
-    { label: 'Revenus', value: `${finances.summary.total_income?.toFixed(0) || 0} CHF`, icon: DollarSign, trend: '+18%', color: 'text-[#D4AF37]' },
-    { label: 'Note moyenne', value: enterprise?.rating?.toFixed(1) || '0.0', icon: Star, trend: '+0.2', color: 'text-yellow-500' },
+    { 
+      label: 'Vues ce mois', 
+      value: '1,234', 
+      icon: Eye, 
+      trend: '+12%', 
+      gradient: 'from-blue-500/20 to-blue-600/10',
+      borderColor: 'border-blue-500/30',
+      iconBg: 'bg-blue-500/20',
+      iconColor: 'text-blue-400',
+      trendColor: 'text-blue-400'
+    },
+    { 
+      label: 'Commandes', 
+      value: orders.length.toString(), 
+      icon: ShoppingCart, 
+      trend: orders.filter(o => o.status === 'pending').length > 0 ? `${orders.filter(o => o.status === 'pending').length} en attente` : '+5%',
+      notifCount: orders.filter(o => o.status === 'pending').length,
+      gradient: 'from-green-500/20 to-green-600/10',
+      borderColor: 'border-green-500/30',
+      iconBg: 'bg-green-500/20',
+      iconColor: 'text-green-400',
+      trendColor: 'text-green-400'
+    },
+    { 
+      label: 'Revenus', 
+      value: `${finances.summary.total_income?.toFixed(0) || 0} CHF`, 
+      icon: DollarSign, 
+      trend: '+18%',
+      gradient: 'from-yellow-500/20 to-yellow-600/10',
+      borderColor: 'border-yellow-500/30',
+      iconBg: 'bg-yellow-500/20',
+      iconColor: 'text-yellow-400',
+      trendColor: 'text-yellow-400'
+    },
+    { 
+      label: 'Note moyenne', 
+      value: enterprise?.rating?.toFixed(1) || '0.0', 
+      icon: Star, 
+      trend: '+0.2',
+      gradient: 'from-purple-500/20 to-purple-600/10',
+      borderColor: 'border-purple-500/30',
+      iconBg: 'bg-purple-500/20',
+      iconColor: 'text-purple-400',
+      trendColor: 'text-purple-400'
+    },
   ];
 
   const openModal = (type, item = null) => {
