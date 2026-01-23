@@ -9,59 +9,102 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
 
 ## ✅ Fonctionnalités Complétées (23 Jan 2026)
 
-### Phase 20 : Page Entreprise Améliorée + Préparation Refactoring
+### Phase 21 : Dashboard Client - Nouvelles Sections Production-Ready
 
-**Nouvelles fonctionnalités :**
+**Nouvelles sections implémentées :**
 
-1. **Page Entreprise - Nouveaux onglets**
-   - **Photos/Vidéos** : Affiche la galerie média de l'entreprise avec :
-     - Grille de photos avec lightbox plein écran
-     - Section vidéos avec aperçu et bouton play
-     - État vide élégant si pas de médias
-   - **Formations** : Affiche les formations proposées par l'entreprise
-     - Cartes avec image, titre, durée, prix
-     - Badge "En ligne" ou "Présentiel"
-     - Lien vers la page de détail de formation
-   - **Offres d'emploi** : Affiche les postes ouverts
-     - Titre, lieu, type de contrat (CDI, CDD...)
-     - Fourchette salariale et date de publication
-     - Lien vers la page de détail de l'emploi
+1. **Mon Agenda**
+   - Création de rendez-vous avec titre, date/heure, lieu, description
+   - Types : Rendez-vous, Réunion, Rappel
+   - Affichage avec badges colorés par type
+   - Suppression d'événements
 
-2. **Corrections API**
-   - `trainingsAPI.getAll()` → `trainingsAPI.listAll()`
-   - `jobsAPI.list()` → `jobsAPI.listAll()` (endpoint public sans auth)
+2. **Mes Finances (données réelles BDD)**
+   - Total dépensé (commandes + formations)
+   - Cashback disponible
+   - Cashback gagné
+   - Pourcentage d'économies
+   - Détails par catégorie (commandes, formations)
+   - Historique des dernières transactions
 
-**Fichiers modifiés :**
-- `/app/frontend/src/pages/EnterprisePage.js`
+3. **Mes Donations**
+   - Liste des donations effectuées
+   - Total donné et nombre de donations
+   - Formulaire de don (montant, bénéficiaire, message)
+   - Option don anonyme
 
-### Phase 19 : Corrections P0 et Système Cashback 10%
+4. **Ma Liste de Souhaits**
+   - Affichage des produits/services ajoutés
+   - Image, nom, prix, entreprise
+   - Suppression rapide
+   - Lien vers le détail
 
-**Bugs corrigés :**
+5. **Suggestions de mes contacts**
+   - Items aimés/ajoutés aux favoris par les amis
+   - Attribution (qui recommande)
+   - Raison de la suggestion (wishlist, avis positif)
 
-1. **Flux de candidature aux emplois corrigé**
-   - Correction `doc.url`/`doc.name` dans `JobDetailPage.js`
-   - Les CV s'affichent maintenant dans le modal de candidature
+6. **Mes Prestataires Personnels**
+   - Liste des prestataires favoris
+   - Note, catégorie, ville
+   - Suppression rapide
+   - Lien vers le profil
 
-2. **Système de cashback passé de 3% à 10%**
-   - Appliqué sur commandes et formations
-   - Historique des transactions avec statistiques
+7. **Mes Cartes (Production-Ready)**
+   - Formulaire complet : numéro 16 chiffres, CVV, expiration
+   - Aperçu visuel de la carte en temps réel
+   - Sélection type (Visa/Mastercard/Amex)
+   - Message sécurité Stripe
+   - Définir comme carte par défaut
 
 ---
 
-## Tests Effectués
+## Tests Effectués - Itération 18
 
-### Itération 17 (Frontend)
 | Test | Statut |
 |------|--------|
-| Onglet Photos/Vidéos | ✅ PASS |
-| Onglet Formations | ✅ PASS |
-| Onglet Offres d'emploi | ✅ PASS |
-| Navigation 7 onglets | ✅ PASS |
-| Lightbox modal | ✅ Code OK (pas de data) |
+| Backend APIs | ✅ 16/16 (100%) |
+| Frontend Tabs | ✅ 7/7 (100%) |
+| Agenda CRUD | ✅ PASS |
+| Finances Stats | ✅ PASS |
+| Donations CRUD | ✅ PASS |
+| Wishlist CRUD | ✅ PASS |
+| Suggestions API | ✅ PASS |
+| Providers CRUD | ✅ PASS |
+| Cards Form | ✅ PASS |
 
-### Itération 16 (Backend + Frontend)
-- 21/21 tests backend passés (100%)
-- Tous les flux utilisateur validés
+---
+
+## APIs créées
+
+```
+# Client Agenda
+GET  /api/client/agenda
+POST /api/client/agenda
+PUT  /api/client/agenda/{id}
+DELETE /api/client/agenda/{id}
+
+# Client Finances
+GET /api/client/finances
+
+# Client Donations
+GET  /api/client/donations
+POST /api/client/donations
+
+# Client Wishlist
+GET    /api/client/wishlist
+POST   /api/client/wishlist
+DELETE /api/client/wishlist/{item_id}
+GET    /api/client/wishlist/check/{item_id}
+
+# Client Suggestions
+GET /api/client/suggestions/from-friends
+
+# Client Personal Providers
+GET    /api/client/providers
+POST   /api/client/providers
+DELETE /api/client/providers/{id}
+```
 
 ---
 
@@ -76,13 +119,12 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
 ## Tâches Restantes
 
 ### 🔴 P0 - Critique
-- ✅ ~~Bug flux candidature~~ - CORRIGÉ
-- ✅ ~~Système cashback 10%~~ - IMPLÉMENTÉ
-- ✅ ~~Page entreprise Photos/Vidéos~~ - CORRIGÉ
-- ✅ ~~Onglets Formations/Emplois~~ - AJOUTÉS
+- ✅ ~~Dashboard client sections~~ - IMPLÉMENTÉ
 
 ### 🟡 P1 - Important
-- [ ] Refactoring `server.py` → modules (Plan créé dans `/app/backend/REFACTORING_PLAN.md`)
+- [ ] Bouton "Ajouter aux favoris" sur produits/services (pour remplir wishlist)
+- [ ] Bouton "Ajouter prestataire" sur pages entreprises (pour remplir mes prestataires)
+- [ ] Refactoring `server.py` → modules
 - [ ] Interface UI questions suggestives (entreprises → clients)
 - [ ] Audit complet responsivité mobile
 
@@ -93,29 +135,22 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
 
 ---
 
-## Architecture des fichiers clés
+## Architecture des fichiers modifiés
 
 ```
 /app/
 ├── backend/
-│   ├── server.py              # API principale (~4500 lignes)
-│   ├── routers/               # Structure de refactoring préparée
-│   │   ├── __init__.py
-│   │   ├── online_status.py   # Placeholder
-│   │   └── trainings.py       # Placeholder
-│   ├── REFACTORING_PLAN.md    # Plan de refactoring détaillé
-│   └── uploads/
+│   ├── server.py              # +300 lignes (nouvelles APIs client)
+│   └── tests/
+│       └── test_client_dashboard_new_sections.py  # NEW (375 lignes)
 └── frontend/
     └── src/
         ├── pages/
-        │   ├── EnterprisePage.js      # 7 onglets avec Photos/Formations/Emplois
-        │   ├── ClientDashboard.js     # Dashboard client avec cashback 10%
-        │   ├── JobDetailPage.js       # Page détail emploi (corrigé)
-        │   └── HomePage.js
+        │   └── ClientDashboard.js  # +700 lignes (nouvelles sections)
         └── services/
-            └── api.js
+            └── api.js              # +40 lignes (nouvelles APIs)
 ```
 
 ---
 
-*Dernière mise à jour: 23 Jan 2026 - Page entreprise améliorée + préparation refactoring*
+*Dernière mise à jour: 23 Jan 2026 - Dashboard client production-ready*
