@@ -7,64 +7,55 @@
 - **Frontend** : React 18, Tailwind CSS, Shadcn/UI, Lucide Icons
 - **Backend** : FastAPI, Motor (async MongoDB), JWT Auth
 - **Base de données** : MongoDB
-- **Paiements** : Stripe (checkouts subscriptions et publicités)
+- **Paiements** : Stripe
 
 ---
 
 ## Fonctionnalités Implémentées
 
-### ✅ Phase 1-9 : Foundation à Influenceur (Complété précédemment)
-- Authentification JWT (client, entreprise, influenceur)
-- Dashboards Admin, Entreprise, Client, Influenceur
-- Services/Produits, Commandes, Paiements Stripe
-- Système d'abonnement multi-tiers
-- Outils IA/Marketing
-- Dashboard Client complet avec système d'amis
-
-### ✅ Phase 10 : Système de Candidature Complet (23 Jan 2026)
-- Filtres emplois Homepage (Type, Ville, Entreprise)
-- Bouton "Postuler" avec modal sélection CV
-- Section "Postulations" dans Dashboard Entreprise
-- Algorithme boost publicitaire (pubs payées en premier)
+### ✅ Phases 1-10 : Complétées précédemment
 
 ### ✅ Phase 11 : Corrections Multiples (23 Jan 2026)
-- [x] **Inscription influenceur** : Redirige vers `/dashboard/influencer`
-- [x] **Dashboard influenceur** : Stats, collaborations, réseaux sociaux fonctionnels
-- [x] **Vidéo header Services/Produits** : Vidéos autoplay en arrière-plan
-- [x] **Filtres emploi élargis** : Grid 4 colonnes (Type, Ville, Entreprise, Reset)
-- [x] **Stripe checkout corrigé** : `response.url` au lieu de `response.checkout_url`
-- [x] **Avis clients centrés** : Texte et avatar centrés dans les cartes
-- [x] **Bouton switch compte** : Navigue vers section "particulier"
+- Inscription influenceur → redirect `/dashboard/influencer`
+- Dashboard influenceur fonctionnel
+- Vidéo header Services/Produits
+- Filtres emploi élargis (Type, Ville, Entreprise)
+- Stripe checkout corrigé
+- Avis clients centrés
+- Bouton switch compte
+
+### ✅ Phase 12 : Améliorations Entreprise & Notifications (23 Jan 2026)
+- [x] **Image de couverture entreprise** : Upload et modification de la bannière
+- [x] **Photo de profil entreprise** : Logo modifiable  
+- [x] **Navigation contextuelle notifications** : Clic redirige vers la page concernée
+- [x] **Validation ajout produits/services** : Fonctionnement confirmé via tests
+
+---
+
+## Notifications avec Navigation Contextuelle
+
+| Type | Lien de redirection |
+|------|---------------------|
+| Nouvelle offre d'emploi | `/emploi/{job_id}` |
+| Candidature reçue (entreprise) | `/dashboard/entreprise?tab=applications` |
+| Statut candidature (client) | `/dashboard/client?tab=jobs` |
+| Demande d'ami | `/dashboard/client?tab=contacts` |
+| Ami accepté | `/dashboard/client?tab=contacts` |
+| Nouvelle commande | `/dashboard/entreprise?tab=orders` |
 
 ---
 
 ## APIs Clés
 
-### Authentification
-- `POST /api/auth/register` - Inscription (client, entreprise, influencer)
-- `POST /api/auth/login` - Connexion
-- `GET /api/auth/me` - Profil utilisateur
+### Upload d'images
+- `POST /api/upload/image` - Upload fichier image (retourne URL)
+- `POST /api/upload/image-base64` - Upload image en base64
 
-### Abonnements Stripe
-- `GET /api/subscriptions/plans` - Liste des plans disponibles
-- `POST /api/subscriptions/checkout?plan_id=X` - Créer checkout session
-- `POST /api/webhook/stripe` - Webhook Stripe
+### Profil Entreprise
+- `PUT /api/enterprises/{id}` - Met à jour logo ET cover_image
 
-### Publicités
-- `GET /api/advertising/public` - Publicités boostées (triées par budget)
-- `POST /api/enterprise/advertising` - Créer une pub
-- `POST /api/enterprise/advertising/{id}/pay` - Payer pour une pub
-
-### Emplois
-- `GET /api/jobs` - Liste des offres (avec filtres type, location)
-- `POST /api/jobs/{id}/apply` - Postuler à une offre
-- `GET /api/enterprise/applications` - Candidatures reçues (entreprise)
-- `PUT /api/enterprise/applications/{id}/status` - Modifier statut candidature
-
-### Influenceur
-- `GET /api/influencer/profile` - Profil influenceur
-- `PUT /api/influencer/profile` - Modifier profil
-- `GET /api/influencer/collaborations` - Mes collaborations
+### Notifications
+- `GET /api/notifications` - Liste avec champ `link` pour navigation
 
 ---
 
@@ -72,22 +63,14 @@
 ```
 /app/
 ├── backend/
-│   ├── server.py (4000+ lignes - APIs complètes)
-│   └── tests/
-│       ├── test_p0_features.py
-│       └── test_bug_fixes_iteration11.py
+│   └── server.py (4200+ lignes)
 └── frontend/src/
     ├── pages/
-    │   ├── HomePage.js (filtres emploi 4 cols + modal candidature)
-    │   ├── ServicesPage.js (vidéo header)
-    │   ├── ProductsPage.js (vidéo header)
-    │   ├── ServiceProductDetailPage.js (avis centrés)
-    │   ├── ClientDashboard.js
-    │   ├── InfluencerDashboard.js
-    │   ├── EnterpriseDashboard.js (section Postulations)
-    │   └── AuthPage.js (inscription influenceur corrigée)
-    └── services/
-        └── api.js
+    │   ├── EnterpriseDashboard.js (ProfileSection avec cover upload)
+    │   ├── ClientDashboard.js (useSearchParams pour tab URL)
+    │   └── ...
+    └── components/
+        └── Header.js (notification click navigation)
 ```
 
 ---
@@ -95,15 +78,13 @@
 ## Tâches Restantes
 
 ### 🟡 P1 - Moyenne Priorité
-1. **Responsivité mobile complète** - Audit CSS
-2. **Refonte menu Dashboard Entreprise** - Structure selon maquettes
-3. **Vidéo panoramique homepage** - Grande vidéo en hero
-4. **Notifications en temps réel** - Alertes candidatures
+1. **Responsivité mobile** - Audit CSS complet
+2. **Refonte menu Enterprise Dashboard** - Structure maquettes
 
 ### 🟢 P2 - Basse Priorité
 1. Commentaires défilants prestataires
-2. Mini-labels sur annonces
-3. **Refactoring `server.py`** - Découper en routers FastAPI
+2. Mini-labels annonces
+3. Refactoring `server.py` en routers FastAPI
 
 ---
 
@@ -115,9 +96,10 @@
 
 ---
 
-## Tests
-- **iteration_10.json** : Système candidature (100% passé)
-- **iteration_11.json** : Corrections multiples (100% passé)
+## Tests Validés
+- **iteration_10.json** : Système candidature ✓
+- **iteration_11.json** : Corrections multiples ✓
+- **Phase 12** : Tests manuels via curl et screenshot ✓
 
 ---
 
