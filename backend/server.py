@@ -5230,6 +5230,89 @@ async def get_lifestyle(current_user: dict = Depends(get_current_user)):
         }
     }
 
+# ============ CLIENT ACTIVITY POST (Feed Social) ============
+
+class ActivityPostCreate(BaseModel):
+    activity_type: str  # "purchase", "review", "recommendation", "lifestyle"
+    title: str
+    description: Optional[str] = None
+    item_id: Optional[str] = None
+    item_name: Optional[str] = None
+    enterprise_id: Optional[str] = None
+    enterprise_name: Optional[str] = None
+    media_url: Optional[str] = None
+    is_public: bool = True  # Visible aux amis
+
+@api_router.post("/client/activity-post")
+async def create_activity_post(post: ActivityPostCreate, current_user: dict = Depends(get_current_user)):
+    """Create a public activity post visible to friends in their feed"""
+    user_name = f"{current_user.get('first_name', '')} {current_user.get('last_name', '')}".strip() or 'Utilisateur'
+    
+    activity = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user['id'],
+        "user_name": user_name,
+        "user_avatar": current_user.get('avatar'),
+        "activity_type": post.activity_type,
+        "title": post.title,
+        "description": post.description,
+        "item_id": post.item_id,
+        "item_name": post.item_name,
+        "enterprise_id": post.enterprise_id,
+        "enterprise_name": post.enterprise_name,
+        "media_url": post.media_url,
+        "is_public": post.is_public,
+        "likes_count": 0,
+        "comments_count": 0,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.activity_posts.insert_one(activity)
+    activity.pop('_id', None)
+    
+    # Also update user's lifestyle activity count
+    await db.users.update_one(
+        {"id": current_user['id']},
+        {"$inc": {"activity_posts_count": 1}}
+    )
+    
+    return activity
+
+@api_router.get("/client/activity-posts")
+async def get_my_activity_posts(current_user: dict = Depends(get_current_user)):
+    """Get current user's activity posts"""
+    posts = await db.activity_posts.find(
+        {"user_id": current_user['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(50)
+    return {"posts": posts}
+
+@api_router.post("/client/activity-posts/{post_id}/like")
+async def like_activity_post(post_id: str, current_user: dict = Depends(get_current_user)):
+    """Like a friend's activity post"""
+    # Check if already liked
+    existing = await db.activity_likes.find_one({
+        "post_id": post_id,
+        "user_id": current_user['id']
+    })
+    
+    if existing:
+        # Unlike
+        await db.activity_likes.delete_one({"_id": existing['_id']})
+        await db.activity_posts.update_one({"id": post_id}, {"$inc": {"likes_count": -1}})
+        return {"liked": False}
+    else:
+        # Like
+        like = {
+            "id": str(uuid.uuid4()),
+            "post_id": post_id,
+            "user_id": current_user['id'],
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.activity_likes.insert_one(like)
+        await db.activity_posts.update_one({"id": post_id}, {"$inc": {"likes_count": 1}})
+        return {"liked": True}
+
 # ============ ENTERPRISE INVITATIONS TO CLIENTS ============
 
 class InvitationCreate(BaseModel):
