@@ -5,10 +5,10 @@ import {
   LayoutDashboard, User, MessageSquare, Bell, Settings, LogOut,
   Star, TrendingUp, DollarSign, Users, Eye, Heart, Share2,
   Instagram, Facebook, Video, CheckCircle, XCircle, Clock,
-  ChevronRight, Camera, Edit, Plus, Briefcase, Calendar,
-  BarChart3, Award, Target, Sparkles
+  ChevronRight, Camera, Edit, Briefcase, Calendar,
+  BarChart3, Award, Target, Sparkles, Gift, UserPlus, Trash2, Send
 } from 'lucide-react';
-import { influencersAPI, notificationsAPI } from '../services/api';
+import { influencersAPI, notificationsAPI, friendsAPI, messagesAPI } from '../services/api';
 import { toast } from 'sonner';
 
 const InfluencerDashboard = () => {
@@ -22,6 +22,11 @@ const InfluencerDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [editForm, setEditForm] = useState({});
+  
+  // Friends states
+  const [friends, setFriends] = useState([]);
+  const [friendRequests, setFriendRequests] = useState({ received: [], sent: [] });
+  const [suggestedFriends, setSuggestedFriends] = useState([]);
 
   useEffect(() => {
     if (user?.user_type !== 'influencer') {
@@ -35,21 +40,41 @@ const InfluencerDashboard = () => {
     try {
       const [profileRes, notifRes] = await Promise.all([
         influencersAPI.getProfile(),
-        notificationsAPI.list(true)
+        notificationsAPI.list()
       ]);
       setProfile(profileRes.data.profile);
       setCollaborations(profileRes.data.collaborations || []);
       setStats(profileRes.data.stats || {});
-      setNotifications(notifRes.data || []);
+      setNotifications(notifRes.data.notifications || []);
       setEditForm(profileRes.data.profile || {});
     } catch (error) {
       console.error('Error fetching data:', error);
-      // If no profile exists, show setup
       setProfile(null);
     } finally {
       setLoading(false);
     }
   };
+
+  const fetchFriendsData = async () => {
+    try {
+      const [friendsRes, requestsRes, suggestionsRes] = await Promise.all([
+        friendsAPI.list(),
+        friendsAPI.getRequests(),
+        friendsAPI.getSuggestions()
+      ]);
+      setFriends(friendsRes.data.friends || []);
+      setFriendRequests(requestsRes.data || { received: [], sent: [] });
+      setSuggestedFriends(suggestionsRes.data.suggestions || []);
+    } catch (error) {
+      console.error('Error fetching friends:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (activeSection === 'amis') {
+      fetchFriendsData();
+    }
+  }, [activeSection]);
 
   const handleUpdateProfile = async () => {
     try {
@@ -72,6 +97,36 @@ const InfluencerDashboard = () => {
     }
   };
 
+  const handleSendFriendRequest = async (friendId) => {
+    try {
+      await friendsAPI.sendRequest(friendId);
+      toast.success('Demande d\'ami envoyée');
+      fetchFriendsData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur');
+    }
+  };
+
+  const handleRespondToFriendRequest = async (friendshipId, accept) => {
+    try {
+      await friendsAPI.respond(friendshipId, accept);
+      toast.success(accept ? 'Ami ajouté' : 'Demande refusée');
+      fetchFriendsData();
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
+  const handleRemoveFriend = async (friendshipId) => {
+    try {
+      await friendsAPI.remove(friendshipId);
+      toast.success('Ami supprimé');
+      fetchFriendsData();
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
   const formatNumber = (num) => {
     if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
     if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
@@ -83,10 +138,16 @@ const InfluencerDashboard = () => {
     navigate('/');
   };
 
+  // Get active collaboration
+  const activeCollab = collaborations.find(c => c.status === 'active');
+  const pendingCollabs = collaborations.filter(c => c.status === 'pending');
+
   const menuItems = [
     { id: 'dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
-    { id: 'collaborations', label: 'Collaborations', icon: Briefcase },
-    { id: 'statistics', label: 'Statistiques', icon: BarChart3 },
+    { id: 'statistiques', label: 'Statistiques', icon: BarChart3 },
+    { id: 'amis', label: 'Amis', icon: Users },
+    { id: 'offres', label: 'Offres reçues', icon: Gift, badge: pendingCollabs.length },
+    { id: 'statut', label: 'Statut en cours', icon: Briefcase },
     { id: 'profile', label: 'Mon profil', icon: User },
     { id: 'messages', label: 'Messages', icon: MessageSquare },
     { id: 'settings', label: 'Paramètres', icon: Settings },
@@ -144,14 +205,22 @@ const InfluencerDashboard = () => {
             <button
               key={item.id}
               onClick={() => setActiveSection(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all ${
                 activeSection === item.id
                   ? 'bg-purple-500/20 text-purple-400'
                   : 'text-gray-400 hover:bg-white/5 hover:text-white'
               }`}
+              data-testid={`menu-${item.id}`}
             >
-              <item.icon className="w-5 h-5" />
-              <span>{item.label}</span>
+              <div className="flex items-center gap-3">
+                <item.icon className="w-5 h-5" />
+                <span>{item.label}</span>
+              </div>
+              {item.badge > 0 && (
+                <span className="w-5 h-5 bg-purple-500 rounded-full text-xs flex items-center justify-center text-white">
+                  {item.badge}
+                </span>
+              )}
             </button>
           ))}
         </nav>
@@ -175,8 +244,10 @@ const InfluencerDashboard = () => {
           <div>
             <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
               {activeSection === 'dashboard' && 'Tableau de bord'}
-              {activeSection === 'collaborations' && 'Mes collaborations'}
-              {activeSection === 'statistics' && 'Statistiques'}
+              {activeSection === 'statistiques' && 'Statistiques'}
+              {activeSection === 'amis' && 'Mes Amis'}
+              {activeSection === 'offres' && 'Offres reçues'}
+              {activeSection === 'statut' && 'Statut en cours'}
               {activeSection === 'profile' && 'Mon profil'}
               {activeSection === 'messages' && 'Messages'}
               {activeSection === 'settings' && 'Paramètres'}
@@ -188,9 +259,9 @@ const InfluencerDashboard = () => {
           <div className="flex items-center gap-4">
             <button className="relative p-3 bg-white/5 rounded-xl text-gray-400 hover:text-white transition-colors">
               <Bell className="w-5 h-5" />
-              {notifications.length > 0 && (
+              {notifications.filter(n => !n.is_read).length > 0 && (
                 <span className="absolute -top-1 -right-1 w-5 h-5 bg-purple-500 rounded-full text-xs flex items-center justify-center text-white">
-                  {notifications.length}
+                  {notifications.filter(n => !n.is_read).length}
                 </span>
               )}
             </button>
@@ -236,18 +307,50 @@ const InfluencerDashboard = () => {
               </div>
             </div>
 
-            {/* Pending Requests */}
-            {collaborations.filter(c => c.status === 'pending').length > 0 && (
+            {/* Current Status Alert */}
+            {activeCollab ? (
+              <div className="card-service rounded-xl p-6 border-green-500/30 bg-gradient-to-r from-green-500/10 to-transparent">
+                <div className="flex items-center gap-3 mb-2">
+                  <CheckCircle className="w-6 h-6 text-green-400" />
+                  <h2 className="text-lg font-semibold text-white">En collaboration active</h2>
+                </div>
+                <p className="text-gray-400 mb-4">
+                  Vous êtes actuellement en collaboration avec <span className="text-white font-medium">{activeCollab.enterprise_name}</span>
+                </p>
+                <div className="flex items-center gap-4 text-sm">
+                  <span className="text-purple-400 font-semibold">{activeCollab.budget} CHF</span>
+                  {activeCollab.end_date && (
+                    <span className="text-gray-500 flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      Fin: {new Date(activeCollab.end_date).toLocaleDateString('fr-FR')}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="card-service rounded-xl p-6 border-gray-500/30">
+                <div className="flex items-center gap-3">
+                  <Clock className="w-6 h-6 text-gray-400" />
+                  <div>
+                    <h2 className="text-lg font-semibold text-white">Pas de collaboration en cours</h2>
+                    <p className="text-gray-400 text-sm">Vous êtes disponible pour de nouvelles opportunités</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Pending Offers */}
+            {pendingCollabs.length > 0 && (
               <div className="card-service rounded-xl p-6 border-yellow-500/30">
                 <div className="flex items-center gap-3 mb-4">
-                  <Clock className="w-5 h-5 text-yellow-400" />
-                  <h2 className="text-lg font-semibold text-white">Demandes en attente</h2>
+                  <Gift className="w-5 h-5 text-yellow-400" />
+                  <h2 className="text-lg font-semibold text-white">Offres en attente</h2>
                   <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 text-xs rounded-full">
-                    {collaborations.filter(c => c.status === 'pending').length}
+                    {pendingCollabs.length}
                   </span>
                 </div>
                 <div className="space-y-3">
-                  {collaborations.filter(c => c.status === 'pending').slice(0, 3).map((collab) => (
+                  {pendingCollabs.slice(0, 3).map((collab) => (
                     <div key={collab.id} className="p-4 bg-white/5 rounded-xl">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -256,7 +359,7 @@ const InfluencerDashboard = () => {
                           </div>
                           <div>
                             <p className="text-white font-medium">{collab.enterprise_name || 'Entreprise'}</p>
-                            <p className="text-sm text-gray-400">{collab.message?.substring(0, 50)}...</p>
+                            <p className="text-sm text-gray-400">{collab.message?.substring(0, 40)}...</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -278,6 +381,14 @@ const InfluencerDashboard = () => {
                     </div>
                   ))}
                 </div>
+                {pendingCollabs.length > 3 && (
+                  <button 
+                    onClick={() => setActiveSection('offres')}
+                    className="w-full mt-4 text-purple-400 text-sm hover:text-purple-300 transition-colors"
+                  >
+                    Voir toutes les offres ({pendingCollabs.length})
+                  </button>
+                )}
               </div>
             )}
 
@@ -308,131 +419,11 @@ const InfluencerDashboard = () => {
                 </div>
               </div>
             </div>
-
-            {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <button
-                onClick={() => setActiveSection('profile')}
-                className="card-service rounded-xl p-6 text-left hover:border-purple-500/50 transition-all group"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
-                      <Edit className="w-6 h-6 text-purple-400" />
-                    </div>
-                    <div>
-                      <p className="text-white font-medium">Modifier mon profil</p>
-                      <p className="text-sm text-gray-400">Mettez à jour vos informations</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-purple-400 transition-colors" />
-                </div>
-              </button>
-              <button
-                onClick={() => setActiveSection('collaborations')}
-                className="card-service rounded-xl p-6 text-left hover:border-purple-500/50 transition-all group"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
-                      <Briefcase className="w-6 h-6 text-green-400" />
-                    </div>
-                    <div>
-                      <p className="text-white font-medium">Voir mes collaborations</p>
-                      <p className="text-sm text-gray-400">{stats.active_collaborations || 0} en cours</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-green-400 transition-colors" />
-                </div>
-              </button>
-            </div>
           </div>
         )}
 
-        {/* Collaborations Section */}
-        {activeSection === 'collaborations' && (
-          <div className="space-y-6">
-            {/* Filter Tabs */}
-            <div className="flex gap-2 overflow-x-auto pb-2">
-              {['all', 'pending', 'active', 'completed'].map((status) => (
-                <button
-                  key={status}
-                  className="px-4 py-2 bg-white/5 rounded-full text-gray-400 hover:bg-purple-500/20 hover:text-purple-400 transition-colors whitespace-nowrap"
-                >
-                  {status === 'all' && 'Toutes'}
-                  {status === 'pending' && `En attente (${collaborations.filter(c => c.status === 'pending').length})`}
-                  {status === 'active' && `En cours (${collaborations.filter(c => c.status === 'active').length})`}
-                  {status === 'completed' && 'Terminées'}
-                </button>
-              ))}
-            </div>
-
-            {/* Collaborations List */}
-            <div className="space-y-4">
-              {collaborations.length > 0 ? (
-                collaborations.map((collab) => (
-                  <div key={collab.id} className="card-service rounded-xl p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white text-lg font-bold">
-                          {collab.enterprise_name?.[0] || 'E'}
-                        </div>
-                        <div>
-                          <h3 className="text-white font-semibold">{collab.enterprise_name || 'Entreprise'}</h3>
-                          <p className="text-gray-400 text-sm mt-1">{collab.message || 'Demande de collaboration'}</p>
-                          <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              {new Date(collab.created_at).toLocaleDateString('fr-FR')}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xl font-bold text-purple-400">{collab.budget} CHF</p>
-                        <span className={`inline-block mt-2 px-3 py-1 rounded-full text-xs ${
-                          collab.status === 'active' ? 'bg-green-500/20 text-green-400' :
-                          collab.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
-                          collab.status === 'completed' ? 'bg-blue-500/20 text-blue-400' :
-                          'bg-gray-500/20 text-gray-400'
-                        }`}>
-                          {collab.status === 'active' ? 'En cours' :
-                           collab.status === 'pending' ? 'En attente' :
-                           collab.status === 'completed' ? 'Terminée' : 'Déclinée'}
-                        </span>
-                      </div>
-                    </div>
-                    {collab.status === 'pending' && (
-                      <div className="flex gap-3 mt-4 pt-4 border-t border-white/10">
-                        <button
-                          onClick={() => handleRespondToCollab(collab.id, true)}
-                          className="flex-1 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors flex items-center justify-center gap-2"
-                        >
-                          <CheckCircle className="w-4 h-4" /> Accepter
-                        </button>
-                        <button
-                          onClick={() => handleRespondToCollab(collab.id, false)}
-                          className="flex-1 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors flex items-center justify-center gap-2"
-                        >
-                          <XCircle className="w-4 h-4" /> Décliner
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <div className="card-service rounded-xl p-12 text-center">
-                  <Briefcase className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-white mb-2">Aucune collaboration</h3>
-                  <p className="text-gray-400">Les demandes de collaboration des entreprises apparaîtront ici.</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Statistics Section */}
-        {activeSection === 'statistics' && (
+        {/* Statistiques Section */}
+        {activeSection === 'statistiques' && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="card-service rounded-xl p-6">
@@ -481,6 +472,283 @@ const InfluencerDashboard = () => {
                   <span className="text-purple-400 font-semibold">{stats.total_investment || 0} CHF</span>
                 </div>
               </div>
+            </div>
+
+            <div className="card-service rounded-xl p-6">
+              <h2 className="text-lg font-semibold text-white mb-4">Taux d'engagement</h2>
+              <div className="flex items-center gap-8">
+                <div className="relative w-32 h-32">
+                  <svg className="w-full h-full transform -rotate-90">
+                    <circle cx="64" cy="64" r="56" fill="none" stroke="#1F1F1F" strokeWidth="8" />
+                    <circle 
+                      cx="64" cy="64" r="56" fill="none" 
+                      stroke="#9333ea" strokeWidth="8"
+                      strokeDasharray={`${(profile?.engagement_rate || 0) * 3.52} 352`}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-2xl font-bold text-white">{profile?.engagement_rate || 0}%</span>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-gray-400 mb-2">Votre taux d'engagement est <span className="text-green-400">excellent</span></p>
+                  <p className="text-sm text-gray-500">Moyenne du secteur: 3.5%</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Amis Section */}
+        {activeSection === 'amis' && (
+          <div className="space-y-6">
+            {/* Friend Requests */}
+            {friendRequests.received.length > 0 && (
+              <div className="card-service rounded-xl p-6 border-yellow-500/30">
+                <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <Bell className="w-5 h-5 text-yellow-500" />
+                  Demandes d'amis ({friendRequests.received.length})
+                </h2>
+                <div className="space-y-3">
+                  {friendRequests.received.map((request) => (
+                    <div key={request.id} className="flex items-center justify-between p-4 bg-white/5 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-purple-500/30 flex items-center justify-center text-white font-bold">
+                          {request.sender?.first_name?.[0]}{request.sender?.last_name?.[0]}
+                        </div>
+                        <div>
+                          <p className="text-white font-medium">{request.sender?.first_name} {request.sender?.last_name}</p>
+                          <p className="text-sm text-gray-400">{request.message || 'Souhaite vous ajouter'}</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleRespondToFriendRequest(request.id, true)}
+                          className="p-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30"
+                        >
+                          <CheckCircle className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => handleRespondToFriendRequest(request.id, false)}
+                          className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30"
+                        >
+                          <XCircle className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Friends List */}
+            <div className="card-service rounded-xl p-6">
+              <h2 className="text-lg font-semibold text-white mb-4">Mes amis ({friends.length})</h2>
+              {friends.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {friends.map((friend) => (
+                    <div key={friend.id} className="flex items-center justify-between p-4 bg-white/5 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-purple-500/30 flex items-center justify-center text-white font-bold overflow-hidden">
+                          {friend.avatar ? (
+                            <img src={friend.avatar.startsWith('http') ? friend.avatar : `${process.env.REACT_APP_BACKEND_URL}${friend.avatar}`} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <>{friend.first_name?.[0]}{friend.last_name?.[0]}</>
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-white font-medium">{friend.first_name} {friend.last_name}</p>
+                          <p className="text-sm text-gray-400">{friend.city || 'Lausanne'}</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button className="p-2 bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/30">
+                          <MessageSquare className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleRemoveFriend(friend.friendship_id)}
+                          className="p-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Users className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+                  <p className="text-gray-400">Aucun ami pour le moment</p>
+                </div>
+              )}
+            </div>
+
+            {/* Suggested Friends */}
+            {suggestedFriends.length > 0 && (
+              <div className="card-service rounded-xl p-6">
+                <h2 className="text-lg font-semibold text-white mb-4">Suggestions d'amis</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {suggestedFriends.map((suggestion) => (
+                    <div key={suggestion.id} className="p-4 bg-white/5 rounded-xl">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center text-white font-bold">
+                          {suggestion.first_name?.[0]}{suggestion.last_name?.[0]}
+                        </div>
+                        <div>
+                          <p className="text-white font-medium">{suggestion.first_name} {suggestion.last_name}</p>
+                          <p className="text-sm text-gray-400">{suggestion.city || 'Lausanne'}</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleSendFriendRequest(suggestion.id)}
+                        className="w-full btn-secondary text-sm flex items-center justify-center gap-2"
+                      >
+                        <UserPlus className="w-4 h-4" />
+                        Ajouter
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Offres reçues Section */}
+        {activeSection === 'offres' && (
+          <div className="space-y-6">
+            {pendingCollabs.length > 0 ? (
+              <div className="space-y-4">
+                {pendingCollabs.map((collab) => (
+                  <div key={collab.id} className="card-service rounded-xl p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white text-lg font-bold">
+                          {collab.enterprise_name?.[0] || 'E'}
+                        </div>
+                        <div>
+                          <h3 className="text-white font-semibold">{collab.enterprise_name || 'Entreprise'}</h3>
+                          <p className="text-gray-400 text-sm mt-1">{collab.message || 'Demande de collaboration'}</p>
+                          <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {new Date(collab.created_at).toLocaleDateString('fr-FR')}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xl font-bold text-purple-400">{collab.budget} CHF</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-3 mt-4 pt-4 border-t border-white/10">
+                      <button
+                        onClick={() => handleRespondToCollab(collab.id, true)}
+                        className="flex-1 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <CheckCircle className="w-4 h-4" /> Accepter
+                      </button>
+                      <button
+                        onClick={() => handleRespondToCollab(collab.id, false)}
+                        className="flex-1 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <XCircle className="w-4 h-4" /> Décliner
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="card-service rounded-xl p-12 text-center">
+                <Gift className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-white mb-2">Aucune offre en attente</h3>
+                <p className="text-gray-400">Les demandes de collaboration des entreprises apparaîtront ici.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Statut en cours Section */}
+        {activeSection === 'statut' && (
+          <div className="space-y-6">
+            {activeCollab ? (
+              <div className="card-service rounded-xl p-8 border-green-500/30">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center">
+                    <CheckCircle className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">Collaboration en cours</h2>
+                    <p className="text-green-400">Statut: Actif</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="p-4 bg-white/5 rounded-xl">
+                    <p className="text-gray-400 text-sm mb-1">Entreprise</p>
+                    <p className="text-white font-semibold text-lg">{activeCollab.enterprise_name}</p>
+                  </div>
+                  <div className="p-4 bg-white/5 rounded-xl">
+                    <p className="text-gray-400 text-sm mb-1">Budget</p>
+                    <p className="text-purple-400 font-semibold text-lg">{activeCollab.budget} CHF</p>
+                  </div>
+                  <div className="p-4 bg-white/5 rounded-xl">
+                    <p className="text-gray-400 text-sm mb-1">Date de début</p>
+                    <p className="text-white font-semibold">
+                      {activeCollab.updated_at ? new Date(activeCollab.updated_at).toLocaleDateString('fr-FR') : 'N/A'}
+                    </p>
+                  </div>
+                  <div className="p-4 bg-white/5 rounded-xl">
+                    <p className="text-gray-400 text-sm mb-1">Date de fin prévue</p>
+                    <p className="text-white font-semibold">
+                      {activeCollab.end_date ? new Date(activeCollab.end_date).toLocaleDateString('fr-FR') : 'À définir'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-6 p-4 bg-white/5 rounded-xl">
+                  <p className="text-gray-400 text-sm mb-2">Description du projet</p>
+                  <p className="text-white">{activeCollab.message || 'Aucune description fournie'}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="card-service rounded-xl p-12 text-center">
+                <Clock className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-white mb-2">Pas de collaboration active</h3>
+                <p className="text-gray-400 mb-6">Vous êtes actuellement disponible pour de nouvelles opportunités</p>
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 text-green-400 rounded-full">
+                  <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                  Disponible
+                </div>
+              </div>
+            )}
+
+            {/* Collaboration History */}
+            <div className="card-service rounded-xl p-6">
+              <h2 className="text-lg font-semibold text-white mb-4">Historique des collaborations</h2>
+              {collaborations.filter(c => c.status === 'completed').length > 0 ? (
+                <div className="space-y-3">
+                  {collaborations.filter(c => c.status === 'completed').map((collab) => (
+                    <div key={collab.id} className="p-4 bg-white/5 rounded-xl flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gray-600 rounded-lg flex items-center justify-center text-white font-bold">
+                          {collab.enterprise_name?.[0] || 'E'}
+                        </div>
+                        <div>
+                          <p className="text-white font-medium">{collab.enterprise_name}</p>
+                          <p className="text-sm text-gray-500">
+                            {collab.updated_at ? new Date(collab.updated_at).toLocaleDateString('fr-FR') : 'N/A'}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-purple-400 font-semibold">{collab.budget} CHF</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-center py-4">Aucune collaboration terminée</p>
+              )}
             </div>
           </div>
         )}
@@ -611,27 +879,6 @@ const InfluencerDashboard = () => {
                     <h4 className="text-sm text-gray-400 mb-2">Tarif par collaboration</h4>
                     <p className="text-2xl font-bold text-purple-400">{profile?.price || 0} CHF</p>
                   </div>
-
-                  <div className="grid grid-cols-3 gap-4">
-                    {profile?.instagram && (
-                      <a href={`https://instagram.com/${profile.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-pink-500/10 rounded-xl flex items-center gap-2 text-pink-400 hover:bg-pink-500/20 transition-colors">
-                        <Instagram className="w-5 h-5" />
-                        <span className="text-sm truncate">{profile.instagram}</span>
-                      </a>
-                    )}
-                    {profile?.tiktok && (
-                      <div className="p-3 bg-white/5 rounded-xl flex items-center gap-2 text-white">
-                        <Video className="w-5 h-5" />
-                        <span className="text-sm truncate">{profile.tiktok}</span>
-                      </div>
-                    )}
-                    {profile?.facebook && (
-                      <div className="p-3 bg-blue-500/10 rounded-xl flex items-center gap-2 text-blue-400">
-                        <Facebook className="w-5 h-5" />
-                        <span className="text-sm truncate">{profile.facebook}</span>
-                      </div>
-                    )}
-                  </div>
                 </div>
               )}
             </div>
@@ -653,7 +900,7 @@ const InfluencerDashboard = () => {
             <div className="card-service rounded-xl p-6">
               <h2 className="text-lg font-semibold text-white mb-4">Paramètres du compte</h2>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl">
+                <label className="flex items-center justify-between p-4 bg-white/5 rounded-xl">
                   <div>
                     <p className="text-white">Notifications email</p>
                     <p className="text-sm text-gray-400">Recevoir les nouvelles demandes par email</p>
@@ -661,8 +908,8 @@ const InfluencerDashboard = () => {
                   <button className="w-12 h-6 bg-purple-500 rounded-full relative">
                     <span className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full" />
                   </button>
-                </div>
-                <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl">
+                </label>
+                <label className="flex items-center justify-between p-4 bg-white/5 rounded-xl">
                   <div>
                     <p className="text-white">Profil public</p>
                     <p className="text-sm text-gray-400">Apparaître dans la liste des influenceurs</p>
@@ -670,7 +917,7 @@ const InfluencerDashboard = () => {
                   <button className="w-12 h-6 bg-purple-500 rounded-full relative">
                     <span className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full" />
                   </button>
-                </div>
+                </label>
               </div>
             </div>
           </div>
