@@ -163,9 +163,11 @@ DELETE /api/client/providers/{id}
 - ✅ ~~Annulation abonnement~~ - TERMINÉ
 
 ### 🟠 P1 - Important
-- [ ] Bouton "Ajouter aux favoris" sur produits/services (pour remplir wishlist)
-- [ ] Bouton "Ajouter prestataire" sur pages entreprises
-- [ ] Refactoring `server.py` → modules (voir REFACTORING_PLAN.md)
+- ✅ ~~Bouton "Ajouter aux favoris" sur produits/services~~ - TERMINÉ (Iteration 21)
+- ✅ ~~Bouton "Ajouter prestataire" sur pages entreprises~~ - TERMINÉ (Iteration 21)
+- ✅ ~~Routes enterprise/services et enterprise/orders~~ - TERMINÉ (Iteration 21)
+- ✅ ~~Suppression données random/simulation dans backend~~ - TERMINÉ (Iteration 21)
+- [ ] Refactoring `server.py` → modules (voir REFACTORING_PLAN.md) - EN COURS
 - [ ] Audit complet responsivité mobile
 
 ### 🟡 P2 - Futur
