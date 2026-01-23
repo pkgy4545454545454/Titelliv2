@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Star, Award, Crown, CheckCircle, ArrowRight, Play, Sparkles, TrendingUp, Gift, Users, Briefcase, MapPin, Clock } from 'lucide-react';
-import { featuredAPI, categoryAPI, enterpriseAPI, servicesProductsAPI, jobsAPI } from '../services/api';
+import { ChevronRight, Star, Award, Crown, CheckCircle, ArrowRight, Play, Sparkles, TrendingUp, Gift, Users, Briefcase, MapPin, Clock, X, FileText, Send, Filter } from 'lucide-react';
+import { featuredAPI, categoryAPI, enterpriseAPI, servicesProductsAPI, jobsAPI, clientDocumentsAPI } from '../services/api';
 import EnterpriseCard from '../components/EnterpriseCard';
 import ServiceProductCard from '../components/ServiceProductCard';
+import { toast } from 'sonner';
 
 const HomePage = () => {
   const [tendances, setTendances] = useState([]);
@@ -11,9 +12,27 @@ const HomePage = () => {
   const [offres, setOffres] = useState([]);
   const [premium, setPremium] = useState([]);
   const [jobs, setJobs] = useState([]);
+  const [filteredJobs, setFilteredJobs] = useState([]);
   const [productCategories, setProductCategories] = useState([]);
   const [serviceCategories, setServiceCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Filter state
+  const [jobFilters, setJobFilters] = useState({
+    type: '',
+    location: ''
+  });
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Application Modal state
+  const [showApplyModal, setShowApplyModal] = useState(false);
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [userDocuments, setUserDocuments] = useState([]);
+  const [applyForm, setApplyForm] = useState({
+    resume_url: '',
+    cover_letter: ''
+  });
+  const [applying, setApplying] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -33,7 +52,9 @@ const HomePage = () => {
         setPremium(premRes.data);
         setProductCategories(prodCatRes.data);
         setServiceCategories(servCatRes.data);
-        setJobs(jobsRes.data || []);
+        const jobsData = jobsRes.data || [];
+        setJobs(jobsData);
+        setFilteredJobs(jobsData);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -42,6 +63,72 @@ const HomePage = () => {
     };
     fetchData();
   }, []);
+  
+  // Apply filters
+  useEffect(() => {
+    let result = [...jobs];
+    
+    if (jobFilters.type) {
+      result = result.filter(job => job.type === jobFilters.type);
+    }
+    
+    if (jobFilters.location) {
+      result = result.filter(job => 
+        (job.location || '').toLowerCase().includes(jobFilters.location.toLowerCase())
+      );
+    }
+    
+    setFilteredJobs(result);
+  }, [jobFilters, jobs]);
+  
+  // Open apply modal
+  const handleApplyClick = async (e, job) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const token = localStorage.getItem('titelli_token');
+    if (!token) {
+      toast.error('Connectez-vous pour postuler');
+      return;
+    }
+    
+    setSelectedJob(job);
+    setApplyForm({ resume_url: '', cover_letter: '' });
+    
+    // Fetch user's documents (CVs)
+    try {
+      const res = await clientDocumentsAPI.list('cv');
+      setUserDocuments(res.data?.documents || res.data || []);
+    } catch (err) {
+      console.error('Error fetching documents:', err);
+      setUserDocuments([]);
+    }
+    
+    setShowApplyModal(true);
+  };
+  
+  // Submit application
+  const handleSubmitApplication = async () => {
+    if (!applyForm.resume_url) {
+      toast.error('Veuillez sélectionner un CV');
+      return;
+    }
+    
+    setApplying(true);
+    try {
+      await jobsAPI.apply(selectedJob.id, {
+        resume_url: applyForm.resume_url,
+        cover_letter: applyForm.cover_letter
+      });
+      toast.success('Candidature envoyée avec succès !');
+      setShowApplyModal(false);
+    } catch (error) {
+      const msg = error.response?.data?.detail || 'Erreur lors de l\'envoi';
+      toast.error(msg);
+    } finally {
+      setApplying(false);
+    }
+  };
 
   const heroImage = 'https://images.unsplash.com/photo-1733950489642-bd1a7c3e69bb?w=1920&q=80';
 
