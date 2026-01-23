@@ -437,6 +437,8 @@ const ClientDashboard = () => {
   const menuSections = [
     {
       title: 'Principal',
+      gradient: 'from-blue-500/20 to-blue-600/10',
+      borderColor: 'border-blue-500/30',
       items: [
         { id: 'overview', label: 'Accueil', icon: LayoutDashboard },
         { id: 'profile', label: 'Mon Profil', icon: User },
@@ -447,6 +449,8 @@ const ClientDashboard = () => {
     },
     {
       title: 'Avantages',
+      gradient: 'from-purple-500/20 to-purple-600/10',
+      borderColor: 'border-purple-500/30',
       items: [
         { id: 'cashback', label: 'Mon cash-back', icon: Wallet },
         { id: 'premium', label: 'Mon Premium', icon: Crown },
@@ -459,6 +463,8 @@ const ClientDashboard = () => {
     },
     {
       title: 'Investissements & Emplois',
+      gradient: 'from-green-500/20 to-green-600/10',
+      borderColor: 'border-green-500/30',
       items: [
         { id: 'investments', label: 'Mes investissements', icon: PieChart },
         { id: 'business_news', label: 'Mon local business news', icon: Newspaper },
@@ -468,6 +474,8 @@ const ClientDashboard = () => {
     },
     {
       title: 'Gestion',
+      gradient: 'from-yellow-500/20 to-yellow-600/10',
+      borderColor: 'border-yellow-500/30',
       items: [
         { id: 'agenda', label: 'Mon agenda', icon: Calendar },
         { id: 'cartes', label: 'Mes cartes', icon: CreditCard },
@@ -478,15 +486,19 @@ const ClientDashboard = () => {
     },
     {
       title: 'Communication',
+      gradient: 'from-pink-500/20 to-pink-600/10',
+      borderColor: 'border-pink-500/30',
       items: [
-        { id: 'messages', label: 'Messagerie', icon: MessageSquare },
+        { id: 'messages', label: 'Messagerie', icon: MessageSquare, notifKey: 'messages' },
         { id: 'contacts', label: 'Contacts & Amis', icon: Users },
-        { id: 'demandes', label: 'Demandes en cours', icon: UserPlus },
+        { id: 'demandes', label: 'Demandes en cours', icon: UserPlus, notifKey: 'friend_requests' },
         { id: 'particulier', label: 'Compte particulier', icon: Building2 },
       ]
     },
     {
       title: 'Recommandations',
+      gradient: 'from-cyan-500/20 to-cyan-600/10',
+      borderColor: 'border-cyan-500/30',
       items: [
         { id: 'suggestions', label: 'Suggestions de mes contacts', icon: Users },
         { id: 'prestataires', label: 'Mes prestataires personnels', icon: Star },
@@ -495,14 +507,18 @@ const ClientDashboard = () => {
     },
     {
       title: 'Commandes',
+      gradient: 'from-orange-500/20 to-orange-600/10',
+      borderColor: 'border-orange-500/30',
       items: [
-        { id: 'orders', label: 'Mes commandes', icon: ShoppingCart },
+        { id: 'orders', label: 'Mes commandes', icon: ShoppingCart, notifKey: 'orders' },
         { id: 'panier', label: 'Mon panier', icon: ShoppingCart },
         { id: 'livraisons', label: 'Livraison', icon: Truck },
       ]
     },
     {
       title: 'Aide & Informations',
+      gradient: 'from-slate-500/20 to-slate-600/10',
+      borderColor: 'border-slate-500/30',
       items: [
         { id: 'support', label: 'Service client', icon: HelpCircle },
         { id: 'partners', label: 'Partenaires', icon: Handshake },
@@ -511,6 +527,20 @@ const ClientDashboard = () => {
       ]
     },
   ];
+
+  // Notification counts for menu items
+  const getNotificationCount = (key) => {
+    switch(key) {
+      case 'messages':
+        return notifications.filter(n => n.type === 'message' && !n.read).length;
+      case 'friend_requests':
+        return friendRequests.received?.length || 0;
+      case 'orders':
+        return notifications.filter(n => n.type === 'order' && !n.read).length;
+      default:
+        return 0;
+    }
+  };
 
   const quickStats = [
     { label: 'Cash-back disponible', value: `${cashback.toFixed(2)} CHF`, icon: Wallet, color: 'text-green-500' },
