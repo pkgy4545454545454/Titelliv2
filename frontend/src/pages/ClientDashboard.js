@@ -583,6 +583,74 @@ const ClientDashboard = () => {
     }
   };
 
+  // Investment handlers
+  const handleAddInvestment = async () => {
+    if (!investmentForm.title || !investmentForm.amount_invested || !investmentForm.investment_date) {
+      toast.error('Titre, montant et date requis');
+      return;
+    }
+    try {
+      await investmentsAPI.create({
+        ...investmentForm,
+        amount_invested: parseFloat(investmentForm.amount_invested),
+        current_value: investmentForm.current_value ? parseFloat(investmentForm.current_value) : null,
+        roi_percent: investmentForm.roi_percent ? parseFloat(investmentForm.roi_percent) : null
+      });
+      toast.success('Investissement ajouté');
+      setShowAddInvestment(false);
+      setInvestmentForm({
+        investment_type: 'real_estate', title: '', description: '', amount_invested: '',
+        current_value: '', roi_percent: '', investment_date: '', property_address: '', status: 'active'
+      });
+      fetchInvestments();
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
+  const handleDeleteInvestment = async (investmentId) => {
+    try {
+      await investmentsAPI.delete(investmentId);
+      toast.success('Investissement supprimé');
+      fetchInvestments();
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
+  // Invitation handlers
+  const handleRespondToInvitation = async (invitationId, accepted) => {
+    try {
+      await clientInvitationsAPI.respond(invitationId, accepted);
+      toast.success(accepted ? 'Offre acceptée' : 'Offre refusée');
+      fetchInvitations();
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
+  // Guest handlers
+  const handleRemoveGuest = async (guestId) => {
+    try {
+      await guestsAPI.remove(guestId);
+      toast.success('Guest retiré');
+      fetchFavoriteGuests();
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
+  // Premium handlers
+  const handleUpgradePremium = async (plan) => {
+    try {
+      await premiumAPI.upgrade(plan);
+      toast.success(`Félicitations ! Vous êtes maintenant ${plan.toUpperCase()}`);
+      fetchPremiumStatus();
+    } catch (error) {
+      toast.error('Erreur lors de la mise à niveau');
+    }
+  };
+
   // Friends handlers
   const handleSendFriendRequest = async (friendId) => {
     try {
