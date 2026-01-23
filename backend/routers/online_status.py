@@ -1,12 +1,20 @@
-# Online Status Router for Titelli
-from fastapi import APIRouter, HTTPException, Depends
-from datetime import datetime, timezone, timedelta
-from typing import Optional
+"""
+Online Status Router - Gestion du statut en ligne des utilisateurs
+"""
+from fastapi import APIRouter, Depends
+from datetime import datetime, timezone
 
-router = APIRouter(prefix="/api", tags=["online-status"])
+# Import from main server (will be circular imports fixed later)
+# For now this is a placeholder showing the structure
 
-# Note: This router requires db and get_current_user from main app
-# Will be configured in main server.py
+router = APIRouter(prefix="/user", tags=["online_status"])
 
-# These endpoints are defined inline in server.py for now
-# This file serves as a template for future refactoring
+# Note: Ces endpoints sont actuellement dans server.py
+# Ce fichier montre la structure cible du refactoring
+
+"""
+Endpoints à migrer depuis server.py:
+- POST /user/heartbeat - Update user's last seen timestamp
+- POST /user/offline - Mark user as offline
+- GET /client/friends/online - Get online status for all friends
+"""
