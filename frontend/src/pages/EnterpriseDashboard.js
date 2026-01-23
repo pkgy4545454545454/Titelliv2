@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
   LayoutDashboard, Building2, Package, ShoppingCart, Users, MessageSquare, 
@@ -9,7 +9,7 @@ import {
   FolderOpen, BookOpen, Wallet, Target, BarChart3, PlayCircle, Pause,
   UserPlus, ClipboardList, AlertTriangle, Box, ArrowUpDown, Upload, Image, X,
   Search, Rss, Newspaper, Truck, Activity, Phone, Heart, HelpCircle, Info,
-  Handshake, UserCircle, Receipt, Send, Crown, Zap, Check, ChevronDown
+  Handshake, UserCircle, Receipt, Send, Crown, Zap, Check, ChevronDown, Camera
 } from 'lucide-react';
 import { 
   enterpriseAPI, servicesProductsAPI, orderAPI, paymentAPI, offersAPI,
