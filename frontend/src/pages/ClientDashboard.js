@@ -89,6 +89,10 @@ const ClientDashboard = () => {
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
   const [submittingReview, setSubmittingReview] = useState(false);
 
+  // Cashback history state
+  const [cashbackHistory, setCashbackHistory] = useState([]);
+  const [cashbackStats, setCashbackStats] = useState({ total_earned: 0, total_used: 0, cashback_rate: '10%', transaction_count: 0 });
+
   useEffect(() => {
     if (!isClient) {
       navigate('/');
