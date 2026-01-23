@@ -1837,17 +1837,118 @@ const ClientDashboard = () => {
               <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
                 Mon Cash-back
               </h1>
-              <div className="card-service rounded-xl p-8 text-center">
+              
+              {/* Balance Card */}
+              <div className="card-service rounded-xl p-8 text-center mb-8">
                 <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-6">
                   <Wallet className="w-10 h-10 text-green-500" />
                 </div>
                 <p className="text-5xl font-bold text-white mb-2">{cashback.toFixed(2)} CHF</p>
-                <p className="text-gray-400">Solde cash-back disponible</p>
-                <div className="mt-8 pt-8 border-t border-white/10">
-                  <p className="text-sm text-gray-500">
-                    Gagnez du cash-back sur chaque achat chez nos prestataires partenaires !
-                  </p>
+                <p className="text-gray-400 mb-4">Solde cash-back disponible</p>
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 rounded-full">
+                  <TrendingUp className="w-4 h-4 text-green-500" />
+                  <span className="text-green-500 font-semibold">10% de cashback sur tous vos achats !</span>
                 </div>
+              </div>
+              
+              {/* Stats Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div className="card-service rounded-xl p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
+                      <TrendingUp className="w-6 h-6 text-green-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-400">Total gagné</p>
+                      <p className="text-xl font-bold text-green-500">{cashbackStats.total_earned.toFixed(2)} CHF</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="card-service rounded-xl p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center">
+                      <ShoppingCart className="w-6 h-6 text-orange-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-400">Total utilisé</p>
+                      <p className="text-xl font-bold text-orange-500">{cashbackStats.total_used.toFixed(2)} CHF</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="card-service rounded-xl p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center">
+                      <Gift className="w-6 h-6 text-blue-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-400">Transactions</p>
+                      <p className="text-xl font-bold text-blue-500">{cashbackStats.transaction_count}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Transaction History */}
+              <div className="card-service rounded-xl p-6">
+                <h2 className="text-lg font-semibold text-white mb-4">Historique des transactions</h2>
+                {cashbackHistory.length > 0 ? (
+                  <div className="space-y-3">
+                    {cashbackHistory.map((tx) => (
+                      <div key={tx.id} className="flex items-center justify-between p-4 bg-white/5 rounded-xl">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.amount > 0 ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
+                            {tx.amount > 0 ? (
+                              <TrendingUp className="w-5 h-5 text-green-500" />
+                            ) : (
+                              <ShoppingCart className="w-5 h-5 text-red-500" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-white font-medium">{tx.description}</p>
+                            <p className="text-sm text-gray-400">
+                              {new Date(tx.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                            </p>
+                          </div>
+                        </div>
+                        <span className={`font-semibold ${tx.amount > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                          {tx.amount > 0 ? '+' : ''}{tx.amount.toFixed(2)} CHF
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Wallet className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+                    <p className="text-gray-400">Aucune transaction pour le moment</p>
+                    <p className="text-sm text-gray-500 mt-1">Faites des achats pour gagner du cashback !</p>
+                  </div>
+                )}
+              </div>
+              
+              {/* Info Section */}
+              <div className="mt-8 card-service rounded-xl p-6 border border-[#0047AB]/30">
+                <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                  <Info className="w-5 h-5 text-[#0047AB]" />
+                  Comment fonctionne le cashback ?
+                </h3>
+                <ul className="space-y-2 text-sm text-gray-400">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span><strong className="text-white">10% de cashback</strong> sur chaque commande et formation achetée</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span>Le cashback est <strong className="text-white">crédité automatiquement</strong> après chaque achat</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span>Utilisez votre cashback pour <strong className="text-white">réduire vos prochains achats</strong></span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span>Votre cashback <strong className="text-white">n'expire jamais</strong></span>
+                  </li>
+                </ul>
               </div>
             </div>
           )}
