@@ -101,7 +101,14 @@ const ServiceProductDetailPage = () => {
         toast.success('Ajouté à votre liste de souhaits !');
       }
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Erreur');
+      const errorMsg = error.response?.data?.detail;
+      if (typeof errorMsg === 'string') {
+        toast.error(errorMsg);
+      } else if (Array.isArray(errorMsg)) {
+        toast.error(errorMsg[0]?.msg || 'Erreur de validation');
+      } else {
+        toast.error('Erreur lors de l\'ajout aux favoris');
+      }
     } finally {
       setWishlistLoading(false);
     }
