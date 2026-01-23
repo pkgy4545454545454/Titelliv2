@@ -24,7 +24,11 @@ import { IAClientsSection, InfluencersSection, InvitationsSection, Subscriptions
 const EnterpriseDashboard = () => {
   const { user, isEnterprise } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(() => {
+    const tabParam = searchParams.get('tab');
+    return tabParam || 'overview';
+  });
   const [enterprise, setEnterprise] = useState(null);
   const [loading, setLoading] = useState(true);
   
