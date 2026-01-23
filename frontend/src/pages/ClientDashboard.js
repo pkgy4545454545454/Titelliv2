@@ -13,7 +13,7 @@ import {
 import { 
   orderAPI, cashbackAPI, featuredAPI, clientProfileAPI, friendsAPI, 
   paymentCardsAPI, clientDocumentsAPI, messagesAPI, notificationsAPI, uploadAPI,
-  trainingsAPI
+  trainingsAPI, onlineStatusAPI
 } from '../services/api';
 import api from '../services/api';
 import { toast } from 'sonner';
