@@ -1641,8 +1641,186 @@ const ClientDashboard = () => {
             </div>
           )}
 
+          {/* Formations Tab - Production Ready */}
+          {activeTab === 'formations' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Mes Formations
+                </h1>
+              </div>
+
+              {/* Stats Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="card-service rounded-xl p-4 flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-[#0047AB]/20 flex items-center justify-center">
+                    <GraduationCap className="w-6 h-6 text-[#0047AB]" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-white">{myTrainings.stats?.total || 0}</p>
+                    <p className="text-sm text-gray-400">Total formations</p>
+                  </div>
+                </div>
+                <div className="card-service rounded-xl p-4 flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-yellow-500/20 flex items-center justify-center">
+                    <Clock className="w-6 h-6 text-yellow-500" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-white">{myTrainings.stats?.in_progress || 0}</p>
+                    <p className="text-sm text-gray-400">En cours</p>
+                  </div>
+                </div>
+                <div className="card-service rounded-xl p-4 flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
+                    <CheckCircle className="w-6 h-6 text-green-500" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-white">{myTrainings.stats?.completed || 0}</p>
+                    <p className="text-sm text-gray-400">Terminées</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Filter Tabs */}
+              <div className="flex gap-2 border-b border-white/10 pb-2">
+                {[
+                  { id: 'all', label: 'Toutes' },
+                  { id: 'in_progress', label: 'En cours' },
+                  { id: 'completed', label: 'Terminées' }
+                ].map((filter) => (
+                  <button
+                    key={filter.id}
+                    onClick={() => setTrainingsFilter(filter.id)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      trainingsFilter === filter.id 
+                        ? 'bg-[#0047AB] text-white' 
+                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    {filter.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Trainings List */}
+              {loadingTrainings ? (
+                <div className="flex justify-center py-12">
+                  <div className="w-10 h-10 border-4 border-[#0047AB] border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : myTrainings.enrollments?.length > 0 ? (
+                <div className="space-y-4">
+                  {myTrainings.enrollments.map((enrollment) => (
+                    <div key={enrollment.id} className="card-service rounded-xl overflow-hidden">
+                      <div className="p-6">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                enrollment.training_type === 'online' 
+                                  ? 'bg-purple-500/20 text-purple-400' 
+                                  : 'bg-blue-500/20 text-blue-400'
+                              }`}>
+                                {enrollment.training_type === 'online' ? '💻 En ligne' : '🏢 Présentiel'}
+                              </span>
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                enrollment.status === 'completed' 
+                                  ? 'bg-green-500/20 text-green-400' 
+                                  : 'bg-yellow-500/20 text-yellow-400'
+                              }`}>
+                                {enrollment.status === 'completed' ? 'Terminée' : 'En cours'}
+                              </span>
+                            </div>
+                            <h3 className="text-lg font-semibold text-white mb-1">{enrollment.training_title}</h3>
+                            <p className="text-sm text-[#D4AF37]">{enrollment.enterprise_name}</p>
+                            
+                            {/* Training Details */}
+                            <div className="flex flex-wrap gap-4 mt-3 text-sm text-gray-400">
+                              <span>💰 {enrollment.price_paid} CHF</span>
+                              {enrollment.start_date && (
+                                <span>📅 {new Date(enrollment.start_date).toLocaleDateString('fr-FR')}</span>
+                              )}
+                              <span>📆 Inscrit le {new Date(enrollment.enrolled_at).toLocaleDateString('fr-FR')}</span>
+                            </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex flex-col gap-2">
+                            {enrollment.status === 'in_progress' && (
+                              <button
+                                onClick={() => handleMarkTrainingComplete(enrollment.id)}
+                                className="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 text-sm flex items-center gap-2"
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                                Terminer
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Downloadable Files for Online Trainings */}
+                        {enrollment.training_type === 'online' && enrollment.downloadable_files?.length > 0 && (
+                          <div className="mt-4 pt-4 border-t border-white/10">
+                            <p className="text-sm text-gray-400 mb-3">📂 Fichiers téléchargeables :</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                              {enrollment.downloadable_files.map((file, idx) => (
+                                <a
+                                  key={idx}
+                                  href={file.url?.startsWith('http') ? file.url : `${process.env.REACT_APP_BACKEND_URL}${file.url}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-3 p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
+                                >
+                                  <span className="text-xl">
+                                    {file.type?.includes('video') ? '🎬' : file.type?.includes('pdf') ? '📄' : file.type?.includes('image') ? '🖼️' : '📁'}
+                                  </span>
+                                  <span className="text-white text-sm truncate flex-1">{file.name}</span>
+                                  <Eye className="w-4 h-4 text-gray-400" />
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Progress Bar */}
+                        {enrollment.status === 'in_progress' && (
+                          <div className="mt-4">
+                            <div className="flex justify-between text-xs text-gray-400 mb-1">
+                              <span>Progression</span>
+                              <span>{enrollment.progress || 0}%</span>
+                            </div>
+                            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-[#0047AB] transition-all duration-500"
+                                style={{ width: `${enrollment.progress || 0}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="card-service rounded-xl p-12 text-center">
+                  <GraduationCap className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                  <h2 className="text-xl font-bold text-white mb-2">Aucune formation</h2>
+                  <p className="text-gray-400 mb-6">
+                    {trainingsFilter === 'all' 
+                      ? "Vous n'êtes inscrit à aucune formation" 
+                      : trainingsFilter === 'in_progress' 
+                        ? "Aucune formation en cours" 
+                        : "Aucune formation terminée"}
+                  </p>
+                  <Link to="/" className="btn-primary">
+                    Découvrir les formations
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Default placeholder for other tabs */}
-          {!['overview', 'profile', 'contacts', 'cartes', 'documents', 'messages', 'particulier', 'orders', 'cashback', 'settings'].includes(activeTab) && (
+          {!['overview', 'profile', 'contacts', 'cartes', 'documents', 'messages', 'particulier', 'orders', 'cashback', 'settings', 'formations'].includes(activeTab) && (
             <div className="card-service rounded-xl p-12 text-center">
               <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Clock className="w-8 h-8 text-gray-500" />
