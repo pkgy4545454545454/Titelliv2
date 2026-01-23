@@ -69,12 +69,29 @@ const ClientDashboard = () => {
   const [trainingsFilter, setTrainingsFilter] = useState('all'); // 'all', 'in_progress', 'completed'
   const [loadingTrainings, setLoadingTrainings] = useState(false);
 
+  // Online status
+  const [friendsOnlineData, setFriendsOnlineData] = useState({ friends: [], online_count: 0, total_count: 0 });
+
   useEffect(() => {
     if (!isClient) {
       navigate('/');
       return;
     }
     fetchInitialData();
+    
+    // Start heartbeat for online status
+    const heartbeatInterval = setInterval(() => {
+      onlineStatusAPI.heartbeat().catch(() => {});
+    }, 60000); // Every minute
+    
+    // Send initial heartbeat
+    onlineStatusAPI.heartbeat().catch(() => {});
+    
+    // Cleanup on unmount
+    return () => {
+      clearInterval(heartbeatInterval);
+      onlineStatusAPI.setOffline().catch(() => {});
+    };
   }, [isClient, navigate]);
 
   const fetchInitialData = async () => {
