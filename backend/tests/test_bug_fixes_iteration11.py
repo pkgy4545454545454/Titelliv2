@@ -107,7 +107,7 @@ class TestInfluencerDashboard:
     def test_influencer_profile_endpoint(self, influencer_token):
         """Test influencer profile endpoint"""
         headers = {"Authorization": f"Bearer {influencer_token}"}
-        response = requests.get(f"{BASE_URL}/api/influencers/profile", headers=headers)
+        response = requests.get(f"{BASE_URL}/api/influencer/profile", headers=headers)
         assert response.status_code == 200
         data = response.json()
         # Should have profile, collaborations, stats
