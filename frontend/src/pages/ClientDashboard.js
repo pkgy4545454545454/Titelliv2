@@ -357,7 +357,7 @@ const ClientDashboard = () => {
       });
       toast.success('Document ajouté');
       setShowAddDocument(false);
-      setDocumentForm({ name: '', category: returnToJobId ? 'cv' : 'general', url: '' });
+      setDocumentForm({ name: '', category: 'cv', url: '' });
       fetchDocuments();
     } catch (error) {
       toast.error('Erreur lors de l\'ajout');
