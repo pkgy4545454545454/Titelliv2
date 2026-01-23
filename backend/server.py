@@ -2899,6 +2899,448 @@ async def upload_image_base64(data: dict, current_user: dict = Depends(get_curre
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Erreur lors de l'upload: {str(e)}")
 
+# ============ CLIENT PROFILE & FRIENDS ROUTES ============
+
+class ClientProfileUpdate(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    phone: Optional[str] = None
+    city: Optional[str] = None
+    avatar: Optional[str] = None
+    linkedin: Optional[str] = None
+    bio: Optional[str] = None
+
+@api_router.put("/client/profile")
+async def update_client_profile(profile_data: ClientProfileUpdate, current_user: dict = Depends(get_current_user)):
+    """Update client profile"""
+    update_data = {k: v for k, v in profile_data.model_dump().items() if v is not None}
+    if update_data:
+        await db.users.update_one({"id": current_user['id']}, {"$set": update_data})
+    
+    updated_user = await db.users.find_one({"id": current_user['id']}, {"_id": 0, "password_hash": 0})
+    return updated_user
+
+@api_router.get("/client/profile")
+async def get_client_profile(current_user: dict = Depends(get_current_user)):
+    """Get client profile with stats"""
+    user = await db.users.find_one({"id": current_user['id']}, {"_id": 0, "password_hash": 0})
+    
+    # Get real stats
+    profile_views = await db.profile_views.count_documents({"viewed_user_id": current_user['id']})
+    friends_count = await db.friendships.count_documents({
+        "$or": [{"user_id": current_user['id']}, {"friend_id": current_user['id']}],
+        "status": "accepted"
+    })
+    orders_count = await db.orders.count_documents({"user_id": current_user['id']})
+    
+    return {
+        "user": user,
+        "stats": {
+            "profile_views": profile_views,
+            "friends_count": friends_count,
+            "orders_count": orders_count
+        }
+    }
+
+# --- Friends System ---
+class FriendRequestCreate(BaseModel):
+    friend_id: str
+    message: Optional[str] = None
+
+@api_router.get("/client/friends")
+async def get_friends_list(current_user: dict = Depends(get_current_user)):
+    """Get list of friends"""
+    friendships = await db.friendships.find({
+        "$or": [{"user_id": current_user['id']}, {"friend_id": current_user['id']}],
+        "status": "accepted"
+    }, {"_id": 0}).to_list(100)
+    
+    friends = []
+    for friendship in friendships:
+        friend_user_id = friendship['friend_id'] if friendship['user_id'] == current_user['id'] else friendship['user_id']
+        friend = await db.users.find_one({"id": friend_user_id}, {"_id": 0, "password_hash": 0})
+        if friend:
+            friends.append({**friend, "friendship_id": friendship['id'], "since": friendship.get('accepted_at')})
+    
+    return {"friends": friends, "count": len(friends)}
+
+@api_router.get("/client/friend-requests")
+async def get_friend_requests(current_user: dict = Depends(get_current_user)):
+    """Get pending friend requests"""
+    # Requests received
+    received = await db.friendships.find({
+        "friend_id": current_user['id'],
+        "status": "pending"
+    }, {"_id": 0}).to_list(50)
+    
+    for req in received:
+        sender = await db.users.find_one({"id": req['user_id']}, {"_id": 0, "password_hash": 0})
+        req['sender'] = sender
+    
+    # Requests sent
+    sent = await db.friendships.find({
+        "user_id": current_user['id'],
+        "status": "pending"
+    }, {"_id": 0}).to_list(50)
+    
+    for req in sent:
+        recipient = await db.users.find_one({"id": req['friend_id']}, {"_id": 0, "password_hash": 0})
+        req['recipient'] = recipient
+    
+    return {"received": received, "sent": sent}
+
+@api_router.post("/client/friends/request")
+async def send_friend_request(request: FriendRequestCreate, current_user: dict = Depends(get_current_user)):
+    """Send a friend request"""
+    if request.friend_id == current_user['id']:
+        raise HTTPException(status_code=400, detail="Vous ne pouvez pas vous ajouter vous-même")
+    
+    # Check if friendship already exists
+    existing = await db.friendships.find_one({
+        "$or": [
+            {"user_id": current_user['id'], "friend_id": request.friend_id},
+            {"user_id": request.friend_id, "friend_id": current_user['id']}
+        ]
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="Une demande d'ami existe déjà")
+    
+    friendship = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user['id'],
+        "friend_id": request.friend_id,
+        "message": request.message,
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.friendships.insert_one(friendship)
+    
+    # Create notification for the recipient
+    sender = await db.users.find_one({"id": current_user['id']}, {"_id": 0, "password_hash": 0})
+    notification = {
+        "id": str(uuid.uuid4()),
+        "user_id": request.friend_id,
+        "title": "Nouvelle demande d'ami",
+        "message": f"{sender['first_name']} {sender['last_name']} souhaite vous ajouter comme ami",
+        "notification_type": "friend_request",
+        "data": {"friendship_id": friendship['id'], "sender_id": current_user['id']},
+        "is_read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.notifications.insert_one(notification)
+    
+    del friendship['_id']
+    return friendship
+
+@api_router.put("/client/friends/{friendship_id}/respond")
+async def respond_to_friend_request(friendship_id: str, accept: bool, current_user: dict = Depends(get_current_user)):
+    """Accept or decline a friend request"""
+    friendship = await db.friendships.find_one({
+        "id": friendship_id,
+        "friend_id": current_user['id'],
+        "status": "pending"
+    })
+    if not friendship:
+        raise HTTPException(status_code=404, detail="Demande d'ami non trouvée")
+    
+    if accept:
+        await db.friendships.update_one(
+            {"id": friendship_id},
+            {"$set": {"status": "accepted", "accepted_at": datetime.now(timezone.utc).isoformat()}}
+        )
+        # Notify the sender
+        user = await db.users.find_one({"id": current_user['id']}, {"_id": 0, "password_hash": 0})
+        notification = {
+            "id": str(uuid.uuid4()),
+            "user_id": friendship['user_id'],
+            "title": "Demande d'ami acceptée",
+            "message": f"{user['first_name']} {user['last_name']} a accepté votre demande d'ami",
+            "notification_type": "friend_accepted",
+            "is_read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(notification)
+        return {"message": "Demande acceptée", "status": "accepted"}
+    else:
+        await db.friendships.delete_one({"id": friendship_id})
+        return {"message": "Demande refusée", "status": "declined"}
+
+@api_router.delete("/client/friends/{friendship_id}")
+async def remove_friend(friendship_id: str, current_user: dict = Depends(get_current_user)):
+    """Remove a friend"""
+    result = await db.friendships.delete_one({
+        "id": friendship_id,
+        "$or": [{"user_id": current_user['id']}, {"friend_id": current_user['id']}]
+    })
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Ami non trouvé")
+    return {"message": "Ami supprimé"}
+
+@api_router.get("/client/suggested-friends")
+async def get_suggested_friends(current_user: dict = Depends(get_current_user), limit: int = 10):
+    """Get suggested friends (other clients)"""
+    # Get IDs of existing friends
+    friendships = await db.friendships.find({
+        "$or": [{"user_id": current_user['id']}, {"friend_id": current_user['id']}]
+    }).to_list(1000)
+    
+    friend_ids = set()
+    for f in friendships:
+        friend_ids.add(f['user_id'])
+        friend_ids.add(f['friend_id'])
+    friend_ids.add(current_user['id'])
+    
+    # Find clients who are not already friends
+    clients = await db.users.find({
+        "id": {"$nin": list(friend_ids)},
+        "user_type": "client"
+    }, {"_id": 0, "password_hash": 0}).limit(limit).to_list(limit)
+    
+    return {"suggestions": clients}
+
+# --- Payment Cards ---
+class PaymentCardCreate(BaseModel):
+    card_holder: str
+    card_number_last4: str
+    card_type: str = "visa"  # visa, mastercard, amex
+    expiry_month: int
+    expiry_year: int
+    is_default: bool = False
+
+@api_router.get("/client/cards")
+async def get_payment_cards(current_user: dict = Depends(get_current_user)):
+    """Get saved payment cards"""
+    cards = await db.payment_cards.find({"user_id": current_user['id']}, {"_id": 0}).to_list(20)
+    return {"cards": cards}
+
+@api_router.post("/client/cards")
+async def add_payment_card(card: PaymentCardCreate, current_user: dict = Depends(get_current_user)):
+    """Add a payment card"""
+    # If this is the first card or marked as default, unset other defaults
+    if card.is_default:
+        await db.payment_cards.update_many(
+            {"user_id": current_user['id']},
+            {"$set": {"is_default": False}}
+        )
+    
+    card_doc = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user['id'],
+        **card.model_dump(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.payment_cards.insert_one(card_doc)
+    del card_doc['_id']
+    return card_doc
+
+@api_router.delete("/client/cards/{card_id}")
+async def delete_payment_card(card_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a payment card"""
+    result = await db.payment_cards.delete_one({"id": card_id, "user_id": current_user['id']})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Carte non trouvée")
+    return {"message": "Carte supprimée"}
+
+@api_router.put("/client/cards/{card_id}/default")
+async def set_default_card(card_id: str, current_user: dict = Depends(get_current_user)):
+    """Set a card as default"""
+    await db.payment_cards.update_many(
+        {"user_id": current_user['id']},
+        {"$set": {"is_default": False}}
+    )
+    await db.payment_cards.update_one(
+        {"id": card_id, "user_id": current_user['id']},
+        {"$set": {"is_default": True}}
+    )
+    return {"message": "Carte par défaut mise à jour"}
+
+# --- Client Documents ---
+class ClientDocumentCreate(BaseModel):
+    name: str
+    category: str = "general"  # general, factures, contrats, autres
+    url: str
+    file_type: Optional[str] = None
+
+@api_router.get("/client/documents")
+async def get_client_documents(current_user: dict = Depends(get_current_user), category: Optional[str] = None):
+    """Get client documents"""
+    query = {"user_id": current_user['id']}
+    if category:
+        query["category"] = category
+    documents = await db.client_documents.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return {"documents": documents}
+
+@api_router.post("/client/documents")
+async def add_client_document(doc: ClientDocumentCreate, current_user: dict = Depends(get_current_user)):
+    """Add a document"""
+    doc_entry = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user['id'],
+        **doc.model_dump(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.client_documents.insert_one(doc_entry)
+    del doc_entry['_id']
+    return doc_entry
+
+@api_router.delete("/client/documents/{doc_id}")
+async def delete_client_document(doc_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a document"""
+    result = await db.client_documents.delete_one({"id": doc_id, "user_id": current_user['id']})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Document non trouvé")
+    return {"message": "Document supprimé"}
+
+# --- Messaging System ---
+class MessageCreate(BaseModel):
+    recipient_id: str
+    content: str
+    message_type: str = "text"  # text, image, file
+
+@api_router.get("/messages/conversations")
+async def get_conversations(current_user: dict = Depends(get_current_user)):
+    """Get all conversations for current user"""
+    # Find all unique conversation partners
+    pipeline = [
+        {"$match": {"$or": [{"sender_id": current_user['id']}, {"recipient_id": current_user['id']}]}},
+        {"$sort": {"created_at": -1}},
+        {"$group": {
+            "_id": {
+                "$cond": [
+                    {"$eq": ["$sender_id", current_user['id']]},
+                    "$recipient_id",
+                    "$sender_id"
+                ]
+            },
+            "last_message": {"$first": "$$ROOT"},
+            "unread_count": {
+                "$sum": {
+                    "$cond": [
+                        {"$and": [
+                            {"$eq": ["$recipient_id", current_user['id']]},
+                            {"$eq": ["$is_read", False]}
+                        ]},
+                        1,
+                        0
+                    ]
+                }
+            }
+        }}
+    ]
+    
+    conversations_raw = await db.messages.aggregate(pipeline).to_list(50)
+    
+    conversations = []
+    for conv in conversations_raw:
+        partner_id = conv['_id']
+        partner = await db.users.find_one({"id": partner_id}, {"_id": 0, "password_hash": 0})
+        if not partner:
+            # Check if it's an enterprise
+            enterprise = await db.enterprises.find_one({"id": partner_id}, {"_id": 0})
+            if enterprise:
+                partner = {"id": partner_id, "first_name": enterprise['business_name'], "last_name": "", "user_type": "entreprise"}
+        
+        if partner:
+            last_msg = conv['last_message']
+            last_msg.pop('_id', None)
+            conversations.append({
+                "partner": partner,
+                "last_message": last_msg,
+                "unread_count": conv['unread_count']
+            })
+    
+    return {"conversations": conversations}
+
+@api_router.get("/messages/{partner_id}")
+async def get_messages_with_partner(partner_id: str, current_user: dict = Depends(get_current_user), limit: int = 50):
+    """Get messages with a specific partner"""
+    messages = await db.messages.find({
+        "$or": [
+            {"sender_id": current_user['id'], "recipient_id": partner_id},
+            {"sender_id": partner_id, "recipient_id": current_user['id']}
+        ]
+    }, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    # Mark as read
+    await db.messages.update_many(
+        {"sender_id": partner_id, "recipient_id": current_user['id'], "is_read": False},
+        {"$set": {"is_read": True, "read_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    # Get partner info
+    partner = await db.users.find_one({"id": partner_id}, {"_id": 0, "password_hash": 0})
+    if not partner:
+        enterprise = await db.enterprises.find_one({"id": partner_id}, {"_id": 0})
+        if enterprise:
+            partner = {"id": partner_id, "first_name": enterprise['business_name'], "last_name": "", "user_type": "entreprise"}
+    
+    return {"messages": list(reversed(messages)), "partner": partner}
+
+@api_router.post("/messages")
+async def send_message(message: MessageCreate, current_user: dict = Depends(get_current_user)):
+    """Send a message"""
+    msg_doc = {
+        "id": str(uuid.uuid4()),
+        "sender_id": current_user['id'],
+        "recipient_id": message.recipient_id,
+        "content": message.content,
+        "message_type": message.message_type,
+        "is_read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.messages.insert_one(msg_doc)
+    
+    # Create notification
+    sender = await db.users.find_one({"id": current_user['id']}, {"_id": 0, "password_hash": 0})
+    notification = {
+        "id": str(uuid.uuid4()),
+        "user_id": message.recipient_id,
+        "title": "Nouveau message",
+        "message": f"{sender['first_name']} vous a envoyé un message",
+        "notification_type": "message",
+        "data": {"sender_id": current_user['id']},
+        "is_read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.notifications.insert_one(notification)
+    
+    del msg_doc['_id']
+    return msg_doc
+
+# --- Profile Views Tracking ---
+@api_router.post("/track/profile-view/{user_id}")
+async def track_profile_view(user_id: str, current_user: dict = Depends(get_current_user)):
+    """Track a profile view"""
+    if user_id == current_user['id']:
+        return {"message": "Self-view not tracked"}
+    
+    view_doc = {
+        "id": str(uuid.uuid4()),
+        "viewed_user_id": user_id,
+        "viewer_id": current_user['id'],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.profile_views.insert_one(view_doc)
+    return {"message": "View tracked"}
+
+@api_router.get("/stats/profile-views")
+async def get_profile_view_stats(current_user: dict = Depends(get_current_user)):
+    """Get profile view statistics"""
+    total_views = await db.profile_views.count_documents({"viewed_user_id": current_user['id']})
+    
+    # Views in last 30 days
+    thirty_days_ago = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+    recent_views = await db.profile_views.count_documents({
+        "viewed_user_id": current_user['id'],
+        "created_at": {"$gte": thirty_days_ago}
+    })
+    
+    return {
+        "total_views": total_views,
+        "recent_views": recent_views,
+        "period": "30 days"
+    }
+
 # ============ INFLUENCER PROFILE ROUTES ============
 
 class InfluencerProfileCreate(BaseModel):
