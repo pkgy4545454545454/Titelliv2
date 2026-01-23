@@ -1713,7 +1713,6 @@ class JobCreate(BaseModel):
     deadline: Optional[str] = None
 
 class JobApplication(BaseModel):
-    job_id: str
     cover_letter: Optional[str] = None
     resume_url: Optional[str] = None
 
