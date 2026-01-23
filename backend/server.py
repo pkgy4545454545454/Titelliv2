@@ -1397,7 +1397,9 @@ async def verify_user(user_id: str, is_certified: bool = False, is_labeled: bool
 
 @api_router.get("/cashback/balance")
 async def get_cashback_balance(current_user: dict = Depends(get_current_user)):
-    return {"balance": current_user.get('cashback_balance', 0.0)}
+    # Get fresh balance from DB
+    user = await db.users.find_one({"id": current_user['id']}, {"_id": 0})
+    return {"balance": user.get('cashback_balance', 0.0) if user else 0.0}
 
 @api_router.post("/cashback/add")
 async def add_cashback(user_id: str, amount: float, current_user: dict = Depends(get_current_user)):
@@ -1409,7 +1411,64 @@ async def add_cashback(user_id: str, amount: float, current_user: dict = Depends
         {"id": user_id},
         {"$inc": {"cashback_balance": amount}}
     )
+    
+    # Record cashback transaction
+    transaction = {
+        "id": str(uuid.uuid4()),
+        "user_id": user_id,
+        "amount": amount,
+        "type": "credit",
+        "description": "Cashback ajouté",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.cashback_transactions.insert_one(transaction)
+    
     return {"message": f"Cashback de {amount} CHF ajouté"}
+
+@api_router.get("/cashback/history")
+async def get_cashback_history(current_user: dict = Depends(get_current_user)):
+    """Get cashback transaction history"""
+    transactions = await db.cashback_transactions.find(
+        {"user_id": current_user['id']}, {"_id": 0}
+    ).sort("created_at", -1).limit(50).to_list(50)
+    
+    user = await db.users.find_one({"id": current_user['id']}, {"_id": 0})
+    
+    return {
+        "balance": user.get('cashback_balance', 0.0) if user else 0.0,
+        "transactions": transactions
+    }
+
+@api_router.post("/cashback/use")
+async def use_cashback(amount: float, order_id: Optional[str] = None, current_user: dict = Depends(get_current_user)):
+    """Use cashback for a purchase"""
+    user = await db.users.find_one({"id": current_user['id']})
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+    
+    current_balance = user.get('cashback_balance', 0.0)
+    if amount > current_balance:
+        raise HTTPException(status_code=400, detail=f"Solde insuffisant ({current_balance} CHF disponible)")
+    
+    # Deduct cashback
+    await db.users.update_one(
+        {"id": current_user['id']},
+        {"$inc": {"cashback_balance": -amount}}
+    )
+    
+    # Record transaction
+    transaction = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user['id'],
+        "amount": -amount,
+        "type": "debit",
+        "description": f"Utilisé pour commande {order_id}" if order_id else "Cashback utilisé",
+        "order_id": order_id,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.cashback_transactions.insert_one(transaction)
+    
+    return {"message": f"Cashback de {amount} CHF utilisé", "new_balance": current_balance - amount}
 
 # ============ FEATURED/TRENDING ROUTES ============
 
