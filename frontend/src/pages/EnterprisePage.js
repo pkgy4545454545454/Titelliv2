@@ -934,6 +934,55 @@ const EnterprisePage = () => {
         </div>
       </div>
 
+      {/* Scrolling Reviews Section - Horizontal Marquee */}
+      {reviews.length > 2 && (
+        <section className="py-12 bg-[#0A0A0A] border-t border-white/5 overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 md:px-8 mb-8">
+            <h3 className="text-xl md:text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+              Avis de nos clients
+            </h3>
+            <p className="text-gray-400 text-sm mt-1">Ce que les clients disent de {enterprise?.business_name}</p>
+          </div>
+          
+          <div className="scrolling-container">
+            <div className="scrolling-track animate-scroll-x" style={{ animationDuration: '40s' }}>
+              {/* Double the reviews for infinite scroll effect */}
+              {[...reviews, ...reviews].map((review, index) => (
+                <div key={`scroll-review-${review.id}-${index}`} className="comment-card">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#0047AB] to-[#D4AF37] flex items-center justify-center text-white font-semibold flex-shrink-0">
+                      {review.user_name?.charAt(0) || 'U'}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-white font-semibold truncate">{review.user_name}</h4>
+                      <div className="flex items-center gap-1 mt-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star 
+                            key={i} 
+                            className={`w-4 h-4 ${i < review.rating ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-gray-600'}`} 
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <Quote className="absolute -top-2 -left-2 w-6 h-6 text-[#0047AB]/20" />
+                    <p className="text-gray-300 text-sm leading-relaxed pl-4 line-clamp-3">
+                      {review.comment}
+                    </p>
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-white/5">
+                    <span className="text-xs text-gray-500">
+                      {new Date(review.created_at || Date.now()).toLocaleDateString('fr-FR')}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Media Lightbox Modal */}
       {selectedMedia && (
         <div 
