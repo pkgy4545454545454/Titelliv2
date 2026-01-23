@@ -5544,30 +5544,51 @@ async def confirm_premium_subscription(session_id: str, current_user: dict = Dep
 @api_router.post("/client/premium/cancel")
 async def cancel_premium_subscription(current_user: dict = Depends(get_current_user)):
     """Cancel premium subscription - removes all benefits immediately"""
+    # Check user's current premium status
+    user = await db.users.find_one({"id": current_user['id']})
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+    
+    # Check if user has any premium status to cancel
+    is_premium = user.get('is_premium', False)
+    current_plan = user.get('premium_plan', 'free')
+    
+    # Find active subscription if exists
     subscription = await db.subscriptions.find_one({
         "user_id": current_user['id'],
         "status": "active"
     })
     
-    if not subscription:
-        raise HTTPException(status_code=404, detail="Aucun abonnement actif")
+    # User must have either an active subscription OR be marked as premium
+    if not subscription and not is_premium and current_plan == 'free':
+        raise HTTPException(status_code=404, detail="Aucun abonnement actif à annuler")
     
-    plan_name = subscription.get('plan', 'premium')
+    plan_name = current_plan if current_plan != 'free' else (subscription.get('plan', 'premium') if subscription else 'premium')
     
     # Cancel subscription on Stripe if we have a subscription ID
-    stripe_sub_id = subscription.get('stripe_subscription_id')
-    if stripe_sub_id:
-        try:
-            import stripe
-            stripe.api_key = STRIPE_API_KEY
-            stripe.Subscription.cancel(stripe_sub_id)
-            logger.info(f"Stripe subscription {stripe_sub_id} cancelled")
-        except Exception as e:
-            logger.warning(f"Could not cancel Stripe subscription: {str(e)}")
+    if subscription:
+        stripe_sub_id = subscription.get('stripe_subscription_id')
+        if stripe_sub_id:
+            try:
+                import stripe
+                stripe.api_key = STRIPE_API_KEY
+                stripe.Subscription.cancel(stripe_sub_id)
+                logger.info(f"Stripe subscription {stripe_sub_id} cancelled")
+            except Exception as e:
+                logger.warning(f"Could not cancel Stripe subscription: {str(e)}")
+        
+        # Update subscription status to cancelled
+        await db.subscriptions.update_one(
+            {"id": subscription['id']},
+            {"$set": {
+                "status": "cancelled",
+                "cancelled_at": datetime.now(timezone.utc).isoformat()
+            }}
+        )
     
-    # Update subscription status to cancelled
-    await db.subscriptions.update_one(
-        {"id": subscription['id']},
+    # Cancel ALL active subscriptions for this user (in case of duplicates)
+    await db.subscriptions.update_many(
+        {"user_id": current_user['id'], "status": "active"},
         {"$set": {
             "status": "cancelled",
             "cancelled_at": datetime.now(timezone.utc).isoformat()
