@@ -253,27 +253,16 @@ DELETE /api/client/providers/{id}
 - ✅ ~~Routes enterprise/services et enterprise/orders~~ - TERMINÉ (Iteration 21)
 - ✅ ~~Suppression données random/simulation dans backend~~ - TERMINÉ (Iteration 21)
 - ✅ ~~Audit global A-Z systèmes~~ - TERMINÉ (Iteration 24) - 86% tests passés
+- ✅ ~~Audit complet responsivité mobile CSS~~ - TERMINÉ (Iteration 25) - 100% tests passés
+- ✅ ~~Vidéo panoramique homepage~~ - TERMINÉ (Iteration 25)
+- ✅ ~~Commentaires défilants~~ - TERMINÉ (Iteration 25)
+- ✅ ~~Pages paiement cohérentes~~ - TERMINÉ (Iteration 25)
 - [ ] Refactoring `server.py` → modules (voir REFACTORING_PLAN.md) - EN COURS
-- [ ] Audit complet responsivité mobile CSS - À FAIRE
 
 ### 🟡 P2 - Futur
-- [ ] Vidéo panoramique sur la page d'accueil
-- [ ] Commentaires/avis défilants sur les pages entreprises
 - [ ] Notifications temps réel (WebSocket)
 - [ ] Refactoring ClientDashboard.js (4000+ lignes)
 - ✅ ~~Dashboard client sections~~ - IMPLÉMENTÉ
-
-### 🟡 P1 - Important
-- [ ] Bouton "Ajouter aux favoris" sur produits/services (pour remplir wishlist)
-- [ ] Bouton "Ajouter prestataire" sur pages entreprises (pour remplir mes prestataires)
-- [ ] Refactoring `server.py` → modules
-- [ ] Interface UI questions suggestives (entreprises → clients)
-- [ ] Audit complet responsivité mobile
-
-### 🟢 P2 - Futur
-- [ ] Vidéo panoramique sur la page d'accueil
-- [ ] Commentaires/avis défilants sur les pages entreprises
-- [ ] Notifications temps réel (WebSocket)
 
 ---
 
