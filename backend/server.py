@@ -1928,12 +1928,11 @@ async def purchase_training(training_id: str, current_user: dict = Depends(get_c
     try:
         stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY)
         checkout_request = CheckoutSessionRequest(
-            amount=int(training['price'] * 100),
+            amount=training['price'],  # Amount in CHF (not cents)
             currency="chf",
-            product_name=f"Formation: {training['title']}",
-            success_url=f"{os.environ.get('FRONTEND_URL', 'http://localhost:3000')}/payment/success?session_id={{CHECKOUT_SESSION_ID}}&type=training&training_id={training_id}",
-            cancel_url=f"{os.environ.get('FRONTEND_URL', 'http://localhost:3000')}/payment/cancel",
-            metadata={"type": "training", "training_id": training_id, "user_id": current_user['id']}
+            success_url=f"{os.environ.get('FRONTEND_URL', 'https://market-overhaul-1.preview.emergentagent.com')}/payment/success?session_id={{CHECKOUT_SESSION_ID}}&type=training&training_id={training_id}",
+            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://market-overhaul-1.preview.emergentagent.com')}/payment/cancel",
+            metadata={"type": "training", "training_id": training_id, "user_id": current_user['id'], "product_name": f"Formation: {training['title']}"}
         )
         response = await stripe_checkout.create_checkout_session(checkout_request)
         return {"url": response.url, "session_id": response.session_id}
