@@ -221,7 +221,10 @@ export const clientInvestmentsAPI = {
 // Client Premium
 export const premiumAPI = {
   getStatus: () => axios.get(`${API}/client/premium`, { headers: getAuthHeaders() }),
-  upgrade: (plan) => axios.post(`${API}/client/premium/upgrade`, null, { params: { plan }, headers: getAuthHeaders() }),
+  checkout: (plan) => axios.post(`${API}/client/premium/checkout`, null, { params: { plan }, headers: getAuthHeaders() }),
+  confirm: (sessionId) => axios.post(`${API}/client/premium/confirm`, null, { params: { session_id: sessionId }, headers: getAuthHeaders() }),
+  cancel: () => axios.post(`${API}/client/premium/cancel`, null, { headers: getAuthHeaders() }),
+  history: () => axios.get(`${API}/client/premium/history`, { headers: getAuthHeaders() }),
 };
 
 // ============ ENTERPRISE MANAGEMENT APIs ============
