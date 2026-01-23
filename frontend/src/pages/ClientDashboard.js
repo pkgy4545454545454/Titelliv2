@@ -12,7 +12,8 @@ import {
 } from 'lucide-react';
 import { 
   orderAPI, cashbackAPI, featuredAPI, clientProfileAPI, friendsAPI, 
-  paymentCardsAPI, clientDocumentsAPI, messagesAPI, notificationsAPI, uploadAPI
+  paymentCardsAPI, clientDocumentsAPI, messagesAPI, notificationsAPI, uploadAPI,
+  trainingsAPI
 } from '../services/api';
 import api from '../services/api';
 import { toast } from 'sonner';
