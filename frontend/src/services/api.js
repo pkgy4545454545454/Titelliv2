@@ -226,11 +226,19 @@ export const financesAPI = {
 // Advertising
 export const advertisingAPI = {
   list: () => axios.get(`${API}/enterprise/advertising`, { headers: getAuthHeaders() }),
+  getPublic: (placement = null, limit = 10) => axios.get(`${API}/advertising/public`, { params: { placement, limit } }),
+  trackClick: (adId) => axios.post(`${API}/advertising/${adId}/click`),
   create: (data) => axios.post(`${API}/enterprise/advertising`, data, { headers: getAuthHeaders() }),
   pay: (id) => axios.post(`${API}/enterprise/advertising/${id}/pay`, null, { headers: getAuthHeaders() }),
   activate: (id, sessionId) => axios.post(`${API}/enterprise/advertising/${id}/activate`, null, { params: { session_id: sessionId }, headers: getAuthHeaders() }),
   toggle: (id) => axios.put(`${API}/enterprise/advertising/${id}/toggle`, null, { headers: getAuthHeaders() }),
   delete: (id) => axios.delete(`${API}/enterprise/advertising/${id}`, { headers: getAuthHeaders() }),
+};
+
+// Enterprise Applications
+export const enterpriseApplicationsAPI = {
+  list: () => axios.get(`${API}/enterprise/applications`, { headers: getAuthHeaders() }),
+  updateStatus: (applicationId, status) => axios.put(`${API}/enterprise/applications/${applicationId}/status`, null, { params: { status }, headers: getAuthHeaders() }),
 };
 
 // Notifications
