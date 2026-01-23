@@ -884,6 +884,12 @@ const HomePage = () => {
         </div>
       )}
 
+      {/* Scrolling Reviews Section */}
+      <ScrollingReviews 
+        title="Ce que nos clients disent"
+        speed={35}
+      />
+
       {/* CTA Section */}
       <section className="py-20 md:py-28" data-testid="cta-section">
         <div className="max-w-4xl mx-auto px-4 md:px-8 text-center">
