@@ -1069,9 +1069,10 @@ async def create_order(data: OrderCreate, current_user: dict = Depends(get_curre
     client_name = f"{current_user['first_name']} {current_user['last_name']}"
     await create_order_notification(data.enterprise_id, order_dict['id'], client_name, total)
     
-    # Add cashback (10% of order total) - Real cashback system
-    CASHBACK_RATE = 0.10  # 10% cashback rate
-    cashback_amount = round(total * CASHBACK_RATE, 2)
+    # Add cashback based on user's subscription plan (Free: 1%, Premium: 10%, VIP: 15%)
+    cashback_rate = await get_user_cashback_rate(current_user['id'])
+    cashback_percent = int(cashback_rate * 100)
+    cashback_amount = round(total * cashback_rate, 2)
     if cashback_amount > 0:
         await db.users.update_one(
             {"id": current_user['id']},
@@ -1083,7 +1084,7 @@ async def create_order(data: OrderCreate, current_user: dict = Depends(get_curre
             "user_id": current_user['id'],
             "amount": cashback_amount,
             "type": "credit",
-            "description": f"10% cashback sur commande #{order_dict['id'][:8]}",
+            "description": f"{cashback_percent}% cashback sur commande #{order_dict['id'][:8]}",
             "order_id": order_dict['id'],
             "enterprise_id": data.enterprise_id,
             "created_at": datetime.now(timezone.utc).isoformat()
