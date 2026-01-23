@@ -773,11 +773,11 @@ const HomePage = () => {
                     <FileText className="w-12 h-12 text-gray-500 mx-auto mb-3" />
                     <p className="text-gray-400 text-sm mb-3">Vous n'avez pas encore de CV enregistré</p>
                     <Link 
-                      to="/dashboard/client?tab=documents" 
+                      to={`/dashboard/client?tab=documents&returnToJob=${selectedJob.id}`}
                       className="text-[#0047AB] hover:underline text-sm"
                       onClick={() => setShowApplyModal(false)}
                     >
-                      Ajouter un CV dans mon espace
+                      Ajouter un CV dans mon espace →
                     </Link>
                   </div>
                 )}
