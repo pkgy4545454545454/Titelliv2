@@ -1328,6 +1328,52 @@ const ProfileSection = ({ enterprise, onUpdate }) => {
           </div>
         </div>
 
+        {/* Cover Image Upload */}
+        <div>
+          <label className="block text-sm text-gray-400 mb-2">Image de couverture (bannière)</label>
+          <div className="relative rounded-xl overflow-hidden border-2 border-dashed border-white/20 hover:border-[#0047AB]/50 transition-colors">
+            {coverPreview || formData.cover_image ? (
+              <div className="relative">
+                <img 
+                  src={coverPreview || formData.cover_image} 
+                  alt="Couverture" 
+                  className="w-full h-40 object-cover"
+                />
+                {uploadingCover && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                  <label htmlFor="cover-upload" className="btn-secondary cursor-pointer">
+                    <Camera className="w-4 h-4 mr-2 inline" />
+                    Changer
+                  </label>
+                  <button type="button" onClick={removeCover} className="btn-secondary bg-red-500/20 text-red-400 hover:bg-red-500/30">
+                    Supprimer
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <label htmlFor="cover-upload" className="block cursor-pointer">
+                <div className="h-40 flex flex-col items-center justify-center">
+                  <Camera className="w-10 h-10 text-gray-500 mb-2" />
+                  <p className="text-gray-400 text-sm">Cliquez pour ajouter une image de couverture</p>
+                  <p className="text-gray-500 text-xs mt-1">Format recommandé: 1200x400px (max 10MB)</p>
+                </div>
+              </label>
+            )}
+            <input
+              ref={coverInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              onChange={handleCoverUpload}
+              className="hidden"
+              id="cover-upload"
+            />
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm text-gray-400 mb-1">Nom de l'entreprise *</label>
