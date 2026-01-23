@@ -2689,6 +2689,23 @@ async def delete_client_invitation(invitation_id: str, current_user: dict = Depe
     await db.client_invitations.delete_one({"id": invitation_id, "enterprise_id": enterprise['id']})
     return {"message": "Invitation supprimée"}
 
+@api_router.put("/enterprise/invitations/{invitation_id}/toggle")
+async def toggle_client_invitation(invitation_id: str, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    invitation = await db.client_invitations.find_one({"id": invitation_id, "enterprise_id": enterprise['id']})
+    if not invitation:
+        raise HTTPException(status_code=404, detail="Invitation non trouvée")
+    
+    new_status = "paused" if invitation.get('status') == 'active' else "active"
+    await db.client_invitations.update_one(
+        {"id": invitation_id},
+        {"$set": {"status": new_status}}
+    )
+    return {"message": "Statut mis à jour", "status": new_status}
+
 # --- Commercial Gestures ---
 @api_router.get("/enterprise/commercial-gestures")
 async def get_commercial_gestures(current_user: dict = Depends(get_current_user)):
