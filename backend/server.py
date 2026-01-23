@@ -4459,6 +4459,368 @@ async def get_influencer_collaborations_list(current_user: dict = Depends(get_cu
         }
     }
 
+# ============ CLIENT AGENDA ============
+
+class ClientAgendaEventCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    start_datetime: str  # ISO format
+    end_datetime: Optional[str] = None
+    location: Optional[str] = None
+    event_type: str = "appointment"  # appointment, reminder, meeting
+    enterprise_id: Optional[str] = None
+    enterprise_name: Optional[str] = None
+    notes: Optional[str] = None
+
+@api_router.get("/client/agenda")
+async def get_client_agenda(
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get client's agenda events"""
+    query = {"user_id": current_user['id']}
+    
+    if start_date:
+        query["start_datetime"] = {"$gte": start_date}
+    if end_date:
+        if "start_datetime" in query:
+            query["start_datetime"]["$lte"] = end_date
+        else:
+            query["start_datetime"] = {"$lte": end_date}
+    
+    events = await db.client_agenda.find(query, {"_id": 0}).sort("start_datetime", 1).to_list(500)
+    return {"events": events}
+
+@api_router.post("/client/agenda")
+async def create_client_agenda_event(event: ClientAgendaEventCreate, current_user: dict = Depends(get_current_user)):
+    """Create a new agenda event for client"""
+    event_doc = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user['id'],
+        **event.dict(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.client_agenda.insert_one(event_doc)
+    del event_doc['_id'] if '_id' in event_doc else None
+    return event_doc
+
+@api_router.put("/client/agenda/{event_id}")
+async def update_client_agenda_event(event_id: str, event: ClientAgendaEventCreate, current_user: dict = Depends(get_current_user)):
+    """Update a client agenda event"""
+    result = await db.client_agenda.update_one(
+        {"id": event_id, "user_id": current_user['id']},
+        {"$set": {**event.dict(), "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Event not found")
+    return {"message": "Event updated"}
+
+@api_router.delete("/client/agenda/{event_id}")
+async def delete_client_agenda_event(event_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a client agenda event"""
+    result = await db.client_agenda.delete_one({"id": event_id, "user_id": current_user['id']})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Event not found")
+    return {"message": "Event deleted"}
+
+# ============ CLIENT FINANCES ============
+
+@api_router.get("/client/finances")
+async def get_client_finances(current_user: dict = Depends(get_current_user)):
+    """Get client financial statistics"""
+    user_id = current_user['id']
+    
+    # Get all orders by this client
+    orders = await db.orders.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
+    
+    # Get all training purchases
+    enrollments = await db.enrollments.find({"user_id": user_id}, {"_id": 0}).to_list(500)
+    
+    # Get cashback history
+    cashback_txs = await db.cashback_transactions.find({"user_id": user_id}, {"_id": 0}).to_list(500)
+    
+    # Calculate statistics
+    total_spent_orders = sum(order.get('total', 0) for order in orders)
+    total_spent_trainings = sum(e.get('amount_paid', 0) for e in enrollments)
+    total_spent = total_spent_orders + total_spent_trainings
+    
+    total_cashback_earned = sum(tx['amount'] for tx in cashback_txs if tx['amount'] > 0)
+    total_cashback_used = abs(sum(tx['amount'] for tx in cashback_txs if tx['amount'] < 0))
+    
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    current_cashback = user.get('cashback_balance', 0) if user else 0
+    
+    # Recent transactions (last 10)
+    recent_orders = sorted(orders, key=lambda x: x.get('created_at', ''), reverse=True)[:5]
+    recent_cashback = sorted(cashback_txs, key=lambda x: x.get('created_at', ''), reverse=True)[:5]
+    
+    return {
+        "statistics": {
+            "total_spent": round(total_spent, 2),
+            "total_spent_orders": round(total_spent_orders, 2),
+            "total_spent_trainings": round(total_spent_trainings, 2),
+            "orders_count": len(orders),
+            "trainings_count": len(enrollments),
+            "total_cashback_earned": round(total_cashback_earned, 2),
+            "total_cashback_used": round(total_cashback_used, 2),
+            "current_cashback_balance": round(current_cashback, 2),
+            "savings_percentage": round((total_cashback_earned / total_spent * 100) if total_spent > 0 else 0, 1)
+        },
+        "recent_orders": recent_orders,
+        "recent_cashback": recent_cashback
+    }
+
+# ============ CLIENT DONATIONS ============
+
+class DonationCreate(BaseModel):
+    amount: float
+    recipient_type: str  # "enterprise" or "charity"
+    recipient_id: str
+    recipient_name: str
+    message: Optional[str] = None
+    is_anonymous: bool = False
+
+@api_router.get("/client/donations")
+async def get_client_donations(current_user: dict = Depends(get_current_user)):
+    """Get client's donation history"""
+    donations = await db.donations.find(
+        {"donor_id": current_user['id']}, 
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    total_donated = sum(d.get('amount', 0) for d in donations)
+    
+    return {
+        "donations": donations,
+        "total_donated": round(total_donated, 2),
+        "donations_count": len(donations)
+    }
+
+@api_router.post("/client/donations")
+async def create_donation(donation: DonationCreate, current_user: dict = Depends(get_current_user)):
+    """Create a new donation"""
+    donation_doc = {
+        "id": str(uuid.uuid4()),
+        "donor_id": current_user['id'],
+        "donor_name": f"{current_user['first_name']} {current_user['last_name']}" if not donation.is_anonymous else "Anonyme",
+        **donation.dict(),
+        "status": "completed",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.donations.insert_one(donation_doc)
+    
+    # Create notification for recipient if it's an enterprise
+    if donation.recipient_type == "enterprise":
+        notification = {
+            "id": str(uuid.uuid4()),
+            "user_id": donation.recipient_id,
+            "title": "Nouveau don reçu",
+            "message": f"{'Un donateur anonyme' if donation.is_anonymous else donation_doc['donor_name']} vous a fait un don de {donation.amount} CHF",
+            "notification_type": "donation",
+            "is_read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(notification)
+    
+    del donation_doc['_id'] if '_id' in donation_doc else None
+    return donation_doc
+
+# ============ CLIENT WISHLIST ============
+
+class WishlistItemCreate(BaseModel):
+    item_id: str
+    item_type: str  # "service" or "product"
+    item_name: str
+    item_price: float
+    item_image: Optional[str] = None
+    enterprise_id: str
+    enterprise_name: str
+
+@api_router.get("/client/wishlist")
+async def get_client_wishlist(current_user: dict = Depends(get_current_user)):
+    """Get client's wishlist"""
+    items = await db.wishlist.find(
+        {"user_id": current_user['id']}, 
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    return {"items": items}
+
+@api_router.post("/client/wishlist")
+async def add_to_wishlist(item: WishlistItemCreate, current_user: dict = Depends(get_current_user)):
+    """Add item to wishlist"""
+    # Check if already in wishlist
+    existing = await db.wishlist.find_one({
+        "user_id": current_user['id'],
+        "item_id": item.item_id
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="Item already in wishlist")
+    
+    wishlist_item = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user['id'],
+        **item.dict(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.wishlist.insert_one(wishlist_item)
+    del wishlist_item['_id'] if '_id' in wishlist_item else None
+    return wishlist_item
+
+@api_router.delete("/client/wishlist/{item_id}")
+async def remove_from_wishlist(item_id: str, current_user: dict = Depends(get_current_user)):
+    """Remove item from wishlist"""
+    result = await db.wishlist.delete_one({
+        "user_id": current_user['id'],
+        "$or": [{"id": item_id}, {"item_id": item_id}]
+    })
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return {"message": "Item removed from wishlist"}
+
+@api_router.get("/client/wishlist/check/{item_id}")
+async def check_wishlist(item_id: str, current_user: dict = Depends(get_current_user)):
+    """Check if item is in wishlist"""
+    item = await db.wishlist.find_one({
+        "user_id": current_user['id'],
+        "item_id": item_id
+    })
+    return {"in_wishlist": item is not None}
+
+# ============ CLIENT SUGGESTIONS FROM FRIENDS ============
+
+@api_router.get("/client/suggestions/from-friends")
+async def get_suggestions_from_friends(current_user: dict = Depends(get_current_user)):
+    """Get products/services liked by friends"""
+    # Get friend IDs
+    friendships = await db.friendships.find({
+        "$or": [
+            {"user_id": current_user['id'], "status": "accepted"},
+            {"friend_id": current_user['id'], "status": "accepted"}
+        ]
+    }).to_list(500)
+    
+    friend_ids = []
+    for f in friendships:
+        if f['user_id'] == current_user['id']:
+            friend_ids.append(f['friend_id'])
+        else:
+            friend_ids.append(f['user_id'])
+    
+    if not friend_ids:
+        return {"suggestions": [], "message": "Add friends to see their recommendations"}
+    
+    # Get wishlist items from friends
+    friend_wishlists = await db.wishlist.find(
+        {"user_id": {"$in": friend_ids}},
+        {"_id": 0}
+    ).to_list(100)
+    
+    # Get reviews from friends (liked items have rating >= 4)
+    friend_reviews = await db.reviews.find(
+        {"user_id": {"$in": friend_ids}, "rating": {"$gte": 4}},
+        {"_id": 0}
+    ).to_list(100)
+    
+    # Combine and deduplicate suggestions
+    suggestions = []
+    seen_items = set()
+    
+    # Get friend names for attribution
+    friends = await db.users.find({"id": {"$in": friend_ids}}, {"_id": 0, "id": 1, "first_name": 1, "last_name": 1}).to_list(500)
+    friend_map = {f['id']: f"{f['first_name']} {f['last_name']}" for f in friends}
+    
+    for item in friend_wishlists:
+        if item['item_id'] not in seen_items:
+            seen_items.add(item['item_id'])
+            suggestions.append({
+                "type": "wishlist",
+                "item_id": item['item_id'],
+                "item_type": item.get('item_type', 'product'),
+                "item_name": item.get('item_name', 'Unknown'),
+                "item_price": item.get('item_price', 0),
+                "item_image": item.get('item_image'),
+                "enterprise_id": item.get('enterprise_id'),
+                "enterprise_name": item.get('enterprise_name'),
+                "recommended_by": friend_map.get(item['user_id'], 'Un ami'),
+                "reason": "Ajouté à sa liste de souhaits"
+            })
+    
+    for review in friend_reviews:
+        if review.get('enterprise_id') not in seen_items:
+            seen_items.add(review.get('enterprise_id'))
+            enterprise = await db.enterprises.find_one({"id": review.get('enterprise_id')}, {"_id": 0, "business_name": 1})
+            suggestions.append({
+                "type": "review",
+                "item_id": review.get('enterprise_id'),
+                "item_type": "enterprise",
+                "item_name": enterprise.get('business_name') if enterprise else 'Unknown',
+                "rating": review.get('rating'),
+                "comment": review.get('comment', '')[:100],
+                "recommended_by": friend_map.get(review['user_id'], 'Un ami'),
+                "reason": f"A donné {review.get('rating')} étoiles"
+            })
+    
+    return {"suggestions": suggestions[:20]}
+
+# ============ CLIENT PERSONAL PROVIDERS ============
+
+class PersonalProviderCreate(BaseModel):
+    enterprise_id: str
+    enterprise_name: str
+    enterprise_logo: Optional[str] = None
+    notes: Optional[str] = None
+
+@api_router.get("/client/providers")
+async def get_personal_providers(current_user: dict = Depends(get_current_user)):
+    """Get client's personal providers list"""
+    providers = await db.personal_providers.find(
+        {"user_id": current_user['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(50)
+    
+    # Enrich with enterprise data
+    for provider in providers:
+        enterprise = await db.enterprises.find_one(
+            {"id": provider['enterprise_id']},
+            {"_id": 0, "rating": 1, "review_count": 1, "category": 1, "city": 1}
+        )
+        if enterprise:
+            provider.update(enterprise)
+    
+    return {"providers": providers}
+
+@api_router.post("/client/providers")
+async def add_personal_provider(provider: PersonalProviderCreate, current_user: dict = Depends(get_current_user)):
+    """Add a provider to personal list"""
+    existing = await db.personal_providers.find_one({
+        "user_id": current_user['id'],
+        "enterprise_id": provider.enterprise_id
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="Provider already in list")
+    
+    provider_doc = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user['id'],
+        **provider.dict(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.personal_providers.insert_one(provider_doc)
+    del provider_doc['_id'] if '_id' in provider_doc else None
+    return provider_doc
+
+@api_router.delete("/client/providers/{provider_id}")
+async def remove_personal_provider(provider_id: str, current_user: dict = Depends(get_current_user)):
+    """Remove provider from personal list"""
+    result = await db.personal_providers.delete_one({
+        "user_id": current_user['id'],
+        "$or": [{"id": provider_id}, {"enterprise_id": provider_id}]
+    })
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Provider not found")
+    return {"message": "Provider removed"}
+
 # ============ ROOT ROUTE ============
 
 @api_router.get("/")
