@@ -5390,87 +5390,179 @@ async def get_premium_status(current_user: dict = Depends(get_current_user)):
         {"_id": 0}
     )
     
-    # Premium benefits
-    benefits = {
-        "free": {
-            "name": "Gratuit",
-            "price": 0,
-            "features": [
-                "Accès aux prestataires",
-                "Messagerie limitée",
-                "1% cashback"
-            ]
-        },
-        "premium": {
-            "name": "Premium",
-            "price": 9.99,
-            "features": [
-                "Accès illimité aux prestataires",
-                "Messagerie illimitée",
-                "10% cashback",
-                "Offres exclusives",
-                "Support prioritaire",
-                "Badge Premium"
-            ]
-        },
-        "vip": {
-            "name": "VIP",
-            "price": 29.99,
-            "features": [
-                "Tous les avantages Premium",
-                "15% cashback",
-                "Invitations événements exclusifs",
-                "Concierge personnel",
-                "Accès anticipé aux nouvelles fonctionnalités",
-                "Badge VIP doré"
-            ]
-        }
-    }
-    
     current_plan = subscription.get('plan', 'free') if subscription else 'free'
+    cashback_rate = PREMIUM_PLANS.get(current_plan, PREMIUM_PLANS['free'])['cashback_rate']
     
     return {
         "current_plan": current_plan,
         "is_premium": current_plan in ['premium', 'vip'],
         "subscription": subscription,
-        "benefits": benefits,
+        "benefits": PREMIUM_PLANS,
         "user_since": user.get('created_at') if user else None,
-        "cashback_rate": 15 if current_plan == 'vip' else (10 if current_plan == 'premium' else 1)
+        "cashback_rate": int(cashback_rate * 100)
     }
 
-@api_router.post("/client/premium/upgrade")
-async def upgrade_to_premium(plan: str, current_user: dict = Depends(get_current_user)):
-    """Upgrade to premium or VIP plan"""
+@api_router.post("/client/premium/checkout")
+async def create_premium_checkout(plan: str, current_user: dict = Depends(get_current_user)):
+    """Create Stripe checkout session for premium subscription"""
     if plan not in ['premium', 'vip']:
-        raise HTTPException(status_code=400, detail="Invalid plan")
+        raise HTTPException(status_code=400, detail="Plan invalide. Choisissez 'premium' ou 'vip'")
     
-    # Check existing subscription
-    existing = await db.subscriptions.find_one({"user_id": current_user['id'], "status": "active"})
-    if existing:
-        await db.subscriptions.update_one(
-            {"id": existing['id']},
+    plan_info = PREMIUM_PLANS[plan]
+    
+    try:
+        # Create Stripe checkout session using emergentintegrations
+        checkout = StripeCheckout(api_key=STRIPE_API_KEY)
+        
+        # Use CheckoutSessionRequest for proper structure
+        session_request = CheckoutSessionRequest(
+            product_name=f"Titelli {plan_info['name']}",
+            unit_amount=int(plan_info['price'] * 100),  # Amount in cents
+            currency="chf",
+            quantity=1,
+            mode="subscription",  # Subscription mode for recurring payments
+            success_url=f"{os.environ.get('FRONTEND_URL', 'http://localhost:3000')}/dashboard/client?tab=premium&success=true&plan={plan}",
+            cancel_url=f"{os.environ.get('FRONTEND_URL', 'http://localhost:3000')}/dashboard/client?tab=premium&cancelled=true"
+        )
+        
+        session_response = checkout.create_checkout_session(session_request)
+        
+        # Store pending subscription
+        pending_sub = {
+            "id": str(uuid.uuid4()),
+            "user_id": current_user['id'],
+            "plan": plan,
+            "stripe_session_id": session_response.session_id,
+            "status": "pending",
+            "price": plan_info['price'],
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.pending_subscriptions.insert_one(pending_sub)
+        
+        return {
+            "checkout_url": session_response.checkout_url,
+            "session_id": session_response.session_id
+        }
+    except Exception as e:
+        logger.error(f"Stripe checkout error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erreur paiement: {str(e)}")
+
+@api_router.post("/client/premium/confirm")
+async def confirm_premium_subscription(session_id: str, current_user: dict = Depends(get_current_user)):
+    """Confirm premium subscription after successful Stripe payment"""
+    try:
+        # Verify payment with Stripe
+        checkout = StripeCheckout(api_key=STRIPE_API_KEY)
+        status = checkout.get_checkout_session_status(session_id)
+        
+        if status.status != "complete":
+            raise HTTPException(status_code=400, detail="Paiement non complété")
+        
+        # Find pending subscription
+        pending = await db.pending_subscriptions.find_one({
+            "stripe_session_id": session_id,
+            "user_id": current_user['id']
+        })
+        
+        if not pending:
+            raise HTTPException(status_code=404, detail="Abonnement non trouvé")
+        
+        plan = pending['plan']
+        
+        # Cancel any existing active subscription
+        await db.subscriptions.update_many(
+            {"user_id": current_user['id'], "status": "active"},
             {"$set": {"status": "cancelled", "cancelled_at": datetime.now(timezone.utc).isoformat()}}
         )
-    
-    sub = {
-        "id": str(uuid.uuid4()),
+        
+        # Create new active subscription
+        sub = {
+            "id": str(uuid.uuid4()),
+            "user_id": current_user['id'],
+            "plan": plan,
+            "status": "active",
+            "price": PREMIUM_PLANS[plan]['price'],
+            "stripe_session_id": session_id,
+            "stripe_subscription_id": status.payment_intent if hasattr(status, 'payment_intent') else None,
+            "started_at": datetime.now(timezone.utc).isoformat(),
+            "next_billing": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
+        }
+        await db.subscriptions.insert_one(sub)
+        
+        # Update user profile
+        await db.users.update_one(
+            {"id": current_user['id']},
+            {"$set": {
+                "is_premium": True, 
+                "premium_plan": plan,
+                "premium_since": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+        
+        # Delete pending subscription
+        await db.pending_subscriptions.delete_one({"_id": pending.get('_id')})
+        
+        # Create notification
+        notification = {
+            "id": str(uuid.uuid4()),
+            "user_id": current_user['id'],
+            "title": f"Bienvenue {PREMIUM_PLANS[plan]['name']} !",
+            "message": f"Votre abonnement {PREMIUM_PLANS[plan]['name']} est maintenant actif. Profitez de {int(PREMIUM_PLANS[plan]['cashback_rate']*100)}% de cashback!",
+            "notification_type": "subscription",
+            "is_read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(notification)
+        
+        if '_id' in sub: del sub['_id']
+        return {
+            "success": True,
+            "subscription": sub,
+            "message": f"Félicitations ! Vous êtes maintenant {PREMIUM_PLANS[plan]['name']}"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Subscription confirmation error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/client/premium/cancel")
+async def cancel_premium_subscription(current_user: dict = Depends(get_current_user)):
+    """Cancel premium subscription"""
+    subscription = await db.subscriptions.find_one({
         "user_id": current_user['id'],
-        "plan": plan,
-        "status": "active",
-        "price": 29.99 if plan == 'vip' else 9.99,
-        "started_at": datetime.now(timezone.utc).isoformat(),
-        "next_billing": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
-    }
-    await db.subscriptions.insert_one(sub)
+        "status": "active"
+    })
     
-    # Update user
-    await db.users.update_one(
-        {"id": current_user['id']},
-        {"$set": {"is_premium": True, "premium_plan": plan}}
+    if not subscription:
+        raise HTTPException(status_code=404, detail="Aucun abonnement actif")
+    
+    # Update subscription status
+    await db.subscriptions.update_one(
+        {"id": subscription['id']},
+        {"$set": {
+            "status": "cancelled",
+            "cancelled_at": datetime.now(timezone.utc).isoformat()
+        }}
     )
     
-    if '_id' in sub: del sub['_id']
-    return sub
+    # Update user profile
+    await db.users.update_one(
+        {"id": current_user['id']},
+        {"$set": {"is_premium": False, "premium_plan": "free"}}
+    )
+    
+    return {"message": "Abonnement annulé. Vous conservez vos avantages jusqu'à la fin de la période."}
+
+@api_router.get("/client/premium/history")
+async def get_subscription_history(current_user: dict = Depends(get_current_user)):
+    """Get subscription payment history"""
+    subscriptions = await db.subscriptions.find(
+        {"user_id": current_user['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(50)
+    
+    return {"subscriptions": subscriptions}
 
 # ============ ROOT ROUTE ============
 
