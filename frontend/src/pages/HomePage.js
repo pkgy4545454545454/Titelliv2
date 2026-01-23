@@ -207,22 +207,47 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-[#050505]" data-testid="home-page">
-      {/* Hero Section */}
-      <section className="relative h-screen" data-testid="hero-section">
-        {/* Background */}
+      {/* Hero Section with Panoramic Video */}
+      <section className="relative h-screen overflow-hidden" data-testid="hero-section">
+        {/* Video Background */}
         <div className="absolute inset-0">
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="w-full h-full object-cover"
+            poster={heroImage}
+          >
+            <source src={panoramicVideoUrl} type="video/mp4" />
+            {/* Fallback to image if video doesn't load */}
+          </video>
           <img 
             src={heroImage} 
             alt="Lausanne" 
-            className="w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover -z-10"
           />
-          <div className="hero-overlay absolute inset-0" />
+          <div className="panoramic-overlay absolute inset-0" />
         </div>
 
-        {/* Video Placeholder Overlay */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2">
-          <button className="group w-20 h-20 rounded-full bg-white/10 backdrop-blur-lg border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all" data-testid="play-video-btn">
-            <Play className="w-8 h-8 text-white ml-1 group-hover:scale-110 transition-transform" />
+        {/* Video Controls */}
+        <div className="absolute bottom-8 right-8 flex items-center gap-3 z-20">
+          <button 
+            onClick={toggleVideoPlay}
+            className="p-3 rounded-full bg-black/50 backdrop-blur-lg border border-white/10 text-white hover:bg-black/70 transition-all"
+            data-testid="video-play-btn"
+            aria-label={isVideoPlaying ? 'Pause video' : 'Play video'}
+          >
+            {isVideoPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+          </button>
+          <button 
+            onClick={toggleVideoMute}
+            className="p-3 rounded-full bg-black/50 backdrop-blur-lg border border-white/10 text-white hover:bg-black/70 transition-all"
+            data-testid="video-mute-btn"
+            aria-label={isVideoMuted ? 'Unmute video' : 'Mute video'}
+          >
+            {isVideoMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
           </button>
         </div>
 
