@@ -29,7 +29,8 @@ class TestJobFiltersAndListing:
         
         data = response.json()
         assert "jobs" in data or isinstance(data, list), "Response should contain jobs"
-        print(f"SUCCESS: Listed {len(data.get('jobs', data))} jobs")
+        jobs = data.get('jobs', data) if isinstance(data, dict) else data
+        print(f"SUCCESS: Listed {len(jobs)} jobs")
     
     def test_list_jobs_with_type_filter(self):
         """Test GET /api/jobs?type=CDI - filter by job type"""
