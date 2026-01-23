@@ -44,6 +44,7 @@ const EnterpriseDashboard = () => {
   const [documents, setDocuments] = useState([]);
   const [finances, setFinances] = useState({ transactions: [], summary: {} });
   const [advertising, setAdvertising] = useState({ campaigns: [], stats: {} });
+  const [applications, setApplications] = useState({ applications: [], jobs: [], stats: {} });
 
   // Modal states
   const [showModal, setShowModal] = useState(false);
