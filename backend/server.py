@@ -5425,7 +5425,7 @@ async def create_premium_checkout(plan: str, current_user: dict = Depends(get_cu
             cancel_url=f"{os.environ.get('FRONTEND_URL', 'http://localhost:3000')}/dashboard/client?tab=premium&cancelled=true"
         )
         
-        session_response = checkout.create_checkout_session(session_request)
+        session_response = await checkout.create_checkout_session(session_request)
         
         # Store pending subscription
         pending_sub = {
@@ -5453,7 +5453,7 @@ async def confirm_premium_subscription(session_id: str, current_user: dict = Dep
     try:
         # Verify payment with Stripe
         checkout = StripeCheckout(api_key=STRIPE_API_KEY)
-        status = checkout.get_checkout_session_status(session_id)
+        status = await checkout.get_checkout_status(session_id)
         
         if status.status != "complete":
             raise HTTPException(status_code=400, detail="Paiement non complété")
@@ -5528,7 +5528,7 @@ async def confirm_premium_subscription(session_id: str, current_user: dict = Dep
 
 @api_router.post("/client/premium/cancel")
 async def cancel_premium_subscription(current_user: dict = Depends(get_current_user)):
-    """Cancel premium subscription"""
+    """Cancel premium subscription - removes all benefits immediately"""
     subscription = await db.subscriptions.find_one({
         "user_id": current_user['id'],
         "status": "active"
@@ -5537,7 +5537,20 @@ async def cancel_premium_subscription(current_user: dict = Depends(get_current_u
     if not subscription:
         raise HTTPException(status_code=404, detail="Aucun abonnement actif")
     
-    # Update subscription status
+    plan_name = subscription.get('plan', 'premium')
+    
+    # Cancel subscription on Stripe if we have a subscription ID
+    stripe_sub_id = subscription.get('stripe_subscription_id')
+    if stripe_sub_id:
+        try:
+            import stripe
+            stripe.api_key = STRIPE_API_KEY
+            stripe.Subscription.cancel(stripe_sub_id)
+            logger.info(f"Stripe subscription {stripe_sub_id} cancelled")
+        except Exception as e:
+            logger.warning(f"Could not cancel Stripe subscription: {str(e)}")
+    
+    # Update subscription status to cancelled
     await db.subscriptions.update_one(
         {"id": subscription['id']},
         {"$set": {
@@ -5546,13 +5559,39 @@ async def cancel_premium_subscription(current_user: dict = Depends(get_current_u
         }}
     )
     
-    # Update user profile
+    # Remove ALL premium benefits from user profile immediately
     await db.users.update_one(
         {"id": current_user['id']},
-        {"$set": {"is_premium": False, "premium_plan": "free"}}
+        {"$set": {
+            "is_premium": False, 
+            "premium_plan": "free",
+            "premium_since": None,
+            "stripe_customer_id": None,
+            "stripe_subscription_id": None
+        }}
     )
     
-    return {"message": "Abonnement annulé. Vous conservez vos avantages jusqu'à la fin de la période."}
+    # Delete pending subscriptions for this user
+    await db.pending_subscriptions.delete_many({"user_id": current_user['id']})
+    
+    # Create notification for cancellation
+    notification = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user['id'],
+        "title": "Abonnement annulé",
+        "message": f"Votre abonnement {plan_name.capitalize()} a été annulé. Vous êtes maintenant sur le plan gratuit avec 1% de cashback.",
+        "notification_type": "subscription",
+        "is_read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.notifications.insert_one(notification)
+    
+    return {
+        "success": True,
+        "message": "Abonnement annulé avec succès. Tous les avantages premium ont été retirés.",
+        "new_plan": "free",
+        "new_cashback_rate": 1
+    }
 
 @api_router.get("/client/premium/history")
 async def get_subscription_history(current_user: dict = Depends(get_current_user)):
