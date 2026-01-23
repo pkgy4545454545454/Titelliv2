@@ -198,6 +198,17 @@ const ClientDashboard = () => {
     }
   };
 
+  const fetchCashbackHistory = async () => {
+    try {
+      const res = await cashbackAPI.history();
+      setCashback(res.data.balance || 0);
+      setCashbackHistory(res.data.transactions || []);
+      setCashbackStats(res.data.statistics || { total_earned: 0, total_used: 0, cashback_rate: '10%', transaction_count: 0 });
+    } catch (error) {
+      console.error('Error fetching cashback history:', error);
+    }
+  };
+
   const fetchConversations = async () => {
     try {
       const res = await messagesAPI.getConversations();
