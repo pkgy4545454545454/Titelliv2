@@ -1208,7 +1208,7 @@ async def create_subscription_checkout(
         
         response = await stripe_checkout.create_checkout_session(checkout_request)
         
-        return {"url": response.url, "session_id": response.id}
+        return {"url": response.url, "session_id": response.session_id}
     except Exception as e:
         logger.error(f"Stripe checkout error: {e}")
         raise HTTPException(status_code=500, detail="Erreur lors de la création du paiement")
