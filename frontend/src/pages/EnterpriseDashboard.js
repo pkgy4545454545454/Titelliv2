@@ -75,7 +75,7 @@ const EnterpriseDashboard = () => {
       // Fetch all data in parallel
       const [ordersRes, offersRes, trainingsRes, jobsRes, realEstateRes, 
              investmentsRes, stockRes, agendaRes, teamRes, teamOrdersRes,
-             permanentOrdersRes, documentsRes, financesRes, advertisingRes] = await Promise.all([
+             permanentOrdersRes, documentsRes, financesRes, advertisingRes, applicationsRes] = await Promise.all([
         orderAPI.list().catch(() => ({ data: [] })),
         offersAPI.list().catch(() => ({ data: [] })),
         trainingsAPI.list().catch(() => ({ data: [] })),
@@ -90,6 +90,7 @@ const EnterpriseDashboard = () => {
         documentsAPI.list().catch(() => ({ data: [] })),
         financesAPI.get().catch(() => ({ data: { transactions: [], summary: {} } })),
         advertisingAPI.list().catch(() => ({ data: { campaigns: [], stats: {} } })),
+        enterpriseApplicationsAPI.list().catch(() => ({ data: { applications: [], jobs: [], stats: {} } })),
       ]);
 
       setOrders(ordersRes.data || []);
@@ -106,6 +107,7 @@ const EnterpriseDashboard = () => {
       setDocuments(documentsRes.data || []);
       setFinances(financesRes.data || { transactions: [], summary: {} });
       setAdvertising(advertisingRes.data || { campaigns: [], stats: {} });
+      setApplications(applicationsRes.data || { applications: [], jobs: [], stats: {} });
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
