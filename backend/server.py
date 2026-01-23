@@ -1912,6 +1912,7 @@ async def apply_to_job(job_id: str, application: JobApplication, current_user: d
             "message": f"{user['first_name']} {user['last_name']} a postulé à : {job['title']}",
             "notification_type": "job_application",
             "data": {"job_id": job_id, "application_id": app_doc['id']},
+            "link": "/dashboard/entreprise?tab=applications",
             "is_read": False,
             "created_at": datetime.now(timezone.utc).isoformat()
         }
