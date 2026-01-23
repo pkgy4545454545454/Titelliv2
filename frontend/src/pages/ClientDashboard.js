@@ -1950,6 +1950,81 @@ const ClientDashboard = () => {
           )}
         </main>
       </div>
+
+      {/* Training Review Modal */}
+      {showReviewModal && reviewingTraining && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#0F0F0F] rounded-2xl p-6 w-full max-w-md border border-white/10">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-white">Votre avis</h2>
+              <button onClick={() => setShowReviewModal(false)} className="text-gray-400 hover:text-white">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="mb-6">
+              <p className="text-gray-400 text-sm mb-2">Formation</p>
+              <p className="text-white font-medium">{reviewingTraining.training_title}</p>
+              <p className="text-sm text-[#D4AF37]">{reviewingTraining.enterprise_name}</p>
+            </div>
+            
+            {/* Star Rating */}
+            <div className="mb-6">
+              <p className="text-gray-400 text-sm mb-3">Note</p>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onClick={() => setReviewForm({...reviewForm, rating: star})}
+                    className="transition-transform hover:scale-110"
+                  >
+                    <Star 
+                      className={`w-8 h-8 ${star <= reviewForm.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600'}`} 
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Comment */}
+            <div className="mb-6">
+              <label className="block text-gray-400 text-sm mb-2">Commentaire (optionnel)</label>
+              <textarea
+                value={reviewForm.comment}
+                onChange={(e) => setReviewForm({...reviewForm, comment: e.target.value})}
+                placeholder="Partagez votre expérience..."
+                className="input-dark w-full h-24 resize-none"
+              />
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowReviewModal(false)}
+                className="flex-1 py-3 border border-white/20 rounded-xl text-white hover:bg-white/5"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleSubmitReview}
+                disabled={submittingReview}
+                className="flex-1 py-3 bg-[#0047AB] text-white rounded-xl hover:bg-[#0047AB]/80 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {submittingReview ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Envoi...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    Envoyer
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
