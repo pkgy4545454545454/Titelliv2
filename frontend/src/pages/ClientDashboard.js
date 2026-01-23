@@ -222,6 +222,22 @@ const ClientDashboard = () => {
       fetchFriendsSuggestions();
     } else if (activeTab === 'prestataires') {
       fetchPersonalProviders();
+    } else if (activeTab === 'feed') {
+      fetchActivityFeed();
+    } else if (activeTab === 'my_feed') {
+      fetchMyFeed();
+    } else if (activeTab === 'mode_vie') {
+      fetchLifestyle();
+    } else if (activeTab === 'invitations') {
+      fetchInvitations();
+    } else if (activeTab === 'offres') {
+      fetchCurrentOffers();
+    } else if (activeTab === 'guests') {
+      fetchFavoriteGuests();
+    } else if (activeTab === 'investments') {
+      fetchInvestments();
+    } else if (activeTab === 'premium') {
+      fetchPremiumStatus();
     }
   }, [activeTab]);
 
