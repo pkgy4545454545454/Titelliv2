@@ -91,6 +91,8 @@ class UserResponse(BaseModel):
     is_labeled: bool
     profile_image: Optional[str]
     city: str
+    social_accounts: Optional[dict] = None
+    niche: Optional[str] = None
 
 # Enterprise Profile Models
 class EnterpriseProfile(BaseModel):
