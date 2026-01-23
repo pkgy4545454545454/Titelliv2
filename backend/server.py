@@ -4502,7 +4502,7 @@ async def create_client_agenda_event(event: ClientAgendaEventCreate, current_use
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.client_agenda.insert_one(event_doc)
-    del event_doc['_id'] if '_id' in event_doc else None
+    if '_id' in event_doc: del event_doc['_id']
     return event_doc
 
 @api_router.put("/client/agenda/{event_id}")
@@ -4623,7 +4623,7 @@ async def create_donation(donation: DonationCreate, current_user: dict = Depends
         }
         await db.notifications.insert_one(notification)
     
-    del donation_doc['_id'] if '_id' in donation_doc else None
+    if '_id' in donation_doc: del donation_doc['_id']
     return donation_doc
 
 # ============ CLIENT WISHLIST ============
@@ -4664,7 +4664,7 @@ async def add_to_wishlist(item: WishlistItemCreate, current_user: dict = Depends
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.wishlist.insert_one(wishlist_item)
-    del wishlist_item['_id'] if '_id' in wishlist_item else None
+    if '_id' in wishlist_item: del wishlist_item['_id']
     return wishlist_item
 
 @api_router.delete("/client/wishlist/{item_id}")
@@ -4807,7 +4807,7 @@ async def add_personal_provider(provider: PersonalProviderCreate, current_user: 
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.personal_providers.insert_one(provider_doc)
-    del provider_doc['_id'] if '_id' in provider_doc else None
+    if '_id' in provider_doc: del provider_doc['_id']
     return provider_doc
 
 @api_router.delete("/client/providers/{provider_id}")
