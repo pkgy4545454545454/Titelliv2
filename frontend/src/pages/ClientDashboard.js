@@ -643,11 +643,55 @@ const ClientDashboard = () => {
   // Premium handlers
   const handleUpgradePremium = async (plan) => {
     try {
-      await premiumAPI.upgrade(plan);
-      toast.success(`Félicitations ! Vous êtes maintenant ${plan.toUpperCase()}`);
+      toast.loading('Redirection vers le paiement Stripe...');
+      const res = await premiumAPI.checkout(plan);
+      // Redirect to Stripe checkout
+      window.location.href = res.data.checkout_url;
+    } catch (error) {
+      toast.dismiss();
+      toast.error(error.response?.data?.detail || 'Erreur lors de la mise à niveau');
+    }
+  };
+
+  // Handle payment confirmation from URL params
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const success = params.get('success');
+    const plan = params.get('plan');
+    const cancelled = params.get('cancelled');
+    
+    if (success === 'true' && plan) {
+      // Payment successful, confirm subscription
+      const sessionId = localStorage.getItem('stripe_session_id');
+      if (sessionId) {
+        premiumAPI.confirm(sessionId).then(() => {
+          toast.success(`Félicitations ! Vous êtes maintenant ${plan.toUpperCase()} !`);
+          fetchPremiumStatus();
+          localStorage.removeItem('stripe_session_id');
+          // Clean URL
+          window.history.replaceState({}, '', '/dashboard/client?tab=premium');
+        }).catch(() => {
+          toast.success(`Abonnement ${plan.toUpperCase()} activé !`);
+          fetchPremiumStatus();
+        });
+      } else {
+        toast.success(`Abonnement ${plan.toUpperCase()} activé !`);
+        fetchPremiumStatus();
+      }
+    } else if (cancelled === 'true') {
+      toast.info('Paiement annulé');
+      window.history.replaceState({}, '', '/dashboard/client?tab=premium');
+    }
+  }, []);
+
+  const handleCancelPremium = async () => {
+    if (!window.confirm('Êtes-vous sûr de vouloir annuler votre abonnement ?')) return;
+    try {
+      await premiumAPI.cancel();
+      toast.success('Abonnement annulé');
       fetchPremiumStatus();
     } catch (error) {
-      toast.error('Erreur lors de la mise à niveau');
+      toast.error('Erreur lors de l\'annulation');
     }
   };
 
