@@ -1426,6 +1426,282 @@ const ProfileSection = ({ enterprise, onUpdate }) => {
   );
 };
 
+// Media Gallery Section Component
+const MediaGallerySection = ({ enterprise, onUpdate }) => {
+  const [photos, setPhotos] = useState(enterprise?.photos || []);
+  const [videos, setVideos] = useState(enterprise?.videos || []);
+  const [uploading, setUploading] = useState(false);
+  const [uploadType, setUploadType] = useState('photo');
+  const [videoUrl, setVideoUrl] = useState('');
+  const photoInputRef = useRef(null);
+
+  const handlePhotoUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    setUploading(true);
+    try {
+      const uploadedUrls = [];
+      for (const file of files) {
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+          toast.error(`${file.name}: Type de fichier non autorisé`);
+          continue;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+          toast.error(`${file.name}: Fichier trop volumineux (max 10MB)`);
+          continue;
+        }
+        
+        const response = await uploadAPI.uploadImage(file);
+        const imageUrl = process.env.REACT_APP_BACKEND_URL + response.data.url;
+        uploadedUrls.push(imageUrl);
+      }
+      
+      if (uploadedUrls.length > 0) {
+        const newPhotos = [...photos, ...uploadedUrls];
+        setPhotos(newPhotos);
+        
+        // Save to backend
+        await enterpriseAPI.update(enterprise.id, { photos: newPhotos });
+        toast.success(`${uploadedUrls.length} photo(s) ajoutée(s) !`);
+        onUpdate();
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Erreur lors de l\'upload');
+    } finally {
+      setUploading(false);
+      if (photoInputRef.current) photoInputRef.current.value = '';
+    }
+  };
+
+  const handleAddVideo = async () => {
+    if (!videoUrl.trim()) {
+      toast.error('Entrez une URL vidéo');
+      return;
+    }
+    
+    // Validate URL format
+    const isValidUrl = videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be') || 
+                       videoUrl.includes('vimeo.com') || videoUrl.startsWith('https://');
+    if (!isValidUrl) {
+      toast.error('URL vidéo invalide');
+      return;
+    }
+    
+    setUploading(true);
+    try {
+      const newVideos = [...videos, videoUrl];
+      setVideos(newVideos);
+      await enterpriseAPI.update(enterprise.id, { videos: newVideos });
+      toast.success('Vidéo ajoutée !');
+      setVideoUrl('');
+      onUpdate();
+    } catch (error) {
+      toast.error('Erreur lors de l\'ajout');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeletePhoto = async (index) => {
+    const newPhotos = photos.filter((_, i) => i !== index);
+    setPhotos(newPhotos);
+    try {
+      await enterpriseAPI.update(enterprise.id, { photos: newPhotos });
+      toast.success('Photo supprimée');
+      onUpdate();
+    } catch (error) {
+      toast.error('Erreur lors de la suppression');
+    }
+  };
+
+  const handleDeleteVideo = async (index) => {
+    const newVideos = videos.filter((_, i) => i !== index);
+    setVideos(newVideos);
+    try {
+      await enterpriseAPI.update(enterprise.id, { videos: newVideos });
+      toast.success('Vidéo supprimée');
+      onUpdate();
+    } catch (error) {
+      toast.error('Erreur lors de la suppression');
+    }
+  };
+
+  const getYouTubeEmbedUrl = (url) => {
+    if (url.includes('youtube.com/watch?v=')) {
+      const videoId = url.split('v=')[1]?.split('&')[0];
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+    if (url.includes('youtu.be/')) {
+      const videoId = url.split('youtu.be/')[1]?.split('?')[0];
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+    return url;
+  };
+
+  return (
+    <div className="space-y-6" data-testid="media-gallery-section">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+            Galerie Média
+          </h1>
+          <p className="text-gray-400 text-sm mt-1">Gérez les photos et vidéos de votre entreprise</p>
+        </div>
+      </div>
+
+      {/* Upload Tabs */}
+      <div className="card-service rounded-xl p-4">
+        <div className="flex gap-2 mb-4">
+          <button 
+            onClick={() => setUploadType('photo')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+              uploadType === 'photo' ? 'bg-[#0047AB] text-white' : 'bg-white/10 text-gray-300 hover:bg-white/20'
+            }`}
+          >
+            <Camera className="w-4 h-4" />
+            Photos
+          </button>
+          <button 
+            onClick={() => setUploadType('video')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+              uploadType === 'video' ? 'bg-[#0047AB] text-white' : 'bg-white/10 text-gray-300 hover:bg-white/20'
+            }`}
+          >
+            <PlayCircle className="w-4 h-4" />
+            Vidéos
+          </button>
+        </div>
+
+        {uploadType === 'photo' ? (
+          <div className="space-y-4">
+            <div 
+              className="border-2 border-dashed border-white/20 rounded-xl p-8 text-center hover:border-[#0047AB]/50 transition-colors cursor-pointer"
+              onClick={() => photoInputRef.current?.click()}
+            >
+              {uploading ? (
+                <div className="flex flex-col items-center">
+                  <div className="w-8 h-8 border-2 border-[#0047AB] border-t-transparent rounded-full animate-spin mb-2" />
+                  <p className="text-gray-400">Upload en cours...</p>
+                </div>
+              ) : (
+                <>
+                  <Upload className="w-10 h-10 text-gray-500 mx-auto mb-2" />
+                  <p className="text-gray-400">Cliquez ou glissez vos photos ici</p>
+                  <p className="text-xs text-gray-500 mt-1">JPG, PNG, GIF, WEBP • Max 10MB par fichier</p>
+                </>
+              )}
+            </div>
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              onChange={handlePhotoUpload}
+              multiple
+              className="hidden"
+            />
+          </div>
+        ) : (
+          <div className="flex gap-3">
+            <input
+              type="url"
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+              placeholder="URL YouTube, Vimeo ou lien vidéo direct..."
+              className="flex-1 input-dark"
+            />
+            <button 
+              onClick={handleAddVideo}
+              disabled={uploading}
+              className="btn-primary flex items-center gap-2"
+            >
+              {uploading ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Plus className="w-4 h-4" />
+              )}
+              Ajouter
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Photos Grid */}
+      <div className="card-service rounded-xl p-6">
+        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+          <Camera className="w-5 h-5 text-[#0047AB]" />
+          Photos ({photos.length})
+        </h3>
+        {photos.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {photos.map((photo, index) => (
+              <div key={index} className="relative group aspect-square rounded-xl overflow-hidden">
+                <img src={photo} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <button
+                    onClick={() => handleDeletePhoto(index)}
+                    className="p-2 bg-red-500/80 hover:bg-red-500 rounded-full text-white transition-colors"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <Camera className="w-12 h-12 text-gray-500 mx-auto mb-3" />
+            <p className="text-gray-400">Aucune photo ajoutée</p>
+            <p className="text-sm text-gray-500">Ajoutez des photos pour présenter votre entreprise</p>
+          </div>
+        )}
+      </div>
+
+      {/* Videos Grid */}
+      <div className="card-service rounded-xl p-6">
+        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+          <PlayCircle className="w-5 h-5 text-[#D4AF37]" />
+          Vidéos ({videos.length})
+        </h3>
+        {videos.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {videos.map((video, index) => (
+              <div key={index} className="relative group">
+                <div className="aspect-video rounded-xl overflow-hidden bg-black">
+                  {video.includes('youtube.com') || video.includes('youtu.be') ? (
+                    <iframe
+                      src={getYouTubeEmbedUrl(video)}
+                      className="w-full h-full"
+                      allowFullScreen
+                      title={`Video ${index + 1}`}
+                    />
+                  ) : (
+                    <video src={video} controls className="w-full h-full object-cover" />
+                  )}
+                </div>
+                <button
+                  onClick={() => handleDeleteVideo(index)}
+                  className="absolute top-2 right-2 p-2 bg-red-500/80 hover:bg-red-500 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <PlayCircle className="w-12 h-12 text-gray-500 mx-auto mb-3" />
+            <p className="text-gray-400">Aucune vidéo ajoutée</p>
+            <p className="text-sm text-gray-500">Ajoutez des vidéos YouTube ou des liens directs</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // Services Section Component
 const ServicesSection = ({ services, onAdd, onDelete, onRefresh }) => {
   return (
