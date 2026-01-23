@@ -368,6 +368,9 @@ const ClientDashboard = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     
+    // Show uploading state
+    toast.info('Upload en cours...');
+    
     try {
       const res = await uploadAPI.uploadImage(file);
       // Auto-set name from file if not already set
@@ -377,9 +380,11 @@ const ClientDashboard = () => {
         url: res.data.url, 
         name: documentForm.name || fileName 
       });
-      toast.success('Fichier uploadé');
+      toast.success('Fichier uploadé avec succès !');
     } catch (error) {
-      toast.error('Erreur lors de l\'upload');
+      console.error('Upload error:', error);
+      const msg = error.response?.data?.detail || 'Erreur lors de l\'upload';
+      toast.error(msg);
     }
   };
 
