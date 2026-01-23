@@ -9,65 +9,59 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
 
 ## ✅ Fonctionnalités Complétées (23 Jan 2026)
 
-### Phase 19 : Corrections Critiques et Système Cashback 10%
+### Phase 20 : Page Entreprise Améliorée + Préparation Refactoring
+
+**Nouvelles fonctionnalités :**
+
+1. **Page Entreprise - Nouveaux onglets**
+   - **Photos/Vidéos** : Affiche la galerie média de l'entreprise avec :
+     - Grille de photos avec lightbox plein écran
+     - Section vidéos avec aperçu et bouton play
+     - État vide élégant si pas de médias
+   - **Formations** : Affiche les formations proposées par l'entreprise
+     - Cartes avec image, titre, durée, prix
+     - Badge "En ligne" ou "Présentiel"
+     - Lien vers la page de détail de formation
+   - **Offres d'emploi** : Affiche les postes ouverts
+     - Titre, lieu, type de contrat (CDI, CDD...)
+     - Fourchette salariale et date de publication
+     - Lien vers la page de détail de l'emploi
+
+2. **Corrections API**
+   - `trainingsAPI.getAll()` → `trainingsAPI.listAll()`
+   - `jobsAPI.list()` → `jobsAPI.listAll()` (endpoint public sans auth)
+
+**Fichiers modifiés :**
+- `/app/frontend/src/pages/EnterprisePage.js`
+
+### Phase 19 : Corrections P0 et Système Cashback 10%
 
 **Bugs corrigés :**
 
 1. **Flux de candidature aux emplois corrigé**
-   - **Cause** : `JobDetailPage.js` utilisait `doc.file_path` et `doc.file_name` au lieu de `doc.url` et `doc.name`
-   - **Solution** : Correction des noms de propriétés dans le modal de candidature
-   - **Fichiers modifiés** : `/app/frontend/src/pages/JobDetailPage.js`
-   - **Statut** : ✅ VÉRIFIÉ - Les CV s'affichent correctement dans le modal
+   - Correction `doc.url`/`doc.name` dans `JobDetailPage.js`
+   - Les CV s'affichent maintenant dans le modal de candidature
 
 2. **Système de cashback passé de 3% à 10%**
-   - **Cause** : Le taux de cashback était de 3% au lieu de 10% comme demandé
-   - **Solution** : Modification du `CASHBACK_RATE = 0.10` dans `server.py` pour:
-     - Les commandes (ligne ~1010)
-     - Les formations (ligne ~1931)
-   - **Fichiers modifiés** : `/app/backend/server.py`
-   - **Statut** : ✅ VÉRIFIÉ - 10% cashback appliqué sur toutes les transactions
-
-**Nouvelles fonctionnalités :**
-
-1. **Page Cashback améliorée**
-   - Affichage du solde avec badge "10% de cashback sur tous vos achats !"
-   - Cartes statistiques: Total gagné, Total utilisé, Nombre de transactions
-   - Historique des transactions avec dates et descriptions
-   - Section explicative "Comment fonctionne le cashback ?"
-   - **Fichiers modifiés** : 
-     - `/app/frontend/src/pages/ClientDashboard.js`
-     - `/app/frontend/src/services/api.js` (ajout `cashbackAPI.history()` et `cashbackAPI.use()`)
-
-2. **API Cashback enrichie**
-   - `GET /api/cashback/history` retourne maintenant:
-     ```json
-     {
-       "balance": 85.47,
-       "transactions": [...],
-       "statistics": {
-         "total_earned": 12.0,
-         "total_used": 0,
-         "cashback_rate": "10%",
-         "transaction_count": 1
-       }
-     }
-     ```
+   - Appliqué sur commandes et formations
+   - Historique des transactions avec statistiques
 
 ---
 
-## Tests Effectués - Itération 16
+## Tests Effectués
 
-| Test | Statut | Détails |
-|------|--------|---------|
-| Sélection CV candidature | ✅ PASS | 2 documents affichés correctement |
-| Cashback 10% | ✅ PASS | Rate: 10%, Transaction enregistrée |
-| Page historique cashback | ✅ PASS | Solde + stats + historique |
-| Upload documents | ✅ PASS | PDF/DOC supportés |
-| Création emplois | ✅ PASS | Modal avec tous les champs |
-| Dashboard client | ✅ PASS | Tous les onglets fonctionnent |
-| Homepage | ✅ PASS | Toutes les sections visibles |
+### Itération 17 (Frontend)
+| Test | Statut |
+|------|--------|
+| Onglet Photos/Vidéos | ✅ PASS |
+| Onglet Formations | ✅ PASS |
+| Onglet Offres d'emploi | ✅ PASS |
+| Navigation 7 onglets | ✅ PASS |
+| Lightbox modal | ✅ Code OK (pas de data) |
 
-**Taux de réussite : 100% (21/21 tests backend)**
+### Itération 16 (Backend + Frontend)
+- 21/21 tests backend passés (100%)
+- Tous les flux utilisateur validés
 
 ---
 
@@ -84,16 +78,18 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
 ### 🔴 P0 - Critique
 - ✅ ~~Bug flux candidature~~ - CORRIGÉ
 - ✅ ~~Système cashback 10%~~ - IMPLÉMENTÉ
+- ✅ ~~Page entreprise Photos/Vidéos~~ - CORRIGÉ
+- ✅ ~~Onglets Formations/Emplois~~ - AJOUTÉS
 
 ### 🟡 P1 - Important
-- Refactoring `server.py` → déplacer la logique vers `/app/backend/routers/`
-- Interface UI questions suggestives (entreprises → clients)
-- Audit complet responsivité mobile
+- [ ] Refactoring `server.py` → modules (Plan créé dans `/app/backend/REFACTORING_PLAN.md`)
+- [ ] Interface UI questions suggestives (entreprises → clients)
+- [ ] Audit complet responsivité mobile
 
 ### 🟢 P2 - Futur
-- Vidéo panoramique sur la page d'accueil
-- Commentaires/avis défilants sur les pages entreprises
-- Notifications temps réel (WebSocket)
+- [ ] Vidéo panoramique sur la page d'accueil
+- [ ] Commentaires/avis défilants sur les pages entreprises
+- [ ] Notifications temps réel (WebSocket)
 
 ---
 
@@ -103,19 +99,23 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
 /app/
 ├── backend/
 │   ├── server.py              # API principale (~4500 lignes)
-│   ├── routers/               # Pour refactoring futur
-│   └── uploads/               # Fichiers uploadés
+│   ├── routers/               # Structure de refactoring préparée
+│   │   ├── __init__.py
+│   │   ├── online_status.py   # Placeholder
+│   │   └── trainings.py       # Placeholder
+│   ├── REFACTORING_PLAN.md    # Plan de refactoring détaillé
+│   └── uploads/
 └── frontend/
     └── src/
         ├── pages/
-        │   ├── ClientDashboard.js    # Dashboard client avec cashback
-        │   ├── JobDetailPage.js      # Page détail emploi (corrigé)
-        │   ├── HomePage.js           # Page d'accueil
-        │   └── EnterpriseDashboard.js
+        │   ├── EnterprisePage.js      # 7 onglets avec Photos/Formations/Emplois
+        │   ├── ClientDashboard.js     # Dashboard client avec cashback 10%
+        │   ├── JobDetailPage.js       # Page détail emploi (corrigé)
+        │   └── HomePage.js
         └── services/
-            └── api.js                # APIs avec cashbackAPI.history()
+            └── api.js
 ```
 
 ---
 
-*Dernière mise à jour: 23 Jan 2026 - Corrections P0 et système cashback 10%*
+*Dernière mise à jour: 23 Jan 2026 - Page entreprise améliorée + préparation refactoring*
