@@ -729,12 +729,23 @@ const ClientDashboard = () => {
               {/* Quick Stats */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 {quickStats.map((stat, index) => (
-                  <div key={index} className="card-service rounded-xl p-4 md:p-6">
-                    <div className={`p-3 rounded-xl bg-white/5 w-fit mb-4 ${stat.color}`}>
-                      <stat.icon className="w-5 h-5" />
+                  <div 
+                    key={index} 
+                    className={`rounded-xl p-4 md:p-6 bg-gradient-to-br ${stat.gradient} border ${stat.borderColor} relative overflow-hidden`}
+                    style={stat.notifCount > 0 ? {
+                      animation: 'pulse-green 2s infinite'
+                    } : {}}
+                  >
+                    <div className={`w-12 h-12 rounded-xl ${stat.iconBg} flex items-center justify-center mb-4`}>
+                      <stat.icon className={`w-6 h-6 ${stat.iconColor}`} />
                     </div>
                     <p className="text-2xl font-bold text-white">{stat.value}</p>
                     <p className="text-sm text-gray-400 mt-1">{stat.label}</p>
+                    {stat.notifCount > 0 && (
+                      <span className="absolute top-3 right-3 w-6 h-6 bg-green-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-bounce">
+                        {stat.notifCount}
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>
