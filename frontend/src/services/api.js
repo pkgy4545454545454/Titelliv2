@@ -208,7 +208,7 @@ export const guestsAPI = {
 };
 
 // Client Investments
-export const investmentsAPI = {
+export const clientInvestmentsAPI = {
   list: () => axios.get(`${API}/client/investments`, { headers: getAuthHeaders() }),
   create: (data) => axios.post(`${API}/client/investments`, data, { headers: getAuthHeaders() }),
   update: (id, data) => axios.put(`${API}/client/investments/${id}`, data, { headers: getAuthHeaders() }),
