@@ -239,23 +239,57 @@ const PaymentSuccessPage = () => {
 };
 
 const PaymentCancelPage = () => {
+  const { isEnterprise, isClient } = useAuth();
+  const navigate = useNavigate();
+
+  const getDashboardLink = () => {
+    if (isEnterprise) return '/dashboard/entreprise';
+    if (isClient) return '/dashboard/client';
+    return '/';
+  };
+
   return (
-    <div className="min-h-screen bg-[#050505] pt-24 flex items-center justify-center px-4" data-testid="payment-cancel-page">
-      <div className="max-w-md w-full text-center card-service rounded-2xl p-12">
-        <div className="w-20 h-20 rounded-full bg-gray-500/20 flex items-center justify-center mx-auto mb-6">
-          <XCircle className="w-10 h-10 text-gray-500" />
+    <div className="min-h-screen bg-[#050505] pt-20 flex items-center justify-center px-4" data-testid="payment-cancel-page">
+      {/* Background decoration */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-gray-500/5 rounded-full blur-3xl" />
+      </div>
+
+      <div className="max-w-lg w-full text-center relative z-10 card-service rounded-2xl p-8 md:p-12 border border-gray-500/30">
+        <div className="w-24 h-24 rounded-full bg-gray-500/20 flex items-center justify-center mx-auto mb-6">
+          <XCircle className="w-12 h-12 text-gray-400" />
         </div>
-        <h1 className="text-2xl font-bold text-white mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
+        <h1 className="text-2xl md:text-3xl font-bold text-white mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
           Paiement annulé
         </h1>
-        <p className="text-gray-400 mb-8">
-          Vous avez annulé le paiement. Aucun montant n'a été débité.
+        <p className="text-gray-400 mb-4 text-sm md:text-base">
+          Vous avez annulé le paiement. Aucun montant n'a été débité de votre compte.
         </p>
+        
+        {/* Info box */}
+        <div className="bg-white/5 rounded-xl p-4 mb-6 text-left">
+          <div className="flex items-start gap-3">
+            <Shield className="w-5 h-5 text-[#0047AB] mt-0.5" />
+            <div className="text-sm">
+              <p className="text-white font-medium mb-1">Paiement sécurisé</p>
+              <p className="text-gray-500">
+                Vos informations de paiement n'ont pas été enregistrées. Vous pouvez réessayer à tout moment.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="space-y-3">
-          <Link to="/dashboard/entreprise" className="btn-primary w-full block">
+          <Link 
+            to={getDashboardLink()} 
+            className="btn-primary w-full flex items-center justify-center gap-2"
+            data-testid="back-to-dashboard-cancel"
+          >
+            <LayoutDashboard className="w-4 h-4" />
             Retour au tableau de bord
           </Link>
-          <Link to="/" className="btn-secondary w-full block">
+          <Link to="/" className="btn-secondary w-full flex items-center justify-center gap-2">
+            <Home className="w-4 h-4" />
             Retour à l'accueil
           </Link>
         </div>
