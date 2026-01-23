@@ -13,112 +13,87 @@
 
 ## Fonctionnalités Implémentées (Mise à jour 23 Jan 2026)
 
-### ✅ Phase 1-4 : Foundation à Marketing (Complété précédemment)
-- Authentification JWT
-- Dashboards Admin, Entreprise, Client
+### ✅ Phase 1-6 : Foundation à Refactoring (Complété précédemment)
+- Authentification JWT (client, entreprise, influenceur)
+- Dashboards Admin, Entreprise, Client, Influenceur
 - Services/Produits, Commandes, Paiements Stripe
 - Système d'abonnement multi-tiers
-- Outils IA/Marketing (Ciblage, Influenceurs, Invitations)
+- Outils IA/Marketing
+- Refactoring des fichiers volumineux
 
-### ✅ Phase 5 : Module Influenceur (Complété)
-- Inscription influenceur avec Instagram/TikTok/Facebook
-- Dashboard influenceur complet
-- APIs profil influenceur
+### ✅ Phase 7 : Dashboard Client Complet (Complété)
+- Profil avec photo modifiable, LinkedIn
+- Système d'amis complet
+- Cartes de paiement (FIXÉ)
+- Documents (FIXÉ)
+- Messagerie production-ready
+- "Compte particulier" (ex entrepreneur)
+- Section "Demandes en cours"
 
-### ✅ Phase 6 : Refactoring (Complété)
-- EnterpriseDashboard.js réduit de 3807 à 2699 lignes
-- Composants extraits dans `/components/dashboard/`
+### ✅ Phase 8 : Système d'Offres d'Emploi (Complété 23 Jan 2026)
+- [x] **CRUD Jobs complet** : Création, lecture, mise à jour, suppression
+- [x] **Toggle activation** des offres
+- [x] **Section HomePage** : Affichage des offres d'emploi publiques
+- [x] **Candidatures** : Postuler avec CV et lettre de motivation
+- [x] **Notifications** : Alertes aux clients pour nouvelles offres
+- [x] **Date limite** : Support des deadlines
 
-### ✅ Phase 7 : Dashboard Client Complet (Complété 23 Jan 2026)
+### ✅ Phase 9 : Dashboard Influenceur Restructuré (Complété 23 Jan 2026)
+Nouveau menu :
+- [x] **Tableau de bord** : Vue d'ensemble avec stats
+- [x] **Statistiques** : Vues, likes, partages, engagement
+- [x] **Amis** : Système d'amis complet avec demandes/acceptation
+- [x] **Offres reçues** : Liste des demandes de collaboration
+- [x] **Statut en cours** : Collaboration active avec date de fin
+- [x] **Mon profil** : Édition des informations
+- [x] **Messages** : (À venir)
+- [x] **Paramètres**
 
-#### Profil Client
-- [x] Modification de la photo de profil
-- [x] Affichage email (non modifiable)
-- [x] Téléphone modifiable
-- [x] **LinkedIn** - Connexion compte LinkedIn
-- [x] Ville modifiable
-- [x] **Statistiques réelles** : Vues profil, Amis, Commandes (via MongoDB)
-
-#### Système d'Amis
-- [x] Liste des amis avec actions (message, supprimer)
-- [x] **Demandes d'amis** avec notifications
-- [x] Accepter/Refuser les demandes
-- [x] **Suggestions d'amis** (autres clients)
-- [x] Bouton "Ajouter" pour envoyer demandes
-
-#### Cartes de Paiement (**Fixé**)
-- [x] Liste des cartes enregistrées
-- [x] Ajout de carte (modal fonctionnel)
-- [x] Suppression de carte
-- [x] Carte par défaut
-
-#### Documents (**Fixé**)
-- [x] Liste des documents
-- [x] Upload de fichiers
-- [x] Suppression de documents
-- [x] Catégorisation (factures, contrats, etc.)
-
-#### Messagerie (**Production Ready**)
-- [x] Liste des conversations (MongoDB)
-- [x] Envoi/Réception de messages en temps réel
-- [x] Notifications pour nouveaux messages
-- [x] Interface chat complète
-
-#### Menu Client
-- [x] "Compte entrepreneur" → **"Compte particulier"**
-- [x] Bouton de switch pour basculer entre comptes
-- [x] Menu restructuré avec toutes les sections
+### ✅ Phase 10 : Demandes en cours Client (Complété 23 Jan 2026)
+- [x] **Demandes envoyées** : Liste avec statut "En attente"
+- [x] **Demandes reçues** : Avec boutons Accepter/Refuser
+- [x] **Amis acceptés** : Cartes de profil des amis avec bouton Message
 
 ---
 
-## APIs Ajoutées (Phase 7)
+## APIs Ajoutées (Phases 8-10)
 
-### Client Profile
-- `GET /api/client/profile` - Profil avec stats réelles
-- `PUT /api/client/profile` - Mise à jour profil
+### Jobs/Emplois (Amélioré)
+- `GET /api/jobs` - Liste publique des offres
+- `GET /api/jobs/{id}` - Détail d'une offre
+- `POST /api/jobs/{id}/apply` - Postuler à une offre
+- `GET /api/client/job-applications` - Mes candidatures
+- `GET /api/enterprise/jobs` - Mes offres (entreprise)
+- `POST /api/enterprise/jobs` - Créer une offre
+- `PUT /api/enterprise/jobs/{id}` - Modifier une offre
+- `PUT /api/enterprise/jobs/{id}/toggle` - Activer/Désactiver
+- `DELETE /api/enterprise/jobs/{id}` - Supprimer
+- `GET /api/enterprise/jobs/{id}/applications` - Candidatures reçues
 
-### Système d'Amis
-- `GET /api/client/friends` - Liste des amis
-- `GET /api/client/friend-requests` - Demandes en attente
-- `POST /api/client/friends/request` - Envoyer demande
-- `PUT /api/client/friends/{id}/respond` - Accepter/Refuser
-- `DELETE /api/client/friends/{id}` - Supprimer ami
-- `GET /api/client/suggested-friends` - Suggestions
-
-### Cartes de Paiement
-- `GET /api/client/cards` - Liste des cartes
-- `POST /api/client/cards` - Ajouter carte
-- `DELETE /api/client/cards/{id}` - Supprimer carte
-- `PUT /api/client/cards/{id}/default` - Définir par défaut
-
-### Documents
-- `GET /api/client/documents` - Liste documents
-- `POST /api/client/documents` - Ajouter document
-- `DELETE /api/client/documents/{id}` - Supprimer document
-
-### Messagerie
-- `GET /api/messages/conversations` - Toutes les conversations
-- `GET /api/messages/{partner_id}` - Messages avec un partenaire
-- `POST /api/messages` - Envoyer message
-
-### Tracking
-- `POST /api/track/profile-view/{user_id}` - Tracker vue profil
-- `GET /api/stats/profile-views` - Stats des vues
+### Collections MongoDB Ajoutées
+- `jobs` : Offres d'emploi
+- `job_applications` : Candidatures
+- `friendships` : Relations d'amitié
+- `payment_cards` : Cartes de paiement clients
+- `client_documents` : Documents clients
+- `messages` : Messages entre utilisateurs
+- `profile_views` : Tracking des vues de profil
+- `influencer_profiles` : Profils influenceurs
 
 ---
 
 ## Tâches Restantes
 
 ### 🔴 P0 - Haute Priorité
-1. ~~Dashboard Client complet~~ ✅ FAIT
-2. **Système d'Offres d'Emploi** - CRUD + affichage HomePage
-3. **Refonte Menu Entreprise** - Nouvelles specs
-4. **Test flux publicitaire Stripe**
+1. ~~Système d'Offres d'Emploi~~ ✅ FAIT
+2. ~~Dashboard Influenceur restructuré~~ ✅ FAIT
+3. ~~Demandes en cours Client~~ ✅ FAIT
+4. **Test flux publicitaire Stripe** - End-to-end
 
 ### 🟡 P1 - Moyenne Priorité
-1. **Responsivité complète mobile** - Audit CSS
+1. **Responsivité mobile complète** - Audit CSS
 2. **Vidéo panoramique homepage**
-3. **Notifications push collaborations influenceurs**
+3. **Notifications push** pour collaborations influenceurs
 
 ### 🟢 P2 - Basse Priorité
 1. Commentaires défilants prestataires
@@ -131,6 +106,7 @@
 - **Admin** : admin@titelli.com / Admin123!
 - **Client** : test@example.com / Test123!
 - **Entreprise** : spa.luxury@titelli.com / Demo123!
+- **Influenceur** : (créer via inscription)
 
 ---
 
@@ -138,16 +114,14 @@
 ```
 /app/
 ├── backend/
-│   ├── server.py (3200+ lignes - APIs complètes)
+│   ├── server.py (3500+ lignes - APIs complètes)
 │   └── tests/
-│       ├── test_client_dashboard.py (nouveau)
-│       └── test_api_production.py
 └── frontend/src/
     ├── pages/
-    │   ├── ClientDashboard.js (refait - 900+ lignes)
-    │   ├── EnterpriseDashboard.js (refactoré - 2699 lignes)
-    │   ├── InfluencerDashboard.js
-    │   └── AuthPage.js (avec option Influenceur)
+    │   ├── HomePage.js (avec section Offres d'emploi)
+    │   ├── ClientDashboard.js (refait - 1200+ lignes)
+    │   ├── InfluencerDashboard.js (restructuré)
+    │   └── EnterpriseDashboard.js
     └── components/dashboard/
         ├── IAClientsSection.js
         ├── InfluencersSection.js
