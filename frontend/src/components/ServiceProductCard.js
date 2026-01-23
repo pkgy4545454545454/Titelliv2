@@ -1,8 +1,14 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { ShoppingCart, Truck, Crown } from 'lucide-react';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ShoppingCart, Truck, Crown, Heart } from 'lucide-react';
+import { wishlistAPI } from '../services/api';
+import { toast } from 'sonner';
 
 const ServiceProductCard = ({ item, onAddToCart }) => {
+  const navigate = useNavigate();
+  const [isInWishlist, setIsInWishlist] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+  
   const {
     id,
     name,
@@ -12,8 +18,47 @@ const ServiceProductCard = ({ item, onAddToCart }) => {
     type,
     images,
     is_premium,
-    is_delivery
+    is_delivery,
+    enterprise_id,
+    enterprise_name
   } = item;
+
+  const handleToggleWishlist = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast.error('Connectez-vous pour ajouter aux favoris');
+      navigate('/auth');
+      return;
+    }
+    
+    setWishlistLoading(true);
+    try {
+      if (isInWishlist) {
+        await wishlistAPI.remove(id);
+        setIsInWishlist(false);
+        toast.success('Retiré des favoris');
+      } else {
+        await wishlistAPI.add({
+          item_id: id,
+          item_type: type,
+          item_name: name,
+          item_price: price,
+          item_image: images?.[0] || '',
+          enterprise_id: enterprise_id,
+          enterprise_name: enterprise_name
+        });
+        setIsInWishlist(true);
+        toast.success('Ajouté aux favoris !');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur');
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
 
   const defaultImage = type === 'service' 
     ? 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=800'
@@ -48,6 +93,20 @@ const ServiceProductCard = ({ item, onAddToCart }) => {
             </span>
           )}
         </div>
+
+        {/* Wishlist Heart Button */}
+        <button
+          onClick={handleToggleWishlist}
+          disabled={wishlistLoading}
+          data-testid={`wishlist-btn-${id}`}
+          className={`absolute top-3 right-3 p-2 rounded-full transition-all ${
+            isInWishlist 
+              ? 'bg-red-500 text-white' 
+              : 'bg-black/50 text-white hover:bg-red-500'
+          }`}
+        >
+          <Heart className={`w-4 h-4 ${isInWishlist ? 'fill-white' : ''}`} />
+        </button>
 
         {/* Type Badge */}
         <div className="absolute bottom-3 left-3">
