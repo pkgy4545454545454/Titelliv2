@@ -358,14 +358,14 @@ const ServiceProductDetailPage = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {reviews.slice(0, 4).map((review) => (
-                <div key={review.id} className="p-6 bg-white/5 rounded-xl">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-gradient-to-br from-[#0047AB] to-[#D4AF37] rounded-full flex items-center justify-center text-white font-bold text-sm">
+                <div key={review.id} className="p-6 bg-white/5 rounded-xl text-center">
+                  <div className="flex flex-col items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-[#0047AB] to-[#D4AF37] rounded-full flex items-center justify-center text-white font-bold">
                       {review.user_name?.charAt(0) || 'A'}
                     </div>
                     <div>
                       <p className="text-white font-medium">{review.user_name || 'Anonyme'}</p>
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center justify-center gap-1 mt-1">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <Star 
                             key={star} 
@@ -375,7 +375,7 @@ const ServiceProductDetailPage = () => {
                       </div>
                     </div>
                   </div>
-                  <p className="text-gray-400">{review.comment}</p>
+                  <p className="text-gray-400 text-center">{review.comment}</p>
                 </div>
               ))}
             </div>
