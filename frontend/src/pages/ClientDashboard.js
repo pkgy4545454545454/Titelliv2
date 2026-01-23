@@ -343,15 +343,21 @@ const ClientDashboard = () => {
 
   // Documents handlers
   const handleAddDocument = async () => {
-    if (!documentForm.name || !documentForm.url) {
-      toast.error('Veuillez remplir tous les champs');
+    // Auto-set name from uploaded file if empty
+    const finalName = documentForm.name || (documentForm.url ? 'Mon document' : '');
+    
+    if (!finalName || !documentForm.url) {
+      toast.error('Veuillez uploader un fichier');
       return;
     }
     try {
-      await clientDocumentsAPI.add(documentForm);
+      await clientDocumentsAPI.add({
+        ...documentForm,
+        name: finalName
+      });
       toast.success('Document ajouté');
       setShowAddDocument(false);
-      setDocumentForm({ name: '', category: 'general', url: '' });
+      setDocumentForm({ name: '', category: returnToJobId ? 'cv' : 'general', url: '' });
       fetchDocuments();
     } catch (error) {
       toast.error('Erreur lors de l\'ajout');
@@ -364,7 +370,13 @@ const ClientDashboard = () => {
     
     try {
       const res = await uploadAPI.uploadImage(file);
-      setDocumentForm({ ...documentForm, url: res.data.url, name: documentForm.name || file.name });
+      // Auto-set name from file if not already set
+      const fileName = file.name.replace(/\.[^/.]+$/, ''); // Remove extension
+      setDocumentForm({ 
+        ...documentForm, 
+        url: res.data.url, 
+        name: documentForm.name || fileName 
+      });
       toast.success('Fichier uploadé');
     } catch (error) {
       toast.error('Erreur lors de l\'upload');
