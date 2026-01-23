@@ -9,78 +9,66 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
 
 ## ✅ Fonctionnalités Complétées (23 Jan 2026)
 
-### Phase 17 : Corrections et Nouveau Design Menu (AUJOURD'HUI)
+### Phase 18 : Corrections Finales et Design Menu (AUJOURD'HUI)
 
 **Bugs corrigés :**
 
-1. **Modal candidature - CV non affiché**
-   - Avant : Filtrait uniquement les documents `category='cv'`
-   - Après : Affiche tous les documents (CV, général, PDF) pour permettre la sélection
-   - Le client peut maintenant sélectionner n'importe quel document comme CV
+1. **Upload PDF ne fonctionnait pas**
+   - Cause : `ALLOWED_EXTENSIONS` n'incluait pas `.pdf`, `.doc`, `.docx`
+   - Solution : Ajout des extensions documents et vidéos
+   - Augmentation de la limite de taille à 50MB
 
-2. **Ajout document - "Veuillez remplir tous les champs"**
-   - Avant : Validation échouait si le nom n'était pas rempli manuellement
-   - Après : Auto-complétion du nom depuis le fichier uploadé
-   - Message d'erreur amélioré : "Veuillez uploader un fichier"
+2. **"Veuillez uploader un fichier" alors que déjà uploadé**
+   - Cause : Le fichier était uploadé mais le `url` n'était pas mis à jour correctement
+   - Solution : Message toast "Upload en cours..." + logging amélioré
 
-3. **Flow candidature - Retour à l'offre**
-   - Redirection vers documents avec `?returnToJob={id}`
-   - Alerte bleue "Vous souhaitez postuler à une offre"
-   - Bouton "Voir l'offre" pour retourner directement
-   - Option CV ajoutée en premier dans les catégories
+3. **CV pas sélectionné par défaut**
+   - Cause : Catégorie par défaut était "general"
+   - Solution : Catégorie par défaut changée à "cv"
 
-**Nouveau design des menus :**
+**Nouveau design des menus et stats :**
 
-1. **Sections colorées avec gradients**
-   - Principal : bleu
-   - Avantages : violet
-   - Investissements & Emplois : vert
-   - Gestion : jaune
-   - Communication : rose
-   - Recommandations : cyan
-   - Commandes : orange
-   - Aide : gris
+1. **Sections menu colorées avec gradients**
+   - Principal (bleu), Avantages (violet), Commercial (vert)
+   - Gestion (jaune), Communication (rose), etc.
 
-2. **Notifications clignotantes**
-   - Bordures vertes qui pulsent quand il y a des notifications
+2. **Cartes de stats colorées**
+   - Chaque carte a un gradient correspondant à sa section
+   - Ex: Commandes (vert), Revenus (jaune), Note (violet)
+
+3. **Notifications clignotantes**
+   - Bordures vertes qui pulsent
    - Badge avec compteur qui rebondit
-   - Appliqué aux items : Messages, Commandes, Postulations, Demandes d'amis
-
-3. **Animations CSS**
-   - `@keyframes pulse-green` - pulsation verte
-   - `@keyframes notification-pulse` - bordure qui clignote
-   - `.animate-pulse-border` - classe pour les items avec notifications
+   - Animation CSS : `pulse-green`, `notification-pulse`
 
 ---
 
-## Style du Menu
+## Extensions de fichiers autorisées
 
-```css
-/* Exemple de section */
-.section {
-  background: linear-gradient(to bottom-right, rgba(59,130,246,0.2), rgba(37,99,235,0.1));
-  border: 1px solid rgba(59,130,246,0.3);
-  border-radius: 12px;
-  padding: 12px;
+```python
+ALLOWED_EXTENSIONS = {
+    # Images
+    '.jpg', '.jpeg', '.png', '.gif', '.webp',
+    # Documents
+    '.pdf', '.doc', '.docx', '.ppt', '.pptx',
+    # Vidéos/Audio
+    '.mp4', '.mov', '.avi', '.mp3', '.wav'
 }
 
-/* Item avec notification */
-.item-with-notif {
-  box-shadow: 0 0 0 2px rgba(34,197,94,0.5);
-  animation: pulse-green 2s infinite;
-}
+MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
 ```
 
 ---
 
 ## Résumé des corrections
 
-| Problème | Solution |
-|----------|----------|
-| CV non affiché dans modal candidature | Affiche tous les documents, pas seulement category='cv' |
-| "Veuillez remplir tous les champs" | Auto-set du nom depuis le fichier uploadé |
-| Menu sans couleur | Gradients colorés pour chaque section |
-| Pas de notification visuelle | Bordures clignotantes vertes + badge compteur |
+| Problème | Cause | Solution |
+|----------|-------|----------|
+| Upload PDF impossible | Extensions non autorisées | Ajout .pdf, .doc, .docx |
+| Message erreur upload | URL non mis à jour | Toast + logging |
+| CV pas par défaut | Default "general" | Default "cv" |
+| Stats sans couleur | Style uniforme | Gradients colorés |
+| Pas de notif visuelle | Pas d'animation | Bordures clignotantes |
 
 ---
 
@@ -105,4 +93,4 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
 
 ---
 
-*Mise à jour: 23 Jan 2026 - Nouveau design menu + corrections*
+*Mise à jour: 23 Jan 2026 - Corrections finales upload + design*
