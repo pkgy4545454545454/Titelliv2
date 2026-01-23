@@ -126,6 +126,7 @@ const EnterpriseDashboard = () => {
       items: [
         { id: 'overview', label: 'Accueil', icon: LayoutDashboard },
         { id: 'profile', label: 'Profil entreprise', icon: Building2 },
+        { id: 'media', label: 'Galerie média', icon: Image },
         { id: 'feed', label: 'Mon fil d\'actualité', icon: Rss },
         { id: 'business_feed', label: 'Mon feed entreprises', icon: Newspaper },
       ]
