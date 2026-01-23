@@ -302,13 +302,21 @@ const ClientDashboard = () => {
     }
   };
 
-  // Switch to entrepreneur account
-  const handleSwitchAccount = () => {
-    if (user?.user_type === 'client') {
-      // If user has an enterprise account, redirect
-      navigate('/dashboard/entreprise');
-    } else {
-      toast.info('Créez un compte particulier pour accéder à cette fonctionnalité');
+  // Switch to particulier account (former entrepreneur)
+  const handleSwitchAccount = async () => {
+    // Check if user has a "particulier" profile
+    try {
+      const res = await api.get('/client/particulier-check');
+      if (res.data?.has_particulier) {
+        // User has a particulier account, switch view
+        setActiveTab('particulier');
+        toast.success('Basculé vers votre espace particulier');
+      } else {
+        toast.info('Créez un compte particulier depuis le menu pour accéder à cette fonctionnalité');
+      }
+    } catch (error) {
+      // API doesn't exist yet, just switch to the particulier tab
+      setActiveTab('particulier');
     }
   };
 
