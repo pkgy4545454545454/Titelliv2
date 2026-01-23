@@ -264,8 +264,18 @@ export const iaCampaignsAPI = {
 export const influencersAPI = {
   list: (category = null) => axios.get(`${API}/influencers`, { params: { category } }),
   getCollaborations: () => axios.get(`${API}/enterprise/influencer-collaborations`, { headers: getAuthHeaders() }),
-  createCollaboration: (influencerId, message = null, budget = 0) => axios.post(`${API}/enterprise/influencer-collaborations`, null, {
-    params: { influencer_id: influencerId, message, budget },
+  createCollaboration: (data) => axios.post(`${API}/enterprise/influencer-collaborations`, null, {
+    params: { influencer_id: data.influencer_id, message: data.message, budget: data.budget },
+    headers: getAuthHeaders()
+  }),
+  cancelCollaboration: (id) => axios.delete(`${API}/enterprise/influencer-collaborations/${id}`, { headers: getAuthHeaders() }),
+  // Influencer Profile APIs
+  getProfile: () => axios.get(`${API}/influencer/profile`, { headers: getAuthHeaders() }),
+  updateProfile: (data) => axios.put(`${API}/influencer/profile`, data, { headers: getAuthHeaders() }),
+  createProfile: (data) => axios.post(`${API}/influencer/profile`, data, { headers: getAuthHeaders() }),
+  getMyCollaborations: () => axios.get(`${API}/influencer/collaborations`, { headers: getAuthHeaders() }),
+  respondToCollaboration: (collabId, accept) => axios.put(`${API}/influencer/collaborations/${collabId}/respond`, null, {
+    params: { accept },
     headers: getAuthHeaders()
   }),
 };
