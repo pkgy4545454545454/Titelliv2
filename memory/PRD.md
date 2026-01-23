@@ -7,105 +7,64 @@
 - **Frontend** : React 18, Tailwind CSS, Shadcn/UI, Lucide Icons
 - **Backend** : FastAPI, Motor (async MongoDB), JWT Auth
 - **Base de données** : MongoDB
-- **Paiements** : Stripe
+- **Paiements** : Stripe (checkouts subscriptions et publicités)
 
 ---
 
 ## Fonctionnalités Implémentées
 
-### ✅ Phase 1-6 : Foundation à Refactoring (Complété précédemment)
+### ✅ Phase 1-9 : Foundation à Influenceur (Complété précédemment)
 - Authentification JWT (client, entreprise, influenceur)
 - Dashboards Admin, Entreprise, Client, Influenceur
 - Services/Produits, Commandes, Paiements Stripe
 - Système d'abonnement multi-tiers
 - Outils IA/Marketing
-- Refactoring des fichiers volumineux
+- Dashboard Client complet avec système d'amis
 
-### ✅ Phase 7 : Dashboard Client Complet (Complété)
-- Profil avec photo modifiable, LinkedIn
-- Système d'amis complet
-- Cartes de paiement
-- Documents
-- Messagerie production-ready
-- "Compte particulier" (ex entrepreneur)
-- Section "Demandes en cours"
+### ✅ Phase 10 : Système de Candidature Complet (23 Jan 2026)
+- Filtres emplois Homepage (Type, Ville, Entreprise)
+- Bouton "Postuler" avec modal sélection CV
+- Section "Postulations" dans Dashboard Entreprise
+- Algorithme boost publicitaire (pubs payées en premier)
 
-### ✅ Phase 8 : Système d'Offres d'Emploi (Complété)
-- CRUD Jobs complet
-- Toggle activation des offres
-- Section HomePage avec offres publiques
-- Candidatures avec CV et lettre de motivation
-- Notifications aux clients pour nouvelles offres
-- Date limite support
-
-### ✅ Phase 9 : Dashboard Influenceur Restructuré (Complété)
-- Tableau de bord avec stats
-- Système d'amis complet
-- Offres de collaboration
-- Profil éditable
-
-### ✅ Phase 10 : Système de Candidature Complet (Complété 23 Jan 2026)
-- [x] **Filtres emplois Homepage** : Type contrat (CDI, CDD, Stage, Freelance) + Localisation
-- [x] **Bouton "Postuler"** sur chaque carte d'emploi
-- [x] **Modal de candidature** : Sélection CV + Lettre de motivation
-- [x] **Section "Postulations"** dans Dashboard Entreprise
-- [x] **Gestion des statuts** : En attente / En examen / Acceptée / Refusée
-- [x] **Notifications candidats** sur changement de statut
-- [x] **Algorithme boost publicitaire** : Pubs payées affichées en premier, triées par budget
+### ✅ Phase 11 : Corrections Multiples (23 Jan 2026)
+- [x] **Inscription influenceur** : Redirige vers `/dashboard/influencer`
+- [x] **Dashboard influenceur** : Stats, collaborations, réseaux sociaux fonctionnels
+- [x] **Vidéo header Services/Produits** : Vidéos autoplay en arrière-plan
+- [x] **Filtres emploi élargis** : Grid 4 colonnes (Type, Ville, Entreprise, Reset)
+- [x] **Stripe checkout corrigé** : `response.url` au lieu de `response.checkout_url`
+- [x] **Avis clients centrés** : Texte et avatar centrés dans les cartes
+- [x] **Bouton switch compte** : Navigue vers section "particulier"
 
 ---
 
-## APIs Ajoutées (Phase 10)
+## APIs Clés
 
-### Publicités Boostées
-- `GET /api/advertising/public` - Liste pubs actives (triées par budget)
-- `POST /api/advertising/{id}/click` - Tracking clics
+### Authentification
+- `POST /api/auth/register` - Inscription (client, entreprise, influencer)
+- `POST /api/auth/login` - Connexion
+- `GET /api/auth/me` - Profil utilisateur
 
-### Gestion Candidatures (Entreprise)
-- `GET /api/enterprise/applications` - Toutes les candidatures
-- `PUT /api/enterprise/applications/{id}/status` - Modifier statut
+### Abonnements Stripe
+- `GET /api/subscriptions/plans` - Liste des plans disponibles
+- `POST /api/subscriptions/checkout?plan_id=X` - Créer checkout session
+- `POST /api/webhook/stripe` - Webhook Stripe
 
----
+### Publicités
+- `GET /api/advertising/public` - Publicités boostées (triées par budget)
+- `POST /api/enterprise/advertising` - Créer une pub
+- `POST /api/enterprise/advertising/{id}/pay` - Payer pour une pub
 
-## Collections MongoDB
+### Emplois
+- `GET /api/jobs` - Liste des offres (avec filtres type, location)
+- `POST /api/jobs/{id}/apply` - Postuler à une offre
+- `GET /api/enterprise/applications` - Candidatures reçues (entreprise)
+- `PUT /api/enterprise/applications/{id}/status` - Modifier statut candidature
 
-### Existantes
-- `users`, `enterprises`, `services_products`, `orders`, `notifications`
-- `friendships`, `payment_cards`, `client_documents`, `messages`
-- `jobs`, `job_applications`, `influencer_profiles`
-
-### Pour la publicité
-- `advertising` : Campagnes pub avec champs `is_paid`, `is_active`, `budget`, `impressions`, `clicks`
-
----
-
-## Tâches Restantes
-
-### 🔴 P0 - Haute Priorité (FAIT ✅)
-1. ~~Filtres offres d'emploi~~ ✅
-2. ~~Bouton Postuler avec CV~~ ✅
-3. ~~Section Postulations Entreprise~~ ✅
-4. ~~Algorithme boost publicitaire~~ ✅
-
-### 🟡 P1 - Moyenne Priorité
-1. **Test flux Stripe end-to-end** - Vérifier paiement abonnement et publicité
-2. **Responsivité mobile complète** - Audit CSS
-3. **Vidéo panoramique homepage**
-4. **Refonte menu Dashboard Entreprise** - Selon structure demandée
-
-### 🟢 P2 - Basse Priorité
-1. Commentaires défilants prestataires
-2. Variantes d'affichage produits
-3. Mini-labels sur annonces
-4. **Refactoring `server.py`** - Découper en routers FastAPI
-
----
-
-## Credentials de Test
-- **Admin** : admin@titelli.com / Admin123!
-- **Client** : test@example.com / Test123!
-- **Entreprise** : spa.luxury@titelli.com / Demo123!
-- **Influenceur** : (créer via inscription)
+### Influenceur
+- `GET /api/influencer/profile` - Profil influenceur
+- `PUT /api/influencer/profile` - Modifier profil
+- `GET /api/influencer/collaborations` - Mes collaborations
 
 ---
 
@@ -113,19 +72,52 @@
 ```
 /app/
 ├── backend/
-│   ├── server.py (3800+ lignes - APIs complètes)
+│   ├── server.py (4000+ lignes - APIs complètes)
 │   └── tests/
-│       ├── test_p0_features.py (nouveau)
-│       └── ...
+│       ├── test_p0_features.py
+│       └── test_bug_fixes_iteration11.py
 └── frontend/src/
     ├── pages/
-    │   ├── HomePage.js (filtres emploi + modal candidature)
+    │   ├── HomePage.js (filtres emploi 4 cols + modal candidature)
+    │   ├── ServicesPage.js (vidéo header)
+    │   ├── ProductsPage.js (vidéo header)
+    │   ├── ServiceProductDetailPage.js (avis centrés)
     │   ├── ClientDashboard.js
     │   ├── InfluencerDashboard.js
-    │   └── EnterpriseDashboard.js (section Postulations)
+    │   ├── EnterpriseDashboard.js (section Postulations)
+    │   └── AuthPage.js (inscription influenceur corrigée)
     └── services/
-        └── api.js (nouvelles APIs advertising, applications)
+        └── api.js
 ```
+
+---
+
+## Tâches Restantes
+
+### 🟡 P1 - Moyenne Priorité
+1. **Responsivité mobile complète** - Audit CSS
+2. **Refonte menu Dashboard Entreprise** - Structure selon maquettes
+3. **Vidéo panoramique homepage** - Grande vidéo en hero
+4. **Notifications en temps réel** - Alertes candidatures
+
+### 🟢 P2 - Basse Priorité
+1. Commentaires défilants prestataires
+2. Mini-labels sur annonces
+3. **Refactoring `server.py`** - Découper en routers FastAPI
+
+---
+
+## Credentials de Test
+- **Admin** : admin@titelli.com / Admin123!
+- **Client** : test@example.com / Test123!
+- **Entreprise** : spa.luxury@titelli.com / Demo123!
+- **Influenceur** : test_influencer2@example.com / Test123!
+
+---
+
+## Tests
+- **iteration_10.json** : Système candidature (100% passé)
+- **iteration_11.json** : Corrections multiples (100% passé)
 
 ---
 
