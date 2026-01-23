@@ -56,7 +56,7 @@ const ClientDashboard = () => {
   // Documents states
   const [documents, setDocuments] = useState([]);
   const [showAddDocument, setShowAddDocument] = useState(false);
-  const [documentForm, setDocumentForm] = useState({ name: '', category: 'general', url: '' });
+  const [documentForm, setDocumentForm] = useState({ name: '', category: 'cv', url: '' });
   
   // Pre-select CV category if coming from job application
   useEffect(() => {
