@@ -5495,17 +5495,36 @@ async def get_enterprise_subscription_tier(enterprise_id: str) -> dict:
     })
     
     if not subscription:
-        return {"tier": "free", "plan": None, "features": []}
+        return {
+            "tier": "free",
+            "plan": None,
+            "plan_name": "Gratuit",
+            "features": ["Exposition basique", "1 publication/mois"],
+            "ads_per_month": 1
+        }
     
     plan_id = subscription.get('plan_id', 'standard')
     plan = SUBSCRIPTION_PLANS.get(plan_id, SUBSCRIPTION_PLANS['standard'])
+    
+    # Calculate ads per month based on plan
+    ads_count = 1
+    if plan_id == 'standard':
+        ads_count = 1
+    elif plan_id == 'guest':
+        ads_count = 2
+    elif plan_id == 'premium':
+        ads_count = 4
+    elif plan_id == 'premium_mvp':
+        ads_count = 6
+    elif 'opti' in plan_id:
+        ads_count = 15
     
     return {
         "tier": plan.get('tier', 'basic'),
         "plan": plan_id,
         "plan_name": plan.get('name'),
         "features": plan.get('features', []),
-        "ads_per_month": 1 if plan_id == 'standard' else (4 if 'premium' in plan_id else 8 if 'opti' in plan_id else 1)
+        "ads_per_month": ads_count
     }
 
 @api_router.get("/enterprise/subscription-status")
