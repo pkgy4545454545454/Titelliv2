@@ -5444,7 +5444,7 @@ async def create_premium_checkout(plan: str, current_user: dict = Depends(get_cu
         await db.pending_subscriptions.insert_one(pending_sub)
         
         return {
-            "checkout_url": session_response.checkout_url,
+            "checkout_url": session_response.url,
             "session_id": session_response.session_id
         }
     except Exception as e:
