@@ -83,13 +83,6 @@ const EnterprisesPage = () => {
           </div>
         </div>
       </div>
-            Entreprises
-          </h1>
-          <p className="text-lg text-gray-400 max-w-2xl">
-            Découvrez tous les prestataires de confiance de la région de Lausanne
-          </p>
-        </div>
-      </div>
 
       {/* Search & Filters */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
