@@ -165,6 +165,62 @@ export const clientProvidersAPI = {
   remove: (providerId) => axios.delete(`${API}/client/providers/${providerId}`, { headers: getAuthHeaders() }),
 };
 
+// Activity Feed
+export const activityFeedAPI = {
+  getFeed: (limit = 50) => axios.get(`${API}/client/activity-feed`, { params: { limit }, headers: getAuthHeaders() }),
+  getMyFeed: (limit = 50) => axios.get(`${API}/client/my-feed`, { params: { limit }, headers: getAuthHeaders() }),
+};
+
+// Client Lifestyle
+export const lifestyleAPI = {
+  get: () => axios.get(`${API}/client/lifestyle`, { headers: getAuthHeaders() }),
+};
+
+// Client Invitations
+export const clientInvitationsAPI = {
+  list: () => axios.get(`${API}/client/invitations`, { headers: getAuthHeaders() }),
+  respond: (invitationId, accepted) => axios.put(`${API}/client/invitations/${invitationId}/respond`, null, { 
+    params: { accepted }, 
+    headers: getAuthHeaders() 
+  }),
+};
+
+// Enterprise Invitations to Clients
+export const enterpriseInvitationsAPI = {
+  create: (data) => axios.post(`${API}/enterprise/invitations`, data, { headers: getAuthHeaders() }),
+};
+
+// Current Offers/Promotions
+export const currentOffersAPI = {
+  list: () => axios.get(`${API}/client/current-offers`, { headers: getAuthHeaders() }),
+};
+
+// Client Promotions (Enterprise creates)
+export const promotionsAPI = {
+  create: (data) => axios.post(`${API}/enterprise/promotions`, null, { params: data, headers: getAuthHeaders() }),
+};
+
+// Favorite Guests
+export const guestsAPI = {
+  list: () => axios.get(`${API}/client/guests`, { headers: getAuthHeaders() }),
+  add: (data) => axios.post(`${API}/client/guests`, data, { headers: getAuthHeaders() }),
+  remove: (guestId) => axios.delete(`${API}/client/guests/${guestId}`, { headers: getAuthHeaders() }),
+};
+
+// Client Investments
+export const investmentsAPI = {
+  list: () => axios.get(`${API}/client/investments`, { headers: getAuthHeaders() }),
+  create: (data) => axios.post(`${API}/client/investments`, data, { headers: getAuthHeaders() }),
+  update: (id, data) => axios.put(`${API}/client/investments/${id}`, data, { headers: getAuthHeaders() }),
+  delete: (id) => axios.delete(`${API}/client/investments/${id}`, { headers: getAuthHeaders() }),
+};
+
+// Client Premium
+export const premiumAPI = {
+  getStatus: () => axios.get(`${API}/client/premium`, { headers: getAuthHeaders() }),
+  upgrade: (plan) => axios.post(`${API}/client/premium/upgrade`, null, { params: { plan }, headers: getAuthHeaders() }),
+};
+
 // ============ ENTERPRISE MANAGEMENT APIs ============
 
 // Offers/Promotions
