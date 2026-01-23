@@ -1420,6 +1420,165 @@ async def get_premium():
     ).sort("rating", -1).limit(6).to_list(6)
     return enterprises
 
+# ============ BOOSTED ADVERTISING - PUBLIC ENDPOINT ============
+
+@api_router.get("/advertising/public")
+async def get_public_advertising(
+    placement: Optional[str] = None,
+    category: Optional[str] = None,
+    limit: int = 10
+):
+    """
+    Get public advertising with boost algorithm.
+    Paid ads appear first, sorted by budget (higher budget = more visibility).
+    Non-paid/inactive ads are filtered out.
+    """
+    now = datetime.now(timezone.utc).isoformat()
+    
+    # Base query: only active and paid ads
+    query = {
+        "is_active": True,
+        "is_paid": True
+    }
+    
+    # Filter by placement if specified
+    if placement:
+        query["placement"] = placement
+    
+    # Filter by date range (start_date <= now <= end_date)
+    query["$or"] = [
+        {"start_date": {"$lte": now}, "end_date": {"$gte": now}},
+        {"start_date": {"$exists": False}},
+        {"end_date": {"$exists": False}}
+    ]
+    
+    # Fetch ads with boost algorithm:
+    # 1. First sort by budget (descending) - higher paying = more visibility
+    # 2. Then by created_at (recent first)
+    ads = await db.advertising.find(query, {"_id": 0}).sort([
+        ("budget", -1),  # Higher budget first
+        ("created_at", -1)  # Then by most recent
+    ]).limit(limit).to_list(limit)
+    
+    # Increment impressions for returned ads
+    for ad in ads:
+        await db.advertising.update_one(
+            {"id": ad['id']},
+            {"$inc": {"impressions": 1}}
+        )
+    
+    return {"ads": ads, "total": len(ads)}
+
+@api_router.post("/advertising/{ad_id}/click")
+async def track_ad_click(ad_id: str):
+    """Track a click on an advertisement"""
+    result = await db.advertising.update_one(
+        {"id": ad_id, "is_active": True},
+        {"$inc": {"clicks": 1}}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Publicité non trouvée")
+    return {"message": "Click enregistré"}
+
+# ============ ENTERPRISE JOB APPLICATIONS VIEW ============
+
+@api_router.get("/enterprise/applications")
+async def get_all_enterprise_applications(current_user: dict = Depends(get_current_user)):
+    """Get all job applications for an enterprise's jobs"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return {"applications": [], "jobs": []}
+    
+    # Get all jobs for this enterprise
+    jobs = await db.jobs.find({"enterprise_id": enterprise['id']}, {"_id": 0}).to_list(100)
+    job_ids = [job['id'] for job in jobs]
+    
+    if not job_ids:
+        return {"applications": [], "jobs": jobs}
+    
+    # Get all applications for these jobs
+    applications = await db.job_applications.find(
+        {"job_id": {"$in": job_ids}}, {"_id": 0}
+    ).sort("created_at", -1).to_list(500)
+    
+    # Enrich applications with user and job info
+    for app in applications:
+        user = await db.users.find_one({"id": app['user_id']}, {"_id": 0, "password": 0})
+        job = next((j for j in jobs if j['id'] == app['job_id']), None)
+        app['applicant'] = user
+        app['job'] = job
+        
+        # Get applicant's documents if available
+        documents = await db.client_documents.find(
+            {"user_id": app['user_id']}, {"_id": 0}
+        ).to_list(20)
+        app['documents'] = documents
+    
+    # Stats
+    stats = {
+        "total": len(applications),
+        "pending": len([a for a in applications if a.get('status') == 'pending']),
+        "reviewed": len([a for a in applications if a.get('status') == 'reviewed']),
+        "accepted": len([a for a in applications if a.get('status') == 'accepted']),
+        "rejected": len([a for a in applications if a.get('status') == 'rejected'])
+    }
+    
+    return {"applications": applications, "jobs": jobs, "stats": stats}
+
+@api_router.put("/enterprise/applications/{application_id}/status")
+async def update_application_status(
+    application_id: str,
+    status: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update the status of a job application"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    # Find the application
+    application = await db.job_applications.find_one({"id": application_id})
+    if not application:
+        raise HTTPException(status_code=404, detail="Candidature non trouvée")
+    
+    # Verify the job belongs to this enterprise
+    job = await db.jobs.find_one({"id": application['job_id'], "enterprise_id": enterprise['id']})
+    if not job:
+        raise HTTPException(status_code=403, detail="Non autorisé")
+    
+    # Update status
+    valid_statuses = ['pending', 'reviewed', 'accepted', 'rejected']
+    if status not in valid_statuses:
+        raise HTTPException(status_code=400, detail=f"Statut invalide. Utilisez: {valid_statuses}")
+    
+    await db.job_applications.update_one(
+        {"id": application_id},
+        {"$set": {"status": status, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    # Notify the applicant
+    applicant = await db.users.find_one({"id": application['user_id']})
+    if applicant:
+        status_messages = {
+            'reviewed': "Votre candidature est en cours d'examen",
+            'accepted': "Félicitations ! Votre candidature a été acceptée",
+            'rejected': "Votre candidature n'a pas été retenue"
+        }
+        if status in status_messages:
+            notification = {
+                "id": str(uuid.uuid4()),
+                "user_id": application['user_id'],
+                "title": f"Mise à jour candidature - {job['title']}",
+                "message": status_messages[status],
+                "notification_type": "job_application_status",
+                "data": {"job_id": job['id'], "application_id": application_id, "status": status},
+                "is_read": False,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.notifications.insert_one(notification)
+    
+    return {"message": "Statut mis à jour", "status": status}
+
 # ============ OFFERS/PROMOTIONS ROUTES ============
 
 class OfferCreate(BaseModel):
