@@ -133,7 +133,7 @@ const AuthPage = () => {
       if (redirectType === 'entreprise') {
         navigate('/dashboard/entreprise');
       } else if (redirectType === 'influencer') {
-        navigate('/influencer-dashboard');
+        navigate('/dashboard/influencer');
       } else {
         navigate('/dashboard/client');
       }
