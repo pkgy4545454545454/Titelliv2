@@ -753,7 +753,7 @@ const HomePage = () => {
                       <label 
                         key={doc.id} 
                         className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                          applyForm.resume_url === doc.file_path 
+                          applyForm.resume_url === doc.url 
                             ? 'bg-[#0047AB]/20 border border-[#0047AB]' 
                             : 'bg-white/5 border border-white/10 hover:bg-white/10'
                         }`}
@@ -761,13 +761,16 @@ const HomePage = () => {
                         <input
                           type="radio"
                           name="resume"
-                          value={doc.file_path}
-                          checked={applyForm.resume_url === doc.file_path}
+                          value={doc.url}
+                          checked={applyForm.resume_url === doc.url}
                           onChange={(e) => setApplyForm({...applyForm, resume_url: e.target.value})}
                           className="accent-[#0047AB]"
                         />
                         <FileText className="w-5 h-5 text-[#0047AB]" />
-                        <span className="text-white text-sm">{doc.file_name}</span>
+                        <div className="flex-1">
+                          <span className="text-white text-sm">{doc.name}</span>
+                          <span className="text-xs text-gray-500 ml-2">({doc.category})</span>
+                        </div>
                       </label>
                     ))}
                   </div>
