@@ -2713,7 +2713,7 @@ async def pay_for_advertising(ad_id: str, request: Request, current_user: dict =
     }
     await db.transactions.insert_one(transaction)
     
-    return {"checkout_url": session.checkout_url, "session_id": session.session_id}
+    return {"url": session.url, "session_id": session.session_id}
 
 @api_router.post("/enterprise/advertising/{ad_id}/activate")
 async def activate_advertising_after_payment(ad_id: str, session_id: str, current_user: dict = Depends(get_current_user)):
