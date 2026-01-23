@@ -2803,10 +2803,15 @@ async def get_ia_campaigns(current_user: dict = Depends(get_current_user)):
     
     campaigns = await db.ia_campaigns.find({"enterprise_id": enterprise['id']}, {"_id": 0}).sort("created_at", -1).to_list(100)
     
-    # Calculate stats
-    total_reach = sum(c.get('reach', 0) for c in campaigns)
+    # Get REAL stats from orders for this enterprise
+    real_orders = await db.orders.find({"enterprise_id": enterprise['id']}).to_list(1000)
+    unique_customers = set([o.get('user_id') for o in real_orders if o.get('user_id')])
+    total_real_reach = len(unique_customers)
+    
+    # Calculate real stats
+    total_reach = sum(c.get('reach', 0) for c in campaigns) if campaigns else total_real_reach
     total_engagement = sum(c.get('engagement', 0) for c in campaigns)
-    total_conversions = sum(c.get('conversions', 0) for c in campaigns)
+    total_conversions = len(real_orders)  # Real conversions = real orders
     active_count = len([c for c in campaigns if c.get('status') == 'active'])
     
     return {
@@ -2817,8 +2822,171 @@ async def get_ia_campaigns(current_user: dict = Depends(get_current_user)):
             "total_conversions": total_conversions,
             "active_campaigns": active_count,
             "engagement_rate": round((total_engagement / total_reach * 100), 1) if total_reach > 0 else 0,
-            "conversion_rate": round((total_conversions / total_engagement * 100), 1) if total_engagement > 0 else 0
+            "conversion_rate": round((total_conversions / max(total_reach, 1) * 100), 1) if total_reach > 0 else 0,
+            "real_customers": total_real_reach
         }
+    }
+
+# ============ REAL CUSTOMER TARGETING BASED ON ORDERS ============
+
+@api_router.get("/enterprise/customers")
+async def get_enterprise_customers(
+    current_user: dict = Depends(get_current_user),
+    filter_type: Optional[str] = None,  # 'all', 'frequent', 'recent', 'inactive'
+    product_id: Optional[str] = None,
+    service_id: Optional[str] = None,
+    search: Optional[str] = None
+):
+    """Get real customers who have ordered from this enterprise"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    # Get all orders for this enterprise
+    orders = await db.orders.find({"enterprise_id": enterprise['id']}).to_list(1000)
+    
+    # Group orders by customer
+    customer_orders = {}
+    for order in orders:
+        user_id = order.get('user_id')
+        if not user_id:
+            continue
+        if user_id not in customer_orders:
+            customer_orders[user_id] = []
+        customer_orders[user_id].append(order)
+    
+    # Get customer details
+    customers = []
+    for user_id, user_orders in customer_orders.items():
+        user = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
+        if not user:
+            continue
+        
+        # Calculate customer stats
+        total_spent = sum(o.get('total_amount', 0) for o in user_orders)
+        last_order_date = max([o.get('created_at', '') for o in user_orders])
+        products_bought = list(set([o.get('item_name', '') for o in user_orders if o.get('item_name')]))
+        
+        customer_data = {
+            "id": user_id,
+            "first_name": user.get('first_name', ''),
+            "last_name": user.get('last_name', ''),
+            "email": user.get('email', ''),
+            "phone": user.get('phone', ''),
+            "profile_image": user.get('profile_image'),
+            "orders_count": len(user_orders),
+            "total_spent": total_spent,
+            "last_order_date": last_order_date,
+            "products_bought": products_bought,
+            "is_frequent": len(user_orders) >= 3,
+            "is_premium": user.get('is_premium', False)
+        }
+        
+        # Apply filters
+        if filter_type == 'frequent' and len(user_orders) < 3:
+            continue
+        if filter_type == 'recent':
+            # Orders in last 30 days
+            from datetime import datetime, timedelta, timezone
+            thirty_days_ago = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+            if last_order_date < thirty_days_ago:
+                continue
+        
+        if product_id:
+            product_orders = [o for o in user_orders if o.get('item_id') == product_id]
+            if not product_orders:
+                continue
+        
+        if service_id:
+            service_orders = [o for o in user_orders if o.get('item_id') == service_id]
+            if not service_orders:
+                continue
+        
+        if search:
+            search_lower = search.lower()
+            name_match = search_lower in user.get('first_name', '').lower() or search_lower in user.get('last_name', '').lower()
+            if not name_match:
+                continue
+        
+        customers.append(customer_data)
+    
+    # Sort by total spent
+    customers.sort(key=lambda x: x['total_spent'], reverse=True)
+    
+    return {
+        "customers": customers,
+        "total": len(customers),
+        "stats": {
+            "total_customers": len(customer_orders),
+            "frequent_customers": len([c for c in customers if c['is_frequent']]),
+            "total_revenue": sum(c['total_spent'] for c in customers)
+        }
+    }
+
+@api_router.post("/enterprise/send-question")
+async def send_suggestive_question(
+    data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Send a suggestive question to selected customers via messaging"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    question = data.get('question', '')
+    customer_ids = data.get('customer_ids', [])
+    filter_type = data.get('filter_type')
+    product_id = data.get('product_id')
+    service_id = data.get('service_id')
+    
+    if not question:
+        raise HTTPException(status_code=400, detail="Question requise")
+    
+    # If no specific customers selected, use filter to get them
+    if not customer_ids and (filter_type or product_id or service_id):
+        customers_response = await get_enterprise_customers(
+            current_user=current_user,
+            filter_type=filter_type,
+            product_id=product_id,
+            service_id=service_id
+        )
+        customer_ids = [c['id'] for c in customers_response['customers']]
+    
+    if not customer_ids:
+        raise HTTPException(status_code=400, detail="Aucun client sélectionné")
+    
+    # Send message to each customer
+    sent_count = 0
+    for customer_id in customer_ids:
+        message = {
+            "id": str(uuid.uuid4()),
+            "sender_id": current_user['id'],
+            "receiver_id": customer_id,
+            "content": f"📊 Question de {enterprise['business_name']}:\n\n{question}",
+            "message_type": "suggestive_question",
+            "is_read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.messages.insert_one(message)
+        
+        # Create notification
+        notification = {
+            "id": str(uuid.uuid4()),
+            "user_id": customer_id,
+            "title": f"Question de {enterprise['business_name']}",
+            "message": question[:100] + ("..." if len(question) > 100 else ""),
+            "notification_type": "suggestive_question",
+            "data": {"enterprise_id": enterprise['id']},
+            "link": "/dashboard/client?tab=messages",
+            "is_read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(notification)
+        sent_count += 1
+    
+    return {
+        "message": f"Question envoyée à {sent_count} client(s)",
+        "sent_count": sent_count
     }
 
 @api_router.post("/enterprise/ia-campaigns")
