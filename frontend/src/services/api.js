@@ -216,6 +216,12 @@ export const developmentAPI = {
   }),
 };
 
+// Enterprise Customers (Real targeting)
+export const enterpriseCustomersAPI = {
+  list: (params = {}) => axios.get(`${API}/enterprise/customers`, { params, headers: getAuthHeaders() }),
+  sendQuestion: (data) => axios.post(`${API}/enterprise/send-question`, data, { headers: getAuthHeaders() }),
+};
+
 // Finances
 export const financesAPI = {
   get: (params) => axios.get(`${API}/enterprise/finances`, { params, headers: getAuthHeaders() }),
