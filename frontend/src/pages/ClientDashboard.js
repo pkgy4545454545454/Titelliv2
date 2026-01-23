@@ -72,6 +72,12 @@ const ClientDashboard = () => {
   // Online status
   const [friendsOnlineData, setFriendsOnlineData] = useState({ friends: [], online_count: 0, total_count: 0 });
 
+  // Training review state
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewingTraining, setReviewingTraining] = useState(null);
+  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
+  const [submittingReview, setSubmittingReview] = useState(false);
+
   useEffect(() => {
     if (!isClient) {
       navigate('/');
