@@ -23,6 +23,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import CartPage from './pages/CartPage';
 import OrdersPage from './pages/OrdersPage';
 import JobDetailPage from './pages/JobDetailPage';
+import JobsPage from './pages/JobsPage';
 import { PaymentSuccessPage, PaymentCancelPage } from './pages/PaymentPages';
 
 import './index.css';
