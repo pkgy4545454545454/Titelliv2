@@ -5414,15 +5414,19 @@ async def create_premium_checkout(plan: str, current_user: dict = Depends(get_cu
         # Create Stripe checkout session using emergentintegrations
         checkout = StripeCheckout(api_key=STRIPE_API_KEY)
         
-        # Use CheckoutSessionRequest for proper structure
+        # Use CheckoutSessionRequest with correct parameters
+        # Note: Using payment mode as subscriptions require pre-created Stripe prices
         session_request = CheckoutSessionRequest(
-            product_name=f"Titelli {plan_info['name']}",
-            unit_amount=int(plan_info['price'] * 100),  # Amount in cents
+            amount=plan_info['price'],  # Amount in CHF
             currency="chf",
             quantity=1,
-            mode="subscription",  # Subscription mode for recurring payments
-            success_url=f"{os.environ.get('FRONTEND_URL', 'http://localhost:3000')}/dashboard/client?tab=premium&success=true&plan={plan}",
-            cancel_url=f"{os.environ.get('FRONTEND_URL', 'http://localhost:3000')}/dashboard/client?tab=premium&cancelled=true"
+            success_url=f"{os.environ.get('FRONTEND_URL', 'https://market-overhaul-1.preview.emergentagent.com')}/dashboard/client?tab=premium&success=true&plan={plan}",
+            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://market-overhaul-1.preview.emergentagent.com')}/dashboard/client?tab=premium&cancelled=true",
+            metadata={
+                "plan": plan,
+                "user_id": current_user['id'],
+                "product_name": f"Titelli {plan_info['name']} - Abonnement mensuel"
+            }
         )
         
         session_response = await checkout.create_checkout_session(session_request)
