@@ -432,13 +432,6 @@ export const influencersAPI = {
   }),
 };
 
-export const enterpriseInvitationsAPI = {
-  list: () => axios.get(`${API}/enterprise/invitations`, { headers: getAuthHeaders() }),
-  create: (data) => axios.post(`${API}/enterprise/invitations`, data, { headers: getAuthHeaders() }),
-  toggle: (id) => axios.put(`${API}/enterprise/invitations/${id}/toggle`, null, { headers: getAuthHeaders() }),
-  delete: (id) => axios.delete(`${API}/enterprise/invitations/${id}`, { headers: getAuthHeaders() }),
-};
-
 export const commercialGesturesAPI = {
   list: () => axios.get(`${API}/enterprise/commercial-gestures`, { headers: getAuthHeaders() }),
   create: (data) => axios.post(`${API}/enterprise/commercial-gestures`, data, { headers: getAuthHeaders() }),
