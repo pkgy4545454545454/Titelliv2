@@ -38,9 +38,17 @@ const EnterprisePage = () => {
         setServices(response.data.services || []);
         setReviews(response.data.reviews || []);
         
-        // Extract photos and videos from enterprise media gallery
-        const photos = response.data.media_gallery?.filter(m => m.type === 'photo' || m.media_type === 'photo') || [];
-        const videos = response.data.media_gallery?.filter(m => m.type === 'video' || m.media_type === 'video') || [];
+        // Extract photos and videos from enterprise data
+        const photos = (response.data.photos || []).map((url, index) => ({ 
+          id: `photo-${index}`, 
+          url, 
+          type: 'photo' 
+        }));
+        const videos = (response.data.videos || []).map((url, index) => ({ 
+          id: `video-${index}`, 
+          url, 
+          type: 'video' 
+        }));
         setMediaGallery({ photos, videos });
         
         // Fetch enterprise trainings
