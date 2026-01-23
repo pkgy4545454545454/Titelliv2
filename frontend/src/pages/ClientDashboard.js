@@ -8,15 +8,18 @@ import {
   GraduationCap, FolderOpen, Phone, Truck, Package, Users, HelpCircle, 
   Handshake, Info, Target, Building2, Menu, X, Camera, Edit, Trash2, Plus,
   CheckCircle, XCircle, Send, Linkedin, Eye, UserPlus, ArrowLeftRight,
-  Upload, Clock, ChevronDown, DollarSign, Bookmark, Store, ThumbsUp
+  Upload, Clock, ChevronDown, DollarSign, Bookmark, Store, ThumbsUp,
+  Home, Zap, Award, Sparkles, MessageCircle, Share2, ExternalLink
 } from 'lucide-react';
 import { 
   orderAPI, cashbackAPI, featuredAPI, clientProfileAPI, friendsAPI, 
   paymentCardsAPI, clientDocumentsAPI, messagesAPI, notificationsAPI, uploadAPI,
   trainingsAPI, onlineStatusAPI, clientAgendaAPI, clientFinancesAPI, 
-  clientDonationsAPI, wishlistAPI, clientSuggestionsAPI, clientProvidersAPI
+  clientDonationsAPI, wishlistAPI, clientSuggestionsAPI, clientProvidersAPI,
+  activityFeedAPI, lifestyleAPI, clientInvitationsAPI, currentOffersAPI,
+  guestsAPI, investmentsAPI, premiumAPI
 } from '../services/api';
-import api from '../services/api';
+import api, { getImageUrl } from '../services/api';
 import { toast } from 'sonner';
 import EnterpriseCard from '../components/EnterpriseCard';
 
