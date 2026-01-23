@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Star, MapPin, Clock, Truck, ShoppingCart, Heart, Share2, Phone, Mail, Globe, Check, AlertCircle } from 'lucide-react';
-import { servicesProductsAPI, enterpriseAPI, reviewAPI } from '../services/api';
+import { servicesProductsAPI, enterpriseAPI, reviewAPI, wishlistAPI } from '../services/api';
 import { useCart } from '../context/CartContext';
 import { toast } from 'sonner';
 
@@ -18,6 +18,8 @@ const ServiceProductDetailPage = () => {
   const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [isInWishlist, setIsInWishlist] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
