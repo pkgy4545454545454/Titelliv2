@@ -1850,6 +1850,7 @@ async def purchase_training(training_id: str, current_user: dict = Depends(get_c
     
     # Create Stripe checkout for training
     try:
+        stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY)
         checkout_request = CheckoutSessionRequest(
             amount=int(training['price'] * 100),
             currency="chf",
@@ -1861,7 +1862,7 @@ async def purchase_training(training_id: str, current_user: dict = Depends(get_c
         response = await stripe_checkout.create_checkout_session(checkout_request)
         return {"url": response.url, "session_id": response.session_id}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erreur paiement: {str(e)}")
+        raise HTTPException(status_code=520, detail=f"Erreur paiement: {str(e)}")
 
 @api_router.post("/trainings/{training_id}/enroll")
 async def enroll_training(training_id: str, session_id: Optional[str] = None, current_user: dict = Depends(get_current_user)):
