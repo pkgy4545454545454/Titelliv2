@@ -5385,12 +5385,22 @@ async def get_premium_status(current_user: dict = Depends(get_current_user)):
     """Get client's premium subscription status and benefits"""
     user = await db.users.find_one({"id": current_user['id']}, {"_id": 0})
     
+    # Check for active subscription first
     subscription = await db.subscriptions.find_one(
         {"user_id": current_user['id'], "status": "active"},
         {"_id": 0}
     )
     
-    current_plan = subscription.get('plan', 'free') if subscription else 'free'
+    # Determine current plan - prioritize subscription, fallback to user profile
+    if subscription:
+        current_plan = subscription.get('plan', 'free')
+    else:
+        # Use user's premium_plan field as fallback
+        current_plan = user.get('premium_plan', 'free') if user else 'free'
+        # If user is marked as premium but no active subscription, they're still on that plan
+        if user and user.get('is_premium') and current_plan == 'free':
+            current_plan = 'premium'  # Default to premium if marked as premium
+    
     cashback_rate = PREMIUM_PLANS.get(current_plan, PREMIUM_PLANS['free'])['cashback_rate']
     
     return {
@@ -5399,7 +5409,8 @@ async def get_premium_status(current_user: dict = Depends(get_current_user)):
         "subscription": subscription,
         "benefits": PREMIUM_PLANS,
         "user_since": user.get('created_at') if user else None,
-        "cashback_rate": int(cashback_rate * 100)
+        "cashback_rate": int(cashback_rate * 100),
+        "has_active_subscription": subscription is not None
     }
 
 @api_router.post("/client/premium/checkout")
