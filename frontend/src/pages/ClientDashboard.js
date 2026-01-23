@@ -58,6 +58,13 @@ const ClientDashboard = () => {
   const [showAddDocument, setShowAddDocument] = useState(false);
   const [documentForm, setDocumentForm] = useState({ name: '', category: 'general', url: '' });
   
+  // Pre-select CV category if coming from job application
+  useEffect(() => {
+    if (returnToJobId && activeTab === 'documents') {
+      setDocumentForm(prev => ({ ...prev, category: 'cv' }));
+    }
+  }, [returnToJobId, activeTab]);
+  
   // Messages states
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
