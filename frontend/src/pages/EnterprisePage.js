@@ -62,7 +62,7 @@ const EnterprisePage = () => {
         
         // Fetch enterprise jobs
         try {
-          const jobsRes = await jobsAPI.list();
+          const jobsRes = await jobsAPI.listAll();
           const jobsData = jobsRes.data?.jobs || jobsRes.data || [];
           const enterpriseJobs = jobsData.filter(j => j.enterprise_id === id);
           setJobs(enterpriseJobs);
