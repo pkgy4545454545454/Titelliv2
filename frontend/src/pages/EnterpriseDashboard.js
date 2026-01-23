@@ -1462,6 +1462,243 @@ const GenericSection = ({ title, icon: Icon, items, onAdd, onDelete, emptyText, 
   );
 };
 
+// Applications/Postulations Section Component
+const ApplicationsSection = ({ applications, onRefresh }) => {
+  const [filter, setFilter] = useState('all');
+  const [selectedApp, setSelectedApp] = useState(null);
+  const [updating, setUpdating] = useState(false);
+  
+  const { applications: appList = [], jobs = [], stats = {} } = applications || {};
+  
+  const filteredApps = filter === 'all' 
+    ? appList 
+    : appList.filter(app => app.status === filter);
+  
+  const updateStatus = async (applicationId, status) => {
+    setUpdating(true);
+    try {
+      const { enterpriseApplicationsAPI } = await import('../services/api');
+      await enterpriseApplicationsAPI.updateStatus(applicationId, status);
+      toast.success('Statut mis à jour');
+      onRefresh();
+    } catch (error) {
+      toast.error('Erreur lors de la mise à jour');
+    } finally {
+      setUpdating(false);
+    }
+  };
+  
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleDateString('fr-CH', {
+      day: 'numeric', month: 'short', year: 'numeric'
+    });
+  };
+
+  return (
+    <div className="space-y-6" data-testid="applications-section">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+            Postulations reçues
+          </h1>
+          <p className="text-gray-400 text-sm mt-1">
+            {stats.total || 0} candidature(s) au total
+          </p>
+        </div>
+        
+        {/* Stats Cards */}
+        <div className="flex flex-wrap gap-2">
+          <button 
+            onClick={() => setFilter('all')}
+            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${filter === 'all' ? 'bg-[#0047AB] text-white' : 'bg-white/10 text-gray-300 hover:bg-white/20'}`}
+          >
+            Toutes ({stats.total || 0})
+          </button>
+          <button 
+            onClick={() => setFilter('pending')}
+            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${filter === 'pending' ? 'bg-yellow-500 text-black' : 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30'}`}
+          >
+            En attente ({stats.pending || 0})
+          </button>
+          <button 
+            onClick={() => setFilter('reviewed')}
+            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${filter === 'reviewed' ? 'bg-blue-500 text-white' : 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30'}`}
+          >
+            En examen ({stats.reviewed || 0})
+          </button>
+          <button 
+            onClick={() => setFilter('accepted')}
+            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${filter === 'accepted' ? 'bg-green-500 text-black' : 'bg-green-500/20 text-green-400 hover:bg-green-500/30'}`}
+          >
+            Acceptées ({stats.accepted || 0})
+          </button>
+          <button 
+            onClick={() => setFilter('rejected')}
+            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${filter === 'rejected' ? 'bg-red-500 text-white' : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'}`}
+          >
+            Refusées ({stats.rejected || 0})
+          </button>
+        </div>
+      </div>
+
+      {filteredApps.length > 0 ? (
+        <div className="space-y-4">
+          {filteredApps.map((app) => (
+            <div 
+              key={app.id} 
+              className="card-service rounded-xl p-5 hover:border-[#0047AB]/30 transition-all"
+              data-testid={`application-card-${app.id}`}
+            >
+              <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                {/* Applicant Info */}
+                <div className="flex items-start gap-4 flex-1">
+                  <div className="w-12 h-12 rounded-full bg-[#0047AB]/20 flex items-center justify-center flex-shrink-0">
+                    {app.applicant?.profile_image ? (
+                      <img src={app.applicant.profile_image} alt="" className="w-12 h-12 rounded-full object-cover" />
+                    ) : (
+                      <UserCircle className="w-6 h-6 text-[#0047AB]" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-white font-semibold">
+                      {app.applicant?.first_name} {app.applicant?.last_name}
+                    </h3>
+                    <p className="text-[#D4AF37] text-sm">{app.job?.title || 'Poste inconnu'}</p>
+                    <p className="text-gray-400 text-xs mt-1">
+                      Candidature du {formatDate(app.created_at)}
+                    </p>
+                    
+                    {/* Cover letter preview */}
+                    {app.cover_letter && (
+                      <div className="mt-3 p-3 bg-white/5 rounded-lg">
+                        <p className="text-gray-300 text-sm line-clamp-2">{app.cover_letter}</p>
+                      </div>
+                    )}
+                    
+                    {/* Documents */}
+                    {app.resume_url && (
+                      <div className="mt-3 flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-[#0047AB]" />
+                        <a 
+                          href={app.resume_url.startsWith('http') ? app.resume_url : `${process.env.REACT_APP_BACKEND_URL}${app.resume_url}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#0047AB] text-sm hover:underline"
+                        >
+                          Voir le CV
+                        </a>
+                      </div>
+                    )}
+                    
+                    {/* Additional documents */}
+                    {app.documents && app.documents.length > 0 && (
+                      <div className="mt-2">
+                        <p className="text-xs text-gray-500 mb-1">Documents disponibles:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {app.documents.slice(0, 3).map((doc, idx) => (
+                            <a 
+                              key={idx}
+                              href={doc.file_path?.startsWith('http') ? doc.file_path : `${process.env.REACT_APP_BACKEND_URL}${doc.file_path}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1 px-2 py-1 bg-white/10 rounded text-xs text-gray-300 hover:bg-white/20"
+                            >
+                              <FileText className="w-3 h-3" />
+                              {doc.file_name?.substring(0, 15)}...
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Status & Actions */}
+                <div className="flex flex-col items-end gap-3">
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    app.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                    app.status === 'reviewed' ? 'bg-blue-500/20 text-blue-400' :
+                    app.status === 'accepted' ? 'bg-green-500/20 text-green-400' :
+                    app.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
+                    'bg-gray-500/20 text-gray-400'
+                  }`}>
+                    {app.status === 'pending' ? 'En attente' :
+                     app.status === 'reviewed' ? 'En examen' :
+                     app.status === 'accepted' ? 'Acceptée' :
+                     app.status === 'rejected' ? 'Refusée' : app.status}
+                  </span>
+                  
+                  {/* Action buttons */}
+                  <div className="flex gap-2">
+                    {app.status === 'pending' && (
+                      <>
+                        <button
+                          onClick={() => updateStatus(app.id, 'reviewed')}
+                          disabled={updating}
+                          className="px-3 py-1.5 bg-blue-500/20 text-blue-400 rounded-lg text-xs hover:bg-blue-500/30 transition-colors"
+                        >
+                          Examiner
+                        </button>
+                        <button
+                          onClick={() => updateStatus(app.id, 'accepted')}
+                          disabled={updating}
+                          className="px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg text-xs hover:bg-green-500/30 transition-colors"
+                        >
+                          <CheckCircle className="w-3 h-3 inline mr-1" />
+                          Accepter
+                        </button>
+                        <button
+                          onClick={() => updateStatus(app.id, 'rejected')}
+                          disabled={updating}
+                          className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg text-xs hover:bg-red-500/30 transition-colors"
+                        >
+                          <XCircle className="w-3 h-3 inline mr-1" />
+                          Refuser
+                        </button>
+                      </>
+                    )}
+                    {app.status === 'reviewed' && (
+                      <>
+                        <button
+                          onClick={() => updateStatus(app.id, 'accepted')}
+                          disabled={updating}
+                          className="px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg text-xs hover:bg-green-500/30 transition-colors"
+                        >
+                          <CheckCircle className="w-3 h-3 inline mr-1" />
+                          Accepter
+                        </button>
+                        <button
+                          onClick={() => updateStatus(app.id, 'rejected')}
+                          disabled={updating}
+                          className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg text-xs hover:bg-red-500/30 transition-colors"
+                        >
+                          <XCircle className="w-3 h-3 inline mr-1" />
+                          Refuser
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="card-service rounded-xl p-12 text-center">
+          <ClipboardList className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+          <p className="text-gray-400">
+            {filter === 'all' ? "Aucune candidature reçue" : `Aucune candidature avec le statut "${filter}"`}
+          </p>
+          <p className="text-sm text-gray-500 mt-2">
+            Les candidatures à vos offres d'emploi apparaîtront ici
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Stock Section Component
 const StockSection = ({ stock, services, onRefresh }) => {
   const [showAdd, setShowAdd] = useState(false);
