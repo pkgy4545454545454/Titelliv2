@@ -25,7 +25,9 @@ const InfluencersSection = () => {
         influencersAPI.list(),
         influencersAPI.getCollaborations()
       ]);
-      setInfluencers(influencersRes.data || []);
+      // API returns {influencers: [...], total: N}
+      const influencersData = influencersRes.data?.influencers || influencersRes.data || [];
+      setInfluencers(Array.isArray(influencersData) ? influencersData : []);
       setCollaborations(collabRes.data?.collaborations || []);
       setStats(collabRes.data?.stats || {});
     } catch (error) {
