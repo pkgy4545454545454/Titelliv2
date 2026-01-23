@@ -465,13 +465,26 @@ const EnterpriseDashboard = () => {
               {/* Stats Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {stats.map((stat, index) => (
-                  <div key={index} className="card-service rounded-xl p-4">
+                  <div 
+                    key={index} 
+                    className={`rounded-xl p-4 bg-gradient-to-br ${stat.gradient} border ${stat.borderColor} relative overflow-hidden`}
+                    style={stat.notifCount > 0 ? {
+                      animation: 'pulse-green 2s infinite'
+                    } : {}}
+                  >
                     <div className="flex items-center justify-between mb-2">
-                      <stat.icon className={`w-5 h-5 ${stat.color}`} />
-                      <span className="text-xs text-green-400">{stat.trend}</span>
+                      <div className={`w-10 h-10 rounded-lg ${stat.iconBg} flex items-center justify-center`}>
+                        <stat.icon className={`w-5 h-5 ${stat.iconColor}`} />
+                      </div>
+                      <span className={`text-xs font-medium ${stat.trendColor}`}>{stat.trend}</span>
                     </div>
                     <p className="text-2xl font-bold text-white">{stat.value}</p>
                     <p className="text-xs text-gray-400">{stat.label}</p>
+                    {stat.notifCount > 0 && (
+                      <span className="absolute top-2 right-2 w-6 h-6 bg-green-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-bounce">
+                        {stat.notifCount}
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>
