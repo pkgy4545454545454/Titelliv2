@@ -746,6 +746,23 @@ async def register(user_data: UserCreate):
     user_dict['password'] = hash_password(user_data.password)
     user_dict['created_at'] = user_dict['created_at'].isoformat()
     
+    # Add influencer-specific fields
+    if user_data.user_type == 'influencer':
+        user_dict['social_accounts'] = user_data.social_accounts or {}
+        user_dict['niche'] = user_data.niche
+        # Create influencer profile
+        influencer_profile = {
+            "id": str(uuid.uuid4()),
+            "user_id": user_dict['id'],
+            "social_accounts": user_data.social_accounts or {},
+            "niche": user_data.niche,
+            "followers_count": 0,
+            "engagement_rate": 0.0,
+            "collaborations": [],
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.influencer_profiles.insert_one(influencer_profile)
+    
     await db.users.insert_one(user_dict)
     
     token = create_token(user.id, user.user_type)
