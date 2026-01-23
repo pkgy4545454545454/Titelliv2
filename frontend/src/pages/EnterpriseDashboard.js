@@ -15,7 +15,7 @@ import {
   enterpriseAPI, servicesProductsAPI, orderAPI, paymentAPI, offersAPI,
   trainingsAPI, jobsAPI, realEstateAPI, investmentsAPI, stockAPI,
   agendaAPI, teamAPI, permanentOrdersAPI, documentsAPI, financesAPI, advertisingAPI,
-  uploadAPI
+  uploadAPI, enterpriseApplicationsAPI
 } from '../services/api';
 import { toast } from 'sonner';
 // Composants extraits pour réduire la taille du fichier
