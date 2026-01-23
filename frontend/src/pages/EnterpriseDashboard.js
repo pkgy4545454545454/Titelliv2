@@ -123,6 +123,8 @@ const EnterpriseDashboard = () => {
   const menuSections = [
     {
       title: 'Principal',
+      gradient: 'from-blue-500/20 to-blue-600/10',
+      borderColor: 'border-blue-500/30',
       items: [
         { id: 'overview', label: 'Accueil', icon: LayoutDashboard },
         { id: 'profile', label: 'Profil entreprise', icon: Building2 },
@@ -133,9 +135,11 @@ const EnterpriseDashboard = () => {
     },
     {
       title: 'Commercial',
+      gradient: 'from-green-500/20 to-green-600/10',
+      borderColor: 'border-green-500/30',
       items: [
         { id: 'services', label: 'Services & Produits', icon: Package },
-        { id: 'orders', label: 'Mes commandes', icon: ShoppingCart },
+        { id: 'orders', label: 'Mes commandes', icon: ShoppingCart, notifKey: 'orders' },
         { id: 'deliveries', label: 'Mes livraisons', icon: Truck },
         { id: 'activities', label: 'Mes activités', icon: Activity },
         { id: 'stock', label: 'Gestion des stocks', icon: Box },
@@ -144,6 +148,8 @@ const EnterpriseDashboard = () => {
     },
     {
       title: 'Marketing',
+      gradient: 'from-purple-500/20 to-purple-600/10',
+      borderColor: 'border-purple-500/30',
       items: [
         { id: 'offers', label: 'Offres & Promotions', icon: Gift },
         { id: 'advertising', label: 'Mes publicités', icon: Megaphone },
@@ -154,6 +160,8 @@ const EnterpriseDashboard = () => {
     },
     {
       title: 'IA & Marketing',
+      gradient: 'from-cyan-500/20 to-cyan-600/10',
+      borderColor: 'border-cyan-500/30',
       items: [
         { id: 'ia_clients', label: 'IA Ciblage clients', icon: Target },
         { id: 'influencers', label: 'Influenceurs', icon: Users },
@@ -162,15 +170,19 @@ const EnterpriseDashboard = () => {
     },
     {
       title: 'Ressources Humaines',
+      gradient: 'from-orange-500/20 to-orange-600/10',
+      borderColor: 'border-orange-500/30',
       items: [
         { id: 'team', label: 'Mon personnel', icon: Users },
         { id: 'jobs', label: 'Emplois & Stages', icon: Briefcase },
-        { id: 'applications', label: 'Postulations', icon: ClipboardList },
+        { id: 'applications', label: 'Postulations', icon: ClipboardList, notifKey: 'applications' },
         { id: 'trainings', label: 'Formations', icon: GraduationCap },
       ]
     },
     {
       title: 'Finances & Investissements',
+      gradient: 'from-yellow-500/20 to-yellow-600/10',
+      borderColor: 'border-yellow-500/30',
       items: [
         { id: 'finances', label: 'Mes finances', icon: Wallet },
         { id: 'cards', label: 'Mes cartes', icon: CreditCard },
@@ -180,6 +192,8 @@ const EnterpriseDashboard = () => {
     },
     {
       title: 'Actualités & Formation',
+      gradient: 'from-indigo-500/20 to-indigo-600/10',
+      borderColor: 'border-indigo-500/30',
       items: [
         { id: 'business_news', label: 'Business News', icon: Newspaper },
         { id: 'development', label: 'Formations métier', icon: BookOpen },
@@ -187,14 +201,18 @@ const EnterpriseDashboard = () => {
     },
     {
       title: 'Communication',
+      gradient: 'from-pink-500/20 to-pink-600/10',
+      borderColor: 'border-pink-500/30',
       items: [
-        { id: 'messages', label: 'Messagerie', icon: MessageSquare },
+        { id: 'messages', label: 'Messagerie', icon: MessageSquare, notifKey: 'messages' },
         { id: 'contacts', label: 'Contacts', icon: Phone },
         { id: 'agenda', label: 'Agenda', icon: Calendar },
       ]
     },
     {
       title: 'Documents & Paramètres',
+      gradient: 'from-teal-500/20 to-teal-600/10',
+      borderColor: 'border-teal-500/30',
       items: [
         { id: 'subscriptions', label: 'Abonnements', icon: Crown },
         { id: 'documents', label: 'Documents', icon: FolderOpen },
@@ -204,6 +222,8 @@ const EnterpriseDashboard = () => {
     },
     {
       title: 'Aide & Informations',
+      gradient: 'from-slate-500/20 to-slate-600/10',
+      borderColor: 'border-slate-500/30',
       items: [
         { id: 'support', label: 'Service client', icon: HelpCircle },
         { id: 'partners', label: 'Partenaires', icon: Handshake },
@@ -211,6 +231,20 @@ const EnterpriseDashboard = () => {
       ]
     },
   ];
+
+  // Notification counts for menu items
+  const getNotificationCount = (key) => {
+    switch(key) {
+      case 'orders':
+        return orders.filter(o => o.status === 'pending').length;
+      case 'applications':
+        return applications.filter(a => a.status === 'pending').length;
+      case 'messages':
+        return 0; // Can be connected to unread messages
+      default:
+        return 0;
+    }
+  };
 
   // Flatten menu items for easy lookup
   const menuItems = menuSections.flatMap(section => section.items);
