@@ -1448,16 +1448,26 @@ async def add_cashback(user_id: str, amount: float, current_user: dict = Depends
 
 @api_router.get("/cashback/history")
 async def get_cashback_history(current_user: dict = Depends(get_current_user)):
-    """Get cashback transaction history"""
+    """Get cashback transaction history with statistics"""
     transactions = await db.cashback_transactions.find(
         {"user_id": current_user['id']}, {"_id": 0}
-    ).sort("created_at", -1).limit(50).to_list(50)
+    ).sort("created_at", -1).limit(100).to_list(100)
     
     user = await db.users.find_one({"id": current_user['id']}, {"_id": 0})
     
+    # Calculate statistics
+    total_earned = sum(t['amount'] for t in transactions if t['amount'] > 0)
+    total_used = abs(sum(t['amount'] for t in transactions if t['amount'] < 0))
+    
     return {
         "balance": user.get('cashback_balance', 0.0) if user else 0.0,
-        "transactions": transactions
+        "transactions": transactions,
+        "statistics": {
+            "total_earned": round(total_earned, 2),
+            "total_used": round(total_used, 2),
+            "cashback_rate": "10%",
+            "transaction_count": len(transactions)
+        }
     }
 
 @api_router.post("/cashback/use")
