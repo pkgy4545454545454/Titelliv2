@@ -145,6 +145,16 @@ export const trainingsAPI = {
     headers: getAuthHeaders() 
   }),
   markComplete: (enrollmentId) => axios.put(`${API}/client/trainings/${enrollmentId}/complete`, null, { headers: getAuthHeaders() }),
+  // Reviews
+  getReviews: (trainingId) => axios.get(`${API}/trainings/${trainingId}/reviews`),
+  createReview: (trainingId, data) => axios.post(`${API}/trainings/${trainingId}/review`, data, { headers: getAuthHeaders() }),
+};
+
+// User Online Status
+export const onlineStatusAPI = {
+  heartbeat: () => axios.post(`${API}/user/heartbeat`, null, { headers: getAuthHeaders() }),
+  setOffline: () => axios.post(`${API}/user/offline`, null, { headers: getAuthHeaders() }),
+  getFriendsOnline: () => axios.get(`${API}/client/friends/online`, { headers: getAuthHeaders() }),
 };
 
 // Jobs/Emplois
