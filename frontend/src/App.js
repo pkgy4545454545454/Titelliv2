@@ -82,10 +82,15 @@ function AppRoutes() {
       <Route path="/auth" element={<AuthPage />} />
       <Route path="/services" element={<MainLayout><ServicesPage /></MainLayout>} />
       <Route path="/products" element={<MainLayout><ProductsPage /></MainLayout>} />
+      <Route path="/produits" element={<MainLayout><ProductsPage /></MainLayout>} />
       <Route path="/service/:id" element={<MainLayout><ServiceProductDetailPage /></MainLayout>} />
       <Route path="/product/:id" element={<MainLayout><ServiceProductDetailPage /></MainLayout>} />
       <Route path="/entreprises" element={<MainLayout><EnterprisesPage /></MainLayout>} />
       <Route path="/entreprise/:id" element={<MainLayout><EnterprisePage /></MainLayout>} />
+      
+      {/* Jobs/Emplois Routes */}
+      <Route path="/emplois" element={<MainLayout><JobsPage /></MainLayout>} />
+      <Route path="/emploi/:id" element={<MainLayout><JobDetailPage /></MainLayout>} />
       
       {/* Filtered pages - reuse EnterprisesPage with filter */}
       <Route path="/certifies" element={<MainLayout><EnterprisesPage /></MainLayout>} />
