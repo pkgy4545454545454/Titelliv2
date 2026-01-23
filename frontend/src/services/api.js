@@ -429,7 +429,7 @@ export const influencersAPI = {
   }),
 };
 
-export const clientInvitationsAPI = {
+export const enterpriseInvitationsAPI = {
   list: () => axios.get(`${API}/enterprise/invitations`, { headers: getAuthHeaders() }),
   create: (data) => axios.post(`${API}/enterprise/invitations`, data, { headers: getAuthHeaders() }),
   toggle: (id) => axios.put(`${API}/enterprise/invitations/${id}/toggle`, null, { headers: getAuthHeaders() }),
