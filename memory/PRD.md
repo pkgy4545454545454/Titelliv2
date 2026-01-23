@@ -9,6 +9,34 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
 
 ## ✅ Fonctionnalités Complétées (23 Jan 2026)
 
+### Phase 23 : Système de Frais et Commissions PRODUCTION RÉELLE
+
+**TOUS les frais Titelli sont maintenant configurés en PRODUCTION :**
+
+1. **Frais de Gestion (10%)**
+   - Appliqué sur chaque commande pour les prestataires
+   - Visible dans order.management_fee
+
+2. **Frais de Transaction (2.9%)**  
+   - Payé par le consommateur
+   - Ajouté automatiquement au total de la commande
+   - Visible dans order.transaction_fee
+
+3. **Commission Investissements (12%)**
+   - Prélevé sur les gains/rendements des investissements
+   - Calcul automatique lors de l'investissement
+   - fees_breakdown retourné à chaque investissement
+
+4. **Feed Social / Mode de Vie RÉEL**
+   - Wishlist crée automatiquement un post d'activité
+   - Posts visibles par les amis dans leur feed
+   - Likes et compteurs fonctionnels
+   - POST /api/client/activity-post pour publier manuellement
+
+5. **Bug Fix: Bouton Wishlist**
+   - Correction du token localStorage (titelli_token)
+   - Fonctionne maintenant quand connecté
+
 ### Phase 22 : Systèmes de Paiement et Abonnements - PRODUCTION READY
 
 **TOUS les systèmes sont maintenant RÉELS et en PRODUCTION :**
@@ -17,30 +45,23 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
    - Checkout Premium (9.99 CHF/mois) → URLs Stripe réelles
    - Checkout VIP (29.99 CHF/mois) → URLs Stripe réelles
    - Annulation d'abonnement → Supprime TOUS les avantages DB
-   - Session ID stocké dans localStorage pour confirmation
 
 2. **Système de Cashback Dynamique**
    - Plan Gratuit : 1% cashback
    - Plan Premium : 10% cashback
    - Plan VIP : 15% cashback
-   - Calcul basé sur subscription active OU user.premium_plan
 
 3. **Abonnements Entreprise (Stripe)**
-   - Standard (200 CHF), Guest (250 CHF), Premium (500 CHF), etc.
+   - Standard (200 CHF), Guest (250 CHF), Premium (500 CHF)
    - URLs Stripe réelles pour tous les plans
 
 4. **Algorithme IA Targeting - RÉEL**
    - Calcul de reach basé sur VRAIS utilisateurs de la DB
-   - Query MongoDB avec filtres (genre, localisation, intérêts)
-   - Taux engagement/conversion basés sur standards industrie
+   - Query MongoDB avec filtres
 
-5. **Achats de Formations (Stripe)**
-   - Checkout vers Stripe réel
-   - Inscription après vérification du paiement
+5. **Achats de Formations (Stripe)** - Checkout réel
 
 ### Phase 21 : Dashboard Client - Nouvelles Sections Production-Ready
-
-**Nouvelles sections implémentées :**
 
 1. **Mon Agenda** - CRUD complet
 2. **Mes Finances** - Stats réelles de la BDD
