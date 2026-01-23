@@ -1606,7 +1606,7 @@ const ClientDashboard = () => {
                       </div>
                     </div>
                     <div className="flex gap-3 mt-6">
-                      <button onClick={() => { setShowAddDocument(false); setDocumentForm({ name: '', category: returnToJobId ? 'cv' : 'general', url: '' }); }} className="btn-secondary flex-1">Annuler</button>
+                      <button onClick={() => { setShowAddDocument(false); setDocumentForm({ name: '', category: 'cv', url: '' }); }} className="btn-secondary flex-1">Annuler</button>
                       <button onClick={handleAddDocument} className="btn-primary flex-1">Ajouter</button>
                     </div>
                   </div>
