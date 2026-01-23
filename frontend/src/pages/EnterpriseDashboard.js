@@ -463,6 +463,11 @@ const EnterpriseDashboard = () => {
             <ProfileSection enterprise={enterprise} onUpdate={() => fetchAllData()} />
           )}
 
+          {/* Media Gallery Tab */}
+          {activeTab === 'media' && (
+            <MediaGallerySection enterprise={enterprise} onUpdate={() => fetchAllData()} />
+          )}
+
           {/* Services Tab */}
           {activeTab === 'services' && (
             <ServicesSection services={services} onAdd={() => openModal('service')} onDelete={(id) => handleDelete('service', id)} onRefresh={fetchAllData} />
