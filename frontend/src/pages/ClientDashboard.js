@@ -150,6 +150,8 @@ const ClientDashboard = () => {
       fetchConversations();
     } else if (activeTab === 'formations') {
       fetchMyTrainings();
+    } else if (activeTab === 'cashback') {
+      fetchCashbackHistory();
     }
   }, [activeTab]);
 
