@@ -358,7 +358,9 @@ class TestTrainingPurchase:
         # First get available trainings
         trainings_response = requests.get(f"{BASE_URL}/api/trainings")
         assert trainings_response.status_code == 200, f"Get trainings failed: {trainings_response.text}"
-        trainings = trainings_response.json().get("trainings", [])
+        trainings_data = trainings_response.json()
+        # API returns list directly or object with trainings key
+        trainings = trainings_data if isinstance(trainings_data, list) else trainings_data.get("trainings", [])
         
         if not trainings:
             pytest.skip("No trainings available to test purchase")
