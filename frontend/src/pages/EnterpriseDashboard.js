@@ -238,7 +238,7 @@ const EnterpriseDashboard = () => {
       case 'orders':
         return orders.filter(o => o.status === 'pending').length;
       case 'applications':
-        return applications.filter(a => a.status === 'pending').length;
+        return (applications?.applications || []).filter(a => a.status === 'pending').length;
       case 'messages':
         return 0; // Can be connected to unread messages
       default:
