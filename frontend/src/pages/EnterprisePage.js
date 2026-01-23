@@ -859,6 +859,37 @@ const EnterprisePage = () => {
           </div>
         </div>
       </div>
+
+      {/* Media Lightbox Modal */}
+      {selectedMedia && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setSelectedMedia(null)}
+        >
+          <button 
+            className="absolute top-6 right-6 p-3 bg-white/10 rounded-full text-white hover:bg-white/20 transition-colors"
+            onClick={() => setSelectedMedia(null)}
+          >
+            <X className="w-6 h-6" />
+          </button>
+          <div className="max-w-5xl max-h-[90vh] w-full" onClick={(e) => e.stopPropagation()}>
+            {selectedMedia.type === 'photo' ? (
+              <img 
+                src={selectedMedia.url} 
+                alt="Photo galerie" 
+                className="w-full h-full object-contain rounded-lg"
+              />
+            ) : (
+              <video 
+                src={selectedMedia.url}
+                controls
+                autoPlay
+                className="w-full h-full object-contain rounded-lg"
+              />
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
