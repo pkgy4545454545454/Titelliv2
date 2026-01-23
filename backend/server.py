@@ -5141,7 +5141,7 @@ async def remove_personal_provider(provider_id: str, current_user: dict = Depend
 
 @api_router.get("/client/activity-feed")
 async def get_activity_feed(limit: int = 50, current_user: dict = Depends(get_current_user)):
-    """Get activity feed showing what friends/contacts do"""
+    """Get activity feed showing what friends/contacts do - REAL social feed"""
     # Get friend IDs
     friendships = await db.friendships.find({
         "$or": [
@@ -5160,17 +5160,43 @@ async def get_activity_feed(limit: int = 50, current_user: dict = Depends(get_cu
     if not friend_ids:
         return {"activities": [], "message": "Ajoutez des amis pour voir leur activité"}
     
-    # Get friend details
+    # Get friend details for mapping
     friends = await db.users.find({"id": {"$in": friend_ids}}, {"_id": 0, "id": 1, "first_name": 1, "last_name": 1, "avatar": 1}).to_list(500)
     friend_map = {f['id']: f for f in friends}
     
     activities = []
     
-    # Get friend reviews
+    # 1. Get PUBLIC activity posts from friends (main social feed)
+    activity_posts = await db.activity_posts.find({
+        "user_id": {"$in": friend_ids},
+        "is_public": True
+    }).sort("created_at", -1).limit(30).to_list(30)
+    
+    for post in activity_posts:
+        friend = friend_map.get(post['user_id'], {})
+        friend_name = f"{friend.get('first_name', '')} {friend.get('last_name', '')}".strip() or post.get('user_name', 'Un ami')
+        activities.append({
+            "id": post.get('id'),
+            "type": post.get('activity_type', 'post'),
+            "user_id": post['user_id'],
+            "user_name": friend_name,
+            "user_avatar": friend.get('avatar') or post.get('user_avatar'),
+            "action": post.get('title'),
+            "description": post.get('description'),
+            "target": post.get('item_name'),
+            "target_id": post.get('item_id'),
+            "enterprise_name": post.get('enterprise_name'),
+            "media_url": post.get('media_url'),
+            "likes_count": post.get('likes_count', 0),
+            "created_at": post.get('created_at')
+        })
+    
+    # 2. Get friend reviews (traditional activity)
     reviews = await db.reviews.find({"user_id": {"$in": friend_ids}}).sort("created_at", -1).limit(20).to_list(20)
     for r in reviews:
         friend = friend_map.get(r['user_id'], {})
         enterprise = await db.enterprises.find_one({"id": r.get('enterprise_id')}, {"_id": 0, "business_name": 1})
+        friend_name = f"{friend.get('first_name', '')} {friend.get('last_name', '')}".strip() or 'Un ami'
         activities.append({
             "type": "review",
             "user_id": r['user_id'],
