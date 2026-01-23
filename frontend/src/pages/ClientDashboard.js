@@ -1861,6 +1861,18 @@ const ClientDashboard = () => {
                                 Terminer
                               </button>
                             )}
+                            {enrollment.status === 'completed' && !enrollment.has_reviewed && (
+                              <button
+                                onClick={() => {
+                                  setReviewingTraining(enrollment);
+                                  setShowReviewModal(true);
+                                }}
+                                className="px-4 py-2 bg-yellow-500/20 text-yellow-400 rounded-lg hover:bg-yellow-500/30 text-sm flex items-center gap-2"
+                              >
+                                <Star className="w-4 h-4" />
+                                Donner un avis
+                              </button>
+                            )}
                           </div>
                         </div>
 
