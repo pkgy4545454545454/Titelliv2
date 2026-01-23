@@ -772,7 +772,7 @@ PREMIUM_PLANS = {
 
 async def get_user_cashback_rate(user_id: str) -> float:
     """Get the cashback rate based on user's subscription plan"""
-    # Check for active subscription
+    # Check for active subscription first
     subscription = await db.subscriptions.find_one({
         "user_id": user_id,
         "status": "active"
@@ -781,6 +781,13 @@ async def get_user_cashback_rate(user_id: str) -> float:
     if subscription:
         plan = subscription.get('plan', 'free')
         return PREMIUM_PLANS.get(plan, PREMIUM_PLANS['free'])['cashback_rate']
+    
+    # Fallback: check user's premium_plan field directly
+    user = await db.users.find_one({"id": user_id})
+    if user:
+        plan = user.get('premium_plan', 'free')
+        if user.get('is_premium') and plan in ['premium', 'vip']:
+            return PREMIUM_PLANS.get(plan, PREMIUM_PLANS['free'])['cashback_rate']
     
     return PREMIUM_PLANS['free']['cashback_rate']  # Default 1%
 
