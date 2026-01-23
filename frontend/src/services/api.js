@@ -187,7 +187,10 @@ export const clientInvitationsAPI = {
 
 // Enterprise Invitations to Clients
 export const enterpriseInvitationsAPI = {
+  list: () => axios.get(`${API}/enterprise/invitations`, { headers: getAuthHeaders() }),
   create: (data) => axios.post(`${API}/enterprise/invitations`, data, { headers: getAuthHeaders() }),
+  toggle: (id) => axios.put(`${API}/enterprise/invitations/${id}/toggle`, null, { headers: getAuthHeaders() }),
+  delete: (id) => axios.delete(`${API}/enterprise/invitations/${id}`, { headers: getAuthHeaders() }),
 };
 
 // Current Offers/Promotions
