@@ -25,7 +25,7 @@ const HomePage = () => {
           featuredAPI.premium(),
           categoryAPI.products(),
           categoryAPI.services(),
-          jobsAPI.list().catch(() => ({ data: [] }))
+          jobsAPI.listAll().catch(() => ({ data: [] }))
         ]);
         setTendances(tendRes.data);
         setGuests(guestRes.data);
