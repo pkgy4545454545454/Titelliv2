@@ -37,6 +37,30 @@ const EnterprisePage = () => {
         setEnterprise(response.data);
         setServices(response.data.services || []);
         setReviews(response.data.reviews || []);
+        
+        // Extract photos and videos from enterprise media gallery
+        const photos = response.data.media_gallery?.filter(m => m.type === 'photo' || m.media_type === 'photo') || [];
+        const videos = response.data.media_gallery?.filter(m => m.type === 'video' || m.media_type === 'video') || [];
+        setMediaGallery({ photos, videos });
+        
+        // Fetch enterprise trainings
+        try {
+          const trainingsRes = await trainingsAPI.getAll();
+          const enterpriseTrainings = (trainingsRes.data || []).filter(t => t.enterprise_id === id);
+          setTrainings(enterpriseTrainings);
+        } catch (err) {
+          console.error('Error fetching trainings:', err);
+        }
+        
+        // Fetch enterprise jobs
+        try {
+          const jobsRes = await jobsAPI.list();
+          const jobsData = jobsRes.data?.jobs || jobsRes.data || [];
+          const enterpriseJobs = jobsData.filter(j => j.enterprise_id === id);
+          setJobs(enterpriseJobs);
+        } catch (err) {
+          console.error('Error fetching jobs:', err);
+        }
       } catch (error) {
         console.error('Error fetching enterprise:', error);
         toast.error('Entreprise non trouvée');
