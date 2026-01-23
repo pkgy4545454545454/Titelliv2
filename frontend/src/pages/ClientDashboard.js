@@ -907,6 +907,159 @@ const ClientDashboard = () => {
             </div>
           )}
 
+          {/* Demandes en cours Tab */}
+          {activeTab === 'demandes' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Demandes en cours
+              </h1>
+
+              {/* Demandes envoyées */}
+              {friendRequests.sent.length > 0 ? (
+                <div className="card-service rounded-xl p-6">
+                  <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <Send className="w-5 h-5 text-[#0047AB]" />
+                    Demandes envoyées ({friendRequests.sent.length})
+                  </h2>
+                  <div className="space-y-3">
+                    {friendRequests.sent.map((request) => (
+                      <div key={request.id} className="p-4 bg-white/5 rounded-xl">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-full bg-[#0047AB]/30 flex items-center justify-center text-white font-bold overflow-hidden">
+                              {request.recipient?.avatar ? (
+                                <img 
+                                  src={request.recipient.avatar.startsWith('http') ? request.recipient.avatar : `${process.env.REACT_APP_BACKEND_URL}${request.recipient.avatar}`} 
+                                  alt="" 
+                                  className="w-full h-full object-cover" 
+                                />
+                              ) : (
+                                <>{request.recipient?.first_name?.[0]}{request.recipient?.last_name?.[0]}</>
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-white font-medium">{request.recipient?.first_name} {request.recipient?.last_name}</p>
+                              <p className="text-sm text-gray-500">{request.recipient?.city || 'Lausanne'}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="px-3 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded-full">
+                              En attente
+                            </span>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {new Date(request.created_at).toLocaleDateString('fr-FR')}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="card-service rounded-xl p-12 text-center">
+                  <Send className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-white mb-2">Aucune demande en cours</h3>
+                  <p className="text-gray-400">Vos demandes d'ami en attente apparaîtront ici</p>
+                </div>
+              )}
+
+              {/* Demandes reçues en attente */}
+              {friendRequests.received.length > 0 && (
+                <div className="card-service rounded-xl p-6 border-[#D4AF37]/30">
+                  <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <Bell className="w-5 h-5 text-[#D4AF37]" />
+                    Demandes reçues ({friendRequests.received.length})
+                  </h2>
+                  <div className="space-y-3">
+                    {friendRequests.received.map((request) => (
+                      <div key={request.id} className="p-4 bg-white/5 rounded-xl">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-full bg-[#D4AF37]/30 flex items-center justify-center text-white font-bold overflow-hidden">
+                              {request.sender?.avatar ? (
+                                <img 
+                                  src={request.sender.avatar.startsWith('http') ? request.sender.avatar : `${process.env.REACT_APP_BACKEND_URL}${request.sender.avatar}`} 
+                                  alt="" 
+                                  className="w-full h-full object-cover" 
+                                />
+                              ) : (
+                                <>{request.sender?.first_name?.[0]}{request.sender?.last_name?.[0]}</>
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-white font-medium">{request.sender?.first_name} {request.sender?.last_name}</p>
+                              <p className="text-sm text-gray-400">{request.message || 'Souhaite vous ajouter comme ami'}</p>
+                              <p className="text-xs text-gray-500 mt-1">{request.sender?.city || 'Lausanne'}</p>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleRespondToRequest(request.id, true)}
+                              className="p-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30"
+                            >
+                              <CheckCircle className="w-5 h-5" />
+                            </button>
+                            <button
+                              onClick={() => handleRespondToRequest(request.id, false)}
+                              className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30"
+                            >
+                              <XCircle className="w-5 h-5" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Amis acceptés récemment */}
+              {friends.length > 0 && (
+                <div className="card-service rounded-xl p-6 border-green-500/30">
+                  <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-400" />
+                    Amis acceptés ({friends.length})
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {friends.slice(0, 6).map((friend) => (
+                      <div key={friend.id} className="p-4 bg-white/5 rounded-xl">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-14 h-14 rounded-full bg-green-500/20 flex items-center justify-center text-white font-bold overflow-hidden">
+                            {friend.avatar ? (
+                              <img 
+                                src={friend.avatar.startsWith('http') ? friend.avatar : `${process.env.REACT_APP_BACKEND_URL}${friend.avatar}`} 
+                                alt="" 
+                                className="w-full h-full object-cover" 
+                              />
+                            ) : (
+                              <>{friend.first_name?.[0]}{friend.last_name?.[0]}</>
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-white font-medium">{friend.first_name} {friend.last_name}</p>
+                            <p className="text-sm text-gray-400">{friend.city || 'Lausanne'}</p>
+                            {friend.since && (
+                              <p className="text-xs text-green-400">Ami depuis {new Date(friend.since).toLocaleDateString('fr-FR')}</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => { setSelectedConversation(friend); setActiveTab('messages'); }}
+                            className="flex-1 btn-secondary text-sm flex items-center justify-center gap-2"
+                          >
+                            <MessageSquare className="w-4 h-4" />
+                            Message
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Cards Tab - Fixed */}
           {activeTab === 'cartes' && (
             <div className="space-y-6">
