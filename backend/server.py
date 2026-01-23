@@ -1211,36 +1211,43 @@ async def get_payment_status(session_id: str, request: Request):
     host_url = str(request.base_url).rstrip('/')
     webhook_url = f"{host_url}/api/webhook/stripe"
     
-    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
-    status = await stripe_checkout.get_checkout_status(session_id)
-    
-    # Update transaction status
-    transaction = await db.payment_transactions.find_one({"session_id": session_id})
-    if transaction and transaction['payment_status'] != status.payment_status:
-        await db.payment_transactions.update_one(
-            {"session_id": session_id},
-            {"$set": {"payment_status": status.payment_status, "status": status.status}}
-        )
+    try:
+        stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
+        status = await stripe_checkout.get_checkout_status(session_id)
         
-        # If payment successful, apply benefits
-        if status.payment_status == "paid" and transaction['payment_status'] != "paid":
-            metadata = transaction.get('metadata', {})
-            user_id = metadata.get('user_id')
+        # Update transaction status
+        transaction = await db.payment_transactions.find_one({"session_id": session_id})
+        if transaction and transaction['payment_status'] != status.payment_status:
+            await db.payment_transactions.update_one(
+                {"session_id": session_id},
+                {"$set": {"payment_status": status.payment_status, "status": status.status}}
+            )
             
-            if metadata.get('type') == 'subscription':
-                plan = metadata.get('plan')
-                is_premium = 'premium' in plan
-                await db.users.update_one(
-                    {"id": user_id},
-                    {"$set": {"is_premium": is_premium, "is_verified": True}}
-                )
-    
-    return {
-        "status": status.status,
-        "payment_status": status.payment_status,
-        "amount_total": status.amount_total,
-        "currency": status.currency
-    }
+            # If payment successful, apply benefits
+            if status.payment_status == "paid" and transaction['payment_status'] != "paid":
+                metadata = transaction.get('metadata', {})
+                user_id = metadata.get('user_id')
+                
+                if metadata.get('type') == 'subscription':
+                    plan = metadata.get('plan')
+                    is_premium = 'premium' in plan
+                    await db.users.update_one(
+                        {"id": user_id},
+                        {"$set": {"is_premium": is_premium, "is_verified": True}}
+                    )
+        
+        return {
+            "status": status.status,
+            "payment_status": status.payment_status,
+            "amount_total": status.amount_total,
+            "currency": status.currency
+        }
+    except Exception as e:
+        # Invalid session or Stripe error
+        error_msg = str(e)
+        if "No such checkout.session" in error_msg:
+            return {"status": "invalid", "payment_status": "not_found", "error": "Session de paiement invalide ou expirée"}
+        raise HTTPException(status_code=400, detail=f"Erreur Stripe: {error_msg}")
 
 @api_router.post("/webhook/stripe")
 async def stripe_webhook(request: Request):
