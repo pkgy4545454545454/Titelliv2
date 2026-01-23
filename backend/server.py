@@ -1974,6 +1974,137 @@ async def complete_training(enrollment_id: str, current_user: dict = Depends(get
         raise HTTPException(status_code=404, detail="Inscription non trouvée")
     return {"message": "Formation marquée comme terminée"}
 
+# ============ TRAINING REVIEWS ============
+
+class TrainingReviewCreate(BaseModel):
+    training_id: str
+    rating: int = Field(..., ge=1, le=5)
+    comment: Optional[str] = None
+
+@api_router.post("/trainings/{training_id}/review")
+async def create_training_review(training_id: str, data: TrainingReviewCreate, current_user: dict = Depends(get_current_user)):
+    """Create a review for a training (only if enrolled and completed)"""
+    # Check if user completed this training
+    enrollment = await db.training_enrollments.find_one({
+        "training_id": training_id,
+        "user_id": current_user['id'],
+        "status": "completed"
+    })
+    if not enrollment:
+        raise HTTPException(status_code=403, detail="Vous devez avoir terminé cette formation pour laisser un avis")
+    
+    # Check if already reviewed
+    existing = await db.training_reviews.find_one({
+        "training_id": training_id,
+        "user_id": current_user['id']
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="Vous avez déjà laissé un avis")
+    
+    review = {
+        "id": str(uuid.uuid4()),
+        "training_id": training_id,
+        "user_id": current_user['id'],
+        "user_name": f"{current_user['first_name']} {current_user['last_name']}",
+        "user_avatar": current_user.get('profile_image') or current_user.get('avatar'),
+        "rating": data.rating,
+        "comment": data.comment,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.training_reviews.insert_one(review)
+    
+    # Update training average rating
+    all_reviews = await db.training_reviews.find({"training_id": training_id}).to_list(1000)
+    avg_rating = sum(r['rating'] for r in all_reviews) / len(all_reviews)
+    await db.trainings.update_one(
+        {"id": training_id},
+        {"$set": {"rating": round(avg_rating, 1), "review_count": len(all_reviews)}}
+    )
+    
+    del review['_id']
+    return review
+
+@api_router.get("/trainings/{training_id}/reviews")
+async def get_training_reviews(training_id: str, limit: int = 20):
+    """Get reviews for a training"""
+    reviews = await db.training_reviews.find(
+        {"training_id": training_id}, {"_id": 0}
+    ).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    # Get average rating
+    if reviews:
+        avg_rating = sum(r['rating'] for r in reviews) / len(reviews)
+    else:
+        avg_rating = 0
+    
+    return {
+        "reviews": reviews,
+        "average_rating": round(avg_rating, 1),
+        "total_reviews": len(reviews)
+    }
+
+# ============ USER ONLINE STATUS ============
+
+@api_router.post("/user/heartbeat")
+async def user_heartbeat(current_user: dict = Depends(get_current_user)):
+    """Update user's last seen timestamp for online status"""
+    await db.users.update_one(
+        {"id": current_user['id']},
+        {"$set": {"last_seen": datetime.now(timezone.utc).isoformat(), "is_online": True}}
+    )
+    return {"status": "ok"}
+
+@api_router.post("/user/offline")
+async def user_offline(current_user: dict = Depends(get_current_user)):
+    """Mark user as offline"""
+    await db.users.update_one(
+        {"id": current_user['id']},
+        {"$set": {"is_online": False}}
+    )
+    return {"status": "ok"}
+
+@api_router.get("/client/friends/online")
+async def get_friends_online_status(current_user: dict = Depends(get_current_user)):
+    """Get online status for all friends"""
+    # Get friendships
+    friendships = await db.friendships.find({
+        "$or": [
+            {"user_id": current_user['id'], "status": "accepted"},
+            {"friend_id": current_user['id'], "status": "accepted"}
+        ]
+    }).to_list(500)
+    
+    friend_ids = []
+    for f in friendships:
+        if f['user_id'] == current_user['id']:
+            friend_ids.append(f['friend_id'])
+        else:
+            friend_ids.append(f['user_id'])
+    
+    if not friend_ids:
+        return {"friends": [], "online_count": 0}
+    
+    # Get friends with online status
+    friends = await db.users.find(
+        {"id": {"$in": friend_ids}},
+        {"_id": 0, "id": 1, "first_name": 1, "last_name": 1, "avatar": 1, "profile_image": 1, "is_online": 1, "last_seen": 1, "city": 1}
+    ).to_list(500)
+    
+    # Consider online if last_seen within 5 minutes
+    five_min_ago = (datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat()
+    for friend in friends:
+        last_seen = friend.get('last_seen', '')
+        friend['is_online'] = friend.get('is_online', False) and last_seen > five_min_ago if last_seen else False
+        friend['avatar'] = friend.get('avatar') or friend.get('profile_image')
+    
+    online_count = len([f for f in friends if f.get('is_online')])
+    
+    return {
+        "friends": friends,
+        "online_count": online_count,
+        "total_count": len(friends)
+    }
+
 # ============ JOBS/EMPLOIS ROUTES ============
 
 class JobCreate(BaseModel):
