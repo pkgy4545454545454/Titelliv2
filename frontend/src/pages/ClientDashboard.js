@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
   LayoutDashboard, User, Heart, ShoppingCart, CreditCard, Wallet, Calendar, 
@@ -14,13 +14,18 @@ import {
   orderAPI, cashbackAPI, featuredAPI, clientProfileAPI, friendsAPI, 
   paymentCardsAPI, clientDocumentsAPI, messagesAPI, notificationsAPI, uploadAPI
 } from '../services/api';
+import api from '../services/api';
 import { toast } from 'sonner';
 import EnterpriseCard from '../components/EnterpriseCard';
 
 const ClientDashboard = () => {
   const { user, isClient, updateUser } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(() => {
+    const tabParam = searchParams.get('tab');
+    return tabParam || 'overview';
+  });
   const [orders, setOrders] = useState([]);
   const [cashback, setCashback] = useState(0);
   const [tendances, setTendances] = useState([]);
