@@ -1991,9 +1991,10 @@ async def enroll_training(training_id: str, session_id: Optional[str] = None, cu
         {"$inc": {"enrollments": 1}}
     )
     
-    # Add cashback (10% of training price) - Real cashback system
-    CASHBACK_RATE = 0.10  # 10% cashback rate
-    cashback_amount = round(training['price'] * CASHBACK_RATE, 2)
+    # Add cashback based on user's subscription plan (Free: 1%, Premium: 10%, VIP: 15%)
+    cashback_rate = await get_user_cashback_rate(current_user['id'])
+    cashback_percent = int(cashback_rate * 100)
+    cashback_amount = round(training['price'] * cashback_rate, 2)
     if cashback_amount > 0:
         await db.users.update_one(
             {"id": current_user['id']},
@@ -2005,7 +2006,7 @@ async def enroll_training(training_id: str, session_id: Optional[str] = None, cu
             "user_id": current_user['id'],
             "amount": cashback_amount,
             "type": "credit",
-            "description": f"10% cashback sur formation: {training['title'][:30]}",
+            "description": f"{cashback_percent}% cashback sur formation: {training['title'][:30]}",
             "training_id": training_id,
             "enterprise_id": training.get('enterprise_id'),
             "created_at": datetime.now(timezone.utc).isoformat()
@@ -2017,7 +2018,7 @@ async def enroll_training(training_id: str, session_id: Optional[str] = None, cu
         "id": str(uuid.uuid4()),
         "user_id": current_user['id'],
         "title": "Inscription confirmée",
-        "message": f"Vous êtes inscrit à la formation: {training['title']}. Cashback de {cashback_amount} CHF ajouté!",
+        "message": f"Vous êtes inscrit à la formation: {training['title']}. Cashback de {cashback_amount} CHF ({cashback_percent}%) ajouté!",
         "notification_type": "training_enrollment",
         "data": {"training_id": training_id, "enrollment_id": enrollment['id'], "cashback": cashback_amount},
         "link": "/dashboard/client?tab=trainings",
