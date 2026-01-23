@@ -53,7 +53,7 @@ const EnterprisePage = () => {
         
         // Fetch enterprise trainings
         try {
-          const trainingsRes = await trainingsAPI.getAll();
+          const trainingsRes = await trainingsAPI.listAll();
           const enterpriseTrainings = (trainingsRes.data || []).filter(t => t.enterprise_id === id);
           setTrainings(enterpriseTrainings);
         } catch (err) {
