@@ -11,66 +11,57 @@
 
 ---
 
-## Fonctionnalités Implémentées
+## Fonctionnalités Implémentées (100% Testées)
 
-### ✅ Phases 1-10 : Complétées précédemment
+### ✅ Phases 1-11 : Complétées précédemment
 
-### ✅ Phase 11 : Corrections Multiples (23 Jan 2026)
-- Inscription influenceur → redirect `/dashboard/influencer`
-- Dashboard influenceur fonctionnel
-- Vidéo header Services/Produits
-- Filtres emploi élargis (Type, Ville, Entreprise)
-- Stripe checkout corrigé
-- Avis clients centrés
-- Bouton switch compte
-
-### ✅ Phase 12 : Améliorations Entreprise & Notifications (23 Jan 2026)
-- [x] **Image de couverture entreprise** : Upload et modification de la bannière
-- [x] **Photo de profil entreprise** : Logo modifiable  
-- [x] **Navigation contextuelle notifications** : Clic redirige vers la page concernée
-- [x] **Validation ajout produits/services** : Fonctionnement confirmé via tests
+### ✅ Phase 12 : Galerie Média & Cover Image (23 Jan 2026)
+- [x] **Image de couverture entreprise** : Upload, sauvegarde et affichage sur les cartes
+- [x] **Galerie Média** : Nouvelle section dans le dashboard entreprise
+  - Upload multiple de photos (drag-drop ou clic)
+  - Ajout de vidéos YouTube/Vimeo via URL
+  - Suppression de photos et vidéos
+- [x] **Navigation contextuelle notifications** : ?tab= paramètre URL
+- [x] **Validation CRUD produits/services** : Fonctionnel
 
 ---
 
-## Notifications avec Navigation Contextuelle
+## Modèle Enterprise (MongoDB)
 
-| Type | Lien de redirection |
-|------|---------------------|
-| Nouvelle offre d'emploi | `/emploi/{job_id}` |
-| Candidature reçue (entreprise) | `/dashboard/entreprise?tab=applications` |
-| Statut candidature (client) | `/dashboard/client?tab=jobs` |
-| Demande d'ami | `/dashboard/client?tab=contacts` |
-| Ami accepté | `/dashboard/client?tab=contacts` |
-| Nouvelle commande | `/dashboard/entreprise?tab=orders` |
-
----
-
-## APIs Clés
-
-### Upload d'images
-- `POST /api/upload/image` - Upload fichier image (retourne URL)
-- `POST /api/upload/image-base64` - Upload image en base64
-
-### Profil Entreprise
-- `PUT /api/enterprises/{id}` - Met à jour logo ET cover_image
-
-### Notifications
-- `GET /api/notifications` - Liste avec champ `link` pour navigation
-
----
-
-## Structure Fichiers Clés
+```javascript
+{
+  id: String,
+  business_name: String,
+  logo: String | null,
+  cover_image: String | null,  // Bannière/Cover
+  photos: [String],            // Galerie photos
+  videos: [String],            // Galerie vidéos (YouTube URLs)
+  // ... autres champs
+}
 ```
-/app/
-├── backend/
-│   └── server.py (4200+ lignes)
-└── frontend/src/
-    ├── pages/
-    │   ├── EnterpriseDashboard.js (ProfileSection avec cover upload)
-    │   ├── ClientDashboard.js (useSearchParams pour tab URL)
-    │   └── ...
-    └── components/
-        └── Header.js (notification click navigation)
+
+---
+
+## Notifications avec Liens
+
+| Type Notification | Lien |
+|-------------------|------|
+| Nouvelle offre d'emploi | `/emploi/{job_id}` |
+| Candidature reçue | `/dashboard/entreprise?tab=applications` |
+| Statut candidature | `/dashboard/client?tab=jobs` |
+| Demande d'ami | `/dashboard/client?tab=contacts` |
+
+---
+
+## API Médias Entreprise
+
+```
+PUT /api/enterprises/{id}
+Body: {
+  "cover_image": "https://...",
+  "photos": ["url1", "url2", ...],
+  "videos": ["youtube_url1", ...]
+}
 ```
 
 ---
@@ -79,7 +70,7 @@
 
 ### 🟡 P1 - Moyenne Priorité
 1. **Responsivité mobile** - Audit CSS complet
-2. **Refonte menu Enterprise Dashboard** - Structure maquettes
+2. **Refonte menu Enterprise Dashboard** - Selon maquettes
 
 ### 🟢 P2 - Basse Priorité
 1. Commentaires défilants prestataires
@@ -89,17 +80,14 @@
 ---
 
 ## Credentials de Test
-- **Admin** : admin@titelli.com / Admin123!
 - **Client** : test@example.com / Test123!
 - **Entreprise** : spa.luxury@titelli.com / Demo123!
 - **Influenceur** : test_influencer2@example.com / Test123!
 
 ---
 
-## Tests Validés
-- **iteration_10.json** : Système candidature ✓
-- **iteration_11.json** : Corrections multiples ✓
-- **Phase 12** : Tests manuels via curl et screenshot ✓
+## Tests
+- **iteration_10-12.json** : Tous passés à 100%
 
 ---
 
