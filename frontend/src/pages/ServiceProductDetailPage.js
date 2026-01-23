@@ -74,7 +74,7 @@ const ServiceProductDetailPage = () => {
   }, [id]);
 
   const handleToggleWishlist = async () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('titelli_token');
     if (!token) {
       toast.error('Connectez-vous pour ajouter aux favoris');
       navigate('/auth');
