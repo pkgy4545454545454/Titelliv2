@@ -1780,6 +1780,7 @@ async def create_job(job: JobCreate, current_user: dict = Depends(get_current_us
             "message": f"{enterprise['business_name']} recrute : {job.title}",
             "notification_type": "job",
             "data": {"job_id": job_doc['id']},
+            "link": f"/emploi/{job_doc['id']}",
             "is_read": False,
             "created_at": datetime.now(timezone.utc).isoformat()
         }
