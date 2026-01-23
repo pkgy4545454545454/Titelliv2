@@ -289,8 +289,8 @@ class TestClientDashboardNewSections:
     # ============ CARDS TESTS ============
     
     def test_cards_list(self):
-        """Test GET /api/payment-cards - list payment cards"""
-        response = self.session.get(f"{BASE_URL}/api/payment-cards")
+        """Test GET /api/client/cards - list payment cards"""
+        response = self.session.get(f"{BASE_URL}/api/client/cards")
         assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
         
         data = response.json()
@@ -300,7 +300,7 @@ class TestClientDashboardNewSections:
         print(f"✓ Payment cards: {len(data['cards'])} cards")
     
     def test_cards_add_and_delete(self):
-        """Test POST and DELETE /api/payment-cards - add and delete card"""
+        """Test POST and DELETE /api/client/cards - add and delete card"""
         card_data = {
             "card_holder": "TEST USER",
             "card_number_last4": "4242",
@@ -311,7 +311,7 @@ class TestClientDashboardNewSections:
         }
         
         # Add card
-        response = self.session.post(f"{BASE_URL}/api/payment-cards", json=card_data)
+        response = self.session.post(f"{BASE_URL}/api/client/cards", json=card_data)
         assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
         
         data = response.json()
@@ -321,7 +321,7 @@ class TestClientDashboardNewSections:
         print(f"✓ Card added: {data['id']} - {data['card_type']} ending in {data['card_number_last4']}")
         
         # Delete card
-        delete_response = self.session.delete(f"{BASE_URL}/api/payment-cards/{data['id']}")
+        delete_response = self.session.delete(f"{BASE_URL}/api/client/cards/{data['id']}")
         assert delete_response.status_code == 200, f"Expected 200, got {delete_response.status_code}: {delete_response.text}"
         print(f"✓ Card deleted")
 
