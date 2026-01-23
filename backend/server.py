@@ -1670,11 +1670,20 @@ class TrainingCreate(BaseModel):
     duration: str  # e.g., "2 heures", "1 jour"
     price: float
     max_participants: Optional[int] = None
-    location: Optional[str] = None
+    location: Optional[str] = None  # For on-site trainings
     is_online: bool = False
     schedule: Optional[str] = None
     prerequisites: Optional[str] = None
     certificate: bool = False
+    # New fields
+    training_type: str = "on_site"  # "online" or "on_site"
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    images: Optional[List[str]] = []
+    videos: Optional[List[str]] = []
+    # Online training files (downloadable after purchase)
+    downloadable_files: Optional[List[dict]] = []  # [{name, url, type}]
+    category: Optional[str] = None
 
 @api_router.get("/enterprise/trainings")
 async def get_enterprise_trainings(current_user: dict = Depends(get_current_user)):
@@ -1694,6 +1703,7 @@ async def create_training(training: TrainingCreate, current_user: dict = Depends
         "id": str(uuid.uuid4()),
         "enterprise_id": enterprise['id'],
         "enterprise_name": enterprise['business_name'],
+        "enterprise_logo": enterprise.get('logo'),
         **training.model_dump(),
         "is_active": True,
         "enrollments": 0,
@@ -1702,6 +1712,20 @@ async def create_training(training: TrainingCreate, current_user: dict = Depends
     await db.trainings.insert_one(training_doc)
     del training_doc['_id']
     return training_doc
+
+@api_router.put("/enterprise/trainings/{training_id}")
+async def update_training(training_id: str, data: dict, current_user: dict = Depends(get_current_user)):
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    result = await db.trainings.update_one(
+        {"id": training_id, "enterprise_id": enterprise['id']},
+        {"$set": data}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Formation non trouvée")
+    return {"message": "Formation mise à jour"}
 
 @api_router.delete("/enterprise/trainings/{training_id}")
 async def delete_training(training_id: str, current_user: dict = Depends(get_current_user)):
@@ -1713,10 +1737,162 @@ async def delete_training(training_id: str, current_user: dict = Depends(get_cur
     return {"message": "Formation supprimée"}
 
 @api_router.get("/trainings")
-async def get_all_trainings(category: Optional[str] = None, limit: int = 50):
+async def get_all_trainings(category: Optional[str] = None, training_type: Optional[str] = None, limit: int = 50):
     query = {"is_active": True}
+    if category:
+        query["category"] = category
+    if training_type:
+        query["training_type"] = training_type
     trainings = await db.trainings.find(query, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
     return trainings
+
+@api_router.get("/trainings/{training_id}")
+async def get_training_detail(training_id: str):
+    training = await db.trainings.find_one({"id": training_id, "is_active": True}, {"_id": 0})
+    if not training:
+        raise HTTPException(status_code=404, detail="Formation non trouvée")
+    return training
+
+# ============ CLIENT TRAINING PURCHASES ============
+
+@api_router.post("/trainings/{training_id}/purchase")
+async def purchase_training(training_id: str, current_user: dict = Depends(get_current_user)):
+    """Purchase a training - creates enrollment after payment"""
+    training = await db.trainings.find_one({"id": training_id, "is_active": True})
+    if not training:
+        raise HTTPException(status_code=404, detail="Formation non trouvée")
+    
+    # Check if already enrolled
+    existing = await db.training_enrollments.find_one({
+        "training_id": training_id,
+        "user_id": current_user['id']
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="Vous êtes déjà inscrit à cette formation")
+    
+    # Create Stripe checkout for training
+    try:
+        checkout_request = CheckoutSessionRequest(
+            amount=int(training['price'] * 100),
+            currency="chf",
+            product_name=f"Formation: {training['title']}",
+            success_url=f"{os.environ.get('FRONTEND_URL', 'http://localhost:3000')}/payment/success?session_id={{CHECKOUT_SESSION_ID}}&type=training&training_id={training_id}",
+            cancel_url=f"{os.environ.get('FRONTEND_URL', 'http://localhost:3000')}/payment/cancel",
+            metadata={"type": "training", "training_id": training_id, "user_id": current_user['id']}
+        )
+        response = await stripe_checkout.create_checkout_session(checkout_request)
+        return {"url": response.url, "session_id": response.session_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur paiement: {str(e)}")
+
+@api_router.post("/trainings/{training_id}/enroll")
+async def enroll_training(training_id: str, session_id: Optional[str] = None, current_user: dict = Depends(get_current_user)):
+    """Enroll in a training after payment verification"""
+    training = await db.trainings.find_one({"id": training_id, "is_active": True})
+    if not training:
+        raise HTTPException(status_code=404, detail="Formation non trouvée")
+    
+    # Verify payment if session_id provided
+    if session_id:
+        try:
+            status = await stripe_checkout.get_session_status(session_id)
+            if status.payment_status != "paid":
+                raise HTTPException(status_code=400, detail="Paiement non effectué")
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Erreur vérification paiement: {str(e)}")
+    
+    # Check if already enrolled
+    existing = await db.training_enrollments.find_one({
+        "training_id": training_id,
+        "user_id": current_user['id']
+    })
+    if existing:
+        return existing
+    
+    # Create enrollment
+    enrollment = {
+        "id": str(uuid.uuid4()),
+        "training_id": training_id,
+        "user_id": current_user['id'],
+        "training_title": training['title'],
+        "training_type": training.get('training_type', 'on_site'),
+        "enterprise_id": training['enterprise_id'],
+        "enterprise_name": training['enterprise_name'],
+        "price_paid": training['price'],
+        "status": "in_progress",  # in_progress, completed
+        "progress": 0,
+        "start_date": training.get('start_date'),
+        "end_date": training.get('end_date'),
+        "downloadable_files": training.get('downloadable_files', []) if training.get('training_type') == 'online' else [],
+        "payment_verified": True if session_id else False,
+        "enrolled_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.training_enrollments.insert_one(enrollment)
+    
+    # Update training enrollments count
+    await db.trainings.update_one(
+        {"id": training_id},
+        {"$inc": {"enrollments": 1}}
+    )
+    
+    # Add cashback (3% of training price)
+    cashback_amount = round(training['price'] * 0.03, 2)
+    if cashback_amount > 0:
+        await db.users.update_one(
+            {"id": current_user['id']},
+            {"$inc": {"cashback_balance": cashback_amount}}
+        )
+    
+    # Notify user
+    notification = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user['id'],
+        "title": "Inscription confirmée",
+        "message": f"Vous êtes inscrit à la formation: {training['title']}",
+        "notification_type": "training_enrollment",
+        "data": {"training_id": training_id, "enrollment_id": enrollment['id']},
+        "link": "/dashboard/client?tab=trainings",
+        "is_read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.notifications.insert_one(notification)
+    
+    del enrollment['_id']
+    return enrollment
+
+@api_router.get("/client/trainings")
+async def get_client_trainings(status: Optional[str] = None, current_user: dict = Depends(get_current_user)):
+    """Get trainings the client is enrolled in"""
+    query = {"user_id": current_user['id']}
+    if status:
+        query["status"] = status
+    
+    enrollments = await db.training_enrollments.find(query, {"_id": 0}).sort("enrolled_at", -1).to_list(100)
+    
+    # Enrich with training details
+    for enrollment in enrollments:
+        training = await db.trainings.find_one({"id": enrollment['training_id']}, {"_id": 0})
+        enrollment['training'] = training
+    
+    # Stats
+    stats = {
+        "total": len(enrollments),
+        "in_progress": len([e for e in enrollments if e.get('status') == 'in_progress']),
+        "completed": len([e for e in enrollments if e.get('status') == 'completed'])
+    }
+    
+    return {"enrollments": enrollments, "stats": stats}
+
+@api_router.put("/client/trainings/{enrollment_id}/complete")
+async def complete_training(enrollment_id: str, current_user: dict = Depends(get_current_user)):
+    """Mark a training as completed"""
+    result = await db.training_enrollments.update_one(
+        {"id": enrollment_id, "user_id": current_user['id']},
+        {"$set": {"status": "completed", "completed_at": datetime.now(timezone.utc).isoformat(), "progress": 100}}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Inscription non trouvée")
+    return {"message": "Formation marquée comme terminée"}
 
 # ============ JOBS/EMPLOIS ROUTES ============
 
