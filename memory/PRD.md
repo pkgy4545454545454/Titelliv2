@@ -158,6 +158,21 @@ DELETE /api/client/providers/{id}
 ## Tâches Restantes
 
 ### 🔴 P0 - Critique
+- ✅ ~~Systèmes paiement RÉELS~~ - TERMINÉ (Iteration 20)
+- ✅ ~~Cashback dynamique~~ - TERMINÉ (1%/10%/15%)
+- ✅ ~~Annulation abonnement~~ - TERMINÉ
+
+### 🟠 P1 - Important
+- [ ] Bouton "Ajouter aux favoris" sur produits/services (pour remplir wishlist)
+- [ ] Bouton "Ajouter prestataire" sur pages entreprises
+- [ ] Refactoring `server.py` → modules (voir REFACTORING_PLAN.md)
+- [ ] Audit complet responsivité mobile
+
+### 🟡 P2 - Futur
+- [ ] Vidéo panoramique sur la page d'accueil
+- [ ] Commentaires/avis défilants sur les pages entreprises
+- [ ] Notifications temps réel (WebSocket)
+- [ ] Refactoring ClientDashboard.js (4000+ lignes)
 - ✅ ~~Dashboard client sections~~ - IMPLÉMENTÉ
 
 ### 🟡 P1 - Important
