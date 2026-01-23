@@ -548,10 +548,44 @@ const ClientDashboard = () => {
   };
 
   const quickStats = [
-    { label: 'Cash-back disponible', value: `${cashback.toFixed(2)} CHF`, icon: Wallet, color: 'text-green-500' },
-    { label: 'Commandes', value: orders.length.toString(), icon: ShoppingCart, color: 'text-[#0047AB]' },
-    { label: 'Vues profil', value: profileStats.profile_views?.toString() || '0', icon: Eye, color: 'text-purple-500' },
-    { label: 'Amis', value: profileStats.friends_count?.toString() || '0', icon: Users, color: 'text-[#D4AF37]' },
+    { 
+      label: 'Cash-back disponible', 
+      value: `${cashback.toFixed(2)} CHF`, 
+      icon: Wallet, 
+      gradient: 'from-green-500/20 to-green-600/10',
+      borderColor: 'border-green-500/30',
+      iconBg: 'bg-green-500/20',
+      iconColor: 'text-green-400'
+    },
+    { 
+      label: 'Commandes', 
+      value: orders.length.toString(), 
+      icon: ShoppingCart,
+      notifCount: orders.filter(o => o.status === 'pending').length,
+      gradient: 'from-blue-500/20 to-blue-600/10',
+      borderColor: 'border-blue-500/30',
+      iconBg: 'bg-blue-500/20',
+      iconColor: 'text-blue-400'
+    },
+    { 
+      label: 'Vues profil', 
+      value: profileStats.profile_views?.toString() || '0', 
+      icon: Eye, 
+      gradient: 'from-purple-500/20 to-purple-600/10',
+      borderColor: 'border-purple-500/30',
+      iconBg: 'bg-purple-500/20',
+      iconColor: 'text-purple-400'
+    },
+    { 
+      label: 'Amis', 
+      value: profileStats.friends_count?.toString() || '0', 
+      icon: Users,
+      notifCount: friendRequests.received?.length || 0, 
+      gradient: 'from-yellow-500/20 to-yellow-600/10',
+      borderColor: 'border-yellow-500/30',
+      iconBg: 'bg-yellow-500/20',
+      iconColor: 'text-yellow-400'
+    },
   ];
 
   if (loading) {
