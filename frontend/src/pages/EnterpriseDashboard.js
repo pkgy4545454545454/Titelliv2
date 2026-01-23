@@ -2879,7 +2879,7 @@ const FormModal = ({ type, item, onClose, onSuccess }) => {
       case 'offer':
         return { discount_type: 'percentage', is_active: true };
       case 'training':
-        return { is_online: false, category: 'Marketing' };
+        return { training_type: 'on_site', category: 'Marketing', downloadable_files: [] };
       case 'job':
         return { job_type: 'full_time', location: 'Lausanne' };
       case 'realestate':
@@ -2894,6 +2894,7 @@ const FormModal = ({ type, item, onClose, onSuccess }) => {
   const [uploading, setUploading] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const fileInputRef = useRef(null);
+  const trainingFileInputRef = useRef(null);
 
   const serviceCategories = [
     { id: 'restauration', name: 'Restauration' },
