@@ -138,8 +138,14 @@ export const trainingsAPI = {
 export const jobsAPI = {
   list: () => axios.get(`${API}/enterprise/jobs`, { headers: getAuthHeaders() }),
   listAll: (params) => axios.get(`${API}/jobs`, { params }),
+  getDetail: (jobId) => axios.get(`${API}/jobs/${jobId}`),
   create: (data) => axios.post(`${API}/enterprise/jobs`, data, { headers: getAuthHeaders() }),
+  update: (id, data) => axios.put(`${API}/enterprise/jobs/${id}`, data, { headers: getAuthHeaders() }),
+  toggle: (id) => axios.put(`${API}/enterprise/jobs/${id}/toggle`, null, { headers: getAuthHeaders() }),
   delete: (id) => axios.delete(`${API}/enterprise/jobs/${id}`, { headers: getAuthHeaders() }),
+  getApplications: (jobId) => axios.get(`${API}/enterprise/jobs/${jobId}/applications`, { headers: getAuthHeaders() }),
+  apply: (jobId, data) => axios.post(`${API}/jobs/${jobId}/apply`, data, { headers: getAuthHeaders() }),
+  myApplications: () => axios.get(`${API}/client/job-applications`, { headers: getAuthHeaders() }),
 };
 
 // Real Estate/Immobilier
