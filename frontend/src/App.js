@@ -95,6 +95,7 @@ function AppRoutes() {
       {/* Cart & Orders Routes */}
       <Route path="/cart" element={<MainLayout><CartPage /></MainLayout>} />
       <Route path="/orders" element={<MainLayout><OrdersPage /></MainLayout>} />
+      <Route path="/emploi/:id" element={<MainLayout><JobDetailPage /></MainLayout>} />
 
       {/* Payment Routes */}
       <Route path="/payment/success" element={<MainLayout><PaymentSuccessPage /></MainLayout>} />
