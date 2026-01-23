@@ -114,6 +114,11 @@ export const adminAPI = {
 // Cashback
 export const cashbackAPI = {
   balance: () => axios.get(`${API}/cashback/balance`, { headers: getAuthHeaders() }),
+  history: () => axios.get(`${API}/cashback/history`, { headers: getAuthHeaders() }),
+  use: (amount, orderId = null) => axios.post(`${API}/cashback/use`, null, { 
+    params: { amount, order_id: orderId }, 
+    headers: getAuthHeaders() 
+  }),
 };
 
 // ============ ENTERPRISE MANAGEMENT APIs ============
