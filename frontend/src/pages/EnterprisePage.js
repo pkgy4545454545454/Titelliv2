@@ -129,6 +129,7 @@ const EnterprisePage = () => {
       }
     };
     fetchEnterprise();
+    checkIfMyProvider();
   }, [id]);
 
   // Auto-scroll reviews
