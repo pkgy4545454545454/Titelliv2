@@ -127,12 +127,16 @@ class TestTrainingReviewsAPIs:
     
     def test_get_training_reviews_endpoint(self):
         """Test GET /api/trainings/{id}/reviews - returns reviews for a training"""
-        # First get a training ID
+        # First get a training ID - API returns a list directly
         trainings_response = requests.get(f"{BASE_URL}/api/trainings")
-        if trainings_response.status_code != 200 or not trainings_response.json().get("trainings"):
+        if trainings_response.status_code != 200:
+            pytest.skip("Could not get trainings")
+        
+        trainings = trainings_response.json()
+        if not trainings or not isinstance(trainings, list):
             pytest.skip("No trainings available")
         
-        training_id = trainings_response.json()["trainings"][0]["id"]
+        training_id = trainings[0]["id"]
         
         response = requests.get(f"{BASE_URL}/api/trainings/{training_id}/reviews")
         
@@ -151,10 +155,14 @@ class TestTrainingReviewsAPIs:
         """Test POST /api/trainings/{id}/review - requires completed enrollment"""
         # Get a training that user hasn't completed
         trainings_response = requests.get(f"{BASE_URL}/api/trainings")
-        if trainings_response.status_code != 200 or not trainings_response.json().get("trainings"):
+        if trainings_response.status_code != 200:
+            pytest.skip("Could not get trainings")
+        
+        trainings = trainings_response.json()
+        if not trainings or not isinstance(trainings, list):
             pytest.skip("No trainings available")
         
-        training_id = trainings_response.json()["trainings"][0]["id"]
+        training_id = trainings[0]["id"]
         
         response = requests.post(
             f"{BASE_URL}/api/trainings/{training_id}/review",
@@ -183,10 +191,14 @@ class TestTrainingReviewsAPIs:
     def test_get_reviews_public_access(self):
         """Test that getting reviews doesn't require authentication"""
         trainings_response = requests.get(f"{BASE_URL}/api/trainings")
-        if trainings_response.status_code != 200 or not trainings_response.json().get("trainings"):
+        if trainings_response.status_code != 200:
+            pytest.skip("Could not get trainings")
+        
+        trainings = trainings_response.json()
+        if not trainings or not isinstance(trainings, list):
             pytest.skip("No trainings available")
         
-        training_id = trainings_response.json()["trainings"][0]["id"]
+        training_id = trainings[0]["id"]
         
         # No auth headers
         response = requests.get(f"{BASE_URL}/api/trainings/{training_id}/reviews")
@@ -202,10 +214,9 @@ class TestTrainingTypeMigration:
         response = requests.get(f"{BASE_URL}/api/trainings")
         
         assert response.status_code == 200, f"Get trainings failed: {response.text}"
-        data = response.json()
+        trainings = response.json()
         
-        trainings = data.get("trainings", [])
-        if not trainings:
+        if not trainings or not isinstance(trainings, list):
             pytest.skip("No trainings to verify")
         
         trainings_with_type = 0
@@ -249,37 +260,62 @@ class TestClientTrainingsWithReviewStatus:
             pytest.skip("Client login failed")
     
     def test_client_trainings_endpoint(self):
-        """Test GET /api/client/trainings returns enrollments"""
+        """Test GET /api/client/trainings returns enrollments with has_reviewed field"""
         response = requests.get(f"{BASE_URL}/api/client/trainings", headers=self.headers)
         
         assert response.status_code == 200, f"Get client trainings failed: {response.text}"
         data = response.json()
         
-        assert isinstance(data, list), "Response should be a list of enrollments"
+        # Response should be an object with enrollments and stats
+        assert "enrollments" in data, "Response should have 'enrollments' key"
+        assert "stats" in data, "Response should have 'stats' key"
+        assert isinstance(data["enrollments"], list), "enrollments should be a list"
         
-        if data:
-            enrollment = data[0]
+        enrollments = data["enrollments"]
+        if enrollments:
+            enrollment = enrollments[0]
             # Check expected fields
             expected_fields = ["id", "training_id", "training_title", "status"]
             for field in expected_fields:
                 assert field in enrollment, f"Enrollment should have '{field}' field"
             
-            # Check for has_reviewed field (for completed trainings)
-            if enrollment.get("status") == "completed":
-                assert "has_reviewed" in enrollment, "Completed enrollment should have 'has_reviewed' field"
+            # Check for has_reviewed field
+            assert "has_reviewed" in enrollment, "Enrollment should have 'has_reviewed' field"
         
-        print(f"✓ Client trainings endpoint working - {len(data)} enrollments found")
+        print(f"✓ Client trainings endpoint working - {len(enrollments)} enrollments found")
     
     def test_client_trainings_filter_by_status(self):
         """Test filtering client trainings by status"""
-        for status in ["enrolled", "completed"]:
+        for status in ["in_progress", "completed"]:
             response = requests.get(
                 f"{BASE_URL}/api/client/trainings",
                 params={"status": status},
                 headers=self.headers
             )
             assert response.status_code == 200, f"Filter by {status} failed: {response.text}"
-            print(f"✓ Filter by status '{status}' working")
+            data = response.json()
+            assert "enrollments" in data, f"Response should have enrollments for status {status}"
+            print(f"✓ Filter by status '{status}' working - {len(data['enrollments'])} enrollments")
+    
+    def test_completed_trainings_have_has_reviewed(self):
+        """Test that completed trainings have has_reviewed field"""
+        response = requests.get(
+            f"{BASE_URL}/api/client/trainings",
+            params={"status": "completed"},
+            headers=self.headers
+        )
+        
+        assert response.status_code == 200
+        data = response.json()
+        
+        if not data.get("enrollments"):
+            pytest.skip("No completed trainings to test")
+        
+        for enrollment in data["enrollments"]:
+            assert "has_reviewed" in enrollment, "Completed enrollment should have has_reviewed field"
+            assert isinstance(enrollment["has_reviewed"], bool), "has_reviewed should be boolean"
+        
+        print(f"✓ All {len(data['enrollments'])} completed trainings have has_reviewed field")
 
 
 class TestReviewWorkflow:
@@ -311,34 +347,35 @@ class TestReviewWorkflow:
         if response.status_code != 200:
             pytest.skip("Could not get client trainings")
         
-        completed = response.json()
+        data = response.json()
+        completed = data.get("enrollments", [])
+        
+        if not completed:
+            pytest.skip("No completed trainings to test review workflow")
         
         # Find a completed training that hasn't been reviewed
-        unreviewd = [t for t in completed if not t.get("has_reviewed")]
+        unreviewed = [t for t in completed if not t.get("has_reviewed")]
         
-        if not unreviewd:
+        if not unreviewed:
             print("No unreviewed completed trainings found - checking if review already exists")
-            if completed:
-                # Try to review anyway to verify the "already reviewed" error
-                training_id = completed[0]["training_id"]
-                review_response = requests.post(
-                    f"{BASE_URL}/api/trainings/{training_id}/review",
-                    json={
-                        "training_id": training_id,
-                        "rating": 5,
-                        "comment": "Test review"
-                    },
-                    headers=self.headers
-                )
-                # Should get 400 "already reviewed"
-                assert review_response.status_code == 400, f"Expected 400 for already reviewed, got {review_response.status_code}"
-                print("✓ Already reviewed validation working")
-            else:
-                pytest.skip("No completed trainings to test review workflow")
+            # Try to review anyway to verify the "already reviewed" error
+            training_id = completed[0]["training_id"]
+            review_response = requests.post(
+                f"{BASE_URL}/api/trainings/{training_id}/review",
+                json={
+                    "training_id": training_id,
+                    "rating": 5,
+                    "comment": "Test review"
+                },
+                headers=self.headers
+            )
+            # Should get 400 "already reviewed"
+            assert review_response.status_code == 400, f"Expected 400 for already reviewed, got {review_response.status_code}"
+            print("✓ Already reviewed validation working")
             return
         
         # Create a review for the first unreviewed training
-        training = unreviewd[0]
+        training = unreviewed[0]
         training_id = training["training_id"]
         
         review_response = requests.post(
