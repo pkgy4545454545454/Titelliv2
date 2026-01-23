@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="17" failures="1" skipped="0" tests="18" time="4.868" timestamp="2026-01-23T00:49:08.066109+00:00" hostname="agent-env-c7bf67dc-80d2-4152-916f-e54a764d9793"><testcase classname="tests.test_client_dashboard.TestClientAuth" name="test_client_login" time="1.223"><failure message="AssertionError: No access_token in response&#10;assert 'access_token' in {'token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYzk5ZDExYmUtZDU0ZS00ZjA5LWFiZDEtMDVhZTM0YTkzM2NiIiwidXNlcl90eXBlIjoiY2xpZW50IiwiZXhwIjoxNzY5NzM0MTQ5LjM1Mzk2Nn0.QKYSse4ufb7VKX3_dnGaD4IZ0Mtxk2BxMSOaGRF0Xik', 'user': {'cashback_balance': 25.5, 'city': 'Lausanne', 'created_at': '2026-01-21T22:57:48.357Z', 'email': 'test@example.com', ...}}">tests/test_client_dashboard.py:30: in test_client_login
+    assert "access_token" in data, "No access_token in response"
+E   AssertionError: No access_token in response
+E   assert 'access_token' in {'token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYzk5ZDExYmUtZDU0ZS00ZjA5LWFiZDEtMDVhZTM0YTkzM2NiIiwidXNlcl90eXBlIjoiY2xpZW50IiwiZXhwIjoxNzY5NzM0MTQ5LjM1Mzk2Nn0.QKYSse4ufb7VKX3_dnGaD4IZ0Mtxk2BxMSOaGRF0Xik', 'user': {'cashback_balance': 25.5, 'city': 'Lausanne', 'created_at': '2026-01-21T22:57:48.357Z', 'email': 'test@example.com', ...}}</failure></testcase><testcase classname="tests.test_client_dashboard.TestClientProfile" name="test_get_client_profile" time="0.202"><error message="failed on setup with &quot;KeyError: 'access_token'&quot;">tests/test_client_dashboard.py:47: in setup
+    self.token = response.json()["access_token"]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'access_token'</error></testcase><testcase classname="tests.test_client_dashboard.TestClientProfile" name="test_update_client_profile" time="0.204"><error message="failed on setup with &quot;KeyError: 'access_token'&quot;">tests/test_client_dashboard.py:47: in setup
+    self.token = response.json()["access_token"]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'access_token'</error></testcase><testcase classname="tests.test_client_dashboard.TestFriendsSystem" name="test_get_friends_list" time="0.203"><error message="failed on setup with &quot;KeyError: 'access_token'&quot;">tests/test_client_dashboard.py:89: in setup
+    self.token = response.json()["access_token"]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'access_token'</error></testcase><testcase classname="tests.test_client_dashboard.TestFriendsSystem" name="test_get_friend_requests" time="0.201"><error message="failed on setup with &quot;KeyError: 'access_token'&quot;">tests/test_client_dashboard.py:89: in setup
+    self.token = response.json()["access_token"]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'access_token'</error></testcase><testcase classname="tests.test_client_dashboard.TestFriendsSystem" name="test_get_suggested_friends" time="0.214"><error message="failed on setup with &quot;KeyError: 'access_token'&quot;">tests/test_client_dashboard.py:89: in setup
+    self.token = response.json()["access_token"]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'access_token'</error></testcase><testcase classname="tests.test_client_dashboard.TestFriendsSystem" name="test_send_friend_request_self" time="0.202"><error message="failed on setup with &quot;KeyError: 'access_token'&quot;">tests/test_client_dashboard.py:89: in setup
+    self.token = response.json()["access_token"]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'access_token'</error></testcase><testcase classname="tests.test_client_dashboard.TestPaymentCards" name="test_get_payment_cards" time="0.205"><error message="failed on setup with &quot;KeyError: 'access_token'&quot;">tests/test_client_dashboard.py:139: in setup
+    self.token = response.json()["access_token"]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'access_token'</error></testcase><testcase classname="tests.test_client_dashboard.TestPaymentCards" name="test_add_payment_card" time="0.206"><error message="failed on setup with &quot;KeyError: 'access_token'&quot;">tests/test_client_dashboard.py:139: in setup
+    self.token = response.json()["access_token"]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'access_token'</error></testcase><testcase classname="tests.test_client_dashboard.TestPaymentCards" name="test_add_and_delete_card" time="0.203"><error message="failed on setup with &quot;KeyError: 'access_token'&quot;">tests/test_client_dashboard.py:139: in setup
+    self.token = response.json()["access_token"]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'access_token'</error></testcase><testcase classname="tests.test_client_dashboard.TestClientDocuments" name="test_get_documents" time="0.198"><error message="failed on setup with &quot;KeyError: 'access_token'&quot;">tests/test_client_dashboard.py:208: in setup
+    self.token = response.json()["access_token"]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'access_token'</error></testcase><testcase classname="tests.test_client_dashboard.TestClientDocuments" name="test_add_document" time="0.198"><error message="failed on setup with &quot;KeyError: 'access_token'&quot;">tests/test_client_dashboard.py:208: in setup
+    self.token = response.json()["access_token"]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'access_token'</error></testcase><testcase classname="tests.test_client_dashboard.TestClientDocuments" name="test_add_and_delete_document" time="0.204"><error message="failed on setup with &quot;KeyError: 'access_token'&quot;">tests/test_client_dashboard.py:208: in setup
+    self.token = response.json()["access_token"]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'access_token'</error></testcase><testcase classname="tests.test_client_dashboard.TestMessaging" name="test_get_conversations" time="0.201"><error message="failed on setup with &quot;KeyError: 'access_token'&quot;">tests/test_client_dashboard.py:263: in setup
+    self.token = response.json()["access_token"]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'access_token'</error></testcase><testcase classname="tests.test_client_dashboard.TestMessaging" name="test_send_message_to_self_fails" time="0.206"><error message="failed on setup with &quot;KeyError: 'access_token'&quot;">tests/test_client_dashboard.py:263: in setup
+    self.token = response.json()["access_token"]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'access_token'</error></testcase><testcase classname="tests.test_client_dashboard.TestStatistics" name="test_profile_stats_in_profile" time="0.210"><error message="failed on setup with &quot;KeyError: 'access_token'&quot;">tests/test_client_dashboard.py:299: in setup
+    self.token = response.json()["access_token"]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'access_token'</error></testcase><testcase classname="tests.test_client_dashboard.TestCleanup" name="test_cleanup_test_cards" time="0.204"><error message="failed on setup with &quot;KeyError: 'access_token'&quot;">tests/test_client_dashboard.py:329: in setup
+    self.token = response.json()["access_token"]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'access_token'</error></testcase><testcase classname="tests.test_client_dashboard.TestCleanup" name="test_cleanup_test_documents" time="0.198"><error message="failed on setup with &quot;KeyError: 'access_token'&quot;">tests/test_client_dashboard.py:329: in setup
+    self.token = response.json()["access_token"]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'access_token'</error></testcase></testsuite></testsuites>
