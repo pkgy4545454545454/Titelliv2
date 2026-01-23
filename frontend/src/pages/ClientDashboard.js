@@ -352,7 +352,7 @@ const ClientDashboard = () => {
 
   const fetchInvestments = async () => {
     try {
-      const res = await investmentsAPI.list();
+      const res = await clientInvestmentsAPI.list();
       setInvestments(res.data);
     } catch (error) {
       console.error('Error fetching investments:', error);
@@ -590,7 +590,7 @@ const ClientDashboard = () => {
       return;
     }
     try {
-      await investmentsAPI.create({
+      await clientInvestmentsAPI.create({
         ...investmentForm,
         amount_invested: parseFloat(investmentForm.amount_invested),
         current_value: investmentForm.current_value ? parseFloat(investmentForm.current_value) : null,
@@ -610,7 +610,7 @@ const ClientDashboard = () => {
 
   const handleDeleteInvestment = async (investmentId) => {
     try {
-      await investmentsAPI.delete(investmentId);
+      await clientInvestmentsAPI.delete(investmentId);
       toast.success('Investissement supprimé');
       fetchInvestments();
     } catch (error) {
