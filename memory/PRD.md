@@ -1,94 +1,74 @@
-# Titelli Marketplace - Product Requirements Document
+# Titelli Marketplace - PRD
 
-## Aperçu du Projet
-**Titelli** est une marketplace premium pour Lausanne, Suisse, connectant les entreprises locales avec les clients et les influenceurs.
+## Aperçu
+Marketplace premium pour Lausanne connectant entreprises, clients et influenceurs.
 
-## Stack Technique
-- **Frontend** : React 18, Tailwind CSS, Shadcn/UI, Lucide Icons
-- **Backend** : FastAPI, Motor (async MongoDB), JWT Auth
-- **Base de données** : MongoDB
-- **Paiements** : Stripe
+## Stack: React 18, FastAPI, MongoDB, Stripe
 
 ---
 
-## Fonctionnalités Implémentées (100% Testées)
+## ✅ Fonctionnalités Complétées (23 Jan 2026)
 
-### ✅ Phases 1-11 : Complétées précédemment
+### Phase 12-13 : Ciblage IA Réel & Pages Emploi
 
-### ✅ Phase 12 : Galerie Média & Cover Image (23 Jan 2026)
-- [x] **Image de couverture entreprise** : Upload, sauvegarde et affichage sur les cartes
-- [x] **Galerie Média** : Nouvelle section dans le dashboard entreprise
-  - Upload multiple de photos (drag-drop ou clic)
-  - Ajout de vidéos YouTube/Vimeo via URL
-  - Suppression de photos et vidéos
-- [x] **Navigation contextuelle notifications** : ?tab= paramètre URL
-- [x] **Validation CRUD produits/services** : Fonctionnel
+**1. Système IA Ciblage Clients (RÉEL - pas mock)**
+- Stats basées sur vraies commandes de la BDD
+- Liste des vrais clients avec historique d'achats
+- Filtres : par nom, par type (fidèles/récents), par produit/service
+- Sélection multiple de clients
+- Envoi de questions suggestives via messagerie
+- Notifications automatiques aux clients
 
----
+**2. Page Détail Offre d'Emploi** (`/emploi/{id}`)
+- Header avec image/vidéo
+- Infos complètes (lieu, type, salaire, début)
+- Description, profil recherché, avantages
+- Bouton "Postuler maintenant" avec modal CV
+- Carte entreprise avec lien
 
-## Modèle Enterprise (MongoDB)
+**3. Vidéos Header**
+- Page Entreprises : vidéo réunion business
+- Page Services : vidéo composition florale
+- Page Produits : vidéo shopping boutique
 
-```javascript
-{
-  id: String,
-  business_name: String,
-  logo: String | null,
-  cover_image: String | null,  // Bannière/Cover
-  photos: [String],            // Galerie photos
-  videos: [String],            // Galerie vidéos (YouTube URLs)
-  // ... autres champs
-}
-```
+**4. Galerie Média Entreprise**
+- Upload photos multiples
+- Ajout vidéos YouTube
+- Suppression individuelle
 
----
-
-## Notifications avec Liens
-
-| Type Notification | Lien |
-|-------------------|------|
-| Nouvelle offre d'emploi | `/emploi/{job_id}` |
-| Candidature reçue | `/dashboard/entreprise?tab=applications` |
-| Statut candidature | `/dashboard/client?tab=jobs` |
-| Demande d'ami | `/dashboard/client?tab=contacts` |
+**5. Cover Image Entreprise**
+- Upload/modification bannière
+- Affichage sur cartes homepage
 
 ---
 
-## API Médias Entreprise
+## APIs Ajoutées
 
 ```
-PUT /api/enterprises/{id}
-Body: {
-  "cover_image": "https://...",
-  "photos": ["url1", "url2", ...],
-  "videos": ["youtube_url1", ...]
-}
+GET  /api/enterprise/customers - Vrais clients avec filtres
+POST /api/enterprise/send-question - Envoyer question suggestive
+GET  /api/jobs/{id} - Détail offre emploi
 ```
 
 ---
 
 ## Tâches Restantes
 
-### 🟡 P1 - Moyenne Priorité
-1. **Responsivité mobile** - Audit CSS complet
-2. **Refonte menu Enterprise Dashboard** - Selon maquettes
+### 🟡 P1
+- Responsivité mobile complète
+- Refonte menu Enterprise Dashboard
 
-### 🟢 P2 - Basse Priorité
-1. Commentaires défilants prestataires
-2. Mini-labels annonces
-3. Refactoring `server.py` en routers FastAPI
-
----
-
-## Credentials de Test
-- **Client** : test@example.com / Test123!
-- **Entreprise** : spa.luxury@titelli.com / Demo123!
-- **Influenceur** : test_influencer2@example.com / Test123!
+### 🟢 P2
+- Commentaires défilants
+- Refactoring server.py
 
 ---
 
-## Tests
-- **iteration_10-12.json** : Tous passés à 100%
+## Credentials
+- Client: test@example.com / Test123!
+- Enterprise: spa.luxury@titelli.com / Demo123!
+- Influencer: test_influencer2@example.com / Test123!
 
 ---
 
-*Dernière mise à jour : 23 Janvier 2026*
+*Mise à jour: 23 Jan 2026*
