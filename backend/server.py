@@ -711,12 +711,116 @@ async def create_order_notification(enterprise_id: str, order_id: str, client_na
             "title": "Nouvelle commande !",
             "message": f"Vous avez reçu une nouvelle commande de {client_name} pour {total:.2f} CHF",
             "notification_type": "order",
-            "link": f"/enterprise-dashboard?tab=orders&order={order_id}",
+            "link": f"/dashboard/entreprise?tab=orders&order={order_id}",
             "data": {"order_id": order_id, "total": total},
             "is_read": False,
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         await db.notifications.insert_one(notification_doc)
+
+
+# ============ UNIFIED NOTIFICATION SYSTEM ============
+# Système de notifications unifié pour toutes les sections
+
+NOTIFICATION_TYPES = {
+    # Client notifications
+    "order_placed": {"icon": "shopping-cart", "color": "green"},
+    "order_status": {"icon": "package", "color": "blue"},
+    "cashback_earned": {"icon": "wallet", "color": "yellow"},
+    "friend_request": {"icon": "user-plus", "color": "purple"},
+    "friend_accepted": {"icon": "users", "color": "green"},
+    "message_received": {"icon": "message-square", "color": "blue"},
+    "training_enrolled": {"icon": "graduation-cap", "color": "indigo"},
+    "training_completed": {"icon": "award", "color": "yellow"},
+    "wishlist_update": {"icon": "heart", "color": "pink"},
+    "offer_special": {"icon": "gift", "color": "orange"},
+    "premium_upgrade": {"icon": "crown", "color": "yellow"},
+    "investment_update": {"icon": "trending-up", "color": "green"},
+    "job_application_status": {"icon": "briefcase", "color": "blue"},
+    "invitation_received": {"icon": "mail", "color": "purple"},
+    
+    # Enterprise notifications
+    "new_order": {"icon": "shopping-cart", "color": "green"},
+    "order_completed": {"icon": "check-circle", "color": "green"},
+    "new_review": {"icon": "star", "color": "yellow"},
+    "job_application": {"icon": "file-text", "color": "blue"},
+    "stock_alert": {"icon": "alert-triangle", "color": "red"},
+    "subscription_updated": {"icon": "credit-card", "color": "purple"},
+    "new_follower": {"icon": "user-plus", "color": "blue"},
+    "training_purchase": {"icon": "graduation-cap", "color": "green"},
+    "service_booked": {"icon": "calendar", "color": "blue"},
+    "payment_received": {"icon": "dollar-sign", "color": "green"},
+    "advertising_stats": {"icon": "bar-chart", "color": "cyan"},
+}
+
+async def create_notification(
+    user_id: str,
+    notification_type: str,
+    title: str,
+    message: str,
+    link: str = None,
+    data: dict = None,
+    sender_id: str = "system"
+):
+    """
+    Crée une notification unifiée pour n'importe quel utilisateur.
+    
+    Args:
+        user_id: ID de l'utilisateur destinataire
+        notification_type: Type de notification (voir NOTIFICATION_TYPES)
+        title: Titre de la notification
+        message: Message détaillé
+        link: Lien vers la page concernée (optionnel)
+        data: Données supplémentaires JSON (optionnel)
+        sender_id: ID de l'expéditeur (défaut: "system")
+    """
+    notification_config = NOTIFICATION_TYPES.get(notification_type, {"icon": "bell", "color": "gray"})
+    
+    notification_doc = {
+        "id": str(uuid.uuid4()),
+        "user_id": user_id,
+        "sender_id": sender_id,
+        "title": title,
+        "message": message,
+        "notification_type": notification_type,
+        "icon": notification_config["icon"],
+        "color": notification_config["color"],
+        "link": link,
+        "data": data or {},
+        "is_read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.notifications.insert_one(notification_doc)
+    return notification_doc
+
+
+async def create_bulk_notifications(user_ids: list, notification_type: str, title: str, message: str, link: str = None, data: dict = None):
+    """Crée des notifications pour plusieurs utilisateurs à la fois."""
+    notifications = []
+    notification_config = NOTIFICATION_TYPES.get(notification_type, {"icon": "bell", "color": "gray"})
+    
+    for user_id in user_ids:
+        notification_doc = {
+            "id": str(uuid.uuid4()),
+            "user_id": user_id,
+            "sender_id": "system",
+            "title": title,
+            "message": message,
+            "notification_type": notification_type,
+            "icon": notification_config["icon"],
+            "color": notification_config["color"],
+            "link": link,
+            "data": data or {},
+            "is_read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        notifications.append(notification_doc)
+    
+    if notifications:
+        await db.notifications.insert_many(notifications)
+    
+    return notifications
 
 
 async def get_current_user(authorization: Optional[str] = Header(None)) -> dict:
