@@ -4919,8 +4919,8 @@ class WishlistItemCreate(BaseModel):
     item_name: str
     item_price: float
     item_image: Optional[str] = None
-    enterprise_id: str
-    enterprise_name: str
+    enterprise_id: Optional[str] = None
+    enterprise_name: Optional[str] = None
 
 @api_router.get("/client/wishlist")
 async def get_client_wishlist(current_user: dict = Depends(get_current_user)):
