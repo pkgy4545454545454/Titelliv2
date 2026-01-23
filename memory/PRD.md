@@ -9,78 +9,78 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
 
 ## ✅ Fonctionnalités Complétées (23 Jan 2026)
 
-### Phase 16 : Audit Complet et Corrections (AUJOURD'HUI)
+### Phase 17 : Corrections et Nouveau Design Menu (AUJOURD'HUI)
 
 **Bugs corrigés :**
-1. **Route 404 /emplois** → Nouvelle page JobsPage.js créée avec filtres et listing complet
-2. **Route 404 /produits** → Alias ajouté vers ProductsPage
-3. **Flow candidature sans CV** → Amélioration complète:
+
+1. **Modal candidature - CV non affiché**
+   - Avant : Filtrait uniquement les documents `category='cv'`
+   - Après : Affiche tous les documents (CV, général, PDF) pour permettre la sélection
+   - Le client peut maintenant sélectionner n'importe quel document comme CV
+
+2. **Ajout document - "Veuillez remplir tous les champs"**
+   - Avant : Validation échouait si le nom n'était pas rempli manuellement
+   - Après : Auto-complétion du nom depuis le fichier uploadé
+   - Message d'erreur amélioré : "Veuillez uploader un fichier"
+
+3. **Flow candidature - Retour à l'offre**
    - Redirection vers documents avec `?returnToJob={id}`
    - Alerte bleue "Vous souhaitez postuler à une offre"
-   - Bouton "Voir l'offre" pour retourner à l'offre
-   - Option "CV" ajoutée en premier dans les catégories de documents
+   - Bouton "Voir l'offre" pour retourner directement
+   - Option CV ajoutée en premier dans les catégories
 
-**Tests passés : 100% (33/33 backend, 100% frontend)**
+**Nouveau design des menus :**
 
-### Fonctionnalités vérifiées et fonctionnelles :
+1. **Sections colorées avec gradients**
+   - Principal : bleu
+   - Avantages : violet
+   - Investissements & Emplois : vert
+   - Gestion : jaune
+   - Communication : rose
+   - Recommandations : cyan
+   - Commandes : orange
+   - Aide : gris
 
-**Pages publiques :**
-- ✅ Homepage (tendances, offres, premium, jobs, formations)
-- ✅ /services avec filtres par catégorie
-- ✅ /produits et /products
-- ✅ /emplois - NOUVELLE PAGE avec 8 offres et filtres
-- ✅ /entreprises avec images de couverture et logos
-- ✅ /entreprise/{id} page de détail
+2. **Notifications clignotantes**
+   - Bordures vertes qui pulsent quand il y a des notifications
+   - Badge avec compteur qui rebondit
+   - Appliqué aux items : Messages, Commandes, Postulations, Demandes d'amis
 
-**Dashboard Entreprise :**
-- ✅ Overview avec stats
-- ✅ Création emplois (modal complet)
-- ✅ Création formations (online/présentiel avec fichiers)
-- ✅ Création services et produits
-- ✅ Profil avec upload logo et couverture
-- ✅ Section Postulations avec filtres et actions
-- ✅ IA Ciblage clients avec stats réelles
-
-**Dashboard Client :**
-- ✅ Overview, Profile, Contacts avec statut en ligne
-- ✅ Documents avec option CV et flow retour offre
-- ✅ Messages, Formations, Orders, Cashback
-- ✅ Paramètres
-
-**Dashboard Influencer :**
-- ✅ Stats, réseaux sociaux, collaborations
-
-**Autres :**
-- ✅ Panier et checkout Stripe
-- ✅ Système d'avis sur formations
-- ✅ Statut en ligne des contacts
+3. **Animations CSS**
+   - `@keyframes pulse-green` - pulsation verte
+   - `@keyframes notification-pulse` - bordure qui clignote
+   - `.animate-pulse-border` - classe pour les items avec notifications
 
 ---
 
-## APIs Principales
+## Style du Menu
 
+```css
+/* Exemple de section */
+.section {
+  background: linear-gradient(to bottom-right, rgba(59,130,246,0.2), rgba(37,99,235,0.1));
+  border: 1px solid rgba(59,130,246,0.3);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+/* Item avec notification */
+.item-with-notif {
+  box-shadow: 0 0 0 2px rgba(34,197,94,0.5);
+  animation: pulse-green 2s infinite;
+}
 ```
-# Jobs/Emplois
-GET  /api/jobs - Liste publique
-GET  /api/jobs/{id} - Détail
-POST /api/jobs/{id}/apply - Postuler
-GET  /api/enterprise/jobs - Emplois de l'entreprise
-POST /api/enterprise/jobs - Créer
-PUT  /api/enterprise/jobs/{id} - Modifier
-DELETE /api/enterprise/jobs/{id} - Supprimer
 
-# Trainings/Formations
-GET  /api/trainings - Liste publique
-POST /api/trainings/{id}/purchase - Acheter
-POST /api/trainings/{id}/review - Donner un avis
-GET  /api/enterprise/trainings - Formations de l'entreprise
-POST /api/enterprise/trainings - Créer
-GET  /api/client/trainings - Mes formations
+---
 
-# Online Status
-POST /api/user/heartbeat - Mettre à jour présence
-GET  /api/client/friends/online - Amis en ligne
-```
+## Résumé des corrections
+
+| Problème | Solution |
+|----------|----------|
+| CV non affiché dans modal candidature | Affiche tous les documents, pas seulement category='cv' |
+| "Veuillez remplir tous les champs" | Auto-set du nom depuis le fichier uploadé |
+| Menu sans couleur | Gradients colorés pour chaque section |
+| Pas de notification visuelle | Bordures clignotantes vertes + badge compteur |
 
 ---
 
@@ -101,8 +101,8 @@ GET  /api/client/friends/online - Amis en ligne
 ### 🟢 P2
 - Vidéo panoramique homepage
 - Questions suggestives UI
-- Commentaires défilants sur les providers
+- Commentaires défilants
 
 ---
 
-*Mise à jour: 23 Jan 2026 - Audit complet et corrections*
+*Mise à jour: 23 Jan 2026 - Nouveau design menu + corrections*
