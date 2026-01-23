@@ -20,7 +20,8 @@ const HomePage = () => {
   // Filter state
   const [jobFilters, setJobFilters] = useState({
     type: '',
-    location: ''
+    location: '',
+    enterprise: ''
   });
   const [showFilters, setShowFilters] = useState(false);
   
