@@ -1949,10 +1949,16 @@ async def get_client_trainings(status: Optional[str] = None, current_user: dict 
     
     enrollments = await db.training_enrollments.find(query, {"_id": 0}).sort("enrolled_at", -1).to_list(100)
     
-    # Enrich with training details
+    # Enrich with training details and review status
     for enrollment in enrollments:
         training = await db.trainings.find_one({"id": enrollment['training_id']}, {"_id": 0})
         enrollment['training'] = training
+        # Check if user has reviewed this training
+        existing_review = await db.training_reviews.find_one({
+            "training_id": enrollment['training_id'],
+            "user_id": current_user['id']
+        })
+        enrollment['has_reviewed'] = existing_review is not None
     
     # Stats
     stats = {
