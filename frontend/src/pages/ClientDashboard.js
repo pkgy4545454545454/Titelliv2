@@ -2376,8 +2376,486 @@ const ClientDashboard = () => {
             </div>
           )}
 
+          {/* Agenda Tab */}
+          {activeTab === 'agenda' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Mon Agenda
+                </h1>
+                <button onClick={() => setShowAddEvent(true)} className="btn-primary flex items-center gap-2">
+                  <Plus className="w-4 h-4" />
+                  Nouveau rendez-vous
+                </button>
+              </div>
+
+              {agendaEvents.length > 0 ? (
+                <div className="space-y-4">
+                  {agendaEvents.map((event) => (
+                    <div key={event.id} className="card-service rounded-xl p-5 hover:border-[#0047AB]/30 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex gap-4">
+                          <div className="w-14 h-14 rounded-xl bg-[#0047AB]/20 flex flex-col items-center justify-center">
+                            <span className="text-xs text-[#0047AB]">
+                              {new Date(event.start_datetime).toLocaleDateString('fr-FR', { weekday: 'short' })}
+                            </span>
+                            <span className="text-lg font-bold text-white">
+                              {new Date(event.start_datetime).getDate()}
+                            </span>
+                          </div>
+                          <div>
+                            <h3 className="text-white font-semibold">{event.title}</h3>
+                            <div className="flex flex-wrap items-center gap-3 mt-1 text-sm text-gray-400">
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {new Date(event.start_datetime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                              {event.location && (
+                                <span className="flex items-center gap-1">
+                                  <MapPin className="w-3 h-3" />
+                                  {event.location}
+                                </span>
+                              )}
+                              <span className={`px-2 py-0.5 rounded-full text-xs ${
+                                event.event_type === 'appointment' ? 'bg-blue-500/20 text-blue-400' :
+                                event.event_type === 'meeting' ? 'bg-purple-500/20 text-purple-400' :
+                                'bg-yellow-500/20 text-yellow-400'
+                              }`}>
+                                {event.event_type === 'appointment' ? 'RDV' : event.event_type === 'meeting' ? 'Réunion' : 'Rappel'}
+                              </span>
+                            </div>
+                            {event.description && (
+                              <p className="text-sm text-gray-500 mt-2">{event.description}</p>
+                            )}
+                          </div>
+                        </div>
+                        <button onClick={() => handleDeleteAgendaEvent(event.id)} className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="card-service rounded-xl p-12 text-center">
+                  <Calendar className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-400 mb-4">Aucun rendez-vous planifié</p>
+                  <button onClick={() => setShowAddEvent(true)} className="btn-secondary">
+                    Ajouter un rendez-vous
+                  </button>
+                </div>
+              )}
+
+              {/* Add Event Modal */}
+              {showAddEvent && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                  <div className="card-service rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+                    <h3 className="text-lg font-semibold text-white mb-6">Nouveau rendez-vous</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">Titre *</label>
+                        <input type="text" value={eventForm.title} onChange={(e) => setEventForm({...eventForm, title: e.target.value})} className="input-dark w-full" placeholder="Ex: RDV Coiffeur" />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">Type</label>
+                        <select value={eventForm.event_type} onChange={(e) => setEventForm({...eventForm, event_type: e.target.value})} className="input-dark w-full">
+                          <option value="appointment">Rendez-vous</option>
+                          <option value="meeting">Réunion</option>
+                          <option value="reminder">Rappel</option>
+                        </select>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm text-gray-400 mb-2">Date & Heure début *</label>
+                          <input type="datetime-local" value={eventForm.start_datetime} onChange={(e) => setEventForm({...eventForm, start_datetime: e.target.value})} className="input-dark w-full" />
+                        </div>
+                        <div>
+                          <label className="block text-sm text-gray-400 mb-2">Date & Heure fin</label>
+                          <input type="datetime-local" value={eventForm.end_datetime} onChange={(e) => setEventForm({...eventForm, end_datetime: e.target.value})} className="input-dark w-full" />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">Lieu</label>
+                        <input type="text" value={eventForm.location} onChange={(e) => setEventForm({...eventForm, location: e.target.value})} className="input-dark w-full" placeholder="Adresse ou lieu" />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">Description</label>
+                        <textarea value={eventForm.description} onChange={(e) => setEventForm({...eventForm, description: e.target.value})} className="input-dark w-full h-20 resize-none" placeholder="Notes supplémentaires..." />
+                      </div>
+                    </div>
+                    <div className="flex gap-3 mt-6">
+                      <button onClick={() => setShowAddEvent(false)} className="btn-secondary flex-1">Annuler</button>
+                      <button onClick={handleAddAgendaEvent} className="btn-primary flex-1">Ajouter</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Finances Tab */}
+          {activeTab === 'finances' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Mes Finances
+              </h1>
+
+              {/* Stats Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="card-service rounded-xl p-5">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center">
+                      <DollarSign className="w-6 h-6 text-red-500" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-white">{finances.statistics?.total_spent?.toFixed(2) || '0.00'} CHF</p>
+                      <p className="text-sm text-gray-400">Total dépensé</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="card-service rounded-xl p-5">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
+                      <Wallet className="w-6 h-6 text-green-500" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-green-500">{finances.statistics?.current_cashback_balance?.toFixed(2) || '0.00'} CHF</p>
+                      <p className="text-sm text-gray-400">Cashback disponible</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="card-service rounded-xl p-5">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-[#D4AF37]/20 flex items-center justify-center">
+                      <TrendingUp className="w-6 h-6 text-[#D4AF37]" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-[#D4AF37]">{finances.statistics?.total_cashback_earned?.toFixed(2) || '0.00'} CHF</p>
+                      <p className="text-sm text-gray-400">Cashback gagné</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="card-service rounded-xl p-5">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-[#0047AB]/20 flex items-center justify-center">
+                      <PieChart className="w-6 h-6 text-[#0047AB]" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-[#0047AB]">{finances.statistics?.savings_percentage || 0}%</p>
+                      <p className="text-sm text-gray-400">Économies</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Details */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="card-service rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-white mb-4">Détails des dépenses</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                      <span className="text-gray-400 flex items-center gap-2"><ShoppingCart className="w-4 h-4" /> Commandes</span>
+                      <span className="text-white font-semibold">{finances.statistics?.total_spent_orders?.toFixed(2) || '0.00'} CHF</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                      <span className="text-gray-400 flex items-center gap-2"><GraduationCap className="w-4 h-4" /> Formations</span>
+                      <span className="text-white font-semibold">{finances.statistics?.total_spent_trainings?.toFixed(2) || '0.00'} CHF</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                      <span className="text-gray-400 flex items-center gap-2"><Package className="w-4 h-4" /> Nombre de commandes</span>
+                      <span className="text-white font-semibold">{finances.statistics?.orders_count || 0}</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                      <span className="text-gray-400 flex items-center gap-2"><GraduationCap className="w-4 h-4" /> Nombre de formations</span>
+                      <span className="text-white font-semibold">{finances.statistics?.trainings_count || 0}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="card-service rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-white mb-4">Dernières transactions</h3>
+                  {finances.recent_orders?.length > 0 ? (
+                    <div className="space-y-3">
+                      {finances.recent_orders.map((order) => (
+                        <div key={order.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                          <div>
+                            <p className="text-white text-sm">Commande #{order.id?.slice(0, 8)}</p>
+                            <p className="text-xs text-gray-500">{new Date(order.created_at).toLocaleDateString('fr-FR')}</p>
+                          </div>
+                          <span className="text-red-400 font-semibold">-{order.total?.toFixed(2)} CHF</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-center py-4">Aucune transaction récente</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Donations Tab */}
+          {activeTab === 'donations' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Mes Donations
+                </h1>
+                <button onClick={() => setShowAddDonation(true)} className="btn-primary flex items-center gap-2">
+                  <Heart className="w-4 h-4" />
+                  Faire un don
+                </button>
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="card-service rounded-xl p-5">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-pink-500/20 flex items-center justify-center">
+                      <Heart className="w-6 h-6 text-pink-500" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-white">{donations.total_donated?.toFixed(2) || '0.00'} CHF</p>
+                      <p className="text-sm text-gray-400">Total donné</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="card-service rounded-xl p-5">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                      <Gift className="w-6 h-6 text-purple-500" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-white">{donations.donations_count || 0}</p>
+                      <p className="text-sm text-gray-400">Donations effectuées</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Donations List */}
+              {donations.donations?.length > 0 ? (
+                <div className="space-y-4">
+                  {donations.donations.map((donation) => (
+                    <div key={donation.id} className="card-service rounded-xl p-5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-full bg-pink-500/20 flex items-center justify-center">
+                            <Heart className="w-6 h-6 text-pink-500" />
+                          </div>
+                          <div>
+                            <p className="text-white font-semibold">{donation.recipient_name}</p>
+                            <p className="text-sm text-gray-400">{new Date(donation.created_at).toLocaleDateString('fr-FR')}</p>
+                            {donation.message && <p className="text-sm text-gray-500 mt-1">"{donation.message}"</p>}
+                          </div>
+                        </div>
+                        <p className="text-xl font-bold text-pink-500">{donation.amount?.toFixed(2)} CHF</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="card-service rounded-xl p-12 text-center">
+                  <Heart className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-400 mb-4">Vous n'avez pas encore fait de don</p>
+                  <button onClick={() => setShowAddDonation(true)} className="btn-secondary">
+                    Faire un premier don
+                  </button>
+                </div>
+              )}
+
+              {/* Add Donation Modal */}
+              {showAddDonation && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                  <div className="card-service rounded-xl p-6 w-full max-w-md">
+                    <h3 className="text-lg font-semibold text-white mb-6">Faire un don</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">Montant (CHF) *</label>
+                        <input type="number" value={donationForm.amount} onChange={(e) => setDonationForm({...donationForm, amount: e.target.value})} className="input-dark w-full" placeholder="50" />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">Bénéficiaire *</label>
+                        <input type="text" value={donationForm.recipient_name} onChange={(e) => setDonationForm({...donationForm, recipient_name: e.target.value})} className="input-dark w-full" placeholder="Nom de l'association ou entreprise" />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">Message (optionnel)</label>
+                        <textarea value={donationForm.message} onChange={(e) => setDonationForm({...donationForm, message: e.target.value})} className="input-dark w-full h-20 resize-none" placeholder="Un petit mot..." />
+                      </div>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" checked={donationForm.is_anonymous} onChange={(e) => setDonationForm({...donationForm, is_anonymous: e.target.checked})} className="w-4 h-4 accent-[#0047AB]" />
+                        <span className="text-sm text-gray-400">Don anonyme</span>
+                      </label>
+                    </div>
+                    <div className="flex gap-3 mt-6">
+                      <button onClick={() => setShowAddDonation(false)} className="btn-secondary flex-1">Annuler</button>
+                      <button onClick={handleAddDonation} className="btn-primary flex-1">Donner</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Wishlist Tab */}
+          {activeTab === 'wishlist' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Ma Liste de Souhaits
+              </h1>
+
+              {wishlistItems.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {wishlistItems.map((item) => (
+                    <div key={item.id} className="card-service rounded-xl overflow-hidden group">
+                      <div className="aspect-video bg-white/5 relative">
+                        {item.item_image ? (
+                          <img src={item.item_image} alt={item.item_name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Package className="w-12 h-12 text-gray-600" />
+                          </div>
+                        )}
+                        <button onClick={() => handleRemoveFromWishlist(item.item_id)} className="absolute top-2 right-2 p-2 bg-black/50 rounded-full text-red-400 hover:text-red-300 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div className="p-4">
+                        <span className="text-xs text-[#0047AB] mb-1 block">{item.enterprise_name}</span>
+                        <h3 className="text-white font-semibold mb-2">{item.item_name}</h3>
+                        <div className="flex items-center justify-between">
+                          <p className="text-lg font-bold text-[#D4AF37]">{item.item_price?.toFixed(2)} CHF</p>
+                          <Link to={`/${item.item_type === 'service' ? 'service' : 'product'}/${item.item_id}`} className="text-sm text-[#0047AB] hover:underline">
+                            Voir le détail
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="card-service rounded-xl p-12 text-center">
+                  <Bookmark className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-400 mb-4">Votre liste de souhaits est vide</p>
+                  <p className="text-sm text-gray-500 mb-6">Ajoutez des produits ou services en cliquant sur le cœur</p>
+                  <Link to="/" className="btn-secondary">
+                    Découvrir nos prestataires
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Suggestions from Friends Tab */}
+          {activeTab === 'suggestions' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Suggestions de mes contacts
+              </h1>
+              <p className="text-gray-400">Découvrez ce que vos amis ont aimé et ajouté à leurs favoris</p>
+
+              {friendsSuggestions.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {friendsSuggestions.map((suggestion, index) => (
+                    <div key={index} className="card-service rounded-xl p-5 hover:border-[#0047AB]/30 transition-colors">
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-[#0047AB]/20 flex items-center justify-center flex-shrink-0">
+                          {suggestion.type === 'wishlist' ? <Heart className="w-6 h-6 text-pink-500" /> : <Star className="w-6 h-6 text-[#D4AF37]" />}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm text-[#0047AB]">{suggestion.recommended_by}</span>
+                            <span className="text-xs text-gray-500">• {suggestion.reason}</span>
+                          </div>
+                          <h3 className="text-white font-semibold">{suggestion.item_name}</h3>
+                          {suggestion.enterprise_name && <p className="text-sm text-gray-400">{suggestion.enterprise_name}</p>}
+                          {suggestion.item_price && (
+                            <p className="text-[#D4AF37] font-semibold mt-2">{suggestion.item_price.toFixed(2)} CHF</p>
+                          )}
+                          {suggestion.comment && (
+                            <p className="text-sm text-gray-500 mt-2 italic">"{suggestion.comment}"</p>
+                          )}
+                        </div>
+                        <Link to={suggestion.item_type === 'enterprise' ? `/entreprise/${suggestion.item_id}` : `/${suggestion.item_type}/${suggestion.item_id}`} className="p-2 bg-[#0047AB] rounded-lg text-white hover:bg-[#2E74D6]">
+                          <ChevronRight className="w-4 h-4" />
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="card-service rounded-xl p-12 text-center">
+                  <Users className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-400 mb-4">Aucune suggestion disponible</p>
+                  <p className="text-sm text-gray-500">Ajoutez des amis pour voir leurs recommandations</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Personal Providers Tab */}
+          {activeTab === 'prestataires' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Mes Prestataires Personnels
+              </h1>
+              <p className="text-gray-400">Vos prestataires favoris pour un accès rapide</p>
+
+              {personalProviders.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {personalProviders.map((provider) => (
+                    <div key={provider.id} className="card-service rounded-xl p-5 hover:border-[#D4AF37]/30 transition-colors group">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-full bg-[#D4AF37]/20 flex items-center justify-center overflow-hidden">
+                            {provider.enterprise_logo ? (
+                              <img src={provider.enterprise_logo} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <Store className="w-6 h-6 text-[#D4AF37]" />
+                            )}
+                          </div>
+                          <div>
+                            <h3 className="text-white font-semibold">{provider.enterprise_name}</h3>
+                            <p className="text-sm text-gray-400">{provider.category}</p>
+                          </div>
+                        </div>
+                        <button onClick={() => handleRemoveProvider(provider.id)} className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      {provider.rating > 0 && (
+                        <div className="flex items-center gap-2 mb-3">
+                          <Star className="w-4 h-4 text-[#D4AF37] fill-[#D4AF37]" />
+                          <span className="text-white">{provider.rating?.toFixed(1)}</span>
+                          <span className="text-gray-500 text-sm">({provider.review_count} avis)</span>
+                        </div>
+                      )}
+                      {provider.city && (
+                        <p className="text-sm text-gray-500 flex items-center gap-1">
+                          <MapPin className="w-3 h-3" /> {provider.city}
+                        </p>
+                      )}
+                      <Link to={`/entreprise/${provider.enterprise_id}`} className="mt-4 btn-secondary w-full text-center block">
+                        Voir le profil
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="card-service rounded-xl p-12 text-center">
+                  <Store className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-400 mb-4">Aucun prestataire enregistré</p>
+                  <p className="text-sm text-gray-500 mb-6">Ajoutez vos prestataires préférés depuis leur page</p>
+                  <Link to="/" className="btn-secondary">
+                    Découvrir nos prestataires
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Default placeholder for other tabs */}
-          {!['overview', 'profile', 'contacts', 'cartes', 'documents', 'messages', 'particulier', 'orders', 'cashback', 'settings', 'formations'].includes(activeTab) && (
+          {!['overview', 'profile', 'contacts', 'cartes', 'documents', 'messages', 'particulier', 'orders', 'cashback', 'settings', 'formations', 'agenda', 'finances', 'donations', 'wishlist', 'suggestions', 'prestataires', 'demandes'].includes(activeTab) && (
             <div className="card-service rounded-xl p-12 text-center">
               <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Clock className="w-8 h-8 text-gray-500" />
