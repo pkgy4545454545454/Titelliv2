@@ -4440,6 +4440,25 @@ async def root():
 async def health_check():
     return {"status": "healthy"}
 
+# ============ MIGRATION ENDPOINT ============
+
+@api_router.post("/admin/migrate-trainings")
+async def migrate_trainings_data(current_user: dict = Depends(get_current_user)):
+    """Migrate existing trainings to add training_type field"""
+    if current_user.get('user_type') != 'admin':
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    # Update all trainings without training_type to 'on_site' as default
+    result = await db.trainings.update_many(
+        {"training_type": {"$exists": False}},
+        {"$set": {"training_type": "on_site", "downloadable_files": []}}
+    )
+    
+    return {
+        "message": "Migration completed",
+        "updated_count": result.modified_count
+    }
+
 # Include the router in the main app
 app.include_router(api_router)
 
