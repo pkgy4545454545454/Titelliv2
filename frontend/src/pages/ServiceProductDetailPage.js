@@ -30,6 +30,14 @@ const ServiceProductDetailPage = () => {
         const itemRes = await servicesProductsAPI.get(id);
         setItem(itemRes.data);
         
+        // Check if item is in wishlist
+        try {
+          const wishlistCheck = await wishlistAPI.check(id);
+          setIsInWishlist(wishlistCheck.data.in_wishlist);
+        } catch (e) {
+          // Not logged in or error - ignore
+        }
+        
         // Fetch the enterprise
         if (itemRes.data.enterprise_id) {
           const entRes = await enterpriseAPI.getById(itemRes.data.enterprise_id);
@@ -64,6 +72,40 @@ const ServiceProductDetailPage = () => {
     
     fetchData();
   }, [id]);
+
+  const handleToggleWishlist = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast.error('Connectez-vous pour ajouter aux favoris');
+      navigate('/auth');
+      return;
+    }
+    
+    setWishlistLoading(true);
+    try {
+      if (isInWishlist) {
+        await wishlistAPI.remove(id);
+        setIsInWishlist(false);
+        toast.success('Retiré de votre liste de souhaits');
+      } else {
+        await wishlistAPI.add({
+          item_id: id,
+          item_type: item.type,
+          item_name: item.name,
+          item_price: item.price,
+          item_image: item.images?.[0] || '',
+          enterprise_id: enterprise?.id,
+          enterprise_name: enterprise?.business_name
+        });
+        setIsInWishlist(true);
+        toast.success('Ajouté à votre liste de souhaits !');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur');
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
 
   const handleAddToCart = () => {
     if (item && enterprise) {
