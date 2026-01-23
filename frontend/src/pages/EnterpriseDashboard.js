@@ -533,6 +533,14 @@ const EnterpriseDashboard = () => {
             />
           )}
 
+          {/* Applications/Postulations Tab */}
+          {activeTab === 'applications' && (
+            <ApplicationsSection 
+              applications={applications} 
+              onRefresh={fetchAllData} 
+            />
+          )}
+
           {/* Real Estate Tab */}
           {activeTab === 'realestate' && (
             <GenericSection
