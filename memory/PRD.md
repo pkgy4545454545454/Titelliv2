@@ -11,7 +11,7 @@
 
 ---
 
-## Fonctionnalités Implémentées (Mise à jour 23 Jan 2026)
+## Fonctionnalités Implémentées
 
 ### ✅ Phase 1-6 : Foundation à Refactoring (Complété précédemment)
 - Authentification JWT (client, entreprise, influenceur)
@@ -24,81 +24,80 @@
 ### ✅ Phase 7 : Dashboard Client Complet (Complété)
 - Profil avec photo modifiable, LinkedIn
 - Système d'amis complet
-- Cartes de paiement (FIXÉ)
-- Documents (FIXÉ)
+- Cartes de paiement
+- Documents
 - Messagerie production-ready
 - "Compte particulier" (ex entrepreneur)
 - Section "Demandes en cours"
 
-### ✅ Phase 8 : Système d'Offres d'Emploi (Complété 23 Jan 2026)
-- [x] **CRUD Jobs complet** : Création, lecture, mise à jour, suppression
-- [x] **Toggle activation** des offres
-- [x] **Section HomePage** : Affichage des offres d'emploi publiques
-- [x] **Candidatures** : Postuler avec CV et lettre de motivation
-- [x] **Notifications** : Alertes aux clients pour nouvelles offres
-- [x] **Date limite** : Support des deadlines
+### ✅ Phase 8 : Système d'Offres d'Emploi (Complété)
+- CRUD Jobs complet
+- Toggle activation des offres
+- Section HomePage avec offres publiques
+- Candidatures avec CV et lettre de motivation
+- Notifications aux clients pour nouvelles offres
+- Date limite support
 
-### ✅ Phase 9 : Dashboard Influenceur Restructuré (Complété 23 Jan 2026)
-Nouveau menu :
-- [x] **Tableau de bord** : Vue d'ensemble avec stats
-- [x] **Statistiques** : Vues, likes, partages, engagement
-- [x] **Amis** : Système d'amis complet avec demandes/acceptation
-- [x] **Offres reçues** : Liste des demandes de collaboration
-- [x] **Statut en cours** : Collaboration active avec date de fin
-- [x] **Mon profil** : Édition des informations
-- [x] **Messages** : (À venir)
-- [x] **Paramètres**
+### ✅ Phase 9 : Dashboard Influenceur Restructuré (Complété)
+- Tableau de bord avec stats
+- Système d'amis complet
+- Offres de collaboration
+- Profil éditable
 
-### ✅ Phase 10 : Demandes en cours Client (Complété 23 Jan 2026)
-- [x] **Demandes envoyées** : Liste avec statut "En attente"
-- [x] **Demandes reçues** : Avec boutons Accepter/Refuser
-- [x] **Amis acceptés** : Cartes de profil des amis avec bouton Message
+### ✅ Phase 10 : Système de Candidature Complet (Complété 23 Jan 2026)
+- [x] **Filtres emplois Homepage** : Type contrat (CDI, CDD, Stage, Freelance) + Localisation
+- [x] **Bouton "Postuler"** sur chaque carte d'emploi
+- [x] **Modal de candidature** : Sélection CV + Lettre de motivation
+- [x] **Section "Postulations"** dans Dashboard Entreprise
+- [x] **Gestion des statuts** : En attente / En examen / Acceptée / Refusée
+- [x] **Notifications candidats** sur changement de statut
+- [x] **Algorithme boost publicitaire** : Pubs payées affichées en premier, triées par budget
 
 ---
 
-## APIs Ajoutées (Phases 8-10)
+## APIs Ajoutées (Phase 10)
 
-### Jobs/Emplois (Amélioré)
-- `GET /api/jobs` - Liste publique des offres
-- `GET /api/jobs/{id}` - Détail d'une offre
-- `POST /api/jobs/{id}/apply` - Postuler à une offre
-- `GET /api/client/job-applications` - Mes candidatures
-- `GET /api/enterprise/jobs` - Mes offres (entreprise)
-- `POST /api/enterprise/jobs` - Créer une offre
-- `PUT /api/enterprise/jobs/{id}` - Modifier une offre
-- `PUT /api/enterprise/jobs/{id}/toggle` - Activer/Désactiver
-- `DELETE /api/enterprise/jobs/{id}` - Supprimer
-- `GET /api/enterprise/jobs/{id}/applications` - Candidatures reçues
+### Publicités Boostées
+- `GET /api/advertising/public` - Liste pubs actives (triées par budget)
+- `POST /api/advertising/{id}/click` - Tracking clics
 
-### Collections MongoDB Ajoutées
-- `jobs` : Offres d'emploi
-- `job_applications` : Candidatures
-- `friendships` : Relations d'amitié
-- `payment_cards` : Cartes de paiement clients
-- `client_documents` : Documents clients
-- `messages` : Messages entre utilisateurs
-- `profile_views` : Tracking des vues de profil
-- `influencer_profiles` : Profils influenceurs
+### Gestion Candidatures (Entreprise)
+- `GET /api/enterprise/applications` - Toutes les candidatures
+- `PUT /api/enterprise/applications/{id}/status` - Modifier statut
+
+---
+
+## Collections MongoDB
+
+### Existantes
+- `users`, `enterprises`, `services_products`, `orders`, `notifications`
+- `friendships`, `payment_cards`, `client_documents`, `messages`
+- `jobs`, `job_applications`, `influencer_profiles`
+
+### Pour la publicité
+- `advertising` : Campagnes pub avec champs `is_paid`, `is_active`, `budget`, `impressions`, `clicks`
 
 ---
 
 ## Tâches Restantes
 
-### 🔴 P0 - Haute Priorité
-1. ~~Système d'Offres d'Emploi~~ ✅ FAIT
-2. ~~Dashboard Influenceur restructuré~~ ✅ FAIT
-3. ~~Demandes en cours Client~~ ✅ FAIT
-4. **Test flux publicitaire Stripe** - End-to-end
+### 🔴 P0 - Haute Priorité (FAIT ✅)
+1. ~~Filtres offres d'emploi~~ ✅
+2. ~~Bouton Postuler avec CV~~ ✅
+3. ~~Section Postulations Entreprise~~ ✅
+4. ~~Algorithme boost publicitaire~~ ✅
 
 ### 🟡 P1 - Moyenne Priorité
-1. **Responsivité mobile complète** - Audit CSS
-2. **Vidéo panoramique homepage**
-3. **Notifications push** pour collaborations influenceurs
+1. **Test flux Stripe end-to-end** - Vérifier paiement abonnement et publicité
+2. **Responsivité mobile complète** - Audit CSS
+3. **Vidéo panoramique homepage**
+4. **Refonte menu Dashboard Entreprise** - Selon structure demandée
 
 ### 🟢 P2 - Basse Priorité
 1. Commentaires défilants prestataires
 2. Variantes d'affichage produits
 3. Mini-labels sur annonces
+4. **Refactoring `server.py`** - Découper en routers FastAPI
 
 ---
 
@@ -114,19 +113,18 @@ Nouveau menu :
 ```
 /app/
 ├── backend/
-│   ├── server.py (3500+ lignes - APIs complètes)
+│   ├── server.py (3800+ lignes - APIs complètes)
 │   └── tests/
+│       ├── test_p0_features.py (nouveau)
+│       └── ...
 └── frontend/src/
     ├── pages/
-    │   ├── HomePage.js (avec section Offres d'emploi)
-    │   ├── ClientDashboard.js (refait - 1200+ lignes)
-    │   ├── InfluencerDashboard.js (restructuré)
-    │   └── EnterpriseDashboard.js
-    └── components/dashboard/
-        ├── IAClientsSection.js
-        ├── InfluencersSection.js
-        ├── InvitationsSection.js
-        └── SubscriptionsSection.js
+    │   ├── HomePage.js (filtres emploi + modal candidature)
+    │   ├── ClientDashboard.js
+    │   ├── InfluencerDashboard.js
+    │   └── EnterpriseDashboard.js (section Postulations)
+    └── services/
+        └── api.js (nouvelles APIs advertising, applications)
 ```
 
 ---
