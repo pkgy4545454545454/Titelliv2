@@ -359,6 +359,7 @@ const ClientDashboard = () => {
       items: [
         { id: 'messages', label: 'Messagerie', icon: MessageSquare },
         { id: 'contacts', label: 'Contacts & Amis', icon: Users },
+        { id: 'demandes', label: 'Demandes en cours', icon: UserPlus },
         { id: 'particulier', label: 'Compte particulier', icon: Building2 },
       ]
     },
