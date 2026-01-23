@@ -4821,6 +4821,592 @@ async def remove_personal_provider(provider_id: str, current_user: dict = Depend
         raise HTTPException(status_code=404, detail="Provider not found")
     return {"message": "Provider removed"}
 
+# ============ CLIENT ACTIVITY FEED ============
+
+@api_router.get("/client/activity-feed")
+async def get_activity_feed(limit: int = 50, current_user: dict = Depends(get_current_user)):
+    """Get activity feed showing what friends/contacts do"""
+    # Get friend IDs
+    friendships = await db.friendships.find({
+        "$or": [
+            {"user_id": current_user['id'], "status": "accepted"},
+            {"friend_id": current_user['id'], "status": "accepted"}
+        ]
+    }).to_list(500)
+    
+    friend_ids = []
+    for f in friendships:
+        if f['user_id'] == current_user['id']:
+            friend_ids.append(f['friend_id'])
+        else:
+            friend_ids.append(f['user_id'])
+    
+    if not friend_ids:
+        return {"activities": [], "message": "Ajoutez des amis pour voir leur activité"}
+    
+    # Get friend details
+    friends = await db.users.find({"id": {"$in": friend_ids}}, {"_id": 0, "id": 1, "first_name": 1, "last_name": 1, "avatar": 1}).to_list(500)
+    friend_map = {f['id']: f for f in friends}
+    
+    activities = []
+    
+    # Get friend reviews
+    reviews = await db.reviews.find({"user_id": {"$in": friend_ids}}).sort("created_at", -1).limit(20).to_list(20)
+    for r in reviews:
+        friend = friend_map.get(r['user_id'], {})
+        enterprise = await db.enterprises.find_one({"id": r.get('enterprise_id')}, {"_id": 0, "business_name": 1})
+        activities.append({
+            "type": "review",
+            "user_id": r['user_id'],
+            "user_name": f"{friend.get('first_name', '')} {friend.get('last_name', '')}",
+            "user_avatar": friend.get('avatar'),
+            "action": f"a donné {r.get('rating')} étoiles à",
+            "target": enterprise.get('business_name') if enterprise else 'un prestataire',
+            "target_id": r.get('enterprise_id'),
+            "comment": r.get('comment', '')[:100] if r.get('comment') else None,
+            "rating": r.get('rating'),
+            "created_at": r.get('created_at')
+        })
+    
+    # Get friend orders (purchases)
+    orders = await db.orders.find({"user_id": {"$in": friend_ids}}).sort("created_at", -1).limit(15).to_list(15)
+    for o in orders:
+        friend = friend_map.get(o['user_id'], {})
+        enterprise = await db.enterprises.find_one({"id": o.get('enterprise_id')}, {"_id": 0, "business_name": 1})
+        activities.append({
+            "type": "purchase",
+            "user_id": o['user_id'],
+            "user_name": f"{friend.get('first_name', '')} {friend.get('last_name', '')}",
+            "user_avatar": friend.get('avatar'),
+            "action": "a commandé chez",
+            "target": enterprise.get('business_name') if enterprise else 'un prestataire',
+            "target_id": o.get('enterprise_id'),
+            "items_count": len(o.get('items', [])),
+            "created_at": o.get('created_at')
+        })
+    
+    # Get friend training enrollments
+    enrollments = await db.enrollments.find({"user_id": {"$in": friend_ids}}).sort("enrolled_at", -1).limit(15).to_list(15)
+    for e in enrollments:
+        friend = friend_map.get(e['user_id'], {})
+        training = await db.trainings.find_one({"id": e.get('training_id')}, {"_id": 0, "title": 1})
+        activities.append({
+            "type": "training",
+            "user_id": e['user_id'],
+            "user_name": f"{friend.get('first_name', '')} {friend.get('last_name', '')}",
+            "user_avatar": friend.get('avatar'),
+            "action": "s'est inscrit à la formation",
+            "target": training.get('title') if training else 'une formation',
+            "target_id": e.get('training_id'),
+            "created_at": e.get('enrolled_at')
+        })
+    
+    # Get friend wishlist additions
+    wishlist_items = await db.wishlist.find({"user_id": {"$in": friend_ids}}).sort("created_at", -1).limit(15).to_list(15)
+    for w in wishlist_items:
+        friend = friend_map.get(w['user_id'], {})
+        activities.append({
+            "type": "wishlist",
+            "user_id": w['user_id'],
+            "user_name": f"{friend.get('first_name', '')} {friend.get('last_name', '')}",
+            "user_avatar": friend.get('avatar'),
+            "action": "a ajouté à sa liste de souhaits",
+            "target": w.get('item_name', 'un article'),
+            "target_id": w.get('item_id'),
+            "item_price": w.get('item_price'),
+            "enterprise_name": w.get('enterprise_name'),
+            "created_at": w.get('created_at')
+        })
+    
+    # Sort by date
+    activities.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+    
+    return {"activities": activities[:limit]}
+
+@api_router.get("/client/my-feed")
+async def get_my_feed(limit: int = 50, current_user: dict = Depends(get_current_user)):
+    """Get current user's own activity history"""
+    user_id = current_user['id']
+    activities = []
+    
+    # My reviews
+    reviews = await db.reviews.find({"user_id": user_id}, {"_id": 0}).sort("created_at", -1).limit(10).to_list(10)
+    for r in reviews:
+        enterprise = await db.enterprises.find_one({"id": r.get('enterprise_id')}, {"_id": 0, "business_name": 1})
+        activities.append({
+            "type": "review",
+            "action": f"Vous avez donné {r.get('rating')} étoiles à",
+            "target": enterprise.get('business_name') if enterprise else 'un prestataire',
+            "target_id": r.get('enterprise_id'),
+            "comment": r.get('comment', '')[:100] if r.get('comment') else None,
+            "created_at": r.get('created_at')
+        })
+    
+    # My orders
+    orders = await db.orders.find({"user_id": user_id}, {"_id": 0}).sort("created_at", -1).limit(10).to_list(10)
+    for o in orders:
+        enterprise = await db.enterprises.find_one({"id": o.get('enterprise_id')}, {"_id": 0, "business_name": 1})
+        activities.append({
+            "type": "purchase",
+            "action": "Vous avez commandé chez",
+            "target": enterprise.get('business_name') if enterprise else 'un prestataire',
+            "target_id": o.get('enterprise_id'),
+            "total": o.get('total'),
+            "created_at": o.get('created_at')
+        })
+    
+    # My trainings
+    enrollments = await db.enrollments.find({"user_id": user_id}, {"_id": 0}).sort("enrolled_at", -1).limit(10).to_list(10)
+    for e in enrollments:
+        training = await db.trainings.find_one({"id": e.get('training_id')}, {"_id": 0, "title": 1})
+        activities.append({
+            "type": "training",
+            "action": "Vous vous êtes inscrit à",
+            "target": training.get('title') if training else 'une formation',
+            "target_id": e.get('training_id'),
+            "created_at": e.get('enrolled_at')
+        })
+    
+    # My wishlist
+    wishlist = await db.wishlist.find({"user_id": user_id}, {"_id": 0}).sort("created_at", -1).limit(10).to_list(10)
+    for w in wishlist:
+        activities.append({
+            "type": "wishlist",
+            "action": "Vous avez ajouté à votre liste",
+            "target": w.get('item_name', 'un article'),
+            "target_id": w.get('item_id'),
+            "item_price": w.get('item_price'),
+            "created_at": w.get('created_at')
+        })
+    
+    activities.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+    return {"activities": activities[:limit]}
+
+# ============ CLIENT MODE DE VIE (LIFESTYLE) ============
+
+@api_router.get("/client/lifestyle")
+async def get_lifestyle(current_user: dict = Depends(get_current_user)):
+    """Get client's lifestyle data - favorites, likes, preferences"""
+    user_id = current_user['id']
+    
+    # Get wishlist (things they want)
+    wishlist = await db.wishlist.find({"user_id": user_id}, {"_id": 0}).to_list(50)
+    
+    # Get personal providers (favorites)
+    providers = await db.personal_providers.find({"user_id": user_id}, {"_id": 0}).to_list(50)
+    
+    # Get reviews (things they liked - rating >= 4)
+    liked_reviews = await db.reviews.find({"user_id": user_id, "rating": {"$gte": 4}}, {"_id": 0}).to_list(50)
+    
+    # Get orders (purchase history for preferences)
+    orders = await db.orders.find({"user_id": user_id}, {"_id": 0}).to_list(100)
+    
+    # Get trainings enrolled (interests)
+    enrollments = await db.enrollments.find({"user_id": user_id}, {"_id": 0}).to_list(50)
+    
+    # Calculate preferences/interests
+    categories_count = {}
+    enterprises_count = {}
+    
+    for order in orders:
+        ent_id = order.get('enterprise_id')
+        if ent_id:
+            enterprises_count[ent_id] = enterprises_count.get(ent_id, 0) + 1
+    
+    # Get enterprise categories
+    for ent_id in enterprises_count.keys():
+        ent = await db.enterprises.find_one({"id": ent_id}, {"_id": 0, "category": 1})
+        if ent and ent.get('category'):
+            categories_count[ent['category']] = categories_count.get(ent['category'], 0) + enterprises_count[ent_id]
+    
+    top_categories = sorted(categories_count.items(), key=lambda x: x[1], reverse=True)[:5]
+    top_enterprises = sorted(enterprises_count.items(), key=lambda x: x[1], reverse=True)[:5]
+    
+    # Enrich top enterprises with names
+    top_enterprises_enriched = []
+    for ent_id, count in top_enterprises:
+        ent = await db.enterprises.find_one({"id": ent_id}, {"_id": 0, "business_name": 1, "logo": 1})
+        if ent:
+            top_enterprises_enriched.append({
+                "id": ent_id,
+                "name": ent.get('business_name'),
+                "logo": ent.get('logo'),
+                "visits": count
+            })
+    
+    return {
+        "wishlist": wishlist,
+        "personal_providers": providers,
+        "liked_items": liked_reviews,
+        "preferences": {
+            "top_categories": [{"name": cat, "count": count} for cat, count in top_categories],
+            "top_enterprises": top_enterprises_enriched,
+            "total_orders": len(orders),
+            "total_trainings": len(enrollments)
+        }
+    }
+
+# ============ ENTERPRISE INVITATIONS TO CLIENTS ============
+
+class InvitationCreate(BaseModel):
+    client_id: str
+    offer_type: str  # "discount", "exclusive", "event", "promotion"
+    title: str
+    description: str
+    discount_percent: Optional[float] = None
+    valid_until: Optional[str] = None
+    terms: Optional[str] = None
+
+@api_router.get("/client/invitations")
+async def get_client_invitations(current_user: dict = Depends(get_current_user)):
+    """Get invitations from enterprises to this client"""
+    invitations = await db.client_invitations.find(
+        {"client_id": current_user['id'], "status": {"$ne": "expired"}},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(50)
+    
+    # Enrich with enterprise data
+    for inv in invitations:
+        enterprise = await db.enterprises.find_one(
+            {"id": inv.get('enterprise_id')},
+            {"_id": 0, "business_name": 1, "logo": 1, "category": 1}
+        )
+        if enterprise:
+            inv['enterprise'] = enterprise
+    
+    return {"invitations": invitations}
+
+@api_router.post("/enterprise/invitations")
+async def create_invitation(invitation: InvitationCreate, current_user: dict = Depends(get_current_user)):
+    """Enterprise sends invitation/offer to a client"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']}, {"_id": 0})
+    if not enterprise:
+        raise HTTPException(status_code=403, detail="Enterprise only")
+    
+    inv_doc = {
+        "id": str(uuid.uuid4()),
+        "enterprise_id": enterprise['id'],
+        "enterprise_name": enterprise.get('business_name'),
+        **invitation.dict(),
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.client_invitations.insert_one(inv_doc)
+    
+    # Notify client
+    notification = {
+        "id": str(uuid.uuid4()),
+        "user_id": invitation.client_id,
+        "title": "Nouvelle invitation",
+        "message": f"{enterprise.get('business_name')} vous a envoyé une offre exclusive: {invitation.title}",
+        "notification_type": "invitation",
+        "data": {"invitation_id": inv_doc['id']},
+        "is_read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.notifications.insert_one(notification)
+    
+    if '_id' in inv_doc: del inv_doc['_id']
+    return inv_doc
+
+@api_router.put("/client/invitations/{invitation_id}/respond")
+async def respond_to_invitation(invitation_id: str, accepted: bool, current_user: dict = Depends(get_current_user)):
+    """Client accepts or declines an invitation"""
+    result = await db.client_invitations.update_one(
+        {"id": invitation_id, "client_id": current_user['id']},
+        {"$set": {"status": "accepted" if accepted else "declined", "responded_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Invitation not found")
+    return {"message": "accepted" if accepted else "declined"}
+
+# ============ CURRENT OFFERS ============
+
+@api_router.get("/client/current-offers")
+async def get_current_offers(current_user: dict = Depends(get_current_user)):
+    """Get current offers/promotions from enterprises"""
+    now = datetime.now(timezone.utc).isoformat()
+    
+    # Get active promotions
+    offers = await db.promotions.find({
+        "is_active": True,
+        "$or": [
+            {"valid_until": {"$gte": now}},
+            {"valid_until": None}
+        ]
+    }, {"_id": 0}).sort("created_at", -1).limit(30).to_list(30)
+    
+    # Enrich with enterprise data
+    for offer in offers:
+        enterprise = await db.enterprises.find_one(
+            {"id": offer.get('enterprise_id')},
+            {"_id": 0, "business_name": 1, "logo": 1, "category": 1, "rating": 1}
+        )
+        if enterprise:
+            offer['enterprise'] = enterprise
+    
+    return {"offers": offers}
+
+@api_router.post("/enterprise/promotions")
+async def create_promotion(
+    title: str,
+    description: str,
+    discount_percent: Optional[float] = None,
+    valid_until: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Enterprise creates a promotion/offer"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']}, {"_id": 0})
+    if not enterprise:
+        raise HTTPException(status_code=403, detail="Enterprise only")
+    
+    promo = {
+        "id": str(uuid.uuid4()),
+        "enterprise_id": enterprise['id'],
+        "title": title,
+        "description": description,
+        "discount_percent": discount_percent,
+        "valid_until": valid_until,
+        "is_active": True,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.promotions.insert_one(promo)
+    if '_id' in promo: del promo['_id']
+    return promo
+
+# ============ GUEST PROFILES (FAVORITES) ============
+
+class GuestFavoriteCreate(BaseModel):
+    guest_user_id: str
+    guest_name: str
+    guest_avatar: Optional[str] = None
+    notes: Optional[str] = None
+
+@api_router.get("/client/guests")
+async def get_favorite_guests(current_user: dict = Depends(get_current_user)):
+    """Get favorite guest profiles"""
+    guests = await db.favorite_guests.find(
+        {"user_id": current_user['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(50)
+    
+    # Enrich with current user data
+    for guest in guests:
+        user = await db.users.find_one(
+            {"id": guest.get('guest_user_id')},
+            {"_id": 0, "first_name": 1, "last_name": 1, "avatar": 1, "city": 1}
+        )
+        if user:
+            guest['current_info'] = user
+    
+    return {"guests": guests}
+
+@api_router.post("/client/guests")
+async def add_favorite_guest(guest: GuestFavoriteCreate, current_user: dict = Depends(get_current_user)):
+    """Add a guest profile to favorites"""
+    existing = await db.favorite_guests.find_one({
+        "user_id": current_user['id'],
+        "guest_user_id": guest.guest_user_id
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="Already in favorites")
+    
+    guest_doc = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user['id'],
+        **guest.dict(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.favorite_guests.insert_one(guest_doc)
+    if '_id' in guest_doc: del guest_doc['_id']
+    return guest_doc
+
+@api_router.delete("/client/guests/{guest_id}")
+async def remove_favorite_guest(guest_id: str, current_user: dict = Depends(get_current_user)):
+    """Remove guest from favorites"""
+    result = await db.favorite_guests.delete_one({
+        "user_id": current_user['id'],
+        "$or": [{"id": guest_id}, {"guest_user_id": guest_id}]
+    })
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Guest not found")
+    return {"message": "Guest removed"}
+
+# ============ CLIENT INVESTMENTS ============
+
+class InvestmentCreate(BaseModel):
+    investment_type: str  # "real_estate", "business", "other"
+    title: str
+    description: Optional[str] = None
+    amount_invested: float
+    current_value: Optional[float] = None
+    roi_percent: Optional[float] = None
+    investment_date: str
+    property_address: Optional[str] = None  # For real estate
+    status: str = "active"  # active, sold, pending
+
+@api_router.get("/client/investments")
+async def get_investments(current_user: dict = Depends(get_current_user)):
+    """Get client's investments"""
+    investments = await db.investments.find(
+        {"user_id": current_user['id']},
+        {"_id": 0}
+    ).sort("investment_date", -1).to_list(100)
+    
+    # Calculate statistics
+    total_invested = sum(i.get('amount_invested', 0) for i in investments)
+    total_current_value = sum(i.get('current_value', i.get('amount_invested', 0)) for i in investments)
+    total_roi = total_current_value - total_invested if total_invested > 0 else 0
+    avg_roi_percent = (total_roi / total_invested * 100) if total_invested > 0 else 0
+    
+    # Group by type
+    by_type = {}
+    for inv in investments:
+        inv_type = inv.get('investment_type', 'other')
+        if inv_type not in by_type:
+            by_type[inv_type] = {"count": 0, "total_invested": 0, "total_current": 0}
+        by_type[inv_type]["count"] += 1
+        by_type[inv_type]["total_invested"] += inv.get('amount_invested', 0)
+        by_type[inv_type]["total_current"] += inv.get('current_value', inv.get('amount_invested', 0))
+    
+    return {
+        "investments": investments,
+        "statistics": {
+            "total_invested": round(total_invested, 2),
+            "total_current_value": round(total_current_value, 2),
+            "total_roi": round(total_roi, 2),
+            "avg_roi_percent": round(avg_roi_percent, 1),
+            "investment_count": len(investments),
+            "by_type": by_type
+        }
+    }
+
+@api_router.post("/client/investments")
+async def create_investment(investment: InvestmentCreate, current_user: dict = Depends(get_current_user)):
+    """Create a new investment record"""
+    inv_doc = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user['id'],
+        **investment.dict(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.investments.insert_one(inv_doc)
+    if '_id' in inv_doc: del inv_doc['_id']
+    return inv_doc
+
+@api_router.put("/client/investments/{investment_id}")
+async def update_investment(investment_id: str, investment: InvestmentCreate, current_user: dict = Depends(get_current_user)):
+    """Update an investment record"""
+    result = await db.investments.update_one(
+        {"id": investment_id, "user_id": current_user['id']},
+        {"$set": {**investment.dict(), "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Investment not found")
+    return {"message": "Investment updated"}
+
+@api_router.delete("/client/investments/{investment_id}")
+async def delete_investment(investment_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete an investment record"""
+    result = await db.investments.delete_one({"id": investment_id, "user_id": current_user['id']})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Investment not found")
+    return {"message": "Investment deleted"}
+
+# ============ CLIENT PREMIUM ============
+
+@api_router.get("/client/premium")
+async def get_premium_status(current_user: dict = Depends(get_current_user)):
+    """Get client's premium subscription status and benefits"""
+    user = await db.users.find_one({"id": current_user['id']}, {"_id": 0})
+    
+    subscription = await db.subscriptions.find_one(
+        {"user_id": current_user['id'], "status": "active"},
+        {"_id": 0}
+    )
+    
+    # Premium benefits
+    benefits = {
+        "free": {
+            "name": "Gratuit",
+            "price": 0,
+            "features": [
+                "Accès aux prestataires",
+                "Messagerie limitée",
+                "1% cashback"
+            ]
+        },
+        "premium": {
+            "name": "Premium",
+            "price": 9.99,
+            "features": [
+                "Accès illimité aux prestataires",
+                "Messagerie illimitée",
+                "10% cashback",
+                "Offres exclusives",
+                "Support prioritaire",
+                "Badge Premium"
+            ]
+        },
+        "vip": {
+            "name": "VIP",
+            "price": 29.99,
+            "features": [
+                "Tous les avantages Premium",
+                "15% cashback",
+                "Invitations événements exclusifs",
+                "Concierge personnel",
+                "Accès anticipé aux nouvelles fonctionnalités",
+                "Badge VIP doré"
+            ]
+        }
+    }
+    
+    current_plan = subscription.get('plan', 'free') if subscription else 'free'
+    
+    return {
+        "current_plan": current_plan,
+        "is_premium": current_plan in ['premium', 'vip'],
+        "subscription": subscription,
+        "benefits": benefits,
+        "user_since": user.get('created_at') if user else None,
+        "cashback_rate": 15 if current_plan == 'vip' else (10 if current_plan == 'premium' else 1)
+    }
+
+@api_router.post("/client/premium/upgrade")
+async def upgrade_to_premium(plan: str, current_user: dict = Depends(get_current_user)):
+    """Upgrade to premium or VIP plan"""
+    if plan not in ['premium', 'vip']:
+        raise HTTPException(status_code=400, detail="Invalid plan")
+    
+    # Check existing subscription
+    existing = await db.subscriptions.find_one({"user_id": current_user['id'], "status": "active"})
+    if existing:
+        await db.subscriptions.update_one(
+            {"id": existing['id']},
+            {"$set": {"status": "cancelled", "cancelled_at": datetime.now(timezone.utc).isoformat()}}
+        )
+    
+    sub = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user['id'],
+        "plan": plan,
+        "status": "active",
+        "price": 29.99 if plan == 'vip' else 9.99,
+        "started_at": datetime.now(timezone.utc).isoformat(),
+        "next_billing": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
+    }
+    await db.subscriptions.insert_one(sub)
+    
+    # Update user
+    await db.users.update_one(
+        {"id": current_user['id']},
+        {"$set": {"is_premium": True, "premium_plan": plan}}
+    )
+    
+    if '_id' in sub: del sub['_id']
+    return sub
+
 # ============ ROOT ROUTE ============
 
 @api_router.get("/")
