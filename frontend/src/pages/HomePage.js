@@ -446,14 +446,14 @@ const HomePage = () => {
           
           {/* Filters */}
           {showFilters && (
-            <div className="mb-6 p-4 bg-white/5 rounded-xl border border-white/10 animate-fade-in" data-testid="jobs-filters">
-              <div className="flex flex-wrap gap-4">
-                <div className="flex-1 min-w-[150px]">
-                  <label className="block text-sm text-gray-400 mb-1">Type de contrat</label>
+            <div className="mb-6 p-5 bg-white/5 rounded-xl border border-white/10 animate-fade-in" data-testid="jobs-filters">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Type de contrat</label>
                   <select 
                     value={jobFilters.type}
                     onChange={(e) => setJobFilters({...jobFilters, type: e.target.value})}
-                    className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white focus:border-[#0047AB] outline-none"
+                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2.5 text-white focus:border-[#0047AB] outline-none"
                     data-testid="jobs-filter-type"
                   >
                     <option value="">Tous les types</option>
@@ -464,28 +464,39 @@ const HomePage = () => {
                     <option value="Apprentissage">Apprentissage</option>
                   </select>
                 </div>
-                <div className="flex-1 min-w-[150px]">
-                  <label className="block text-sm text-gray-400 mb-1">Localisation</label>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Ville</label>
                   <input 
                     type="text"
                     value={jobFilters.location}
                     onChange={(e) => setJobFilters({...jobFilters, location: e.target.value})}
                     placeholder="Ex: Lausanne, Genève..."
-                    className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:border-[#0047AB] outline-none"
+                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:border-[#0047AB] outline-none"
                     data-testid="jobs-filter-location"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Entreprise</label>
+                  <input 
+                    type="text"
+                    value={jobFilters.enterprise}
+                    onChange={(e) => setJobFilters({...jobFilters, enterprise: e.target.value})}
+                    placeholder="Nom de l'entreprise..."
+                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:border-[#0047AB] outline-none"
+                    data-testid="jobs-filter-enterprise"
                   />
                 </div>
                 <div className="flex items-end">
                   <button 
-                    onClick={() => setJobFilters({ type: '', location: '' })}
-                    className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                    onClick={() => setJobFilters({ type: '', location: '', enterprise: '' })}
+                    className="w-full px-4 py-2.5 bg-white/10 hover:bg-white/20 rounded-lg text-gray-300 hover:text-white transition-colors"
                   >
                     Réinitialiser
                   </button>
                 </div>
               </div>
               {filteredJobs.length !== jobs.length && (
-                <p className="mt-3 text-sm text-[#0047AB]">{filteredJobs.length} résultat(s) sur {jobs.length}</p>
+                <p className="mt-4 text-sm text-[#0047AB]">{filteredJobs.length} résultat(s) sur {jobs.length}</p>
               )}
             </div>
           )}
