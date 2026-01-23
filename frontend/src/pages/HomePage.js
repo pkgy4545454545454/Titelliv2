@@ -144,6 +144,29 @@ const HomePage = () => {
     }
   };
 
+  // Handle training purchase
+  const handlePurchaseTraining = async (training) => {
+    const token = localStorage.getItem('titelli_token');
+    if (!token) {
+      toast.error('Connectez-vous pour acheter une formation');
+      navigate('/auth');
+      return;
+    }
+    
+    setPurchasingTraining(training.id);
+    try {
+      const res = await trainingsAPI.purchase(training.id);
+      if (res.data.url) {
+        window.location.href = res.data.url;
+      }
+    } catch (error) {
+      const msg = error.response?.data?.detail || 'Erreur lors de l\'achat';
+      toast.error(msg);
+    } finally {
+      setPurchasingTraining(null);
+    }
+  };
+
   const heroImage = 'https://images.unsplash.com/photo-1733950489642-bd1a7c3e69bb?w=1920&q=80';
 
   const mainCategories = [
