@@ -54,10 +54,35 @@ const EnterprisesPage = () => {
 
   return (
     <div className="min-h-screen bg-[#050505] pt-24" data-testid="enterprises-page">
-      {/* Hero */}
-      <div className="py-16 md:py-24 bg-gradient-to-b from-[#0047AB]/10 to-transparent">
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
+      {/* Hero with Video Background */}
+      <div className="relative h-[40vh] min-h-[300px] overflow-hidden">
+        {/* Video Background */}
+        <div className="absolute inset-0">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="w-full h-full object-cover"
+            poster="https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1920&q=80"
+          >
+            <source src="https://assets.mixkit.co/videos/preview/mixkit-business-team-meeting-in-office-4815-large.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/70 via-[#050505]/50 to-[#050505]" />
+        </div>
+        
+        {/* Content */}
+        <div className="relative h-full flex items-center">
+          <div className="max-w-7xl mx-auto px-4 md:px-8 w-full">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
+              Nos Entreprises
+            </h1>
+            <p className="text-lg md:text-xl text-gray-300 max-w-2xl">
+              Découvrez les meilleures entreprises de la région de Lausanne
+            </p>
+          </div>
+        </div>
+      </div>
             Entreprises
           </h1>
           <p className="text-lg text-gray-400 max-w-2xl">
