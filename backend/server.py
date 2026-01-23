@@ -4503,16 +4503,16 @@ async def create_influencer_profile(profile_data: InfluencerProfileCreate, curre
         "name": f"{user.get('first_name', '')} {user.get('last_name', '')}".strip() or "Influenceur",
         "category": profile_data.category,
         "followers": followers,
-        "engagement_rate": round(3 + random.random() * 4, 1),  # Random engagement 3-7%
+        "engagement_rate": profile_data.engagement_rate if hasattr(profile_data, 'engagement_rate') else 4.5,  # Default 4.5% if not provided
         "price": profile_data.price,
         "bio": profile_data.bio or "",
         "instagram": profile_data.instagram or "",
         "tiktok": profile_data.tiktok or "",
         "facebook": profile_data.facebook or "",
         "image": user.get('avatar', ''),
-        "total_views": random.randint(50000, 200000),
-        "total_likes": random.randint(5000, 15000),
-        "total_shares": random.randint(500, 2000),
+        "total_views": 0,  # Start at 0, will be updated from real campaigns
+        "total_likes": 0,
+        "total_shares": 0,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
