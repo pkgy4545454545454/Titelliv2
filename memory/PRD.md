@@ -9,88 +9,113 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
 
 ## ✅ Fonctionnalités Complétées (23 Jan 2026)
 
-### Phase 18 : Corrections Finales et Design Menu (AUJOURD'HUI)
+### Phase 19 : Corrections Critiques et Système Cashback 10%
 
 **Bugs corrigés :**
 
-1. **Upload PDF ne fonctionnait pas**
-   - Cause : `ALLOWED_EXTENSIONS` n'incluait pas `.pdf`, `.doc`, `.docx`
-   - Solution : Ajout des extensions documents et vidéos
-   - Augmentation de la limite de taille à 50MB
+1. **Flux de candidature aux emplois corrigé**
+   - **Cause** : `JobDetailPage.js` utilisait `doc.file_path` et `doc.file_name` au lieu de `doc.url` et `doc.name`
+   - **Solution** : Correction des noms de propriétés dans le modal de candidature
+   - **Fichiers modifiés** : `/app/frontend/src/pages/JobDetailPage.js`
+   - **Statut** : ✅ VÉRIFIÉ - Les CV s'affichent correctement dans le modal
 
-2. **"Veuillez uploader un fichier" alors que déjà uploadé**
-   - Cause : Le fichier était uploadé mais le `url` n'était pas mis à jour correctement
-   - Solution : Message toast "Upload en cours..." + logging amélioré
+2. **Système de cashback passé de 3% à 10%**
+   - **Cause** : Le taux de cashback était de 3% au lieu de 10% comme demandé
+   - **Solution** : Modification du `CASHBACK_RATE = 0.10` dans `server.py` pour:
+     - Les commandes (ligne ~1010)
+     - Les formations (ligne ~1931)
+   - **Fichiers modifiés** : `/app/backend/server.py`
+   - **Statut** : ✅ VÉRIFIÉ - 10% cashback appliqué sur toutes les transactions
 
-3. **CV pas sélectionné par défaut**
-   - Cause : Catégorie par défaut était "general"
-   - Solution : Catégorie par défaut changée à "cv"
+**Nouvelles fonctionnalités :**
 
-**Nouveau design des menus et stats :**
+1. **Page Cashback améliorée**
+   - Affichage du solde avec badge "10% de cashback sur tous vos achats !"
+   - Cartes statistiques: Total gagné, Total utilisé, Nombre de transactions
+   - Historique des transactions avec dates et descriptions
+   - Section explicative "Comment fonctionne le cashback ?"
+   - **Fichiers modifiés** : 
+     - `/app/frontend/src/pages/ClientDashboard.js`
+     - `/app/frontend/src/services/api.js` (ajout `cashbackAPI.history()` et `cashbackAPI.use()`)
 
-1. **Sections menu colorées avec gradients**
-   - Principal (bleu), Avantages (violet), Commercial (vert)
-   - Gestion (jaune), Communication (rose), etc.
-
-2. **Cartes de stats colorées**
-   - Chaque carte a un gradient correspondant à sa section
-   - Ex: Commandes (vert), Revenus (jaune), Note (violet)
-
-3. **Notifications clignotantes**
-   - Bordures vertes qui pulsent
-   - Badge avec compteur qui rebondit
-   - Animation CSS : `pulse-green`, `notification-pulse`
-
----
-
-## Extensions de fichiers autorisées
-
-```python
-ALLOWED_EXTENSIONS = {
-    # Images
-    '.jpg', '.jpeg', '.png', '.gif', '.webp',
-    # Documents
-    '.pdf', '.doc', '.docx', '.ppt', '.pptx',
-    # Vidéos/Audio
-    '.mp4', '.mov', '.avi', '.mp3', '.wav'
-}
-
-MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
-```
+2. **API Cashback enrichie**
+   - `GET /api/cashback/history` retourne maintenant:
+     ```json
+     {
+       "balance": 85.47,
+       "transactions": [...],
+       "statistics": {
+         "total_earned": 12.0,
+         "total_used": 0,
+         "cashback_rate": "10%",
+         "transaction_count": 1
+       }
+     }
+     ```
 
 ---
 
-## Résumé des corrections
+## Tests Effectués - Itération 16
 
-| Problème | Cause | Solution |
-|----------|-------|----------|
-| Upload PDF impossible | Extensions non autorisées | Ajout .pdf, .doc, .docx |
-| Message erreur upload | URL non mis à jour | Toast + logging |
-| CV pas par défaut | Default "general" | Default "cv" |
-| Stats sans couleur | Style uniforme | Gradients colorés |
-| Pas de notif visuelle | Pas d'animation | Bordures clignotantes |
+| Test | Statut | Détails |
+|------|--------|---------|
+| Sélection CV candidature | ✅ PASS | 2 documents affichés correctement |
+| Cashback 10% | ✅ PASS | Rate: 10%, Transaction enregistrée |
+| Page historique cashback | ✅ PASS | Solde + stats + historique |
+| Upload documents | ✅ PASS | PDF/DOC supportés |
+| Création emplois | ✅ PASS | Modal avec tous les champs |
+| Dashboard client | ✅ PASS | Tous les onglets fonctionnent |
+| Homepage | ✅ PASS | Toutes les sections visibles |
+
+**Taux de réussite : 100% (21/21 tests backend)**
 
 ---
 
 ## Credentials de test
-- Client: test@example.com / Test123!
-- Enterprise: spa.luxury@titelli.com / Demo123!
-- Influencer: test_influencer2@example.com / Test123!
-- Admin: admin@titelli.com / Admin123!
+- **Client**: test@example.com / Test123!
+- **Enterprise**: spa.luxury@titelli.com / Demo123!
+- **Influencer**: test_influencer2@example.com / Test123!
+- **Admin**: admin@titelli.com / Admin123!
 
 ---
 
 ## Tâches Restantes
 
-### 🟡 P1
-- Responsivité mobile complète
-- Refactoring server.py en modules (4500+ lignes)
+### 🔴 P0 - Critique
+- ✅ ~~Bug flux candidature~~ - CORRIGÉ
+- ✅ ~~Système cashback 10%~~ - IMPLÉMENTÉ
 
-### 🟢 P2
-- Vidéo panoramique homepage
-- Questions suggestives UI
-- Commentaires défilants
+### 🟡 P1 - Important
+- Refactoring `server.py` → déplacer la logique vers `/app/backend/routers/`
+- Interface UI questions suggestives (entreprises → clients)
+- Audit complet responsivité mobile
+
+### 🟢 P2 - Futur
+- Vidéo panoramique sur la page d'accueil
+- Commentaires/avis défilants sur les pages entreprises
+- Notifications temps réel (WebSocket)
 
 ---
 
-*Mise à jour: 23 Jan 2026 - Corrections finales upload + design*
+## Architecture des fichiers clés
+
+```
+/app/
+├── backend/
+│   ├── server.py              # API principale (~4500 lignes)
+│   ├── routers/               # Pour refactoring futur
+│   └── uploads/               # Fichiers uploadés
+└── frontend/
+    └── src/
+        ├── pages/
+        │   ├── ClientDashboard.js    # Dashboard client avec cashback
+        │   ├── JobDetailPage.js      # Page détail emploi (corrigé)
+        │   ├── HomePage.js           # Page d'accueil
+        │   └── EnterpriseDashboard.js
+        └── services/
+            └── api.js                # APIs avec cashbackAPI.history()
+```
+
+---
+
+*Dernière mise à jour: 23 Jan 2026 - Corrections P0 et système cashback 10%*
