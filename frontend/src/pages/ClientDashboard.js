@@ -1371,6 +1371,27 @@ const ClientDashboard = () => {
                 </button>
               </div>
 
+              {/* Return to Job Alert */}
+              {returnToJobId && (
+                <div className="bg-[#0047AB]/20 border border-[#0047AB]/50 rounded-xl p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-[#0047AB]/30 flex items-center justify-center">
+                      <Briefcase className="w-5 h-5 text-[#0047AB]" />
+                    </div>
+                    <div>
+                      <p className="text-white font-medium">Vous souhaitez postuler à une offre</p>
+                      <p className="text-sm text-gray-400">Ajoutez votre CV puis retournez postuler</p>
+                    </div>
+                  </div>
+                  <Link 
+                    to={`/emploi/${returnToJobId}`}
+                    className="btn-primary text-sm"
+                  >
+                    Voir l'offre
+                  </Link>
+                </div>
+              )}
+
               {documents.length > 0 ? (
                 <div className="space-y-3">
                   {documents.map((doc) => (
@@ -1402,6 +1423,19 @@ const ClientDashboard = () => {
                       </div>
                     </div>
                   ))}
+                  
+                  {/* After adding CV, show button to return to job */}
+                  {returnToJobId && documents.some(d => d.category === 'cv') && (
+                    <div className="mt-4 text-center">
+                      <Link 
+                        to={`/emploi/${returnToJobId}`}
+                        className="btn-primary inline-flex items-center gap-2"
+                      >
+                        <Briefcase className="w-4 h-4" />
+                        Retourner postuler à l'offre
+                      </Link>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="card-service rounded-xl p-12 text-center">
