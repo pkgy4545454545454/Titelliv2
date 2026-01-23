@@ -3104,6 +3104,32 @@ const FormModal = ({ type, item, onClose, onSuccess }) => {
               <label className="block text-sm text-gray-400 mb-1">Description *</label>
               <textarea placeholder="Décrivez le contenu de la formation" value={formData.description || ''} onChange={(e) => setFormData({...formData, description: e.target.value})} className="input-dark w-full" rows={3} required />
             </div>
+            
+            {/* Training Type Selection */}
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Type de formation *</label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFormData({...formData, training_type: 'online'})}
+                  className={`p-4 rounded-xl border-2 transition-all ${formData.training_type === 'online' ? 'border-[#0047AB] bg-[#0047AB]/20' : 'border-white/10 hover:border-white/30'}`}
+                >
+                  <div className="text-2xl mb-2">💻</div>
+                  <p className="text-white font-medium">En ligne</p>
+                  <p className="text-xs text-gray-400 mt-1">Fichiers téléchargeables</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({...formData, training_type: 'on_site'})}
+                  className={`p-4 rounded-xl border-2 transition-all ${formData.training_type === 'on_site' ? 'border-[#0047AB] bg-[#0047AB]/20' : 'border-white/10 hover:border-white/30'}`}
+                >
+                  <div className="text-2xl mb-2">🏢</div>
+                  <p className="text-white font-medium">Présentiel</p>
+                  <p className="text-xs text-gray-400 mt-1">Sur site avec dates</p>
+                </button>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Durée *</label>
@@ -3114,6 +3140,116 @@ const FormModal = ({ type, item, onClose, onSuccess }) => {
                 <input type="number" placeholder="Ex: 150" min="0" value={formData.price || ''} onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value)})} className="input-dark w-full" required />
               </div>
             </div>
+            
+            {/* On-site specific fields */}
+            {formData.training_type === 'on_site' && (
+              <>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Lieu de la formation</label>
+                  <input type="text" placeholder="Ex: Centre de formation, Lausanne" value={formData.location || ''} onChange={(e) => setFormData({...formData, location: e.target.value})} className="input-dark w-full" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-1">Date de début</label>
+                    <input type="date" value={formData.start_date || ''} onChange={(e) => setFormData({...formData, start_date: e.target.value})} className="input-dark w-full" />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-1">Date de fin</label>
+                    <input type="date" value={formData.end_date || ''} onChange={(e) => setFormData({...formData, end_date: e.target.value})} className="input-dark w-full" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Nombre max. de participants</label>
+                  <input type="number" placeholder="Ex: 20" min="1" value={formData.max_participants || ''} onChange={(e) => setFormData({...formData, max_participants: parseInt(e.target.value)})} className="input-dark w-full" />
+                </div>
+              </>
+            )}
+
+            {/* Online specific fields - File uploads */}
+            {formData.training_type === 'online' && (
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Fichiers téléchargeables (vidéos, PDF, images)</label>
+                <div className="border-2 border-dashed border-white/20 rounded-xl p-4">
+                  {formData.downloadable_files && formData.downloadable_files.length > 0 && (
+                    <div className="space-y-2 mb-4">
+                      {formData.downloadable_files.map((file, idx) => (
+                        <div key={idx} className="flex items-center justify-between bg-white/5 rounded-lg p-3">
+                          <div className="flex items-center gap-3">
+                            <span className="text-xl">
+                              {file.type?.includes('video') ? '🎬' : file.type?.includes('pdf') ? '📄' : file.type?.includes('image') ? '🖼️' : '📁'}
+                            </span>
+                            <span className="text-white text-sm truncate max-w-[200px]">{file.name}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newFiles = formData.downloadable_files.filter((_, i) => i !== idx);
+                              setFormData({...formData, downloadable_files: newFiles});
+                            }}
+                            className="text-red-400 hover:text-red-300"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <input
+                    ref={trainingFileInputRef}
+                    type="file"
+                    accept="video/*,application/pdf,image/*,.doc,.docx,.ppt,.pptx"
+                    multiple
+                    className="hidden"
+                    onChange={async (e) => {
+                      const files = Array.from(e.target.files);
+                      setUploading(true);
+                      try {
+                        const uploadPromises = files.map(async (file) => {
+                          const formDataUpload = new FormData();
+                          formDataUpload.append('file', file);
+                          const res = await uploadAPI.uploadImage(file);
+                          return {
+                            name: file.name,
+                            url: res.data.url,
+                            type: file.type
+                          };
+                        });
+                        const uploadedFiles = await Promise.all(uploadPromises);
+                        setFormData({
+                          ...formData,
+                          downloadable_files: [...(formData.downloadable_files || []), ...uploadedFiles]
+                        });
+                        toast.success(`${files.length} fichier(s) uploadé(s)`);
+                      } catch (err) {
+                        toast.error('Erreur lors de l\'upload');
+                      } finally {
+                        setUploading(false);
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => trainingFileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="w-full py-3 border border-white/20 rounded-lg text-gray-400 hover:text-white hover:border-[#0047AB] transition-colors flex items-center justify-center gap-2"
+                  >
+                    {uploading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Upload en cours...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4" />
+                        Ajouter des fichiers
+                      </>
+                    )}
+                  </button>
+                  <p className="text-xs text-gray-500 mt-2 text-center">Vidéos, PDF, Images, Documents (max 50MB chacun)</p>
+                </div>
+              </div>
+            )}
+
             <div>
               <label className="block text-sm text-gray-400 mb-1">Catégorie</label>
               <select value={formData.category || 'Marketing'} onChange={(e) => setFormData({...formData, category: e.target.value})} className="input-dark w-full">
@@ -3123,10 +3259,18 @@ const FormModal = ({ type, item, onClose, onSuccess }) => {
                 <option value="Ventes">Ventes</option>
                 <option value="Technologie">Technologie</option>
                 <option value="Communication">Communication</option>
+                <option value="Développement personnel">Développement personnel</option>
+                <option value="Langues">Langues</option>
               </select>
             </div>
+            
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Prérequis (optionnel)</label>
+              <input type="text" placeholder="Ex: Connaissances de base en marketing" value={formData.prerequisites || ''} onChange={(e) => setFormData({...formData, prerequisites: e.target.value})} className="input-dark w-full" />
+            </div>
+            
             <label className="flex items-center gap-2 text-gray-400">
-              <input type="checkbox" checked={formData.is_online || false} onChange={(e) => setFormData({...formData, is_online: e.target.checked})} className="rounded" /> Formation en ligne
+              <input type="checkbox" checked={formData.certificate || false} onChange={(e) => setFormData({...formData, certificate: e.target.checked})} className="rounded" /> Certificat délivré
             </label>
           </>
         );
