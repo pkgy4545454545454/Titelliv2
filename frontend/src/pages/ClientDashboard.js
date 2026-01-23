@@ -395,6 +395,76 @@ const ClientDashboard = () => {
     }
   };
 
+  // Agenda handlers
+  const handleAddAgendaEvent = async () => {
+    if (!eventForm.title || !eventForm.start_datetime) {
+      toast.error('Titre et date de début requis');
+      return;
+    }
+    try {
+      await clientAgendaAPI.create(eventForm);
+      toast.success('Événement ajouté');
+      setShowAddEvent(false);
+      setEventForm({ title: '', description: '', start_datetime: '', end_datetime: '', location: '', event_type: 'appointment', notes: '' });
+      fetchAgenda();
+    } catch (error) {
+      toast.error('Erreur lors de l\'ajout');
+    }
+  };
+
+  const handleDeleteAgendaEvent = async (eventId) => {
+    try {
+      await clientAgendaAPI.delete(eventId);
+      toast.success('Événement supprimé');
+      fetchAgenda();
+    } catch (error) {
+      toast.error('Erreur lors de la suppression');
+    }
+  };
+
+  // Donation handlers
+  const handleAddDonation = async () => {
+    if (!donationForm.amount || !donationForm.recipient_name) {
+      toast.error('Montant et bénéficiaire requis');
+      return;
+    }
+    try {
+      await clientDonationsAPI.create({
+        ...donationForm,
+        amount: parseFloat(donationForm.amount),
+        recipient_id: donationForm.recipient_id || 'charity_' + Date.now()
+      });
+      toast.success('Don effectué avec succès');
+      setShowAddDonation(false);
+      setDonationForm({ amount: '', recipient_type: 'charity', recipient_id: '', recipient_name: '', message: '', is_anonymous: false });
+      fetchDonations();
+    } catch (error) {
+      toast.error('Erreur lors du don');
+    }
+  };
+
+  // Wishlist handlers
+  const handleRemoveFromWishlist = async (itemId) => {
+    try {
+      await wishlistAPI.remove(itemId);
+      toast.success('Retiré de la liste de souhaits');
+      fetchWishlist();
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
+  // Personal providers handlers
+  const handleRemoveProvider = async (providerId) => {
+    try {
+      await clientProvidersAPI.remove(providerId);
+      toast.success('Prestataire retiré');
+      fetchPersonalProviders();
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
   // Friends handlers
   const handleSendFriendRequest = async (friendId) => {
     try {
