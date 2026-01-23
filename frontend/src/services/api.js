@@ -294,6 +294,46 @@ export const commercialGesturesAPI = {
   delete: (id) => axios.delete(`${API}/enterprise/commercial-gestures/${id}`, { headers: getAuthHeaders() }),
 };
 
+// ============ CLIENT APIs ============
+
+export const clientProfileAPI = {
+  get: () => axios.get(`${API}/client/profile`, { headers: getAuthHeaders() }),
+  update: (data) => axios.put(`${API}/client/profile`, data, { headers: getAuthHeaders() }),
+};
+
+export const friendsAPI = {
+  list: () => axios.get(`${API}/client/friends`, { headers: getAuthHeaders() }),
+  getRequests: () => axios.get(`${API}/client/friend-requests`, { headers: getAuthHeaders() }),
+  sendRequest: (friendId, message = null) => axios.post(`${API}/client/friends/request`, { friend_id: friendId, message }, { headers: getAuthHeaders() }),
+  respond: (friendshipId, accept) => axios.put(`${API}/client/friends/${friendshipId}/respond`, null, { params: { accept }, headers: getAuthHeaders() }),
+  remove: (friendshipId) => axios.delete(`${API}/client/friends/${friendshipId}`, { headers: getAuthHeaders() }),
+  getSuggestions: () => axios.get(`${API}/client/suggested-friends`, { headers: getAuthHeaders() }),
+};
+
+export const paymentCardsAPI = {
+  list: () => axios.get(`${API}/client/cards`, { headers: getAuthHeaders() }),
+  add: (data) => axios.post(`${API}/client/cards`, data, { headers: getAuthHeaders() }),
+  delete: (cardId) => axios.delete(`${API}/client/cards/${cardId}`, { headers: getAuthHeaders() }),
+  setDefault: (cardId) => axios.put(`${API}/client/cards/${cardId}/default`, null, { headers: getAuthHeaders() }),
+};
+
+export const clientDocumentsAPI = {
+  list: (category = null) => axios.get(`${API}/client/documents`, { params: { category }, headers: getAuthHeaders() }),
+  add: (data) => axios.post(`${API}/client/documents`, data, { headers: getAuthHeaders() }),
+  delete: (docId) => axios.delete(`${API}/client/documents/${docId}`, { headers: getAuthHeaders() }),
+};
+
+export const messagesAPI = {
+  getConversations: () => axios.get(`${API}/messages/conversations`, { headers: getAuthHeaders() }),
+  getMessages: (partnerId, limit = 50) => axios.get(`${API}/messages/${partnerId}`, { params: { limit }, headers: getAuthHeaders() }),
+  send: (recipientId, content, messageType = 'text') => axios.post(`${API}/messages`, { recipient_id: recipientId, content, message_type: messageType }, { headers: getAuthHeaders() }),
+};
+
+export const statsAPI = {
+  trackProfileView: (userId) => axios.post(`${API}/track/profile-view/${userId}`, null, { headers: getAuthHeaders() }),
+  getProfileViews: () => axios.get(`${API}/stats/profile-views`, { headers: getAuthHeaders() }),
+};
+
 export default {
   auth: authAPI,
   enterprise: enterpriseAPI,
