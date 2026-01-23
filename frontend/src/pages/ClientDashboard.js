@@ -180,8 +180,75 @@ const ClientDashboard = () => {
       fetchMyTrainings();
     } else if (activeTab === 'cashback') {
       fetchCashbackHistory();
+    } else if (activeTab === 'agenda') {
+      fetchAgenda();
+    } else if (activeTab === 'finances') {
+      fetchFinances();
+    } else if (activeTab === 'donations') {
+      fetchDonations();
+    } else if (activeTab === 'wishlist') {
+      fetchWishlist();
+    } else if (activeTab === 'suggestions') {
+      fetchFriendsSuggestions();
+    } else if (activeTab === 'prestataires') {
+      fetchPersonalProviders();
     }
   }, [activeTab]);
+
+  // New fetch functions
+  const fetchAgenda = async () => {
+    try {
+      const res = await clientAgendaAPI.list();
+      setAgendaEvents(res.data.events || []);
+    } catch (error) {
+      console.error('Error fetching agenda:', error);
+    }
+  };
+
+  const fetchFinances = async () => {
+    try {
+      const res = await clientFinancesAPI.getStats();
+      setFinances(res.data);
+    } catch (error) {
+      console.error('Error fetching finances:', error);
+    }
+  };
+
+  const fetchDonations = async () => {
+    try {
+      const res = await clientDonationsAPI.list();
+      setDonations(res.data);
+    } catch (error) {
+      console.error('Error fetching donations:', error);
+    }
+  };
+
+  const fetchWishlist = async () => {
+    try {
+      const res = await wishlistAPI.list();
+      setWishlistItems(res.data.items || []);
+    } catch (error) {
+      console.error('Error fetching wishlist:', error);
+    }
+  };
+
+  const fetchFriendsSuggestions = async () => {
+    try {
+      const res = await clientSuggestionsAPI.fromFriends();
+      setFriendsSuggestions(res.data.suggestions || []);
+    } catch (error) {
+      console.error('Error fetching suggestions:', error);
+    }
+  };
+
+  const fetchPersonalProviders = async () => {
+    try {
+      const res = await clientProvidersAPI.list();
+      setPersonalProviders(res.data.providers || []);
+    } catch (error) {
+      console.error('Error fetching providers:', error);
+    }
+  };
 
   const fetchProfileData = async () => {
     try {
