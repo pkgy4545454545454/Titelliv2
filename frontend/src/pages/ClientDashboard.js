@@ -1025,7 +1025,7 @@ const ClientDashboard = () => {
       {/* Mobile Menu Overlay - Must be rendered before sidebar */}
       {mobileMenuOpen && (
         <div 
-          className="lg:hidden fixed inset-0 bg-black/90 z-[45]"
+          className="lg:hidden fixed inset-0 bg-black/90 z-[40]"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
@@ -1033,7 +1033,7 @@ const ClientDashboard = () => {
       {/* Sidebar - Mobile: Slide-in panel, Desktop: Fixed sidebar */}
       <aside 
         className={`
-          fixed top-0 bottom-0 z-[50]
+          fixed top-0 bottom-0 z-[55]
           bg-[#111111] border-r border-white/10 
           overflow-y-auto overflow-x-hidden 
           transition-all duration-300 ease-in-out
