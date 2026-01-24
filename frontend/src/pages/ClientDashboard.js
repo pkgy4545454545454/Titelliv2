@@ -1025,26 +1025,35 @@ const ClientDashboard = () => {
       {/* Mobile Menu Button - Fixed at top */}
       <button 
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        className="lg:hidden fixed top-24 left-4 z-50 w-12 h-12 bg-[#0047AB] rounded-xl flex items-center justify-center shadow-lg border border-white/10"
+        className="lg:hidden fixed top-24 left-4 z-[60] w-12 h-12 bg-[#0047AB] rounded-xl flex items-center justify-center shadow-lg border border-white/10"
         data-testid="mobile-menu-toggle"
       >
         {mobileMenuOpen ? <X className="w-5 h-5 text-white" /> : <Menu className="w-5 h-5 text-white" />}
       </button>
 
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/80 z-[45] backdrop-blur-sm"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
       <div className="flex">
-        {/* Sidebar - Mobile: Full screen overlay, Desktop: Fixed sidebar */}
+        {/* Sidebar - Mobile: Slide-in panel, Desktop: Fixed sidebar */}
         <aside className={`
-          fixed left-0 top-20 bottom-0 z-40 
+          fixed left-0 top-0 bottom-0 z-[50]
           bg-[#0A0A0A] border-r border-white/5 
           overflow-y-auto overflow-x-hidden 
-          transition-all duration-300 ease-in-out
-          dashboard-sidebar
+          transition-transform duration-300 ease-in-out
+          dashboard-sidebar pt-4
+          w-[85vw] max-w-[320px] lg:w-64 lg:top-20
           ${mobileMenuOpen 
-            ? 'w-full sm:w-80 translate-x-0 shadow-2xl' 
-            : 'w-64 -translate-x-full lg:translate-x-0'
+            ? 'translate-x-0 shadow-2xl' 
+            : '-translate-x-full lg:translate-x-0'
           }
         `}>
-          <div className="p-4 hide-scrollbar overflow-x-hidden pb-20">
+          <div className="p-4 hide-scrollbar overflow-x-hidden pb-24">
             {/* Profile Header with Switch Button */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
