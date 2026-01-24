@@ -888,7 +888,7 @@ const ClientDashboard = () => {
         { id: 'overview', label: 'Accueil', icon: LayoutDashboard },
         { id: 'profile', label: 'Mon Profil', icon: User },
         { id: 'mode_vie', label: 'Mon mode de vie', icon: Heart },
-        { id: 'feed', label: 'Mon fil d\'actualité', icon: Rss },
+        { id: 'feed', label: 'Mon fil d\'actualité', icon: Rss, notifKey: 'feed' },
         { id: 'my_feed', label: 'Mon feed', icon: Newspaper },
       ]
     },
@@ -897,13 +897,13 @@ const ClientDashboard = () => {
       gradient: 'from-purple-500/20 to-purple-600/10',
       borderColor: 'border-purple-500/30',
       items: [
-        { id: 'cashback', label: 'Mon cash-back', icon: Wallet },
-        { id: 'premium', label: 'Mon Premium', icon: Crown },
-        { id: 'invitations', label: 'Mes invitations prestataires', icon: Gift },
-        { id: 'offres', label: 'Mes offres du moment', icon: Target },
+        { id: 'cashback', label: 'Mon cash-back', icon: Wallet, notifKey: 'cashback' },
+        { id: 'premium', label: 'Mon Premium', icon: Crown, notifKey: 'premium' },
+        { id: 'invitations', label: 'Mes invitations prestataires', icon: Gift, notifKey: 'invitations' },
+        { id: 'offres', label: 'Mes offres du moment', icon: Target, notifKey: 'offers' },
         { id: 'guests', label: 'Mes guests du moment', icon: Star },
         { id: 'tendances', label: 'Mes tendances actuelles', icon: TrendingUp },
-        { id: 'cadeaux', label: 'Mes cadeaux du mois', icon: Gift },
+        { id: 'cadeaux', label: 'Mes cadeaux du mois', icon: Gift, notifKey: 'gifts' },
       ]
     },
     {
@@ -911,10 +911,10 @@ const ClientDashboard = () => {
       gradient: 'from-green-500/20 to-green-600/10',
       borderColor: 'border-green-500/30',
       items: [
-        { id: 'investments', label: 'Mes investissements', icon: PieChart },
+        { id: 'investments', label: 'Mes investissements', icon: PieChart, notifKey: 'investments' },
         { id: 'business_news', label: 'Mon local business news', icon: Newspaper },
-        { id: 'jobs', label: 'Mes emplois', icon: Briefcase },
-        { id: 'formations', label: 'Mes formations', icon: GraduationCap },
+        { id: 'jobs', label: 'Mes emplois', icon: Briefcase, notifKey: 'jobs' },
+        { id: 'formations', label: 'Mes formations', icon: GraduationCap, notifKey: 'trainings' },
       ]
     },
     {
@@ -922,7 +922,7 @@ const ClientDashboard = () => {
       gradient: 'from-yellow-500/20 to-yellow-600/10',
       borderColor: 'border-yellow-500/30',
       items: [
-        { id: 'agenda', label: 'Mon agenda', icon: Calendar },
+        { id: 'agenda', label: 'Mon agenda', icon: Calendar, notifKey: 'agenda' },
         { id: 'cartes', label: 'Mes cartes', icon: CreditCard },
         { id: 'finances', label: 'Mes finances', icon: FileText },
         { id: 'donations', label: 'Mes donations', icon: Heart },
@@ -935,7 +935,7 @@ const ClientDashboard = () => {
       borderColor: 'border-pink-500/30',
       items: [
         { id: 'messages', label: 'Messagerie', icon: MessageSquare, notifKey: 'messages' },
-        { id: 'contacts', label: 'Contacts & Amis', icon: Users },
+        { id: 'contacts', label: 'Contacts & Amis', icon: Users, notifKey: 'contacts' },
         { id: 'demandes', label: 'Demandes en cours', icon: UserPlus, notifKey: 'friend_requests' },
         { id: 'particulier', label: 'Compte particulier', icon: Building2 },
       ]
@@ -947,7 +947,7 @@ const ClientDashboard = () => {
       items: [
         { id: 'suggestions', label: 'Suggestions de mes contacts', icon: Users },
         { id: 'prestataires', label: 'Mes prestataires personnels', icon: Star },
-        { id: 'wishlist', label: 'Ma liste de souhaits', icon: Heart },
+        { id: 'wishlist', label: 'Ma liste de souhaits', icon: Heart, notifKey: 'wishlist' },
       ]
     },
     {
@@ -956,8 +956,8 @@ const ClientDashboard = () => {
       borderColor: 'border-orange-500/30',
       items: [
         { id: 'orders', label: 'Mes commandes', icon: ShoppingCart, notifKey: 'orders' },
-        { id: 'panier', label: 'Mon panier', icon: ShoppingCart },
-        { id: 'livraisons', label: 'Livraison', icon: Truck },
+        { id: 'panier', label: 'Mon panier', icon: ShoppingCart, notifKey: 'cart' },
+        { id: 'livraisons', label: 'Livraison', icon: Truck, notifKey: 'deliveries' },
       ]
     },
     {
