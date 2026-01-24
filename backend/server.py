@@ -7050,6 +7050,42 @@ async def migrate_trainings_data(current_user: dict = Depends(get_current_user))
         "updated_count": result.modified_count
     }
 
+# ============ API ENDPOINTS FOR WEBSOCKET STATUS ============
+
+@api_router.get("/ws/status")
+async def get_websocket_status():
+    """Retourne les statistiques WebSocket."""
+    online_users = ws_manager.get_online_users()
+    return {
+        "online_users_count": len(online_users),
+        "status": "active"
+    }
+
+
+@api_router.get("/ws/online-friends")
+async def get_online_friends_api(current_user: dict = Depends(get_current_user)):
+    """Retourne la liste des amis en ligne."""
+    user_id = current_user['id']
+    
+    friendships = await db.friendships.find({
+        "$or": [{"user_id": user_id}, {"friend_id": user_id}],
+        "status": "accepted"
+    }).to_list(100)
+    
+    online_friends = []
+    for f in friendships:
+        friend_id = f['friend_id'] if f['user_id'] == user_id else f['user_id']
+        if ws_manager.is_user_online(friend_id):
+            friend_user = await db.users.find_one(
+                {"id": friend_id}, 
+                {"_id": 0, "id": 1, "first_name": 1, "last_name": 1, "profile_image": 1}
+            )
+            if friend_user:
+                online_friends.append(friend_user)
+    
+    return {"online_friends": online_friends, "count": len(online_friends)}
+
+
 # Include the router in the main app
 app.include_router(api_router)
 
