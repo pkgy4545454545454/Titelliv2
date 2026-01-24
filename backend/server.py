@@ -3615,6 +3615,63 @@ async def delete_finance_transaction(transaction_id: str, current_user: dict = D
     await db.finance_transactions.delete_one({"id": transaction_id, "enterprise_id": enterprise['id']})
     return {"message": "Transaction supprimée"}
 
+
+@api_router.get("/enterprise/invoices")
+async def get_enterprise_invoices(
+    current_user: dict = Depends(get_current_user),
+    status: Optional[str] = None
+):
+    """Get all invoices for the enterprise."""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return {"invoices": [], "summary": {}}
+    
+    query = {"enterprise_id": enterprise['id']}
+    if status:
+        query["status"] = status
+    
+    invoices = await db.enterprise_invoices.find(query, {"_id": 0}).sort("created_at", -1).to_list(500)
+    
+    # Calculate summary
+    total_pending = sum(inv['total_ttc'] for inv in invoices if inv['status'] == 'pending')
+    total_paid = sum(inv['total_ttc'] for inv in invoices if inv['status'] == 'paid')
+    total_net_revenue = sum(inv['enterprise_net'] for inv in invoices if inv['status'] == 'paid')
+    total_fees_paid = sum(inv['management_fee'] + inv['transaction_fee'] for inv in invoices if inv['status'] == 'paid')
+    
+    summary = {
+        "total_invoices": len(invoices),
+        "pending_invoices": len([inv for inv in invoices if inv['status'] == 'pending']),
+        "paid_invoices": len([inv for inv in invoices if inv['status'] == 'paid']),
+        "total_pending_amount": total_pending,
+        "total_paid_amount": total_paid,
+        "total_net_revenue": total_net_revenue,
+        "total_fees_paid": total_fees_paid
+    }
+    
+    return {"invoices": invoices, "summary": summary}
+
+
+@api_router.get("/enterprise/invoices/{invoice_id}")
+async def get_enterprise_invoice_detail(invoice_id: str, current_user: dict = Depends(get_current_user)):
+    """Get detailed invoice information."""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    invoice = await db.enterprise_invoices.find_one(
+        {"id": invoice_id, "enterprise_id": enterprise['id']}, {"_id": 0}
+    )
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Facture non trouvée")
+    
+    # Get related order
+    order = None
+    if invoice.get('order_id'):
+        order = await db.orders.find_one({"id": invoice['order_id']}, {"_id": 0})
+    
+    return {"invoice": invoice, "order": order}
+
+
 # ============ ADVERTISING ROUTES ============
 
 class AdvertisingCreate(BaseModel):
