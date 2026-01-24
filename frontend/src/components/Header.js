@@ -96,8 +96,18 @@ const Header = () => {
         setApiNotifications(apiNotifications.map(n => ({ ...n, is_read: true })));
         setApiUnreadCount(0);
         toast.success('Toutes les notifications lues');
-    } catch (error) {
-      toast.error('Erreur');
+      } catch (error) {
+        toast.error('Erreur');
+      }
+    }
+  };
+
+  // Handle refresh - use WebSocket if connected, otherwise API
+  const handleRefresh = () => {
+    if (wsConnected) {
+      wsFetchNotifications(50);
+    } else {
+      fetchNotificationsAPI();
     }
   };
 
