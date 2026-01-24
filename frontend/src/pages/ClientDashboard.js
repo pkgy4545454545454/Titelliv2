@@ -1147,8 +1147,17 @@ const ClientDashboard = () => {
           </div>
         </aside>
 
+      {/* Mobile Menu Button - Fixed at top */}
+      <button 
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        className="lg:hidden fixed top-24 left-4 z-[60] w-12 h-12 bg-[#0047AB] rounded-xl flex items-center justify-center shadow-lg border border-white/10"
+        data-testid="mobile-menu-toggle"
+      >
+        {mobileMenuOpen ? <X className="w-5 h-5 text-white" /> : <Menu className="w-5 h-5 text-white" />}
+      </button>
+
         {/* Main Content */}
-        <main className="flex-1 lg:ml-64 p-4 md:p-6 lg:p-8 pt-6 lg:pt-4">
+        <main className="flex-1 lg:ml-64 p-4 md:p-6 lg:p-8 pt-16 lg:pt-4">
           {/* Overview Tab */}
           {activeTab === 'overview' && (
             <div className="space-y-6 md:space-y-8">
