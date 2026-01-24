@@ -3458,14 +3458,22 @@ class DocumentCreate(BaseModel):
 async def get_enterprise_documents(current_user: dict = Depends(get_current_user), category: Optional[str] = None):
     enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
     if not enterprise:
-        return []
+        return {"documents": []}
     
     query = {"enterprise_id": enterprise['id']}
     if category:
         query["category"] = category
     
+    # Get from both collections
     documents = await db.documents.find(query, {"_id": 0}).sort("created_at", -1).to_list(200)
-    return documents
+    enterprise_docs = await db.enterprise_documents.find(query, {"_id": 0}).sort("created_at", -1).to_list(200)
+    
+    # Merge both lists
+    all_docs = documents + enterprise_docs
+    # Sort by created_at descending
+    all_docs.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+    
+    return {"documents": all_docs}
 
 @api_router.post("/enterprise/documents")
 async def add_document(doc: DocumentCreate, current_user: dict = Depends(get_current_user)):
