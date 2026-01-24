@@ -349,11 +349,11 @@ const EnterpriseDashboard = () => {
     <div className="min-h-screen bg-[#050505] pt-20" data-testid="enterprise-dashboard">
       <div className="flex">
         {/* Sidebar */}
-        <aside className="w-72 min-h-screen bg-[#0A0A0A] border-r border-white/5 fixed left-0 top-20 bottom-0 overflow-y-auto hidden lg:block">
-          <div className="p-4">
+        <aside className="w-72 min-h-screen bg-[#0A0A0A] border-r border-white/5 fixed left-0 top-20 bottom-0 overflow-y-auto overflow-x-hidden hidden lg:block dashboard-sidebar">
+          <div className="p-4 hide-scrollbar overflow-x-hidden">
             {/* Enterprise Header */}
             <div className="flex items-center gap-3 mb-4 pb-4 border-b border-white/10">
-              <div className="w-10 h-10 rounded-xl bg-[#0047AB]/20 flex items-center justify-center overflow-hidden">
+              <div className="w-10 h-10 rounded-xl bg-[#0047AB]/20 flex items-center justify-center overflow-hidden flex-shrink-0">
                 {enterprise?.logo ? (
                   <img src={enterprise.logo} alt="" className="w-full h-full object-cover" />
                 ) : (
@@ -379,10 +379,10 @@ const EnterpriseDashboard = () => {
             </div>
 
             {/* Menu Sections */}
-            <nav className="space-y-3">
+            <nav className="space-y-3 overflow-hidden">
               {menuSections.map((section) => (
-                <div key={section.title} className={`rounded-xl p-3 bg-gradient-to-br ${section.gradient} border ${section.borderColor}`}>
-                  <p className="text-xs text-gray-300 uppercase tracking-wider px-2 mb-2">{section.title}</p>
+                <div key={section.title} className={`rounded-xl p-3 bg-gradient-to-br ${section.gradient} border ${section.borderColor} menu-section`}>
+                  <p className="text-xs text-gray-300 uppercase tracking-wider px-2 mb-2 truncate">{section.title}</p>
                   <div className="space-y-0.5">
                     {section.items.map((item) => {
                       const notifCount = item.notifKey ? getNotificationCount(item.notifKey) : 0;
@@ -393,7 +393,7 @@ const EnterpriseDashboard = () => {
                         <button
                           key={item.id}
                           onClick={() => setActiveTab(item.id)}
-                          className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
+                          className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm transition-all overflow-hidden ${
                             activeTab === item.id
                               ? 'bg-white/20 text-white shadow-lg'
                               : 'text-gray-300 hover:bg-white/10 hover:text-white'
@@ -403,12 +403,12 @@ const EnterpriseDashboard = () => {
                             animation: 'pulse-green 2s infinite'
                           } : {}}
                         >
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
                             <item.icon className="w-4 h-4 flex-shrink-0" />
-                            <span className="truncate">{item.label}</span>
+                            <span className="truncate text-left">{item.label}</span>
                           </div>
                           {(hasNotif || stockAlerts > 0) && (
-                            <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-green-500 text-white text-xs font-bold rounded-full animate-bounce">
+                            <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-green-500 text-white text-xs font-bold rounded-full animate-bounce flex-shrink-0">
                               {notifCount || stockAlerts}
                             </span>
                           )}
