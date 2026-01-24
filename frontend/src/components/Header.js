@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import NotificationCenter from './NotificationCenter';
 
 const Header = () => {
   const { user, logout, isAuthenticated, isEnterprise } = useAuth();
@@ -23,6 +24,7 @@ const Header = () => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [notifLoading, setNotifLoading] = useState(false);
 
   const cartCount = getItemCount();
 
@@ -30,11 +32,14 @@ const Header = () => {
   const fetchNotifications = useCallback(async () => {
     if (!isAuthenticated) return;
     try {
+      setNotifLoading(true);
       const response = await notificationsAPI.list();
       setNotifications(response.data.notifications || []);
       setUnreadCount(response.data.unread_count || 0);
     } catch (error) {
       console.error('Error fetching notifications:', error);
+    } finally {
+      setNotifLoading(false);
     }
   }, [isAuthenticated]);
 
