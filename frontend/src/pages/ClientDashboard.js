@@ -1047,13 +1047,15 @@ const ClientDashboard = () => {
           overflow-y-auto overflow-x-hidden 
           transition-transform duration-300 ease-in-out
           dashboard-sidebar pt-4
-          w-[85vw] max-w-[320px] lg:w-64 lg:top-20
+          w-[280px] sm:w-[300px] lg:w-64 lg:top-20
           ${mobileMenuOpen 
-            ? 'translate-x-0 shadow-2xl' 
+            ? 'translate-x-0 shadow-2xl shadow-black' 
             : '-translate-x-full lg:translate-x-0'
           }
-        `}>
-          <div className="p-4 hide-scrollbar overflow-x-hidden pb-24">
+        `}
+        style={{ backgroundColor: '#0A0A0A' }}
+        >
+          <div className="p-4 hide-scrollbar overflow-x-hidden pb-24 bg-[#0A0A0A]">
             {/* Profile Header with Switch Button */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
