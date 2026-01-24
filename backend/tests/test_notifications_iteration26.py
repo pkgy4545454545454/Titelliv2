@@ -195,6 +195,9 @@ class TestNotificationsCRUD:
 class TestOrderNotifications:
     """Test automatic notifications when creating orders"""
     
+    # Known enterprise ID from seed data
+    ENTERPRISE_ID = "b34dd7dd-e7ac-4308-83c8-173163ebc819"  # Spa Luxury Lausanne
+    
     @pytest.fixture(scope="class")
     def client_auth(self):
         response = requests.post(f"{BASE_URL}/api/auth/login", json={
@@ -221,20 +224,13 @@ class TestOrderNotifications:
     
     def test_order_creates_client_notification(self, client_auth, enterprise_auth):
         """Test that creating an order generates notification for client"""
-        # Get enterprise profile
-        response = requests.get(f"{BASE_URL}/api/enterprises/me", headers=enterprise_auth["headers"])
-        if response.status_code != 200:
-            pytest.skip("No enterprise profile found")
-        enterprise = response.json()
-        enterprise_id = enterprise.get("id")
-        
         # Get initial notification count
         response = requests.get(f"{BASE_URL}/api/notifications", headers=client_auth["headers"])
         initial_count = len(response.json().get("notifications", []))
         
-        # Create order
+        # Create order using known enterprise ID
         order_data = {
-            "enterprise_id": enterprise_id,
+            "enterprise_id": self.ENTERPRISE_ID,
             "items": [
                 {
                     "service_product_id": "test-product-1",
@@ -264,20 +260,13 @@ class TestOrderNotifications:
     
     def test_order_creates_enterprise_notification(self, client_auth, enterprise_auth):
         """Test that creating an order generates notification for enterprise"""
-        # Get enterprise profile
-        response = requests.get(f"{BASE_URL}/api/enterprises/me", headers=enterprise_auth["headers"])
-        if response.status_code != 200:
-            pytest.skip("No enterprise profile found")
-        enterprise = response.json()
-        enterprise_id = enterprise.get("id")
-        
         # Get initial enterprise notification count
         response = requests.get(f"{BASE_URL}/api/notifications", headers=enterprise_auth["headers"])
         initial_notifs = response.json().get("notifications", [])
         
-        # Create order
+        # Create order using known enterprise ID
         order_data = {
-            "enterprise_id": enterprise_id,
+            "enterprise_id": self.ENTERPRISE_ID,
             "items": [
                 {
                     "service_product_id": "test-product-2",
@@ -297,14 +286,16 @@ class TestOrderNotifications:
         new_notifs = response.json().get("notifications", [])
         
         # Find new order notification
-        new_order_notifs = [n for n in new_notifs if n.get("notification_type") in ["new_order", "order"] 
-                           and n not in initial_notifs]
-        assert len(new_order_notifs) >= 0, "Enterprise should receive order notification"
-        print(f"✓ Enterprise has {len(new_notifs)} total notifications")
+        new_order_notifs = [n for n in new_notifs if n.get("notification_type") in ["new_order", "order"]]
+        assert len(new_order_notifs) > 0, "Enterprise should receive order notification"
+        print(f"✓ Enterprise has {len(new_notifs)} total notifications, {len(new_order_notifs)} order notifications")
 
 
 class TestReviewNotifications:
     """Test automatic notifications when creating reviews"""
+    
+    # Known enterprise ID from seed data
+    ENTERPRISE_ID = "b34dd7dd-e7ac-4308-83c8-173163ebc819"  # Spa Luxury Lausanne
     
     @pytest.fixture(scope="class")
     def client_auth(self):
@@ -328,16 +319,9 @@ class TestReviewNotifications:
     
     def test_review_creates_enterprise_notification(self, client_auth, enterprise_auth):
         """Test that creating a review generates notification for enterprise"""
-        # Get enterprise profile
-        response = requests.get(f"{BASE_URL}/api/enterprises/me", headers=enterprise_auth)
-        if response.status_code != 200:
-            pytest.skip("No enterprise profile found")
-        enterprise = response.json()
-        enterprise_id = enterprise.get("id")
-        
-        # Create review
+        # Create review using known enterprise ID
         review_data = {
-            "enterprise_id": enterprise_id,
+            "enterprise_id": self.ENTERPRISE_ID,
             "rating": 5,
             "comment": "TEST_Excellent service for notification testing!"
         }
