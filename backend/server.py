@@ -1157,6 +1157,16 @@ async def create_review(data: ReviewCreate, current_user: dict = Depends(get_cur
         {"$set": {"rating": round(avg_rating, 1), "review_count": len(all_reviews)}}
     )
     
+    # Create notification for enterprise owner
+    await create_notification(
+        user_id=enterprise['user_id'],
+        notification_type="new_review",
+        title="Nouvel avis reçu !",
+        message=f"{current_user['first_name']} vous a laissé un avis {data.rating}⭐",
+        link=f"/dashboard/entreprise?tab=overview",
+        data={"review_id": review_dict['id'], "rating": data.rating}
+    )
+    
     return review_dict
 
 @api_router.get("/reviews/{enterprise_id}")
