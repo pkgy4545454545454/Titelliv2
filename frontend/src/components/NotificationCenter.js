@@ -139,7 +139,8 @@ const NotificationCenter = ({
   notifications = [], 
   onRefresh, 
   loading = false,
-  userType = 'client' 
+  userType = 'client',
+  isRealTime = false
 }) => {
   const [filter, setFilter] = useState('all');
   const [localNotifications, setLocalNotifications] = useState(notifications);
