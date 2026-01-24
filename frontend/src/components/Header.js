@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { notificationsAPI } from '../services/api';
-import { Search, Menu, X, ShoppingCart, Heart, Bell, ChevronDown, Check, CheckCheck, Trash2 } from 'lucide-react';
+import { Search, Menu, X, ShoppingCart, Heart, Bell, ChevronDown, Check, CheckCheck, Trash2, Wifi, WifiOff } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +13,7 @@ import {
 } from '../components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import NotificationCenter from './NotificationCenter';
+import { useNotificationWebSocket } from '../hooks/useWebSocket';
 
 const Header = () => {
   const { user, logout, isAuthenticated, isEnterprise } = useAuth();
@@ -21,53 +22,80 @@ const Header = () => {
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifLoading, setNotifLoading] = useState(false);
 
   const cartCount = getItemCount();
 
-  // Fetch notifications
-  const fetchNotifications = useCallback(async () => {
-    if (!isAuthenticated) return;
+  // Use WebSocket for real-time notifications
+  const {
+    isConnected: wsConnected,
+    unreadCount: wsUnreadCount,
+    notifications: wsNotifications,
+    markRead: wsMarkRead,
+    markAllRead: wsMarkAllRead,
+    fetchNotifications: wsFetchNotifications,
+    reconnect: wsReconnect
+  } = useNotificationWebSocket();
+
+  // State for notifications (fallback to API if WS not connected)
+  const [apiNotifications, setApiNotifications] = useState([]);
+  const [apiUnreadCount, setApiUnreadCount] = useState(0);
+
+  // Use WebSocket data if connected, otherwise use API data
+  const notifications = wsConnected ? wsNotifications : apiNotifications;
+  const unreadCount = wsConnected ? wsUnreadCount : apiUnreadCount;
+
+  // Fetch notifications via API (fallback)
+  const fetchNotificationsAPI = useCallback(async () => {
+    if (!isAuthenticated || wsConnected) return;
     try {
       setNotifLoading(true);
       const response = await notificationsAPI.list();
-      setNotifications(response.data.notifications || []);
-      setUnreadCount(response.data.unread_count || 0);
+      setApiNotifications(response.data.notifications || []);
+      setApiUnreadCount(response.data.unread_count || 0);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {
       setNotifLoading(false);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, wsConnected]);
 
   useEffect(() => {
-    fetchNotifications();
-    // Poll for new notifications every 30 seconds
-    const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
-  }, [fetchNotifications]);
+    // Only poll if WebSocket is not connected
+    if (!wsConnected) {
+      fetchNotificationsAPI();
+      const interval = setInterval(fetchNotificationsAPI, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [fetchNotificationsAPI, wsConnected]);
 
   const handleMarkRead = async (notifId) => {
-    try {
-      await notificationsAPI.markRead(notifId);
-      setNotifications(notifications.map(n => 
-        n.id === notifId ? { ...n, is_read: true } : n
-      ));
-      setUnreadCount(Math.max(0, unreadCount - 1));
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
+    if (wsConnected) {
+      wsMarkRead(notifId);
+    } else {
+      try {
+        await notificationsAPI.markRead(notifId);
+        setApiNotifications(apiNotifications.map(n => 
+          n.id === notifId ? { ...n, is_read: true } : n
+        ));
+        setApiUnreadCount(Math.max(0, apiUnreadCount - 1));
+      } catch (error) {
+        console.error('Error marking notification as read:', error);
+      }
     }
   };
 
   const handleMarkAllRead = async () => {
-    try {
-      await notificationsAPI.markAllRead();
-      setNotifications(notifications.map(n => ({ ...n, is_read: true })));
-      setUnreadCount(0);
+    if (wsConnected) {
+      wsMarkAllRead();
       toast.success('Toutes les notifications lues');
+    } else {
+      try {
+        await notificationsAPI.markAllRead();
+        setApiNotifications(apiNotifications.map(n => ({ ...n, is_read: true })));
+        setApiUnreadCount(0);
+        toast.success('Toutes les notifications lues');
     } catch (error) {
       toast.error('Erreur');
     }
