@@ -212,6 +212,7 @@ const Header = () => {
                   onClick={() => setNotifOpen(true)}
                   className="p-2 text-gray-400 hover:text-white transition-colors relative" 
                   data-testid="notifications-btn"
+                  title={wsConnected ? 'Connecté en temps réel' : 'Mode polling'}
                 >
                   <Bell className="w-5 h-5" />
                   {unreadCount > 0 && (
@@ -219,14 +220,17 @@ const Header = () => {
                       {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                   )}
+                  {/* WebSocket connection indicator */}
+                  <span className={`absolute -bottom-1 -right-1 w-2 h-2 rounded-full ${wsConnected ? 'bg-green-500' : 'bg-gray-500'}`} title={wsConnected ? 'Temps réel actif' : 'Temps réel inactif'} />
                 </button>
                 <NotificationCenter
                   isOpen={notifOpen}
                   onClose={() => setNotifOpen(false)}
                   notifications={notifications}
-                  onRefresh={fetchNotifications}
+                  onRefresh={handleRefresh}
                   loading={notifLoading}
                   userType={isEnterprise ? 'entreprise' : 'client'}
+                  isRealTime={wsConnected}
                 />
               </>
             )}
