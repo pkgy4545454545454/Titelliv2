@@ -89,6 +89,9 @@ function AppRoutes() {
       <Route path="/entreprises" element={<MainLayout><EnterprisesPage /></MainLayout>} />
       <Route path="/entreprise/:id" element={<MainLayout><EnterprisePage /></MainLayout>} />
       
+      {/* Client Profile Route */}
+      <Route path="/profil/:userId" element={<MainLayout><ClientProfilePage /></MainLayout>} />
+      
       {/* Jobs/Emplois Routes */}
       <Route path="/emplois" element={<MainLayout><JobsPage /></MainLayout>} />
       <Route path="/emploi/:id" element={<MainLayout><JobDetailPage /></MainLayout>} />
