@@ -9,13 +9,42 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
 
 ## ✅ Fonctionnalités Complétées (24 Jan 2026)
 
+### Phase 27 : WebSocket Temps Réel & Vérifications Système (TERMINÉ)
+
+**Système WebSocket pour notifications temps réel :**
+
+1. **Backend WebSocket**
+   - ConnectionManager pour gérer les connexions multiples par utilisateur
+   - `/ws/notifications?token=xxx` - Notifications temps réel
+   - `/ws/presence?token=xxx` - Statut en ligne des amis
+   - Heartbeat ping/pong pour maintenir connexion
+   - Actions via WebSocket: mark_read, mark_all_read, get_notifications
+
+2. **Frontend WebSocket Hook**
+   - `useNotificationWebSocket()` - Hook React avec reconnexion auto
+   - `usePresenceWebSocket()` - Hook pour statut amis
+   - Fallback polling 30s si WebSocket non disponible
+   - Son de notification et toast temps réel
+   - Indicateur "Live" dans NotificationCenter
+
+3. **Vérifications Système (21/21 tests passés)**
+   - **CV Postulations:** ✅ Fichiers PDF accessibles via /api/uploads/*.pdf
+   - **Messages Client/Enterprise:** ✅ Envoi, réception, conversations
+   - **Influenceurs:** ✅ 8 influenceurs, collaborations, filtres
+   - **IA Marketing:** ✅ Ciblage réel BDD (db.users.count_documents)
+
+4. **Bug Fix Critique**
+   - Endpoints WebSocket (/api/ws/status, /api/ws/online-friends) déplacés avant include_router()
+
+---
+
 ### Phase 26 : Système de Notifications Unifié (TERMINÉ)
 
 **Système de notifications complet pour Client et Entreprise :**
 
 1. **Backend - Système Unifié**
    - 20+ types de notifications (NOTIFICATION_TYPES)
-   - Fonction `create_notification()` générique
+   - Fonction `create_notification()` générique avec envoi WebSocket
    - Notifications automatiques sur actions clés
    - Filtrage par lu/non-lu
    - CRUD complet (list, mark read, mark all, delete)
@@ -31,11 +60,8 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
    - Composant unifié avec filtres par catégorie
    - Client: Tout, Non lues, Commandes, Cashback, Amis, Messages
    - Entreprise: Tout, Non lues, Commandes, Avis, Emplois, Formations
-   - Badge compteur dans le Header
+   - Badge compteur dans le Header avec indicateur temps réel
    - Actions: marquer lu, supprimer, actualiser
-
-4. **Bug Fix Critique**
-   - Résolution collision de noms entre helper et endpoint API
 
 ---
 
