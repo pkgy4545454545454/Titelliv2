@@ -414,8 +414,9 @@ class TestJobsAPI:
         response = requests.get(f"{BASE_URL}/api/jobs")
         assert response.status_code == 200, f"Failed to list jobs: {response.text}"
         data = response.json()
-        assert "jobs" in data, "Response should contain jobs key"
-        print(f"✓ Listed {len(data['jobs'])} jobs")
+        # Jobs API returns a list directly
+        assert isinstance(data, list), "Response should be a list of jobs"
+        print(f"✓ Listed {len(data)} jobs")
     
     def test_get_client_job_applications(self, client_auth):
         """Test GET /api/client/job-applications"""
@@ -490,10 +491,10 @@ class TestPaymentsAPI:
         return {"Authorization": f"Bearer {response.json().get('token')}"}
     
     def test_subscription_checkout_creates_stripe_url(self, enterprise_auth):
-        """Test POST /api/payments/checkout for subscription returns valid Stripe URL"""
+        """Test POST /api/subscriptions/checkout for subscription returns valid Stripe URL"""
         response = requests.post(
-            f"{BASE_URL}/api/payments/checkout",
-            params={"package_type": "subscription", "plan": "premium"},
+            f"{BASE_URL}/api/subscriptions/checkout",
+            params={"plan_id": "premium"},
             headers=enterprise_auth
         )
         assert response.status_code == 200, f"Failed to create checkout: {response.text}"
