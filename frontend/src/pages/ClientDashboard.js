@@ -46,6 +46,7 @@ const ClientDashboard = () => {
   const [editProfile, setEditProfile] = useState(false);
   const [profileForm, setProfileForm] = useState({});
   const fileInputRef = useRef(null);
+  const coverInputRef = useRef(null);
   
   // Friends states
   const [friends, setFriends] = useState([]);
