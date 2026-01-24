@@ -974,14 +974,61 @@ const ClientDashboard = () => {
   ];
 
   // Notification counts for menu items
+  // Notification count for menu items - reactive based on real data
   const getNotificationCount = (key) => {
     switch(key) {
       case 'messages':
-        return notifications.filter(n => n.type === 'message' && !n.read).length;
+        // Count unread messages from conversations
+        return conversations.reduce((count, conv) => count + (conv.unread_count || 0), 0);
       case 'friend_requests':
+        // Count pending friend requests received
+        return friendRequests.received?.length || 0;
+      case 'contacts':
+        // Show notification for new friend requests
         return friendRequests.received?.length || 0;
       case 'orders':
-        return notifications.filter(n => n.type === 'order' && !n.read).length;
+        // Count orders with new status or pending
+        return orders.filter(o => o.status === 'pending' || o.status === 'confirmed').length;
+      case 'deliveries':
+        // Count orders being delivered
+        return orders.filter(o => o.status === 'shipped' || o.status === 'delivering').length;
+      case 'cart':
+        // Count items in cart
+        return cart.length || 0;
+      case 'invitations':
+        // Count new invitations
+        return notifications.filter(n => n.notification_type === 'invitation' && !n.is_read).length;
+      case 'offers':
+        // Count new offers
+        return notifications.filter(n => n.notification_type === 'new_offer' && !n.is_read).length;
+      case 'gifts':
+        // Count new gifts/rewards
+        return notifications.filter(n => n.notification_type === 'gift' && !n.is_read).length;
+      case 'cashback':
+        // Show if cashback is available
+        return cashback > 0 ? 1 : 0;
+      case 'premium':
+        // Show if premium benefits available
+        return premium?.tier !== 'free' && notifications.filter(n => n.notification_type === 'premium' && !n.is_read).length;
+      case 'investments':
+        // Count investment notifications
+        return notifications.filter(n => n.notification_type === 'investment' && !n.is_read).length;
+      case 'jobs':
+        // Count job application updates
+        return notifications.filter(n => (n.notification_type === 'job_application' || n.notification_type === 'job_response') && !n.is_read).length;
+      case 'trainings':
+        // Count training notifications
+        return notifications.filter(n => n.notification_type === 'training' && !n.is_read).length;
+      case 'agenda':
+        // Count upcoming events today
+        const today = new Date().toDateString();
+        return agendaEvents.filter(e => new Date(e.date).toDateString() === today).length;
+      case 'feed':
+        // Count new feed activity
+        return notifications.filter(n => (n.notification_type === 'like' || n.notification_type === 'comment' || n.notification_type === 'share') && !n.is_read).length;
+      case 'wishlist':
+        // Count wishlist items with price drops or availability
+        return notifications.filter(n => n.notification_type === 'wishlist_alert' && !n.is_read).length;
       default:
         return 0;
     }
