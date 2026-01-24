@@ -295,7 +295,7 @@ class TestClientDashboardDataEndpoints:
         token = auth_token["token"]
         
         response = requests.get(
-            f"{BASE_URL}/api/friends/requests",
+            f"{BASE_URL}/api/client/friend-requests",
             headers={"Authorization": f"Bearer {token}"}
         )
         
@@ -320,16 +320,18 @@ class TestClientDashboardDataEndpoints:
         assert response.status_code == 200, f"Conversations fetch failed: {response.text}"
         data = response.json()
         
-        # Should be a list of conversations
-        assert isinstance(data, list), "Conversations should be a list"
+        # Response is an object with conversations array
+        assert "conversations" in data, "Missing conversations in response"
+        conversations = data["conversations"]
+        assert isinstance(conversations, list), "Conversations should be a list"
         
         # Each conversation should have unread_count
         total_unread = 0
-        for conv in data:
+        for conv in conversations:
             if "unread_count" in conv:
                 total_unread += conv.get("unread_count", 0)
         
-        print(f"✓ Conversations endpoint works, {len(data)} conversations, {total_unread} total unread messages")
+        print(f"✓ Conversations endpoint works, {len(conversations)} conversations, {total_unread} total unread messages")
     
     def test_cashback_endpoint_for_badge(self, auth_token):
         """Test cashback endpoint returns balance for badge display"""
