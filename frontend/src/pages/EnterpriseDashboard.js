@@ -347,10 +347,37 @@ const EnterpriseDashboard = () => {
 
   return (
     <div className="min-h-screen bg-[#050505] pt-20" data-testid="enterprise-dashboard">
+      {/* Mobile Menu Button */}
+      <button 
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        className="lg:hidden fixed top-24 left-4 z-50 w-12 h-12 bg-[#D4AF37] rounded-xl flex items-center justify-center shadow-lg border border-white/10"
+        data-testid="mobile-menu-toggle"
+      >
+        {mobileMenuOpen ? <X className="w-5 h-5 text-black" /> : <Menu className="w-5 h-5 text-black" />}
+      </button>
+
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/70 z-30 backdrop-blur-sm"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
       <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-72 min-h-screen bg-[#0A0A0A] border-r border-white/5 fixed left-0 top-20 bottom-0 overflow-y-auto overflow-x-hidden hidden lg:block dashboard-sidebar">
-          <div className="p-4 hide-scrollbar overflow-x-hidden">
+        {/* Sidebar - Mobile: Full screen overlay, Desktop: Fixed sidebar */}
+        <aside className={`
+          fixed left-0 top-20 bottom-0 z-40 
+          bg-[#0A0A0A] border-r border-white/5 
+          overflow-y-auto overflow-x-hidden 
+          transition-all duration-300 ease-in-out
+          dashboard-sidebar
+          ${mobileMenuOpen 
+            ? 'w-full sm:w-80 translate-x-0 shadow-2xl' 
+            : 'w-72 -translate-x-full lg:translate-x-0'
+          }
+        `}>
+          <div className="p-4 hide-scrollbar overflow-x-hidden pb-20">
             {/* Enterprise Header */}
             <div className="flex items-center gap-3 mb-4 pb-4 border-b border-white/10">
               <div className="w-10 h-10 rounded-xl bg-[#0047AB]/20 flex items-center justify-center overflow-hidden flex-shrink-0">
