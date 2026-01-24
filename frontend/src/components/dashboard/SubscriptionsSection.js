@@ -28,12 +28,18 @@ const SubscriptionsSection = () => {
 
   const handleSubscribe = async (planId, price) => {
     try {
-      const response = await subscriptionsAPI.checkout({ plan_id: planId, price });
+      toast.loading('Redirection vers le paiement...');
+      const response = await subscriptionsAPI.createCheckout(planId);
+      toast.dismiss();
       if (response.data.url) {
         window.open(response.data.url, '_blank');
+      } else {
+        toast.error('Erreur: URL de paiement non reçue');
       }
     } catch (error) {
-      toast.error('Erreur lors de la souscription');
+      toast.dismiss();
+      console.error('Subscription error:', error);
+      toast.error(error.response?.data?.detail || 'Erreur lors de la souscription');
     }
   };
 
