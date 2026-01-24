@@ -9,9 +9,7 @@ import os
 from datetime import datetime, timezone
 
 from .shared import db, get_current_user, TITELLI_FEES, STRIPE_API_KEY
-from emergentintegrations.payments.stripe.checkout import (
-    StripeCheckout, CheckoutSessionRequest
-)
+from stripe_helper import StripeCheckout, CheckoutSessionRequest
 
 router = APIRouter(prefix="/payments", tags=["Payments"])
 
