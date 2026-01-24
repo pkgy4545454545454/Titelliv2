@@ -4052,8 +4052,127 @@ const ClientDashboard = () => {
             </div>
           )}
 
+          {/* Panier Tab */}
+          {activeTab === 'panier' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Mon Panier
+                </h1>
+                {cartItems.length > 0 && (
+                  <span className="px-3 py-1 bg-[#0047AB]/20 text-[#0047AB] rounded-full text-sm font-medium">
+                    {cartItems.length} article{cartItems.length > 1 ? 's' : ''}
+                  </span>
+                )}
+              </div>
+
+              {cartItems.length === 0 ? (
+                <div className="card-service rounded-xl p-12 text-center">
+                  <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <ShoppingCart className="w-10 h-10 text-gray-500" />
+                  </div>
+                  <h2 className="text-xl font-bold text-white mb-2">Votre panier est vide</h2>
+                  <p className="text-gray-400 mb-6">Découvrez nos services et produits pour commencer vos achats</p>
+                  <div className="flex gap-4 justify-center">
+                    <Link to="/services" className="btn-primary">
+                      Voir les services
+                    </Link>
+                    <Link to="/produits" className="btn-secondary">
+                      Voir les produits
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Items List */}
+                  <div className="lg:col-span-2 space-y-4">
+                    {getItemsByEnterprise().map((group) => (
+                      <div key={group.enterprise_id} className="card-service rounded-xl p-6">
+                        <div className="flex items-center gap-3 mb-4 pb-4 border-b border-white/10">
+                          <Building2 className="w-5 h-5 text-[#D4AF37]" />
+                          <span className="text-white font-medium">{group.enterprise_name}</span>
+                        </div>
+                        <div className="space-y-4">
+                          {group.items.map((item) => (
+                            <div key={item.id} className="flex items-center gap-4 p-4 bg-white/5 rounded-xl">
+                              {item.image && (
+                                <img 
+                                  src={item.image.startsWith('http') ? item.image : `${process.env.REACT_APP_BACKEND_URL}${item.image}`}
+                                  alt={item.name}
+                                  className="w-20 h-20 rounded-lg object-cover"
+                                />
+                              )}
+                              <div className="flex-1">
+                                <h3 className="text-white font-medium">{item.name}</h3>
+                                <p className="text-[#D4AF37] font-semibold">{item.price.toFixed(2)} CHF</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => updateCartQuantity(item.id, Math.max(1, item.quantity - 1))}
+                                  className="p-1 bg-white/10 rounded hover:bg-white/20 transition-colors"
+                                >
+                                  <Minus className="w-4 h-4 text-white" />
+                                </button>
+                                <span className="w-8 text-center text-white">{item.quantity}</span>
+                                <button
+                                  onClick={() => updateCartQuantity(item.id, item.quantity + 1)}
+                                  className="p-1 bg-white/10 rounded hover:bg-white/20 transition-colors"
+                                >
+                                  <Plus className="w-4 h-4 text-white" />
+                                </button>
+                              </div>
+                              <button
+                                onClick={() => removeCartItem(item.id)}
+                                className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                              >
+                                <Trash2 className="w-5 h-5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Order Summary */}
+                  <div className="lg:col-span-1">
+                    <div className="card-service rounded-xl p-6 sticky top-24">
+                      <h3 className="text-lg font-bold text-white mb-4">Résumé</h3>
+                      <div className="space-y-3 mb-6">
+                        <div className="flex justify-between text-gray-400">
+                          <span>Sous-total</span>
+                          <span>{getCartTotal().toFixed(2)} CHF</span>
+                        </div>
+                        <div className="flex justify-between text-gray-400">
+                          <span>Frais de livraison</span>
+                          <span>À calculer</span>
+                        </div>
+                        <div className="border-t border-white/10 pt-3">
+                          <div className="flex justify-between text-white font-bold text-lg">
+                            <span>Total</span>
+                            <span>{getCartTotal().toFixed(2)} CHF</span>
+                          </div>
+                        </div>
+                      </div>
+                      <Link 
+                        to="/cart" 
+                        className="w-full btn-primary flex items-center justify-center gap-2"
+                      >
+                        <CreditCard className="w-4 h-4" />
+                        Passer commande
+                      </Link>
+                      <p className="text-xs text-gray-500 text-center mt-4">
+                        Vous serez redirigé vers la page de paiement sécurisé
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Default placeholder for other tabs */}
-          {!['overview', 'profile', 'contacts', 'cartes', 'documents', 'messages', 'particulier', 'orders', 'cashback', 'settings', 'formations', 'agenda', 'finances', 'donations', 'wishlist', 'suggestions', 'prestataires', 'demandes', 'feed', 'my_feed', 'mode_vie', 'invitations', 'offres', 'guests', 'investments', 'premium'].includes(activeTab) && (
+          {!['overview', 'profile', 'contacts', 'cartes', 'documents', 'messages', 'particulier', 'orders', 'cashback', 'settings', 'formations', 'agenda', 'finances', 'donations', 'wishlist', 'suggestions', 'prestataires', 'demandes', 'feed', 'my_feed', 'mode_vie', 'invitations', 'offres', 'guests', 'investments', 'premium', 'panier'].includes(activeTab) && (
             <div className="card-service rounded-xl p-12 text-center">
               <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Clock className="w-8 h-8 text-gray-500" />
