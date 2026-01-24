@@ -6688,7 +6688,7 @@ async def create_premium_checkout(plan: str, current_user: dict = Depends(get_cu
     plan_info = PREMIUM_PLANS[plan]
     
     try:
-        # Create Stripe checkout session using emergentintegrations
+        # Create Stripe checkout session
         checkout = StripeCheckout(api_key=STRIPE_API_KEY)
         
         # Use CheckoutSessionRequest with correct parameters
