@@ -1034,7 +1034,7 @@ const ClientDashboard = () => {
         return cashback > 0 ? 1 : 0;
       case 'premium':
         // Show if premium benefits available
-        return premium?.tier !== 'free' && notifications.filter(n => n.notification_type === 'premium' && !n.is_read).length;
+        return premiumData?.current_plan !== 'free' && notifications.filter(n => n.notification_type === 'premium' && !n.is_read).length;
       case 'investments':
         // Count investment notifications
         return notifications.filter(n => n.notification_type === 'investment' && !n.is_read).length;
