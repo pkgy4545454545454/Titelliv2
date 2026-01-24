@@ -1457,6 +1457,34 @@ async def update_order_status(order_id: str, status: str, current_user: dict = D
     old_status = order.get('status', 'pending')
     await db.orders.update_one({"id": order_id}, {"$set": {"status": status}})
     
+    # If order is completed or delivered, mark invoice as paid
+    if status in ["completed", "delivered"]:
+        await db.enterprise_invoices.update_one(
+            {"order_id": order_id},
+            {"$set": {
+                "status": "paid",
+                "payment_date": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+        # Update the document entry
+        await db.enterprise_documents.update_one(
+            {"metadata.order_id": order_id},
+            {"$set": {"metadata.status": "paid"}}
+        )
+    
+    # If order is cancelled, mark invoice as cancelled
+    if status == "cancelled":
+        await db.enterprise_invoices.update_one(
+            {"order_id": order_id},
+            {"$set": {"status": "cancelled"}}
+        )
+        await db.enterprise_documents.update_one(
+            {"metadata.order_id": order_id},
+            {"$set": {"metadata.status": "cancelled"}}
+        )
+        # Remove the finance transaction if cancelled
+        await db.finance_transactions.delete_one({"reference_id": order_id})
+    
     # Notify client about status change
     status_messages = {
         "confirmed": "Votre commande a été confirmée par le prestataire",
