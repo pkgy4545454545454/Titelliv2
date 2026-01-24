@@ -1079,10 +1079,10 @@ const ClientDashboard = () => {
               />
             </div>
 
-            <nav className="space-y-4">
+            <nav className="space-y-4 overflow-hidden">
               {menuSections.map((section) => (
-                <div key={section.title} className={`rounded-xl p-3 bg-gradient-to-br ${section.gradient} border ${section.borderColor} mb-3`}>
-                  <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2 px-2">
+                <div key={section.title} className={`rounded-xl p-3 bg-gradient-to-br ${section.gradient} border ${section.borderColor} mb-3 menu-section`}>
+                  <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2 px-2 truncate">
                     {section.title}
                   </h3>
                   <div className="space-y-0.5">
@@ -1094,7 +1094,7 @@ const ClientDashboard = () => {
                         <button
                           key={item.id}
                           onClick={() => { setActiveTab(item.id); setMobileMenuOpen(false); }}
-                          className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all relative ${
+                          className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all relative overflow-hidden ${
                             activeTab === item.id
                               ? 'bg-white/20 text-white shadow-lg'
                               : 'text-gray-300 hover:bg-white/10 hover:text-white'
@@ -1105,12 +1105,12 @@ const ClientDashboard = () => {
                             animation: 'pulse-green 2s infinite'
                           } : {}}
                         >
-                          <div className="flex items-center gap-3">
-                            <item.icon className="w-4 h-4" />
-                            <span className="truncate">{item.label}</span>
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
+                            <item.icon className="w-4 h-4 flex-shrink-0" />
+                            <span className="truncate text-left">{item.label}</span>
                           </div>
                           {hasNotif && (
-                            <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-green-500 text-white text-xs font-bold rounded-full animate-bounce">
+                            <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-green-500 text-white text-xs font-bold rounded-full animate-bounce flex-shrink-0">
                               {notifCount}
                             </span>
                           )}
