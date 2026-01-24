@@ -7,6 +7,47 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
 
 ---
 
+## ✅ Fonctionnalités Complétées (25 Jan 2026)
+
+### Phase 30 : Bug Fixes - Notifications, Cover Image, Stripe, Panier (TERMINÉ)
+
+**Bugs corrigés dans cette session :**
+
+1. **Cover Image (Bannière) Client**
+   - ✅ Ajout du champ `cover_image` dans `ClientProfileUpdate` model
+   - ✅ L'image de couverture est maintenant sauvegardée en BDD
+   - ✅ Visible sur le profil public `/profil/:userId`
+
+2. **Notifications Réactives Dashboard**
+   - ✅ Intégration du hook `useNotificationWebSocket` dans ClientDashboard
+   - ✅ Synchronisation temps réel des compteurs de notifications
+   - ✅ Correction variable `premium` → `premiumData`
+   - ✅ Correction variable `cart` → utilisation CartContext
+
+3. **Stripe Abonnements Entreprise**
+   - ✅ Correction `handleSubscribe` dans SubscriptionsSection.js
+   - ✅ Appel correct: `subscriptionsAPI.createCheckout(planId)`
+   - ✅ Ouverture Stripe checkout en nouvelle fenêtre
+
+4. **Section Panier Client**
+   - ✅ Nouvelle section panier complète dans ClientDashboard
+   - ✅ Affichage articles groupés par entreprise
+   - ✅ Contrôles quantité (+/-) et suppression
+   - ✅ Résumé et bouton checkout
+
+---
+
+### Phase 29 : Déploiement Render & Profil Client Public (TERMINÉ)
+
+**Fonctionnalités précédentes :**
+- Déploiement sur Render.com (backend + frontend)
+- Suppression `emergentintegrations` → `stripe_helper.py` natif
+- Page profil client public `/profil/:userId`
+- Amis cliquables vers leurs profils
+- Refonte menu mobile dashboards
+
+---
+
 ## ✅ Fonctionnalités Complétées (24 Jan 2026)
 
 ### Phase 27 : WebSocket Temps Réel & Vérifications Système (TERMINÉ)
