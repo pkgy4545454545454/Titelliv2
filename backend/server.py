@@ -1228,6 +1228,29 @@ async def create_order(data: OrderCreate, current_user: dict = Depends(get_curre
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         await db.cashback_transactions.insert_one(cashback_tx)
+        
+        # Notify client about cashback earned
+        await create_notification(
+            user_id=current_user['id'],
+            notification_type="cashback_earned",
+            title="Cashback gagné !",
+            message=f"Vous avez gagné {cashback_amount:.2f} CHF de cashback ({cashback_percent}%)",
+            link="/dashboard/client?tab=cashback",
+            data={"amount": cashback_amount, "order_id": order_dict['id']}
+        )
+    
+    # Notify client about order placed
+    enterprise = await db.enterprises.find_one({"id": data.enterprise_id}, {"_id": 0, "business_name": 1})
+    enterprise_name = enterprise.get('business_name', 'Prestataire') if enterprise else 'Prestataire'
+    
+    await create_notification(
+        user_id=current_user['id'],
+        notification_type="order_placed",
+        title="Commande confirmée !",
+        message=f"Votre commande chez {enterprise_name} de {total:.2f} CHF a été enregistrée",
+        link="/dashboard/client?tab=orders",
+        data={"order_id": order_dict['id'], "total": total}
+    )
     
     return order_dict
 
