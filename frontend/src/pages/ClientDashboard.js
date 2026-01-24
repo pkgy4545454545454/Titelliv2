@@ -1020,7 +1020,7 @@ const ClientDashboard = () => {
         return orders.filter(o => o.status === 'shipped' || o.status === 'delivering').length;
       case 'cart':
         // Count items in cart
-        return cart.length || 0;
+        return cartItems.length || 0;
       case 'invitations':
         // Count new invitations
         return notifications.filter(n => n.notification_type === 'invitation' && !n.is_read).length;
