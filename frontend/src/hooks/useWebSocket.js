@@ -2,14 +2,14 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 
+// Détecter si on est sur Render (qui ne supporte pas bien les WebSockets)
+const isRenderHost = () => {
+  const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
+  return backendUrl.includes('onrender.com') || backendUrl.includes('render.com');
+};
+
 /**
- * Hook pour gérer la connexion WebSocket des notifications en temps réel.
- * 
- * Fonctionnalités:
- * - Connexion automatique à l'authentification
- * - Reconnexion automatique en cas de déconnexion
- * - Heartbeat pour maintenir la connexion
- * - Mise à jour temps réel des notifications
+ * Hook pour gérer les notifications - utilise polling HTTP sur Render, WebSocket ailleurs.
  */
 export const useNotificationWebSocket = () => {
   const { user, isAuthenticated } = useAuth();
@@ -17,17 +17,67 @@ export const useNotificationWebSocket = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState([]);
   const wsRef = useRef(null);
+  const pollingRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
   const reconnectAttempts = useRef(0);
-  const maxReconnectAttempts = 5;
-  const baseReconnectDelay = 1000;
+  const maxReconnectAttempts = 3;
+  const baseReconnectDelay = 5000; // 5 seconds minimum
+
+  // Utiliser polling sur Render
+  const usePolling = isRenderHost();
+
+  // Polling HTTP pour les notifications
+  const pollNotifications = useCallback(async () => {
+    if (!isAuthenticated) return;
+    
+    const token = localStorage.getItem('titelli_token');
+    if (!token) return;
+
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
+      const response = await fetch(`${backendUrl}/api/notifications?unread_only=false`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setNotifications(data.notifications || []);
+        setUnreadCount(data.unread_count || 0);
+        setIsConnected(true);
+      }
+    } catch (error) {
+      console.error('Error polling notifications:', error);
+    }
+  }, [isAuthenticated]);
+
+  // Démarrer le polling
+  const startPolling = useCallback(() => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+    }
+    
+    // Poll immédiatement, puis toutes les 30 secondes
+    pollNotifications();
+    pollingRef.current = setInterval(pollNotifications, 30000);
+    setIsConnected(true);
+  }, [pollNotifications]);
+
+  // Arrêter le polling
+  const stopPolling = useCallback(() => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+    setIsConnected(false);
+  }, []);
 
   // Construire l'URL WebSocket
   const getWebSocketUrl = useCallback(() => {
     const token = localStorage.getItem('titelli_token');
     if (!token) return null;
 
-    // Convertir l'URL HTTP en WS
     const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
     const wsProtocol = backendUrl.startsWith('https') ? 'wss' : 'ws';
     const wsHost = backendUrl.replace(/^https?:\/\//, '');
@@ -41,7 +91,6 @@ export const useNotificationWebSocket = () => {
       const data = JSON.parse(event.data);
       
       if (data.type === 'ping') {
-        // Répondre au ping du serveur
         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
           wsRef.current.send(JSON.stringify({ type: 'pong' }));
         }
@@ -50,12 +99,10 @@ export const useNotificationWebSocket = () => {
       
       if (data.type === 'notification') {
         if (data.action === 'new') {
-          // Nouvelle notification reçue
           const notif = data.notification;
           setNotifications(prev => [notif, ...prev]);
           setUnreadCount(prev => prev + 1);
           
-          // Afficher un toast pour la nouvelle notification
           toast(notif.title, {
             description: notif.message,
             duration: 5000,
@@ -64,58 +111,34 @@ export const useNotificationWebSocket = () => {
               onClick: () => window.location.href = notif.link
             } : undefined
           });
-          
-          // Jouer un son de notification (optionnel)
-          playNotificationSound();
         } else if (data.action === 'count_update') {
           setUnreadCount(data.unread_count);
         } else if (data.action === 'list') {
           setNotifications(data.notifications || []);
         }
       }
-      
     } catch (error) {
       console.error('Error parsing WebSocket message:', error);
     }
   }, []);
 
-  // Jouer un son de notification
-  const playNotificationSound = () => {
-    try {
-      // Créer un son de notification simple avec Web Audio API
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      
-      oscillator.frequency.value = 800;
-      oscillator.type = 'sine';
-      gainNode.gain.value = 0.1;
-      
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.1);
-    } catch (e) {
-      // Ignorer si l'audio n'est pas disponible
-    }
-  };
-
-  // Connecter au WebSocket
+  // Connecter au WebSocket (seulement si pas sur Render)
   const connect = useCallback(() => {
+    if (usePolling) {
+      startPolling();
+      return;
+    }
+
     const url = getWebSocketUrl();
     if (!url || !isAuthenticated) return;
 
-    // Fermer la connexion existante si elle existe
     if (wsRef.current) {
       wsRef.current.close();
     }
 
-    console.log('Connecting to WebSocket...');
     const ws = new WebSocket(url);
 
     ws.onopen = () => {
-      console.log('WebSocket connected');
       setIsConnected(true);
       reconnectAttempts.current = 0;
     };
@@ -123,41 +146,31 @@ export const useNotificationWebSocket = () => {
     ws.onmessage = handleMessage;
 
     ws.onclose = (event) => {
-      console.log('WebSocket closed:', event.code, event.reason);
       setIsConnected(false);
       
-      // Reconnexion automatique si ce n'est pas une fermeture volontaire
-      if (event.code !== 1000 && isAuthenticated) {
-        scheduleReconnect();
+      if (event.code !== 1000 && isAuthenticated && reconnectAttempts.current < maxReconnectAttempts) {
+        const delay = baseReconnectDelay * Math.pow(2, reconnectAttempts.current);
+        reconnectTimeoutRef.current = setTimeout(() => {
+          reconnectAttempts.current++;
+          connect();
+        }, delay);
       }
     };
 
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
+    ws.onerror = () => {
       setIsConnected(false);
     };
 
     wsRef.current = ws;
-  }, [getWebSocketUrl, isAuthenticated, handleMessage]);
-
-  // Planifier une reconnexion avec backoff exponentiel
-  const scheduleReconnect = useCallback(() => {
-    if (reconnectAttempts.current >= maxReconnectAttempts) {
-      console.log('Max reconnection attempts reached');
-      return;
-    }
-
-    const delay = baseReconnectDelay * Math.pow(2, reconnectAttempts.current);
-    console.log(`Scheduling reconnection in ${delay}ms...`);
-    
-    reconnectTimeoutRef.current = setTimeout(() => {
-      reconnectAttempts.current++;
-      connect();
-    }, delay);
-  }, [connect]);
+  }, [getWebSocketUrl, isAuthenticated, handleMessage, usePolling, startPolling]);
 
   // Déconnecter
   const disconnect = useCallback(() => {
+    if (usePolling) {
+      stopPolling();
+      return;
+    }
+
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
     }
@@ -166,36 +179,58 @@ export const useNotificationWebSocket = () => {
       wsRef.current = null;
     }
     setIsConnected(false);
-  }, []);
+  }, [usePolling, stopPolling]);
 
-  // Envoyer un message au serveur
-  const sendMessage = useCallback((message) => {
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify(message));
+  // Marquer une notification comme lue
+  const markRead = useCallback(async (notificationId) => {
+    const token = localStorage.getItem('titelli_token');
+    if (!token) return;
+
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
+      await fetch(`${backendUrl}/api/notifications/${notificationId}/read`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      setNotifications(prev => 
+        prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
+      );
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
     }
   }, []);
 
-  // Marquer une notification comme lue via WebSocket
-  const markRead = useCallback((notificationId) => {
-    sendMessage({ type: 'mark_read', notification_id: notificationId });
-    setNotifications(prev => 
-      prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
-    );
-  }, [sendMessage]);
+  // Marquer toutes comme lues
+  const markAllRead = useCallback(async () => {
+    const token = localStorage.getItem('titelli_token');
+    if (!token) return;
 
-  // Marquer toutes comme lues via WebSocket
-  const markAllRead = useCallback(() => {
-    sendMessage({ type: 'mark_all_read' });
-    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
-    setUnreadCount(0);
-  }, [sendMessage]);
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
+      await fetch(`${backendUrl}/api/notifications/read-all`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('Error marking all as read:', error);
+    }
+  }, []);
 
-  // Demander la liste des notifications
-  const fetchNotifications = useCallback((limit = 20) => {
-    sendMessage({ type: 'get_notifications', limit });
-  }, [sendMessage]);
+  // Rafraîchir les notifications
+  const fetchNotifications = useCallback(() => {
+    pollNotifications();
+  }, [pollNotifications]);
 
-  // Effet pour connecter/déconnecter automatiquement
+  // Connexion automatique
   useEffect(() => {
     if (isAuthenticated && user) {
       connect();
@@ -208,11 +243,14 @@ export const useNotificationWebSocket = () => {
     };
   }, [isAuthenticated, user, connect, disconnect]);
 
-  // Effet pour nettoyer lors du démontage
+  // Nettoyage
   useEffect(() => {
     return () => {
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
+      }
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
       }
     };
   }, []);
@@ -229,88 +267,13 @@ export const useNotificationWebSocket = () => {
 };
 
 /**
- * Hook pour le statut de présence des amis en temps réel.
+ * Hook pour le statut de présence - désactivé sur Render.
  */
 export const usePresenceWebSocket = () => {
-  const { isAuthenticated } = useAuth();
-  const [onlineFriends, setOnlineFriends] = useState([]);
-  const [isConnected, setIsConnected] = useState(false);
-  const wsRef = useRef(null);
+  const [onlineFriends] = useState([]);
+  const [isConnected] = useState(false);
 
-  const getWebSocketUrl = useCallback(() => {
-    const token = localStorage.getItem('titelli_token');
-    if (!token) return null;
-
-    const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
-    const wsProtocol = backendUrl.startsWith('https') ? 'wss' : 'ws';
-    const wsHost = backendUrl.replace(/^https?:\/\//, '');
-    
-    return `${wsProtocol}://${wsHost}/ws/presence?token=${token}`;
-  }, []);
-
-  const connect = useCallback(() => {
-    const url = getWebSocketUrl();
-    if (!url || !isAuthenticated) return;
-
-    if (wsRef.current) {
-      wsRef.current.close();
-    }
-
-    const ws = new WebSocket(url);
-
-    ws.onopen = () => {
-      setIsConnected(true);
-      // Demander la liste des amis en ligne
-      ws.send(JSON.stringify({ type: 'get_online_friends' }));
-    };
-
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        
-        if (data.type === 'ping') {
-          ws.send(JSON.stringify({ type: 'pong' }));
-          return;
-        }
-        
-        if (data.type === 'presence') {
-          if (data.action === 'online') {
-            setOnlineFriends(prev => {
-              if (!prev.find(f => f.id === data.user_id)) {
-                return [...prev, { id: data.user_id, name: data.user_name }];
-              }
-              return prev;
-            });
-          } else if (data.action === 'offline') {
-            setOnlineFriends(prev => prev.filter(f => f.id !== data.user_id));
-          } else if (data.action === 'online_friends') {
-            setOnlineFriends(data.friends || []);
-          }
-        }
-      } catch (error) {
-        console.error('Presence WebSocket error:', error);
-      }
-    };
-
-    ws.onclose = () => {
-      setIsConnected(false);
-    };
-
-    wsRef.current = ws;
-  }, [getWebSocketUrl, isAuthenticated]);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      connect();
-    }
-
-    return () => {
-      if (wsRef.current) {
-        wsRef.current.close();
-      }
-    };
-  }, [isAuthenticated, connect]);
-
+  // Désactivé car Render ne supporte pas bien les WebSockets
   return {
     isConnected,
     onlineFriends
