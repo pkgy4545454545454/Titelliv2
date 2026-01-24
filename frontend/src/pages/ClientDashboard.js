@@ -155,8 +155,7 @@ const ClientDashboard = () => {
   // Premium state
   const [premiumData, setPremiumData] = useState({ current_plan: 'free', is_premium: false, benefits: {} });
 
-  // Cart state (for notification count)
-  const [cart, setCart] = useState([]);
+  // Cart is from CartContext - cartItems
 
   // WebSocket notifications hook for real-time updates
   const { 
