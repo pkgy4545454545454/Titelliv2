@@ -4603,6 +4603,128 @@ async def get_client_profile(current_user: dict = Depends(get_current_user)):
         }
     }
 
+@api_router.get("/client/profile/{user_id}/public")
+async def get_client_public_profile(user_id: str, current_user: dict = Depends(get_current_user)):
+    """Get public profile of another client"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0, "password_hash": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+    
+    # Record profile view
+    await db.profile_views.insert_one({
+        "id": str(uuid.uuid4()),
+        "viewer_id": current_user['id'],
+        "viewed_user_id": user_id,
+        "viewed_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    # Get stats
+    friends_count = await db.friendships.count_documents({
+        "$or": [{"user_id": user_id}, {"friend_id": user_id}],
+        "status": "accepted"
+    })
+    
+    # Check if already friends
+    is_friend = await db.friendships.find_one({
+        "$or": [
+            {"user_id": current_user['id'], "friend_id": user_id, "status": "accepted"},
+            {"user_id": user_id, "friend_id": current_user['id'], "status": "accepted"}
+        ]
+    })
+    
+    # Check if request pending
+    pending_request = await db.friendships.find_one({
+        "$or": [
+            {"user_id": current_user['id'], "friend_id": user_id, "status": "pending"},
+            {"user_id": user_id, "friend_id": current_user['id'], "status": "pending"}
+        ]
+    })
+    
+    # Get user's feed posts
+    feed_posts = await db.feed_posts.find(
+        {"user_id": user_id},
+        {"_id": 0}
+    ).sort("created_at", -1).limit(10).to_list(10)
+    
+    # Get mutual friends count
+    my_friends = await db.friendships.find({
+        "$or": [{"user_id": current_user['id']}, {"friend_id": current_user['id']}],
+        "status": "accepted"
+    }).to_list(100)
+    my_friend_ids = set()
+    for f in my_friends:
+        my_friend_ids.add(f['friend_id'] if f['user_id'] == current_user['id'] else f['user_id'])
+    
+    their_friends = await db.friendships.find({
+        "$or": [{"user_id": user_id}, {"friend_id": user_id}],
+        "status": "accepted"
+    }).to_list(100)
+    their_friend_ids = set()
+    for f in their_friends:
+        their_friend_ids.add(f['friend_id'] if f['user_id'] == user_id else f['user_id'])
+    
+    mutual_count = len(my_friend_ids.intersection(their_friend_ids))
+    
+    return {
+        "user": {
+            "id": user['id'],
+            "first_name": user.get('first_name'),
+            "last_name": user.get('last_name'),
+            "avatar": user.get('avatar'),
+            "cover_image": user.get('cover_image'),
+            "bio": user.get('bio'),
+            "city": user.get('city'),
+            "lifestyle_mode": user.get('lifestyle_mode'),
+            "linkedin": user.get('linkedin'),
+            "instagram": user.get('instagram'),
+            "twitter": user.get('twitter'),
+            "website": user.get('website'),
+            "created_at": user.get('created_at')
+        },
+        "stats": {
+            "friends_count": friends_count,
+            "mutual_friends": mutual_count,
+            "posts_count": len(feed_posts)
+        },
+        "is_friend": bool(is_friend),
+        "pending_request": bool(pending_request),
+        "feed_posts": feed_posts
+    }
+
+@api_router.get("/client/{user_id}/feed")
+async def get_client_feed(user_id: str, current_user: dict = Depends(get_current_user)):
+    """Get feed posts from a specific client"""
+    # Check if friends (only friends can see full feed)
+    is_friend = await db.friendships.find_one({
+        "$or": [
+            {"user_id": current_user['id'], "friend_id": user_id, "status": "accepted"},
+            {"user_id": user_id, "friend_id": current_user['id'], "status": "accepted"}
+        ]
+    })
+    
+    # If not friends, only show public posts
+    query = {"user_id": user_id}
+    if not is_friend and user_id != current_user['id']:
+        query["visibility"] = "public"
+    
+    posts = await db.feed_posts.find(query, {"_id": 0}).sort("created_at", -1).limit(20).to_list(20)
+    
+    # Enrich posts with user info
+    user = await db.users.find_one({"id": user_id}, {"_id": 0, "password_hash": 0})
+    for post in posts:
+        post['author'] = {
+            "id": user.get('id'),
+            "first_name": user.get('first_name'),
+            "last_name": user.get('last_name'),
+            "avatar": user.get('avatar')
+        }
+        # Get likes and comments count
+        post['likes_count'] = await db.feed_likes.count_documents({"post_id": post['id']})
+        post['comments_count'] = await db.feed_comments.count_documents({"post_id": post['id']})
+        post['is_liked'] = bool(await db.feed_likes.find_one({"post_id": post['id'], "user_id": current_user['id']}))
+    
+    return {"posts": posts, "count": len(posts)}
+
 # --- Friends System ---
 class FriendRequestCreate(BaseModel):
     friend_id: str
