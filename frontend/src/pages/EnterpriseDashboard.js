@@ -448,21 +448,32 @@ const EnterpriseDashboard = () => {
                 </div>
               ))}
             </nav>
+            
+            {/* Close button at bottom of mobile menu */}
+            <div className="lg:hidden mt-6 pt-4 border-t border-white/10">
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full py-3 bg-white/5 rounded-xl text-gray-400 hover:bg-white/10 hover:text-white transition-colors flex items-center justify-center gap-2"
+              >
+                <X className="w-4 h-4" />
+                Fermer le menu
+              </button>
+            </div>
           </div>
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 lg:ml-72 p-4 md:p-8">
-          {/* Mobile Menu */}
+        <main className="flex-1 lg:ml-72 p-4 md:p-8 pt-6 lg:pt-4">
+          {/* Mobile Quick Access - Optional tabs for quick navigation */}
           <div className="lg:hidden mb-6 overflow-x-auto">
             <div className="flex gap-2 pb-2">
-              {menuItems.slice(0, 8).map((item) => (
+              {menuItems.slice(0, 6).map((item) => (
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm whitespace-nowrap ${
                     activeTab === item.id
-                      ? 'bg-[#0047AB] text-white'
+                      ? 'bg-[#D4AF37] text-black'
                       : 'bg-white/5 text-gray-400'
                   }`}
                 >
