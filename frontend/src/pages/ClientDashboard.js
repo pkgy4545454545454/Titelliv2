@@ -27,6 +27,7 @@ import { useCart } from '../context/CartContext';
 
 const ClientDashboard = () => {
   const { user, isClient, updateUser } = useAuth();
+  const { items: cartItems, removeItem: removeCartItem, updateQuantity: updateCartQuantity, getTotal: getCartTotal, getItemsByEnterprise } = useCart();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(() => {
