@@ -1155,14 +1155,6 @@ const ClientDashboard = () => {
           </div>
         </aside>
 
-        {/* Overlay for mobile - darker and clickable */}
-        {mobileMenuOpen && (
-          <div 
-            className="lg:hidden fixed inset-0 bg-black/70 z-30 backdrop-blur-sm"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-        )}
-
         {/* Main Content */}
         <main className="flex-1 lg:ml-64 p-4 md:p-6 lg:p-8 pt-6 lg:pt-4">
           {/* Overview Tab */}
