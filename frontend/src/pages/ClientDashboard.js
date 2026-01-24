@@ -1032,8 +1032,8 @@ const ClientDashboard = () => {
 
       <div className="flex">
         {/* Sidebar */}
-        <aside className={`w-64 min-h-screen bg-[#0A0A0A] border-r border-white/5 fixed left-0 top-20 bottom-0 overflow-y-auto z-40 transition-transform duration-300 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-          <div className="p-4 hide-scrollbar">
+        <aside className={`w-64 min-h-screen bg-[#0A0A0A] border-r border-white/5 fixed left-0 top-20 bottom-0 overflow-y-auto overflow-x-hidden z-40 transition-transform duration-300 dashboard-sidebar ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+          <div className="p-4 hide-scrollbar overflow-x-hidden">
             {/* Profile Header with Switch Button */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
