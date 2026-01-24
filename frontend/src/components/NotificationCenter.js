@@ -224,6 +224,13 @@ const NotificationCenter = ({
                   {unreadCount}
                 </span>
               )}
+              {/* Real-time indicator */}
+              {isRealTime && (
+                <span className="flex items-center gap-1 px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded-full">
+                  <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+                  Live
+                </span>
+              )}
             </div>
             <div className="flex items-center gap-2">
               {unreadCount > 0 && (
