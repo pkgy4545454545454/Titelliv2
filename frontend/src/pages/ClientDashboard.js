@@ -514,6 +514,21 @@ const ClientDashboard = () => {
     }
   };
 
+  const handleCoverUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    try {
+      const res = await uploadAPI.uploadImage(file);
+      const coverUrl = res.data.url;
+      setProfileForm({ ...profileForm, cover_image: coverUrl });
+      await clientProfileAPI.update({ cover_image: coverUrl });
+      toast.success('Image de couverture mise à jour');
+    } catch (error) {
+      toast.error('Erreur lors de l\'upload');
+    }
+  };
+
   // Agenda handlers
   const handleAddAgendaEvent = async () => {
     if (!eventForm.title || !eventForm.start_datetime) {
