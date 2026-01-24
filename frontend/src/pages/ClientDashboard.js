@@ -153,6 +153,30 @@ const ClientDashboard = () => {
   // Premium state
   const [premiumData, setPremiumData] = useState({ current_plan: 'free', is_premium: false, benefits: {} });
 
+  // Cart state (for notification count)
+  const [cart, setCart] = useState([]);
+
+  // WebSocket notifications hook for real-time updates
+  const { 
+    notifications: wsNotifications, 
+    unreadCount: wsUnreadCount,
+    isConnected: wsConnected,
+    fetchNotifications: refreshNotifications 
+  } = useNotificationWebSocket();
+
+  // Sync WebSocket notifications with local state
+  useEffect(() => {
+    if (wsNotifications && wsNotifications.length > 0) {
+      setNotifications(wsNotifications);
+    }
+  }, [wsNotifications]);
+
+  useEffect(() => {
+    if (wsUnreadCount !== undefined) {
+      setUnreadCount(wsUnreadCount);
+    }
+  }, [wsUnreadCount]);
+
   useEffect(() => {
     if (!isClient) {
       navigate('/');
