@@ -9,7 +9,8 @@ import {
   FolderOpen, BookOpen, Wallet, Target, BarChart3, PlayCircle, Pause,
   UserPlus, ClipboardList, AlertTriangle, Box, ArrowUpDown, Upload, Image, X,
   Search, Rss, Newspaper, Truck, Activity, Phone, Heart, HelpCircle, Info,
-  Handshake, UserCircle, Receipt, Send, Crown, Zap, Check, ChevronDown, Camera
+  Handshake, UserCircle, Receipt, Send, Crown, Zap, Check, ChevronDown, Camera,
+  Menu
 } from 'lucide-react';
 import { 
   enterpriseAPI, servicesProductsAPI, orderAPI, paymentAPI, offersAPI,
@@ -31,6 +32,7 @@ const EnterpriseDashboard = () => {
   });
   const [enterprise, setEnterprise] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Data states
   const [services, setServices] = useState([]);
