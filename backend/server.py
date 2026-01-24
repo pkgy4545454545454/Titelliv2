@@ -4176,7 +4176,7 @@ async def get_notifications(current_user: dict = Depends(get_current_user), limi
     return {"notifications": notifications, "unread_count": unread_count}
 
 @api_router.post("/notifications")
-async def create_notification(notification: NotificationCreate, user_id: str, current_user: dict = Depends(get_current_user)):
+async def create_notification_endpoint(notification: NotificationCreate, user_id: str, current_user: dict = Depends(get_current_user)):
     # Only enterprise or admin can create notifications for users
     if current_user['user_type'] not in ['entreprise', 'admin']:
         raise HTTPException(status_code=403, detail="Non autorisé")
