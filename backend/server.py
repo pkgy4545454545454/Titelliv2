@@ -1323,6 +1323,75 @@ async def create_order(data: OrderCreate, current_user: dict = Depends(get_curre
     client_name = f"{current_user['first_name']} {current_user['last_name']}"
     await create_order_notification(data.enterprise_id, order_dict['id'], client_name, total)
     
+    # Get enterprise info for invoice
+    enterprise = await db.enterprises.find_one({"id": data.enterprise_id}, {"_id": 0})
+    enterprise_name = enterprise.get('business_name', 'Prestataire') if enterprise else 'Prestataire'
+    
+    # === Generate Invoice for Enterprise Documents ===
+    invoice_number = f"FAC-{datetime.now().strftime('%Y%m%d')}-{order_dict['id'][:8].upper()}"
+    enterprise_net = round(subtotal - order_dict['management_fee'], 2)  # Net après commission Titelli
+    
+    invoice_doc = {
+        "id": str(uuid.uuid4()),
+        "enterprise_id": data.enterprise_id,
+        "order_id": order_dict['id'],
+        "invoice_number": invoice_number,
+        "document_type": "invoice",
+        "name": f"Facture {invoice_number}",
+        "description": f"Commande de {client_name}",
+        "category": "factures",
+        "client_info": {
+            "id": current_user['id'],
+            "name": client_name,
+            "email": current_user.get('email', '')
+        },
+        "items": order_dict['items'],
+        "subtotal": subtotal,
+        "transaction_fee": transaction_fee,
+        "management_fee": order_dict['management_fee'],
+        "total_ttc": total,
+        "enterprise_net": enterprise_net,  # Ce que l'entreprise reçoit réellement
+        "status": "pending",  # pending -> paid when order is completed
+        "payment_date": None,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.enterprise_invoices.insert_one(invoice_doc)
+    
+    # Also add to enterprise documents for visibility
+    document_entry = {
+        "id": invoice_doc['id'],
+        "enterprise_id": data.enterprise_id,
+        "name": invoice_doc['name'],
+        "file_type": "invoice",
+        "category": "factures",
+        "file_path": None,  # Generated invoice, not a file
+        "size": 0,
+        "metadata": {
+            "invoice_number": invoice_number,
+            "order_id": order_dict['id'],
+            "client_name": client_name,
+            "total": total,
+            "enterprise_net": enterprise_net
+        },
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.enterprise_documents.insert_one(document_entry)
+    
+    # Add finance transaction for enterprise revenue
+    finance_transaction = {
+        "id": str(uuid.uuid4()),
+        "enterprise_id": data.enterprise_id,
+        "transaction_type": "income",
+        "amount": enterprise_net,  # Net revenue after Titelli fees
+        "description": f"Vente - Commande #{order_dict['id'][:8]} - {client_name}",
+        "category": "ventes",
+        "reference_type": "order",
+        "reference_id": order_dict['id'],
+        "date": datetime.now(timezone.utc).strftime('%Y-%m-%d'),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.finance_transactions.insert_one(finance_transaction)
+    
     # Add cashback based on user's subscription plan (Free: 1%, Premium: 10%, VIP: 15%)
     cashback_rate = await get_user_cashback_rate(current_user['id'])
     cashback_percent = int(cashback_rate * 100)
@@ -1356,9 +1425,6 @@ async def create_order(data: OrderCreate, current_user: dict = Depends(get_curre
         )
     
     # Notify client about order placed
-    enterprise = await db.enterprises.find_one({"id": data.enterprise_id}, {"_id": 0, "business_name": 1})
-    enterprise_name = enterprise.get('business_name', 'Prestataire') if enterprise else 'Prestataire'
-    
     await create_notification(
         user_id=current_user['id'],
         notification_type="order_placed",
