@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useNotificationWebSocket } from '../hooks/useWebSocket';
 import { 
   LayoutDashboard, User, Heart, ShoppingCart, CreditCard, Wallet, Calendar, 
   MessageSquare, FileText, Settings, Gift, Crown, TrendingUp, MapPin,
