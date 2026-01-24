@@ -446,9 +446,9 @@ class TestHealthAndAuth:
         assert "user" in data, "Login response should contain user"
         
         user = data["user"]
-        # User type can be in 'role' or 'user_type' field, or determined by enterprise_id
+        # User type can be in 'role' or 'user_type' field - French app uses 'entreprise'
         user_type = user.get("role") or user.get("user_type") or ("enterprise" if user.get("enterprise_id") else "client")
-        assert user_type in ["enterprise", "prestataire"], f"User should be enterprise/prestataire, got {user_type}"
+        assert user_type in ["enterprise", "prestataire", "entreprise"], f"User should be enterprise type, got {user_type}"
         
         print(f"✓ Enterprise login successful: {user.get('email')}")
 
