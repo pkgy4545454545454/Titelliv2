@@ -1132,19 +1132,30 @@ const ClientDashboard = () => {
                 </div>
               ))}
             </nav>
+            
+            {/* Close button at bottom of mobile menu */}
+            <div className="lg:hidden mt-6 pt-4 border-t border-white/10">
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full py-3 bg-white/5 rounded-xl text-gray-400 hover:bg-white/10 hover:text-white transition-colors flex items-center justify-center gap-2"
+              >
+                <X className="w-4 h-4" />
+                Fermer le menu
+              </button>
+            </div>
           </div>
         </aside>
 
-        {/* Overlay for mobile */}
+        {/* Overlay for mobile - darker and clickable */}
         {mobileMenuOpen && (
           <div 
-            className="lg:hidden fixed inset-0 bg-black/50 z-30"
+            className="lg:hidden fixed inset-0 bg-black/70 z-30 backdrop-blur-sm"
             onClick={() => setMobileMenuOpen(false)}
           />
         )}
 
         {/* Main Content */}
-        <main className="flex-1 lg:ml-64 p-4 md:p-6 lg:p-8">
+        <main className="flex-1 lg:ml-64 p-4 md:p-6 lg:p-8 pt-6 lg:pt-4">
           {/* Overview Tab */}
           {activeTab === 'overview' && (
             <div className="space-y-6 md:space-y-8">
