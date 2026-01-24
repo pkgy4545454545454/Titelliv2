@@ -2211,11 +2211,24 @@ async def enroll_training(training_id: str, session_id: Optional[str] = None, cu
         "message": f"Vous êtes inscrit à la formation: {training['title']}. Cashback de {cashback_amount} CHF ({cashback_percent}%) ajouté!",
         "notification_type": "training_enrollment",
         "data": {"training_id": training_id, "enrollment_id": enrollment['id'], "cashback": cashback_amount},
-        "link": "/dashboard/client?tab=trainings",
+        "link": "/dashboard/client?tab=formations",
         "is_read": False,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.notifications.insert_one(notification)
+    
+    # Notify enterprise about new enrollment
+    if training.get('enterprise_id'):
+        enterprise = await db.enterprises.find_one({"id": training['enterprise_id']})
+        if enterprise:
+            await create_notification(
+                user_id=enterprise['user_id'],
+                notification_type="training_purchase",
+                title="Nouvelle inscription formation !",
+                message=f"{current_user['first_name']} s'est inscrit à '{training['title']}' ({training['price']} CHF)",
+                link="/dashboard/entreprise?tab=trainings",
+                data={"training_id": training_id, "user_id": current_user['id']}
+            )
     
     del enrollment['_id']
     return enrollment
