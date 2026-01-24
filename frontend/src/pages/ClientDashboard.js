@@ -1039,7 +1039,7 @@ const ClientDashboard = () => {
           transition-all duration-300 ease-in-out
           dashboard-sidebar pt-4
           w-[280px] sm:w-[300px] lg:w-64 lg:top-20
-          ${mobileMenuOpen ? 'left-0' : '-left-[300px] lg:left-0'}
+          ${mobileMenuOpen ? 'mobile-sidebar-open' : 'mobile-sidebar-closed'}
         `}
         style={{ backgroundColor: '#111111' }}
       >
