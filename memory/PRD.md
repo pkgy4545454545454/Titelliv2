@@ -276,6 +276,7 @@ DELETE /api/client/providers/{id}
 - ✅ ~~Systèmes paiement RÉELS~~ - TERMINÉ (Iteration 20)
 - ✅ ~~Cashback dynamique~~ - TERMINÉ (1%/10%/15%)
 - ✅ ~~Annulation abonnement~~ - TERMINÉ
+- ✅ ~~Système de notifications unifié~~ - TERMINÉ (Iteration 26)
 
 ### 🟠 P1 - Important
 - ✅ ~~Bouton "Ajouter aux favoris" sur produits/services~~ - TERMINÉ (Iteration 21)
@@ -290,7 +291,7 @@ DELETE /api/client/providers/{id}
 - [ ] Refactoring `server.py` → modules (voir REFACTORING_PLAN.md) - EN COURS
 
 ### 🟡 P2 - Futur
-- [ ] Notifications temps réel (WebSocket)
+- [ ] Notifications temps réel (WebSocket) - Polling actuellement 30s
 - [ ] Refactoring ClientDashboard.js (4000+ lignes)
 - ✅ ~~Dashboard client sections~~ - IMPLÉMENTÉ
 
