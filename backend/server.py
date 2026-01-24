@@ -837,6 +837,7 @@ async def create_notification(
 ):
     """
     Crée une notification unifiée pour n'importe quel utilisateur.
+    Envoie également via WebSocket si l'utilisateur est connecté.
     
     Args:
         user_id: ID de l'utilisateur destinataire
@@ -865,11 +866,33 @@ async def create_notification(
     }
     
     await db.notifications.insert_one(notification_doc)
+    
+    # Envoyer via WebSocket si l'utilisateur est connecté
+    if ws_manager.is_user_online(user_id):
+        ws_message = {
+            "type": "notification",
+            "action": "new",
+            "notification": {
+                "id": notification_doc["id"],
+                "title": title,
+                "message": message,
+                "notification_type": notification_type,
+                "icon": notification_config["icon"],
+                "color": notification_config["color"],
+                "link": link,
+                "data": data or {},
+                "is_read": False,
+                "created_at": notification_doc["created_at"]
+            }
+        }
+        await ws_manager.send_personal_message(ws_message, user_id)
+        logger.info(f"Real-time notification sent to user {user_id}: {title}")
+    
     return notification_doc
 
 
 async def create_bulk_notifications(user_ids: list, notification_type: str, title: str, message: str, link: str = None, data: dict = None):
-    """Crée des notifications pour plusieurs utilisateurs à la fois."""
+    """Crée des notifications pour plusieurs utilisateurs à la fois. Envoie via WebSocket."""
     notifications = []
     notification_config = NOTIFICATION_TYPES.get(notification_type, {"icon": "bell", "color": "gray"})
     
@@ -889,6 +912,26 @@ async def create_bulk_notifications(user_ids: list, notification_type: str, titl
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         notifications.append(notification_doc)
+        
+        # Envoyer via WebSocket si l'utilisateur est connecté
+        if ws_manager.is_user_online(user_id):
+            ws_message = {
+                "type": "notification",
+                "action": "new",
+                "notification": {
+                    "id": notification_doc["id"],
+                    "title": title,
+                    "message": message,
+                    "notification_type": notification_type,
+                    "icon": notification_config["icon"],
+                    "color": notification_config["color"],
+                    "link": link,
+                    "data": data or {},
+                    "is_read": False,
+                    "created_at": notification_doc["created_at"]
+                }
+            }
+            await ws_manager.send_personal_message(ws_message, user_id)
     
     if notifications:
         await db.notifications.insert_many(notifications)
