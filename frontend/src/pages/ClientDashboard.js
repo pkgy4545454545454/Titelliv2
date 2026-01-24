@@ -1493,6 +1493,7 @@ const ClientDashboard = () => {
                     Enregistrer les modifications
                   </button>
                 )}
+                </div>
               </div>
             </div>
           )}
