@@ -24,6 +24,7 @@ import CartPage from './pages/CartPage';
 import OrdersPage from './pages/OrdersPage';
 import JobDetailPage from './pages/JobDetailPage';
 import JobsPage from './pages/JobsPage';
+import ClientProfilePage from './pages/ClientProfilePage';
 import { PaymentSuccessPage, PaymentCancelPage } from './pages/PaymentPages';
 
 import './index.css';
