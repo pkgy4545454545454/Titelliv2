@@ -1780,6 +1780,29 @@ async def activate_subscription(
                     {"user_id": current_user['id']},
                     {"$set": updates}
                 )
+            
+            # Also create/update enterprise_subscriptions for algorithm access
+            await db.enterprise_subscriptions.update_many(
+                {"enterprise_id": enterprise['id'], "status": "active"},
+                {"$set": {"status": "cancelled", "ended_at": datetime.now(timezone.utc)}}
+            )
+            
+            enterprise_subscription = {
+                "id": str(uuid.uuid4()),
+                "enterprise_id": enterprise['id'],
+                "user_id": current_user['id'],
+                "plan_id": plan_id,
+                "plan_name": plan['name'],
+                "price": plan['price'],
+                "features": plan['features'],
+                "tier": plan.get('tier', 'basic'),
+                "status": "active",
+                "stripe_session_id": session_id,
+                "started_at": datetime.now(timezone.utc),
+                "next_billing_date": datetime.now(timezone.utc),
+                "created_at": datetime.now(timezone.utc)
+            }
+            await db.enterprise_subscriptions.insert_one(enterprise_subscription)
         
         return {"success": True, "subscription": {k: v for k, v in subscription.items() if k != '_id'}}
     except HTTPException:
