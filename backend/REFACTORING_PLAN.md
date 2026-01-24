@@ -1,73 +1,96 @@
-# Refactoring Plan - server.py → routers/
+# Plan de Refactoring - server.py → modules
 
 ## Objectif
-Diviser le fichier monolithique `server.py` (~4500 lignes) en modules séparés pour améliorer la maintenabilité.
+Diviser le fichier monolithique `server.py` (7300+ lignes) en modules spécialisés pour améliorer la maintenabilité et la lisibilité du code.
 
-## Structure cible
+## Architecture Cible
 
 ```
 /app/backend/
-├── server.py              # App principale, configuration, middleware
-├── database.py            # Connexion MongoDB
-├── models/                # Pydantic models
-│   ├── __init__.py
-│   ├── user.py
-│   ├── enterprise.py
-│   ├── training.py
-│   └── ...
-├── routers/               # API endpoints par domaine
-│   ├── __init__.py
-│   ├── auth.py            # /auth/* (login, register, me)
-│   ├── enterprises.py     # /enterprises/*
-│   ├── services_products.py  # /services-products/*
-│   ├── orders.py          # /orders/*
-│   ├── payments.py        # /payments/*, /subscriptions/*
-│   ├── trainings.py       # /trainings/*, /enterprise/trainings/*
-│   ├── jobs.py            # /jobs/*, /enterprise/offers/*
-│   ├── cashback.py        # /cashback/*
-│   ├── advertising.py     # /advertising/*, /enterprise/advertising/*
-│   ├── notifications.py   # /notifications/*
-│   ├── messages.py        # /messages/*
-│   ├── client.py          # /client/* (profile, friends, documents, cards)
-│   ├── influencer.py      # /influencer/*
-│   ├── admin.py           # /admin/*
-│   └── online_status.py   # /user/heartbeat, /user/offline
-└── utils/
+├── server.py              # Point d'entrée principal (configuration CORS, montage routers)
+├── routers/
+│   ├── __init__.py        # ✅ FAIT - Exports des routers
+│   ├── shared.py          # ✅ FAIT - DB, auth helpers, config partagée
+│   ├── auth.py            # ✅ FAIT - register, login, profile
+│   ├── payments.py        # ✅ FAIT - Stripe checkout, webhooks
+│   ├── websocket.py       # ✅ FAIT - Notifications temps réel
+│   ├── client.py          # 🔄 EN COURS - Endpoints client
+│   ├── client_premium.py  # ⏳ À FAIRE - Premium client features
+│   ├── enterprise.py      # ⏳ À FAIRE - Endpoints entreprise
+│   ├── trainings.py       # ⏳ À FAIRE - Formations
+│   ├── jobs.py            # ⏳ À FAIRE - Offres d'emploi
+│   ├── influencers.py     # ⏳ À FAIRE - Influenceurs
+│   └── admin.py           # ⏳ À FAIRE - Administration
+└── models/
     ├── __init__.py
-    ├── auth.py            # get_current_user, JWT functions
-    └── helpers.py         # Utility functions
+    ├── user.py            # User, UserCreate, UserResponse
+    ├── enterprise.py      # Enterprise models
+    ├── order.py           # Order, OrderItem, OrderCreate
+    └── ...
 ```
 
-## Priorité de migration
+## Modules Complétés
 
-### Phase 1 (Haute priorité)
-1. ✅ Structure créée
-2. [ ] auth.py - Authentication endpoints
-3. [ ] trainings.py - Formations
-4. [ ] online_status.py - Statut en ligne
+### 1. shared.py ✅
+- Configuration MongoDB
+- Configuration JWT
+- Configuration Stripe
+- Constantes TITELLI_FEES et PREMIUM_PLANS
+- Fonctions: hash_password, verify_password, create_token
+- Dépendances: get_current_user, get_user_cashback_rate, get_user_plan
 
-### Phase 2 (Moyenne priorité)
-5. [ ] cashback.py - Système cashback
-6. [ ] notifications.py
-7. [ ] messages.py
-8. [ ] jobs.py
+### 2. auth.py ✅
+- POST /auth/register
+- POST /auth/login
+- GET /auth/me
+- PUT /auth/profile
+- PUT /auth/password
+- POST /auth/validate-token
 
-### Phase 3 (Basse priorité)
-9. [ ] enterprises.py
-10. [ ] services_products.py
-11. [ ] orders.py
-12. [ ] payments.py
-13. [ ] advertising.py
-14. [ ] client.py
-15. [ ] influencer.py
-16. [ ] admin.py
+### 3. payments.py ✅
+- POST /payments/checkout
+- GET /payments/status/{session_id}
+- POST /payments/webhook
 
-## Notes
-- Chaque router doit importer les dépendances communes depuis server.py
-- Les modèles Pydantic peuvent rester dans server.py pour l'instant
-- Ajouter progressivement les routers dans app.include_router()
+### 4. websocket.py ✅
+- ConnectionManager class
+- GET /ws/status
+- GET /ws/online-friends
+- Export ws_manager pour create_notification
 
-## Statut actuel
-- server.py contient ~4500 lignes de code
-- Fichiers placeholder créés dans /routers
-- Refactoring complet nécessite plusieurs sessions de travail
+## Prochaines Étapes
+
+1. **client.py** - Endpoints client:
+   - Wishlist, providers, orders, cashback
+   - Activity feed, lifestyle
+   - Friends, messages
+
+2. **enterprise.py** - Endpoints entreprise:
+   - Profile, services/products
+   - Orders, finances, invoices
+   - IA campaigns, advertising
+
+3. **trainings.py** - Formations:
+   - CRUD trainings
+   - Enrollments, certificates
+
+4. **jobs.py** - Emplois:
+   - CRUD jobs
+   - Applications
+
+5. **Mise à jour server.py**:
+   - Supprimer le code migré
+   - Inclure les nouveaux routers
+   - Garder les endpoints WebSocket au niveau app
+
+## Notes Importantes
+
+- Les endpoints WebSocket doivent rester dans server.py car ils utilisent @app.websocket()
+- ws_manager doit être importé dans server.py pour les fonctions create_notification
+- Garder la compatibilité avec le frontend (mêmes URLs)
+- Tester après chaque migration
+
+## Estimation
+- Total: ~7300 lignes
+- Migré: ~500 lignes (7%)
+- Restant: ~6800 lignes
