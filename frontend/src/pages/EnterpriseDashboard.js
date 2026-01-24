@@ -368,21 +368,19 @@ const EnterpriseDashboard = () => {
 
       <div className="flex">
         {/* Sidebar - Mobile: Slide-in panel, Desktop: Fixed sidebar */}
-        <aside className={`
-          fixed left-0 top-0 bottom-0 z-[50]
-          bg-[#0A0A0A] border-r border-white/5 
+      <aside 
+        className={`
+          fixed top-0 bottom-0 z-[50]
+          bg-[#111111] border-r border-white/10 
           overflow-y-auto overflow-x-hidden 
-          transition-transform duration-300 ease-in-out
+          transition-all duration-300 ease-in-out
           dashboard-sidebar pt-4
           w-[280px] sm:w-[300px] lg:w-72 lg:top-20
-          ${mobileMenuOpen 
-            ? 'translate-x-0 shadow-2xl shadow-black' 
-            : '-translate-x-full lg:translate-x-0'
-          }
+          ${mobileMenuOpen ? 'left-0' : '-left-[300px] lg:left-0'}
         `}
-        style={{ backgroundColor: '#0A0A0A' }}
-        >
-          <div className="p-4 hide-scrollbar overflow-x-hidden pb-24 bg-[#0A0A0A]">
+        style={{ backgroundColor: '#111111' }}
+      >
+        <div className="p-4 hide-scrollbar overflow-x-hidden pb-24">
             {/* Enterprise Header */}
             <div className="flex items-center gap-3 mb-4 pb-4 border-b border-white/10">
               <div className="w-10 h-10 rounded-xl bg-[#0047AB]/20 flex items-center justify-center overflow-hidden flex-shrink-0">
