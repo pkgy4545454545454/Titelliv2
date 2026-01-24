@@ -7056,6 +7056,245 @@ app.include_router(api_router)
 # Mount uploads folder for serving static images
 app.mount("/api/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
+
+# ============ WEBSOCKET ENDPOINTS ============
+
+async def get_user_from_token(token: str) -> Optional[dict]:
+    """Valider le token JWT et retourner l'utilisateur."""
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        user_id = payload.get('user_id')
+        if not user_id:
+            return None
+        user = await db.users.find_one({"id": user_id}, {"_id": 0, "password_hash": 0})
+        return user
+    except jwt.ExpiredSignatureError:
+        return None
+    except jwt.InvalidTokenError:
+        return None
+
+
+@app.websocket("/ws/notifications")
+async def websocket_notifications(websocket: WebSocket, token: str = None):
+    """
+    WebSocket endpoint pour les notifications en temps réel.
+    Authentification via query parameter: /ws/notifications?token=<JWT_TOKEN>
+    
+    Messages envoyés au client:
+    - {"type": "notification", "action": "new", "notification": {...}}
+    - {"type": "notification", "action": "count_update", "unread_count": int}
+    - {"type": "ping"} - heartbeat
+    
+    Messages reçus du client:
+    - {"type": "pong"} - heartbeat response
+    - {"type": "mark_read", "notification_id": str}
+    - {"type": "mark_all_read"}
+    """
+    # Authentifier l'utilisateur
+    if not token:
+        await websocket.close(code=4001, reason="Token required")
+        return
+    
+    user = await get_user_from_token(token)
+    if not user:
+        await websocket.close(code=4002, reason="Invalid or expired token")
+        return
+    
+    user_id = user['id']
+    
+    # Connecter l'utilisateur
+    await ws_manager.connect(websocket, user_id)
+    
+    try:
+        # Envoyer le compte initial des notifications non lues
+        unread_count = await db.notifications.count_documents({"user_id": user_id, "is_read": False})
+        await websocket.send_json({
+            "type": "notification",
+            "action": "count_update",
+            "unread_count": unread_count,
+            "message": "Connected to real-time notifications"
+        })
+        
+        # Écouter les messages du client
+        while True:
+            try:
+                data = await asyncio.wait_for(websocket.receive_json(), timeout=30.0)
+                
+                if data.get("type") == "pong":
+                    # Réponse au heartbeat, rien à faire
+                    pass
+                
+                elif data.get("type") == "mark_read":
+                    notification_id = data.get("notification_id")
+                    if notification_id:
+                        await db.notifications.update_one(
+                            {"id": notification_id, "user_id": user_id},
+                            {"$set": {"is_read": True, "read_at": datetime.now(timezone.utc).isoformat()}}
+                        )
+                        # Envoyer le nouveau compte
+                        unread_count = await db.notifications.count_documents({"user_id": user_id, "is_read": False})
+                        await websocket.send_json({
+                            "type": "notification",
+                            "action": "count_update",
+                            "unread_count": unread_count
+                        })
+                
+                elif data.get("type") == "mark_all_read":
+                    await db.notifications.update_many(
+                        {"user_id": user_id, "is_read": False},
+                        {"$set": {"is_read": True, "read_at": datetime.now(timezone.utc).isoformat()}}
+                    )
+                    await websocket.send_json({
+                        "type": "notification",
+                        "action": "count_update",
+                        "unread_count": 0
+                    })
+                
+                elif data.get("type") == "get_notifications":
+                    # Récupérer les notifications
+                    limit = data.get("limit", 20)
+                    notifications = await db.notifications.find(
+                        {"user_id": user_id}, {"_id": 0}
+                    ).sort("created_at", -1).limit(limit).to_list(limit)
+                    await websocket.send_json({
+                        "type": "notification",
+                        "action": "list",
+                        "notifications": notifications
+                    })
+                    
+            except asyncio.TimeoutError:
+                # Envoyer un ping pour maintenir la connexion
+                try:
+                    await websocket.send_json({"type": "ping"})
+                except:
+                    break
+                    
+    except WebSocketDisconnect:
+        logger.info(f"WebSocket disconnected normally for user {user_id}")
+    except Exception as e:
+        logger.error(f"WebSocket error for user {user_id}: {e}")
+    finally:
+        await ws_manager.disconnect(websocket, user_id)
+
+
+@app.websocket("/ws/presence")
+async def websocket_presence(websocket: WebSocket, token: str = None):
+    """
+    WebSocket endpoint pour le statut de présence en temps réel.
+    Permet de voir qui est en ligne parmi les amis.
+    """
+    if not token:
+        await websocket.close(code=4001, reason="Token required")
+        return
+    
+    user = await get_user_from_token(token)
+    if not user:
+        await websocket.close(code=4002, reason="Invalid or expired token")
+        return
+    
+    user_id = user['id']
+    await ws_manager.connect(websocket, user_id)
+    
+    try:
+        # Notifier les amis que l'utilisateur est en ligne
+        friendships = await db.friendships.find({
+            "$or": [{"user_id": user_id}, {"friend_id": user_id}],
+            "status": "accepted"
+        }).to_list(100)
+        
+        friend_ids = []
+        for f in friendships:
+            friend_id = f['friend_id'] if f['user_id'] == user_id else f['user_id']
+            friend_ids.append(friend_id)
+        
+        # Envoyer le statut "online" aux amis connectés
+        await ws_manager.broadcast_to_users({
+            "type": "presence",
+            "action": "online",
+            "user_id": user_id,
+            "user_name": f"{user.get('first_name', '')} {user.get('last_name', '')}".strip()
+        }, friend_ids)
+        
+        # Écouter les messages
+        while True:
+            try:
+                data = await asyncio.wait_for(websocket.receive_json(), timeout=60.0)
+                
+                if data.get("type") == "get_online_friends":
+                    # Retourner les amis en ligne
+                    online_friends = []
+                    for fid in friend_ids:
+                        if ws_manager.is_user_online(fid):
+                            friend_user = await db.users.find_one({"id": fid}, {"_id": 0, "id": 1, "first_name": 1, "last_name": 1})
+                            if friend_user:
+                                online_friends.append(friend_user)
+                    
+                    await websocket.send_json({
+                        "type": "presence",
+                        "action": "online_friends",
+                        "friends": online_friends
+                    })
+                    
+            except asyncio.TimeoutError:
+                try:
+                    await websocket.send_json({"type": "ping"})
+                except:
+                    break
+                    
+    except WebSocketDisconnect:
+        pass
+    except Exception as e:
+        logger.error(f"Presence WebSocket error: {e}")
+    finally:
+        await ws_manager.disconnect(websocket, user_id)
+        
+        # Notifier les amis que l'utilisateur est hors ligne
+        try:
+            await ws_manager.broadcast_to_users({
+                "type": "presence",
+                "action": "offline",
+                "user_id": user_id
+            }, friend_ids)
+        except:
+            pass
+
+
+# ============ API ENDPOINTS FOR WEBSOCKET STATUS ============
+
+@api_router.get("/ws/status")
+async def get_websocket_status():
+    """Retourne les statistiques WebSocket."""
+    online_users = ws_manager.get_online_users()
+    return {
+        "online_users_count": len(online_users),
+        "status": "active"
+    }
+
+
+@api_router.get("/ws/online-friends")
+async def get_online_friends(current_user: dict = Depends(get_current_user)):
+    """Retourne la liste des amis en ligne."""
+    user_id = current_user['id']
+    
+    friendships = await db.friendships.find({
+        "$or": [{"user_id": user_id}, {"friend_id": user_id}],
+        "status": "accepted"
+    }).to_list(100)
+    
+    online_friends = []
+    for f in friendships:
+        friend_id = f['friend_id'] if f['user_id'] == user_id else f['user_id']
+        if ws_manager.is_user_online(friend_id):
+            friend_user = await db.users.find_one(
+                {"id": friend_id}, 
+                {"_id": 0, "id": 1, "first_name": 1, "last_name": 1, "profile_image": 1}
+            )
+            if friend_user:
+                online_friends.append(friend_user)
+    
+    return {"online_friends": online_friends, "count": len(online_friends)}
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
