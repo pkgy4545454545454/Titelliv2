@@ -3947,7 +3947,6 @@ const ClientDashboard = () => {
             </div>
           )}
         </main>
-      </div>
 
       {/* Training Review Modal */}
       {showReviewModal && reviewingTraining && (
