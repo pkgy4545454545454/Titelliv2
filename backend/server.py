@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, Header, UploadFile, File
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, Header, UploadFile, File, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -15,6 +15,8 @@ import bcrypt
 import jwt
 import shutil
 import base64
+import asyncio
+import json
 from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionResponse, CheckoutStatusResponse, CheckoutSessionRequest
 
 ROOT_DIR = Path(__file__).parent
@@ -44,6 +46,77 @@ api_router = APIRouter(prefix="/api")
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+
+# ============ WEBSOCKET CONNECTION MANAGER ============
+
+class ConnectionManager:
+    """
+    Gestionnaire de connexions WebSocket pour les notifications en temps réel.
+    Maintient un dictionnaire des connexions par user_id.
+    """
+    def __init__(self):
+        # Dict mapping user_id to list of WebSocket connections
+        # Un utilisateur peut avoir plusieurs connexions (plusieurs onglets/appareils)
+        self.active_connections: Dict[str, List[WebSocket]] = {}
+        self.lock = asyncio.Lock()
+    
+    async def connect(self, websocket: WebSocket, user_id: str):
+        """Accepter une nouvelle connexion WebSocket pour un utilisateur."""
+        await websocket.accept()
+        async with self.lock:
+            if user_id not in self.active_connections:
+                self.active_connections[user_id] = []
+            self.active_connections[user_id].append(websocket)
+        logger.info(f"WebSocket connected for user {user_id}. Total connections: {len(self.active_connections[user_id])}")
+    
+    async def disconnect(self, websocket: WebSocket, user_id: str):
+        """Retirer une connexion WebSocket."""
+        async with self.lock:
+            if user_id in self.active_connections:
+                if websocket in self.active_connections[user_id]:
+                    self.active_connections[user_id].remove(websocket)
+                if not self.active_connections[user_id]:
+                    del self.active_connections[user_id]
+        logger.info(f"WebSocket disconnected for user {user_id}")
+    
+    async def send_personal_message(self, message: dict, user_id: str):
+        """Envoyer un message à toutes les connexions d'un utilisateur."""
+        if user_id in self.active_connections:
+            dead_connections = []
+            for connection in self.active_connections[user_id]:
+                try:
+                    await connection.send_json(message)
+                except Exception as e:
+                    logger.error(f"Error sending to user {user_id}: {e}")
+                    dead_connections.append(connection)
+            
+            # Nettoyer les connexions mortes
+            for conn in dead_connections:
+                await self.disconnect(conn, user_id)
+    
+    async def broadcast_to_users(self, message: dict, user_ids: List[str]):
+        """Envoyer un message à plusieurs utilisateurs."""
+        for user_id in user_ids:
+            await self.send_personal_message(message, user_id)
+    
+    async def broadcast_all(self, message: dict):
+        """Envoyer un message à tous les utilisateurs connectés."""
+        for user_id in list(self.active_connections.keys()):
+            await self.send_personal_message(message, user_id)
+    
+    def get_online_users(self) -> List[str]:
+        """Retourner la liste des user_ids connectés."""
+        return list(self.active_connections.keys())
+    
+    def is_user_online(self, user_id: str) -> bool:
+        """Vérifier si un utilisateur est en ligne."""
+        return user_id in self.active_connections and len(self.active_connections[user_id]) > 0
+
+
+# Instance globale du gestionnaire de connexions
+ws_manager = ConnectionManager()
+
 
 # ============ MODELS ============
 
