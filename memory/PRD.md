@@ -9,6 +9,36 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
 
 ## ✅ Fonctionnalités Complétées (24 Jan 2026)
 
+### Phase 26 : Système de Notifications Unifié (TERMINÉ)
+
+**Système de notifications complet pour Client et Entreprise :**
+
+1. **Backend - Système Unifié**
+   - 20+ types de notifications (NOTIFICATION_TYPES)
+   - Fonction `create_notification()` générique
+   - Notifications automatiques sur actions clés
+   - Filtrage par lu/non-lu
+   - CRUD complet (list, mark read, mark all, delete)
+
+2. **Notifications Automatiques**
+   - **Commandes:** Client reçoit "order_placed" + "cashback_earned", Entreprise reçoit "new_order"
+   - **Reviews:** Entreprise reçoit "new_review" avec note ⭐
+   - **Formations:** Client reçoit "training_enrolled", Entreprise reçoit "training_purchase"
+   - **Emplois:** Entreprise reçoit "job_application" à chaque candidature
+   - **Statut commande:** Client notifié à chaque changement de statut
+
+3. **Frontend - NotificationCenter**
+   - Composant unifié avec filtres par catégorie
+   - Client: Tout, Non lues, Commandes, Cashback, Amis, Messages
+   - Entreprise: Tout, Non lues, Commandes, Avis, Emplois, Formations
+   - Badge compteur dans le Header
+   - Actions: marquer lu, supprimer, actualiser
+
+4. **Bug Fix Critique**
+   - Résolution collision de noms entre helper et endpoint API
+
+---
+
 ### Phase 25 : CSS Responsive & Améliorations UI (TERMINÉ)
 
 **Nouvelles fonctionnalités implémentées :**
