@@ -263,7 +263,7 @@ class TestNotificationCounters:
     def test_friends_requests(self, client_token):
         """Test friend requests endpoint for notification counter"""
         headers = {"Authorization": f"Bearer {client_token}"}
-        response = requests.get(f"{BASE_URL}/api/friends/requests", headers=headers)
+        response = requests.get(f"{BASE_URL}/api/client/friend-requests", headers=headers)
         assert response.status_code == 200, f"Failed to get friend requests: {response.text}"
         data = response.json()
         assert "received" in data, "Received not in response"
