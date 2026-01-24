@@ -1032,11 +1032,16 @@ const ClientDashboard = () => {
 
       {/* Sidebar - Mobile: Slide-in panel, Desktop: Fixed sidebar */}
       <aside 
-        className="fixed top-0 bottom-0 z-[50] bg-[#111111] border-r border-white/10 overflow-y-auto overflow-x-hidden transition-all duration-300 ease-in-out dashboard-sidebar pt-4 w-[280px] sm:w-[300px] lg:w-64 lg:top-20 lg:left-0"
-        style={{ 
-          backgroundColor: '#111111',
-          left: mobileMenuOpen ? '0' : (typeof window !== 'undefined' && window.innerWidth >= 1024 ? '0' : '-300px')
-        }}
+        className={`
+          fixed top-0 bottom-0 z-[50]
+          bg-[#111111] border-r border-white/10 
+          overflow-y-auto overflow-x-hidden 
+          transition-all duration-300 ease-in-out
+          dashboard-sidebar pt-4
+          w-[280px] sm:w-[300px] lg:w-64 lg:top-20
+          ${mobileMenuOpen ? 'left-0' : '-left-[300px] lg:left-0'}
+        `}
+        style={{ backgroundColor: '#111111' }}
       >
         <div className="p-4 hide-scrollbar overflow-x-hidden pb-24">
           {/* Profile Header with Switch Button */}
