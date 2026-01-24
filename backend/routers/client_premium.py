@@ -4,7 +4,7 @@ Handles premium plans, checkout, confirmation, and cancellation
 """
 from fastapi import APIRouter, HTTPException, Depends
 from datetime import datetime, timezone, timedelta
-from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionRequest
+from stripe_helper import StripeCheckout, CheckoutSessionRequest
 import stripe
 import uuid
 import os
