@@ -7,7 +7,7 @@ import {
   MessageSquare, FileText, Settings, Gift, Crown, TrendingUp, MapPin,
   ChevronRight, Star, Bell, Search, Rss, Newspaper, PieChart, Briefcase,
   GraduationCap, FolderOpen, Phone, Truck, Package, Users, HelpCircle, 
-  Handshake, Info, Target, Building2, Menu, X, Camera, Edit, Trash2, Plus,
+  Handshake, Info, Target, Building2, Menu, X, Camera, Edit, Trash2, Plus, Minus,
   CheckCircle, XCircle, Send, Linkedin, Eye, UserPlus, ArrowLeftRight,
   Upload, Clock, ChevronDown, DollarSign, Bookmark, Store, ThumbsUp,
   Home, Zap, Award, Sparkles, MessageCircle, Share2, ExternalLink
