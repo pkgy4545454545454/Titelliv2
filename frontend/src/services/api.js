@@ -448,6 +448,8 @@ export const commercialGesturesAPI = {
 export const clientProfileAPI = {
   get: () => axios.get(`${API}/client/profile`, { headers: getAuthHeaders() }),
   update: (data) => axios.put(`${API}/client/profile`, data, { headers: getAuthHeaders() }),
+  getPublic: (userId) => axios.get(`${API}/client/profile/${userId}/public`, { headers: getAuthHeaders() }),
+  getFeed: (userId) => axios.get(`${API}/client/${userId}/feed`, { headers: getAuthHeaders() }),
 };
 
 export const friendsAPI = {
