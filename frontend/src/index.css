@@ -337,6 +337,22 @@ code, pre {
   }
 }
 
+/* Mobile Sidebar Slide */
+.mobile-sidebar-closed {
+  left: -300px !important;
+}
+
+.mobile-sidebar-open {
+  left: 0 !important;
+}
+
+@media (min-width: 1024px) {
+  .mobile-sidebar-closed,
+  .mobile-sidebar-open {
+    left: 0 !important;
+  }
+}
+
 /* Section Blue Background */
 .section-blue {
   background: linear-gradient(180deg, rgba(0, 71, 171, 0.15) 0%, rgba(5, 5, 5, 0) 100%);
