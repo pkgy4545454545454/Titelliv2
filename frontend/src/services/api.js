@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+// Fallback to production URL if env variable is not set
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://pkgyweb.com';
 const API = `${BACKEND_URL}/api`;
 
 const getAuthHeaders = () => {
