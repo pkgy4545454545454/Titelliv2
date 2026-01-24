@@ -1272,7 +1272,30 @@ async def update_order_status(order_id: str, status: str, current_user: dict = D
     if not order:
         raise HTTPException(status_code=404, detail="Commande non trouvée")
     
+    old_status = order.get('status', 'pending')
     await db.orders.update_one({"id": order_id}, {"$set": {"status": status}})
+    
+    # Notify client about status change
+    status_messages = {
+        "confirmed": "Votre commande a été confirmée par le prestataire",
+        "preparing": "Votre commande est en cours de préparation",
+        "ready": "Votre commande est prête !",
+        "shipped": "Votre commande a été expédiée",
+        "delivered": "Votre commande a été livrée",
+        "completed": "Votre commande est terminée",
+        "cancelled": "Votre commande a été annulée"
+    }
+    
+    if status in status_messages and order.get('user_id'):
+        await create_notification(
+            user_id=order['user_id'],
+            notification_type="order_status",
+            title=f"Commande #{order_id[:8]} - {status.capitalize()}",
+            message=status_messages[status],
+            link="/dashboard/client?tab=orders",
+            data={"order_id": order_id, "status": status, "old_status": old_status}
+        )
+    
     return {"message": "Statut mis à jour"}
 
 # ============ PAYMENT ROUTES ============
