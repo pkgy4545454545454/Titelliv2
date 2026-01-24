@@ -4568,7 +4568,11 @@ class ClientProfileUpdate(BaseModel):
     phone: Optional[str] = None
     city: Optional[str] = None
     avatar: Optional[str] = None
+    cover_image: Optional[str] = None
     linkedin: Optional[str] = None
+    instagram: Optional[str] = None
+    twitter: Optional[str] = None
+    website: Optional[str] = None
     bio: Optional[str] = None
 
 @api_router.put("/client/profile")
