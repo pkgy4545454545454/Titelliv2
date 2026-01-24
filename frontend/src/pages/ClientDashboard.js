@@ -1034,7 +1034,7 @@ const ClientDashboard = () => {
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <div 
-          className="lg:hidden fixed inset-0 bg-black/80 z-[45] backdrop-blur-sm"
+          className="lg:hidden fixed inset-0 bg-black/90 z-[45]"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
