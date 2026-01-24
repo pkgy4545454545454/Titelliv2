@@ -1022,16 +1022,7 @@ const ClientDashboard = () => {
 
   return (
     <div className="min-h-screen bg-[#050505] pt-20" data-testid="client-dashboard">
-      {/* Mobile Menu Button - Fixed at top */}
-      <button 
-        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        className="lg:hidden fixed top-24 left-4 z-[60] w-12 h-12 bg-[#0047AB] rounded-xl flex items-center justify-center shadow-lg border border-white/10"
-        data-testid="mobile-menu-toggle"
-      >
-        {mobileMenuOpen ? <X className="w-5 h-5 text-white" /> : <Menu className="w-5 h-5 text-white" />}
-      </button>
-
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu Overlay - Must be rendered before sidebar */}
       {mobileMenuOpen && (
         <div 
           className="lg:hidden fixed inset-0 bg-black/90 z-[45]"
@@ -1039,35 +1030,34 @@ const ClientDashboard = () => {
         />
       )}
 
-      <div className="flex">
-        {/* Sidebar - Mobile: Slide-in panel, Desktop: Fixed sidebar */}
-        <aside className={`
-          fixed left-0 top-0 bottom-0 z-[50]
-          bg-[#0A0A0A] border-r border-white/5 
-          overflow-y-auto overflow-x-hidden 
-          transition-transform duration-300 ease-in-out
-          dashboard-sidebar pt-4
-          w-[280px] sm:w-[300px] lg:w-64 lg:top-20
-          ${mobileMenuOpen 
-            ? 'translate-x-0 shadow-2xl shadow-black' 
-            : '-translate-x-full lg:translate-x-0'
-          }
-        `}
-        style={{ backgroundColor: '#0A0A0A' }}
-        >
-          <div className="p-4 hide-scrollbar overflow-x-hidden pb-24 bg-[#0A0A0A]">
-            {/* Profile Header with Switch Button */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#0047AB] flex items-center justify-center text-white font-bold text-sm overflow-hidden">
-                  {profileForm?.avatar ? (
-                    <img src={profileForm.avatar.startsWith('http') ? profileForm.avatar : `${process.env.REACT_APP_BACKEND_URL}${profileForm.avatar}`} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <>{user?.first_name?.[0]}{user?.last_name?.[0]}</>
-                  )}
-                </div>
-                <div>
-                  <p className="font-semibold text-white text-sm">{user?.first_name} {user?.last_name}</p>
+      {/* Sidebar - Mobile: Slide-in panel, Desktop: Fixed sidebar */}
+      <aside className={`
+        fixed left-0 top-0 bottom-0 z-[50]
+        bg-[#0A0A0A] border-r border-white/5 
+        overflow-y-auto overflow-x-hidden 
+        transition-transform duration-300 ease-in-out
+        dashboard-sidebar pt-4
+        w-[280px] sm:w-[300px] lg:w-64 lg:top-20
+        ${mobileMenuOpen 
+          ? 'translate-x-0 shadow-2xl shadow-black' 
+          : '-translate-x-full lg:translate-x-0'
+        }
+      `}
+      style={{ backgroundColor: '#0A0A0A' }}
+      >
+        <div className="p-4 hide-scrollbar overflow-x-hidden pb-24 bg-[#0A0A0A]">
+          {/* Profile Header with Switch Button */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-[#0047AB] flex items-center justify-center text-white font-bold text-sm overflow-hidden">
+                {profileForm?.avatar ? (
+                  <img src={profileForm.avatar.startsWith('http') ? profileForm.avatar : `${process.env.REACT_APP_BACKEND_URL}${profileForm.avatar}`} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <>{user?.first_name?.[0]}{user?.last_name?.[0]}</>
+                )}
+              </div>
+              <div>
+                <p className="font-semibold text-white text-sm">{user?.first_name} {user?.last_name}</p>
                   <p className="text-xs text-gray-500">Espace client</p>
                 </div>
               </div>
