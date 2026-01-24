@@ -1269,10 +1269,10 @@ const ClientDashboard = () => {
             </div>
           )}
 
-          {/* Profile Tab - Enhanced */}
+          {/* Profile Tab - Enhanced with Cover Image */}
           {activeTab === 'profile' && (
-            <div className="max-w-2xl">
-              <div className="flex items-center justify-between mb-8">
+            <div className="max-w-3xl">
+              <div className="flex items-center justify-between mb-6">
                 <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
                   Mon Profil
                 </h1>
@@ -1285,67 +1285,99 @@ const ClientDashboard = () => {
                 </button>
               </div>
               
-              <div className="card-service rounded-xl p-8">
-                {/* Avatar Section */}
-                <div className="flex items-center gap-6 mb-8">
-                  <div className="relative">
-                    <div className="w-24 h-24 rounded-full bg-[#0047AB] flex items-center justify-center text-white text-2xl font-bold overflow-hidden">
-                      {profileForm?.avatar ? (
-                        <img 
-                          src={profileForm.avatar.startsWith('http') ? profileForm.avatar : `${process.env.REACT_APP_BACKEND_URL}${profileForm.avatar}`} 
-                          alt="" 
-                          className="w-full h-full object-cover" 
-                        />
+              <div className="card-service rounded-xl overflow-hidden">
+                {/* Cover Image Section */}
+                <div className="relative h-40 md:h-56 bg-gradient-to-br from-[#0047AB]/30 to-[#1a1a2e]">
+                  {profileForm?.cover_image ? (
+                    <img 
+                      src={profileForm.cover_image.startsWith('http') ? profileForm.cover_image : `${process.env.REACT_APP_BACKEND_URL}${profileForm.cover_image}`}
+                      alt="Cover"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-[#0047AB]/20 via-[#1a1a2e] to-[#050505]" />
+                  )}
+                  
+                  {editProfile && (
+                    <button 
+                      onClick={() => coverInputRef.current?.click()}
+                      className="absolute top-4 right-4 px-4 py-2 bg-black/50 backdrop-blur-sm rounded-lg text-white text-sm hover:bg-black/70 transition-colors flex items-center gap-2"
+                    >
+                      <Camera className="w-4 h-4" />
+                      Changer la couverture
+                    </button>
+                  )}
+                  <input 
+                    ref={coverInputRef}
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleCoverUpload}
+                    className="hidden" 
+                  />
+                </div>
+
+                {/* Profile Content */}
+                <div className="p-6 md:p-8 -mt-16 relative">
+                  {/* Avatar Section */}
+                  <div className="flex flex-col md:flex-row items-start md:items-end gap-4 mb-6">
+                    <div className="relative">
+                      <div className="w-28 h-28 rounded-full border-4 border-[#0F0F0F] bg-[#0047AB] flex items-center justify-center text-white text-2xl font-bold overflow-hidden shadow-xl">
+                        {profileForm?.avatar ? (
+                          <img 
+                            src={profileForm.avatar.startsWith('http') ? profileForm.avatar : `${process.env.REACT_APP_BACKEND_URL}${profileForm.avatar}`} 
+                            alt="" 
+                            className="w-full h-full object-cover" 
+                          />
+                        ) : (
+                          <>{user?.first_name?.[0]}{user?.last_name?.[0]}</>
+                        )}
+                      </div>
+                      {editProfile && (
+                        <button 
+                          onClick={() => fileInputRef.current?.click()}
+                          className="absolute -bottom-2 -right-2 p-2 bg-[#0047AB] rounded-full text-white hover:bg-[#0047AB]/80 transition-colors shadow-lg"
+                        >
+                          <Camera className="w-4 h-4" />
+                        </button>
+                      )}
+                      <input 
+                        ref={fileInputRef}
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handleAvatarUpload}
+                        className="hidden" 
+                      />
+                    </div>
+                    <div className="flex-1">
+                      {editProfile ? (
+                        <div className="grid grid-cols-2 gap-3">
+                          <input
+                            type="text"
+                            value={profileForm.first_name || ''}
+                            onChange={(e) => setProfileForm({...profileForm, first_name: e.target.value})}
+                            placeholder="Prénom"
+                            className="input-dark"
+                          />
+                          <input
+                            type="text"
+                            value={profileForm.last_name || ''}
+                            onChange={(e) => setProfileForm({...profileForm, last_name: e.target.value})}
+                            placeholder="Nom"
+                            className="input-dark"
+                          />
+                        </div>
                       ) : (
-                        <>{user?.first_name?.[0]}{user?.last_name?.[0]}</>
+                        <>
+                          <h2 className="text-xl font-bold text-white">{user?.first_name} {user?.last_name}</h2>
+                          <p className="text-gray-400">{user?.email}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <MapPin className="w-4 h-4 text-gray-500" />
+                            <span className="text-gray-500">{profileForm?.city || 'Lausanne'}</span>
+                          </div>
+                        </>
                       )}
                     </div>
-                    {editProfile && (
-                      <button 
-                        onClick={() => fileInputRef.current?.click()}
-                        className="absolute -bottom-2 -right-2 p-2 bg-[#0047AB] rounded-full text-white hover:bg-[#0047AB]/80 transition-colors"
-                      >
-                        <Camera className="w-4 h-4" />
-                      </button>
-                    )}
-                    <input 
-                      ref={fileInputRef}
-                      type="file" 
-                      accept="image/*" 
-                      onChange={handleAvatarUpload}
-                      className="hidden" 
-                    />
                   </div>
-                  <div className="flex-1">
-                    {editProfile ? (
-                      <div className="grid grid-cols-2 gap-3">
-                        <input
-                          type="text"
-                          value={profileForm.first_name || ''}
-                          onChange={(e) => setProfileForm({...profileForm, first_name: e.target.value})}
-                          placeholder="Prénom"
-                          className="input-dark"
-                        />
-                        <input
-                          type="text"
-                          value={profileForm.last_name || ''}
-                          onChange={(e) => setProfileForm({...profileForm, last_name: e.target.value})}
-                          placeholder="Nom"
-                          className="input-dark"
-                        />
-                      </div>
-                    ) : (
-                      <>
-                        <h2 className="text-xl font-bold text-white">{user?.first_name} {user?.last_name}</h2>
-                        <p className="text-gray-400">{user?.email}</p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <MapPin className="w-4 h-4 text-gray-500" />
-                          <span className="text-gray-500">{user?.city || 'Lausanne'}</span>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
 
                 {/* Stats Row */}
                 <div className="grid grid-cols-3 gap-4 mb-8 p-4 bg-white/5 rounded-xl">
