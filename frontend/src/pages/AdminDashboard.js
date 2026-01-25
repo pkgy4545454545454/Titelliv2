@@ -235,6 +235,232 @@ const AdminDashboard = () => {
             </div>
           )}
 
+          {activeTab === 'withdrawals' && (
+            <div>
+              <div className="flex items-center justify-between mb-8">
+                <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Gestion des retraits
+                </h1>
+                <button
+                  onClick={handleExportCSV}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#D4AF37] text-black rounded-lg font-medium hover:bg-[#C4A030] transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  Exporter CSV
+                </button>
+              </div>
+
+              {/* Status Filter Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                <button
+                  onClick={() => setWithdrawalFilter(null)}
+                  className={`card-service rounded-xl p-4 text-left transition-all ${!withdrawalFilter ? 'ring-2 ring-[#D4AF37]' : ''}`}
+                >
+                  <p className="text-2xl font-bold text-white">{Object.values(withdrawalStats).reduce((a, b) => a + b, 0)}</p>
+                  <p className="text-sm text-gray-400">Tous</p>
+                </button>
+                <button
+                  onClick={() => setWithdrawalFilter('manual_processing')}
+                  className={`card-service rounded-xl p-4 text-left transition-all ${withdrawalFilter === 'manual_processing' ? 'ring-2 ring-yellow-500' : ''}`}
+                >
+                  <p className="text-2xl font-bold text-yellow-500">{withdrawalStats.manual_processing || 0}</p>
+                  <p className="text-sm text-gray-400">En attente</p>
+                </button>
+                <button
+                  onClick={() => setWithdrawalFilter('processing')}
+                  className={`card-service rounded-xl p-4 text-left transition-all ${withdrawalFilter === 'processing' ? 'ring-2 ring-blue-500' : ''}`}
+                >
+                  <p className="text-2xl font-bold text-blue-500">{withdrawalStats.processing || 0}</p>
+                  <p className="text-sm text-gray-400">En cours</p>
+                </button>
+                <button
+                  onClick={() => setWithdrawalFilter('completed')}
+                  className={`card-service rounded-xl p-4 text-left transition-all ${withdrawalFilter === 'completed' ? 'ring-2 ring-green-500' : ''}`}
+                >
+                  <p className="text-2xl font-bold text-green-500">{withdrawalStats.completed || 0}</p>
+                  <p className="text-sm text-gray-400">Complétés</p>
+                </button>
+                <button
+                  onClick={() => setWithdrawalFilter('failed')}
+                  className={`card-service rounded-xl p-4 text-left transition-all ${withdrawalFilter === 'failed' ? 'ring-2 ring-red-500' : ''}`}
+                >
+                  <p className="text-2xl font-bold text-red-500">{withdrawalStats.failed || 0}</p>
+                  <p className="text-sm text-gray-400">Échoués</p>
+                </button>
+              </div>
+
+              {/* Withdrawals Table */}
+              <div className="card-service rounded-xl overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-white/5">
+                    <tr>
+                      <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Date</th>
+                      <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Utilisateur</th>
+                      <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">IBAN</th>
+                      <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Montant</th>
+                      <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Statut</th>
+                      <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {withdrawals.map((w) => (
+                      <tr key={w.id} className="hover:bg-white/5">
+                        <td className="px-6 py-4">
+                          <p className="text-white text-sm">{new Date(w.created_at).toLocaleDateString('fr-FR')}</p>
+                          <p className="text-gray-500 text-xs">{new Date(w.created_at).toLocaleTimeString('fr-FR')}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-white font-medium">{w.account_holder}</p>
+                          <p className="text-gray-400 text-sm">{w.user_email}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-white font-mono text-sm">{w.iban}</p>
+                          {w.bic_swift && <p className="text-gray-500 text-xs">BIC: {w.bic_swift}</p>}
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-[#D4AF37] font-bold">{w.amount.toFixed(2)} CHF</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            w.status === 'completed' ? 'bg-green-500/20 text-green-500' :
+                            w.status === 'failed' ? 'bg-red-500/20 text-red-500' :
+                            w.status === 'processing' ? 'bg-blue-500/20 text-blue-500' :
+                            'bg-yellow-500/20 text-yellow-500'
+                          }`}>
+                            {w.status === 'completed' ? 'Complété' :
+                             w.status === 'failed' ? 'Échoué' :
+                             w.status === 'processing' ? 'En cours' :
+                             w.status === 'manual_processing' ? 'En attente' : w.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex gap-2">
+                            {w.status === 'manual_processing' && (
+                              <>
+                                <button
+                                  onClick={() => handleUpdateWithdrawalStatus(w.id, 'completed')}
+                                  className="p-2 bg-green-500/20 text-green-500 rounded-lg hover:bg-green-500/30 transition-colors"
+                                  title="Marquer comme complété"
+                                >
+                                  <CheckCircle className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleUpdateWithdrawalStatus(w.id, 'failed')}
+                                  className="p-2 bg-red-500/20 text-red-500 rounded-lg hover:bg-red-500/30 transition-colors"
+                                  title="Marquer comme échoué (rembourse)"
+                                >
+                                  <XCircle className="w-4 h-4" />
+                                </button>
+                              </>
+                            )}
+                            <button
+                              onClick={() => setSelectedWithdrawal(w)}
+                              className="p-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
+                              title="Voir détails"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {withdrawals.length === 0 && (
+                      <tr>
+                        <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                          Aucun retrait trouvé
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Withdrawal Detail Modal */}
+              {selectedWithdrawal && (
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+                  <div className="card-service rounded-xl p-6 w-full max-w-lg">
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-xl font-bold text-white">Détails du retrait</h2>
+                      <button onClick={() => setSelectedWithdrawal(null)} className="text-gray-400 hover:text-white">×</button>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-gray-400">Montant</p>
+                          <p className="text-xl font-bold text-[#D4AF37]">{selectedWithdrawal.amount.toFixed(2)} CHF</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-400">Statut</p>
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            selectedWithdrawal.status === 'completed' ? 'bg-green-500/20 text-green-500' :
+                            selectedWithdrawal.status === 'failed' ? 'bg-red-500/20 text-red-500' :
+                            'bg-yellow-500/20 text-yellow-500'
+                          }`}>
+                            {selectedWithdrawal.status}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <p className="text-sm text-gray-400">Titulaire</p>
+                        <p className="text-white font-medium">{selectedWithdrawal.account_holder}</p>
+                      </div>
+                      
+                      <div>
+                        <p className="text-sm text-gray-400">IBAN (complet)</p>
+                        <p className="text-white font-mono bg-white/10 p-2 rounded">{selectedWithdrawal.iban}</p>
+                      </div>
+                      
+                      {selectedWithdrawal.bic_swift && (
+                        <div>
+                          <p className="text-sm text-gray-400">BIC/SWIFT</p>
+                          <p className="text-white font-mono">{selectedWithdrawal.bic_swift}</p>
+                        </div>
+                      )}
+                      
+                      <div>
+                        <p className="text-sm text-gray-400">Email</p>
+                        <p className="text-white">{selectedWithdrawal.user_email}</p>
+                      </div>
+                      
+                      <div>
+                        <p className="text-sm text-gray-400">Date de demande</p>
+                        <p className="text-white">{new Date(selectedWithdrawal.created_at).toLocaleString('fr-FR')}</p>
+                      </div>
+                      
+                      {selectedWithdrawal.processing_note && (
+                        <div>
+                          <p className="text-sm text-gray-400">Note</p>
+                          <p className="text-yellow-500 text-sm">{selectedWithdrawal.processing_note}</p>
+                        </div>
+                      )}
+                      
+                      {selectedWithdrawal.status === 'manual_processing' && (
+                        <div className="flex gap-3 pt-4">
+                          <button
+                            onClick={() => handleUpdateWithdrawalStatus(selectedWithdrawal.id, 'completed')}
+                            className="flex-1 py-3 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+                          >
+                            <CheckCircle className="w-4 h-4" />
+                            Marquer complété
+                          </button>
+                          <button
+                            onClick={() => handleUpdateWithdrawalStatus(selectedWithdrawal.id, 'failed')}
+                            className="flex-1 py-3 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
+                          >
+                            <XCircle className="w-4 h-4" />
+                            Échoué (rembourse)
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {activeTab === 'users' && (
             <div>
               <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
