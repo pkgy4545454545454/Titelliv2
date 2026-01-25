@@ -100,6 +100,14 @@ const ClientDashboard = () => {
   // Cashback history state
   const [cashbackHistory, setCashbackHistory] = useState([]);
   const [cashbackStats, setCashbackStats] = useState({ total_earned: 0, total_used: 0, cashback_rate: '10%', transaction_count: 0 });
+  
+  // Cashback withdrawal state
+  const [withdrawalInfo, setWithdrawalInfo] = useState({ balance: 0, minimum_withdrawal: 50, can_withdraw: false, has_bank_info: false });
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [showBankForm, setShowBankForm] = useState(false);
+  const [bankForm, setBankForm] = useState({ iban: '', bank_account_holder: '', bic_swift: '' });
+  const [withdrawing, setWithdrawing] = useState(false);
+  const [withdrawalHistory, setWithdrawalHistory] = useState([]);
 
   // Agenda state
   const [agendaEvents, setAgendaEvents] = useState([]);
