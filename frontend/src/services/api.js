@@ -359,6 +359,15 @@ export const agendaAPI = {
   delete: (id) => axios.delete(`${API}/enterprise/agenda/${id}`, { headers: getAuthHeaders() }),
 };
 
+// Enterprise Contacts
+export const enterpriseContactsAPI = {
+  list: (params) => axios.get(`${API}/enterprise/contacts`, { params, headers: getAuthHeaders() }),
+  get: (id) => axios.get(`${API}/enterprise/contacts/${id}`, { headers: getAuthHeaders() }),
+  create: (data) => axios.post(`${API}/enterprise/contacts`, data, { headers: getAuthHeaders() }),
+  update: (id, data) => axios.put(`${API}/enterprise/contacts/${id}`, data, { headers: getAuthHeaders() }),
+  delete: (id) => axios.delete(`${API}/enterprise/contacts/${id}`, { headers: getAuthHeaders() }),
+};
+
 // Team/Personnel
 export const teamAPI = {
   list: () => axios.get(`${API}/enterprise/team`, { headers: getAuthHeaders() }),
