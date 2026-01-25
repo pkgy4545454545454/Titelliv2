@@ -82,7 +82,7 @@ const EnterpriseDashboard = () => {
       // Fetch all data in parallel
       const [ordersRes, offersRes, trainingsRes, jobsRes, realEstateRes, 
              investmentsRes, stockRes, agendaRes, teamRes, teamOrdersRes,
-             permanentOrdersRes, documentsRes, financesRes, advertisingRes, applicationsRes] = await Promise.all([
+             permanentOrdersRes, documentsRes, financesRes, advertisingRes, applicationsRes, contactsRes] = await Promise.all([
         orderAPI.list().catch(() => ({ data: [] })),
         offersAPI.list().catch(() => ({ data: [] })),
         trainingsAPI.list().catch(() => ({ data: [] })),
@@ -98,6 +98,7 @@ const EnterpriseDashboard = () => {
         financesAPI.get().catch(() => ({ data: { transactions: [], summary: {} } })),
         advertisingAPI.list().catch(() => ({ data: { campaigns: [], stats: {} } })),
         enterpriseApplicationsAPI.list().catch(() => ({ data: { applications: [], jobs: [], stats: {} } })),
+        enterpriseContactsAPI.list().catch(() => ({ data: { contacts: [], total: 0, type_counts: {} } })),
       ]);
 
       setOrders(ordersRes.data || []);
