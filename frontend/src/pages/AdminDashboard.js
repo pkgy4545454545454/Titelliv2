@@ -57,6 +57,7 @@ const AdminDashboard = () => {
 
   const menuItems = [
     { id: 'overview', label: 'Vue d\'ensemble', icon: LayoutDashboard },
+    { id: 'accounting', label: 'Comptabilité', icon: BarChart3 },
     { id: 'withdrawals', label: 'Retraits', icon: Wallet },
     { id: 'users', label: 'Utilisateurs', icon: Users },
     { id: 'enterprises', label: 'Entreprises', icon: Building2 },
@@ -64,6 +65,51 @@ const AdminDashboard = () => {
     { id: 'payments', label: 'Paiements', icon: CreditCard },
     { id: 'settings', label: 'Paramètres', icon: Settings },
   ];
+
+  // Accounting state
+  const [accountingSummary, setAccountingSummary] = useState(null);
+  const [accountingTransactions, setAccountingTransactions] = useState([]);
+  const [transactionFilter, setTransactionFilter] = useState(null);
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [loadingAccounting, setLoadingAccounting] = useState(false);
+
+  // Fetch accounting when tab changes
+  useEffect(() => {
+    if (activeTab === 'accounting') {
+      fetchAccountingData();
+    }
+  }, [activeTab]);
+
+  const fetchAccountingData = async () => {
+    setLoadingAccounting(true);
+    try {
+      const [summaryRes, txRes] = await Promise.all([
+        adminAPI.accountingSummary(dateRange.start || null, dateRange.end || null),
+        adminAPI.accountingTransactions(transactionFilter, dateRange.start || null, dateRange.end || null, 200)
+      ]);
+      setAccountingSummary(summaryRes.data);
+      setAccountingTransactions(txRes.data.transactions || []);
+    } catch (error) {
+      console.error('Error fetching accounting:', error);
+      toast.error('Erreur lors du chargement des données comptables');
+    } finally {
+      setLoadingAccounting(false);
+    }
+  };
+
+  const handleExportExcel = async () => {
+    const token = localStorage.getItem('token');
+    const url = adminAPI.exportAccountingExcel(dateRange.start || null, dateRange.end || null);
+    window.open(`${url}&token=${token}`, '_blank');
+    toast.success('Export Excel en cours...');
+  };
+
+  const handleExportPDF = async () => {
+    const token = localStorage.getItem('token');
+    const url = adminAPI.exportAccountingPDF(dateRange.start || null, dateRange.end || null);
+    window.open(`${url}&token=${token}`, '_blank');
+    toast.success('Export PDF en cours...');
+  };
 
   // Fetch withdrawals when tab changes
   useEffect(() => {
