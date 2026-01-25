@@ -412,6 +412,21 @@ const EnterpriseDashboard = () => {
               />
             </div>
 
+            {/* Admin Panel Button - Only for admins */}
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="flex items-center gap-3 px-4 py-3 mb-4 rounded-xl bg-gradient-to-r from-red-600/20 to-orange-600/20 border border-red-500/30 text-white hover:from-red-600/30 hover:to-orange-600/30 transition-all"
+              >
+                <Shield className="w-5 h-5 text-red-400" />
+                <div className="flex-1">
+                  <span className="font-semibold">Panel Admin</span>
+                  <p className="text-xs text-gray-400">Comptabilité & Gestion</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-gray-400" />
+              </Link>
+            )}
+
             {/* Menu Sections */}
             <nav className="space-y-3 overflow-hidden">
               {menuSections.map((section) => (
