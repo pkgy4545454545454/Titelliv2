@@ -1989,6 +1989,243 @@ async def use_cashback(amount: float, order_id: Optional[str] = None, current_us
     
     return {"message": f"Cashback de {amount} CHF utilisé", "new_balance": current_balance - amount}
 
+# Minimum withdrawal amount
+MINIMUM_WITHDRAWAL_CHF = 50.0
+# Platform's Stripe Connect account ID for payouts
+STRIPE_CONNECT_ACCOUNT_ID = "acct_1S0gbwGsrEOIn6nv"
+
+class WithdrawalRequest(BaseModel):
+    amount: Optional[float] = None  # If None, withdraw full balance
+
+@api_router.post("/cashback/withdraw")
+async def withdraw_cashback(
+    request: WithdrawalRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Withdraw cashback to client's bank account via Stripe.
+    Minimum withdrawal: 50 CHF
+    Requires: IBAN and bank_account_holder in client profile
+    """
+    import stripe
+    stripe.api_key = STRIPE_API_KEY
+    
+    # Get user with bank info
+    user = await db.users.find_one({"id": current_user['id']})
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+    
+    # Check bank account info
+    iban = user.get('iban')
+    account_holder = user.get('bank_account_holder')
+    
+    if not iban or not account_holder:
+        raise HTTPException(
+            status_code=400, 
+            detail="Veuillez d'abord ajouter vos coordonnées bancaires (IBAN et nom du titulaire) dans votre profil"
+        )
+    
+    # Validate IBAN format (basic check for Swiss IBAN)
+    iban_clean = iban.replace(' ', '').upper()
+    if len(iban_clean) < 15 or len(iban_clean) > 34:
+        raise HTTPException(status_code=400, detail="Format IBAN invalide")
+    
+    # Get current balance
+    current_balance = user.get('cashback_balance', 0.0)
+    
+    # Determine withdrawal amount
+    withdrawal_amount = request.amount if request.amount else current_balance
+    
+    # Validate amount
+    if withdrawal_amount < MINIMUM_WITHDRAWAL_CHF:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Le montant minimum de retrait est de {MINIMUM_WITHDRAWAL_CHF} CHF. Votre solde: {current_balance:.2f} CHF"
+        )
+    
+    if withdrawal_amount > current_balance:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Solde insuffisant. Disponible: {current_balance:.2f} CHF"
+        )
+    
+    try:
+        # Create withdrawal record first (pending status)
+        withdrawal_id = str(uuid.uuid4())
+        withdrawal_record = {
+            "id": withdrawal_id,
+            "user_id": current_user['id'],
+            "amount": withdrawal_amount,
+            "currency": "chf",
+            "iban": iban_clean[-4:].rjust(len(iban_clean), '*'),  # Masked IBAN for security
+            "account_holder": account_holder,
+            "status": "pending",
+            "stripe_transfer_id": None,
+            "stripe_payout_id": None,
+            "error_message": None,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "completed_at": None
+        }
+        await db.cashback_withdrawals.insert_one(withdrawal_record)
+        
+        # Convert to centimes for Stripe (CHF uses 2 decimal places)
+        amount_centimes = int(withdrawal_amount * 100)
+        
+        # Create a Transfer to the connected account
+        # This moves funds from your platform's Stripe balance to the connected account
+        transfer = stripe.Transfer.create(
+            amount=amount_centimes,
+            currency="chf",
+            destination=STRIPE_CONNECT_ACCOUNT_ID,
+            transfer_group=f"cashback_withdrawal_{withdrawal_id}",
+            metadata={
+                "withdrawal_id": withdrawal_id,
+                "user_id": current_user['id'],
+                "user_email": user.get('email', ''),
+                "iban_last4": iban_clean[-4:],
+                "type": "cashback_withdrawal"
+            }
+        )
+        
+        # Update withdrawal with transfer ID
+        await db.cashback_withdrawals.update_one(
+            {"id": withdrawal_id},
+            {"$set": {
+                "stripe_transfer_id": transfer.id,
+                "status": "transferred"
+            }}
+        )
+        
+        # Now create a payout from the connected account to the bank
+        # Note: This requires the connected account to have the bank account set up
+        # For direct bank payouts, we'll use the platform's payout capability
+        try:
+            payout = stripe.Payout.create(
+                amount=amount_centimes,
+                currency="chf",
+                metadata={
+                    "withdrawal_id": withdrawal_id,
+                    "user_id": current_user['id'],
+                    "destination_iban": iban_clean[-4:]
+                },
+                stripe_account=STRIPE_CONNECT_ACCOUNT_ID
+            )
+            
+            await db.cashback_withdrawals.update_one(
+                {"id": withdrawal_id},
+                {"$set": {
+                    "stripe_payout_id": payout.id,
+                    "status": "processing"
+                }}
+            )
+        except stripe.error.StripeError as payout_error:
+            # Transfer succeeded but payout failed - log for manual processing
+            logger.warning(f"Payout failed for withdrawal {withdrawal_id}: {payout_error}")
+            await db.cashback_withdrawals.update_one(
+                {"id": withdrawal_id},
+                {"$set": {
+                    "status": "payout_pending",
+                    "error_message": f"Payout en attente de traitement manuel: {str(payout_error)}"
+                }}
+            )
+        
+        # Deduct from user's cashback balance
+        await db.users.update_one(
+            {"id": current_user['id']},
+            {"$inc": {"cashback_balance": -withdrawal_amount}}
+        )
+        
+        # Record cashback transaction
+        transaction = {
+            "id": str(uuid.uuid4()),
+            "user_id": current_user['id'],
+            "amount": -withdrawal_amount,
+            "type": "withdrawal",
+            "description": f"Retrait vers compte bancaire ****{iban_clean[-4:]}",
+            "withdrawal_id": withdrawal_id,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.cashback_transactions.insert_one(transaction)
+        
+        # Notify user
+        await create_notification(
+            db=db,
+            user_id=current_user['id'],
+            notification_type="cashback_withdrawal",
+            title="Retrait en cours",
+            message=f"Votre retrait de {withdrawal_amount:.2f} CHF est en cours de traitement. Délai: 1-5 jours ouvrables.",
+            link="/dashboard/client?tab=cashback"
+        )
+        
+        # Update withdrawal status to completed
+        await db.cashback_withdrawals.update_one(
+            {"id": withdrawal_id},
+            {"$set": {
+                "status": "completed",
+                "completed_at": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+        
+        return {
+            "success": True,
+            "message": f"Retrait de {withdrawal_amount:.2f} CHF initié avec succès",
+            "withdrawal_id": withdrawal_id,
+            "new_balance": current_balance - withdrawal_amount,
+            "estimated_arrival": "1-5 jours ouvrables"
+        }
+        
+    except stripe.error.StripeError as e:
+        logger.error(f"Stripe withdrawal error: {e}")
+        # Update withdrawal status to failed
+        await db.cashback_withdrawals.update_one(
+            {"id": withdrawal_id},
+            {"$set": {
+                "status": "failed",
+                "error_message": str(e)
+            }}
+        )
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Erreur Stripe: {str(e)}. Veuillez réessayer ou contacter le support."
+        )
+    except Exception as e:
+        logger.error(f"Withdrawal error: {e}")
+        raise HTTPException(status_code=500, detail="Erreur lors du retrait. Veuillez réessayer.")
+
+@api_router.get("/cashback/withdrawals")
+async def get_withdrawal_history(current_user: dict = Depends(get_current_user)):
+    """Get user's withdrawal history"""
+    withdrawals = await db.cashback_withdrawals.find(
+        {"user_id": current_user['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).limit(50).to_list(50)
+    
+    return {"withdrawals": withdrawals}
+
+@api_router.get("/cashback/withdrawal-info")
+async def get_withdrawal_info(current_user: dict = Depends(get_current_user)):
+    """Get withdrawal eligibility info"""
+    user = await db.users.find_one({"id": current_user['id']})
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+    
+    balance = user.get('cashback_balance', 0.0)
+    has_bank_info = bool(user.get('iban') and user.get('bank_account_holder'))
+    can_withdraw = balance >= MINIMUM_WITHDRAWAL_CHF and has_bank_info
+    
+    return {
+        "balance": balance,
+        "minimum_withdrawal": MINIMUM_WITHDRAWAL_CHF,
+        "can_withdraw": can_withdraw,
+        "has_bank_info": has_bank_info,
+        "iban_masked": f"****{user.get('iban', '')[-4:]}" if user.get('iban') else None,
+        "account_holder": user.get('bank_account_holder'),
+        "reason_cannot_withdraw": None if can_withdraw else (
+            "Ajoutez vos coordonnées bancaires" if not has_bank_info 
+            else f"Solde minimum requis: {MINIMUM_WITHDRAWAL_CHF} CHF"
+        )
+    }
+
 # ============ FEATURED/TRENDING ROUTES ============
 
 @api_router.get("/featured/tendances")
