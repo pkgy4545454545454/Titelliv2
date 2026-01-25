@@ -128,6 +128,27 @@ export const adminAPI = {
     if (endDate) params.append('end_date', endDate);
     return `${API}/admin/withdrawals/export?${params.toString()}`;
   },
+  // Accounting / Comptabilité
+  accountingSummary: (startDate = null, endDate = null) => axios.get(`${API}/admin/accounting/summary`, {
+    params: { start_date: startDate, end_date: endDate },
+    headers: getAuthHeaders()
+  }),
+  accountingTransactions: (type = null, startDate = null, endDate = null, limit = 100, skip = 0) => axios.get(`${API}/admin/accounting/transactions`, {
+    params: { transaction_type: type, start_date: startDate, end_date: endDate, limit, skip },
+    headers: getAuthHeaders()
+  }),
+  exportAccountingExcel: (startDate = null, endDate = null) => {
+    const params = new URLSearchParams();
+    if (startDate) params.append('start_date', startDate);
+    if (endDate) params.append('end_date', endDate);
+    return `${API}/admin/accounting/export/excel?${params.toString()}`;
+  },
+  exportAccountingPDF: (startDate = null, endDate = null) => {
+    const params = new URLSearchParams();
+    if (startDate) params.append('start_date', startDate);
+    if (endDate) params.append('end_date', endDate);
+    return `${API}/admin/accounting/export/pdf?${params.toString()}`;
+  },
 };
 
 // Cashback
