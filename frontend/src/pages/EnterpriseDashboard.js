@@ -116,6 +116,7 @@ const EnterpriseDashboard = () => {
       setFinances(financesRes.data || { transactions: [], summary: {} });
       setAdvertising(advertisingRes.data || { campaigns: [], stats: {} });
       setApplications(applicationsRes.data || { applications: [], jobs: [], stats: {} });
+      setContacts(contactsRes.data || { contacts: [], total: 0, type_counts: {} });
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
