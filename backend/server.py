@@ -2024,7 +2024,7 @@ async def get_admin_stats(current_user: dict = Depends(get_current_user)):
 
 @api_router.get("/admin/users")
 async def get_all_users(current_user: dict = Depends(get_current_user), limit: int = 100, skip: int = 0):
-    if current_user.get('email') != 'admin@titelli.com':
+    if not is_admin(current_user):
         raise HTTPException(status_code=403, detail="Admin uniquement")
     
     users = await db.users.find({}, {"_id": 0, "password": 0}).skip(skip).limit(limit).to_list(limit)
@@ -2033,7 +2033,7 @@ async def get_all_users(current_user: dict = Depends(get_current_user), limit: i
 
 @api_router.put("/admin/users/{user_id}/verify")
 async def verify_user(user_id: str, is_certified: bool = False, is_labeled: bool = False, current_user: dict = Depends(get_current_user)):
-    if current_user.get('email') != 'admin@titelli.com':
+    if not is_admin(current_user):
         raise HTTPException(status_code=403, detail="Admin uniquement")
     
     update_data = {"is_verified": True}
