@@ -9,7 +9,42 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
 
 ## ✅ Fonctionnalités Complétées (25 Jan 2026)
 
-### Phase 30 : Bug Fixes - Notifications, Cover Image, Stripe, Panier (TERMINÉ)
+### Phase 32 : Système de Retrait Cashback (TERMINÉ)
+
+**Nouvelle fonctionnalité : Retrait de cashback vers compte bancaire**
+
+1. **Coordonnées Bancaires Client**
+   - ✅ Nouveaux champs dans profil : `iban`, `bank_account_holder`, `bic_swift`
+   - ✅ Interface modale pour ajouter/modifier les coordonnées bancaires
+   - ✅ IBAN masqué affiché (****2957) avec lien "Modifier"
+
+2. **Bouton "Retirer vers mon compte"**
+   - ✅ Visible sur la page Mon Cash-back
+   - ✅ Désactivé si solde < 50 CHF (minimum de retrait)
+   - ✅ Message indiquant le montant manquant
+
+3. **API de Retrait**
+   - ✅ `POST /api/cashback/withdraw` - Crée demande de retrait
+   - ✅ `GET /api/cashback/withdrawal-info` - Info d'éligibilité
+   - ✅ `GET /api/cashback/withdrawals` - Historique des retraits
+   - ✅ Validation : minimum 50 CHF, IBAN requis, solde suffisant
+
+4. **Intégration Stripe**
+   - ✅ Tentative de transfert automatique via Stripe Connect
+   - ✅ Fallback vers `manual_processing` si API restreinte
+   - ✅ IBAN complet stocké pour traitement manuel
+   - ✅ Compte Connect : acct_1S0gbwGsrEOIn6nv
+
+5. **Historique des Retraits**
+   - ✅ Section dédiée dans l'UI
+   - ✅ Statuts : pending, processing, manual_processing, completed, failed
+   - ✅ Notification envoyée au client après demande
+
+**Tests: 100% réussis (14 tests backend + UI vérifiée)**
+
+---
+
+### Phase 30-31 : Bug Fixes - Notifications, Cover Image, Stripe Abonnements (TERMINÉ)
 
 **Bugs corrigés dans cette session :**
 
