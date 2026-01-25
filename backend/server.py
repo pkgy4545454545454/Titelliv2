@@ -1622,6 +1622,14 @@ async def get_payment_status(session_id: str, request: Request):
 
 @api_router.post("/webhook/stripe")
 async def stripe_webhook(request: Request):
+    """
+    Handle Stripe webhooks for:
+    - Payment completion (checkout sessions)
+    - Transfer/Payout status updates
+    """
+    import stripe
+    stripe.api_key = STRIPE_API_KEY
+    
     body = await request.body()
     signature = request.headers.get("Stripe-Signature")
     
@@ -1634,15 +1642,156 @@ async def stripe_webhook(request: Request):
         webhook_response = await stripe_checkout.handle_webhook(body, signature)
         logger.info(f"Webhook received: {webhook_response.event_type}")
         
+        # Handle checkout session completed (payments)
         if webhook_response.payment_status == "paid":
+            # Update payment transaction
             await db.payment_transactions.update_one(
                 {"session_id": webhook_response.session_id},
                 {"$set": {"payment_status": "paid", "status": "complete"}}
             )
+            
+            # Check if this is a subscription payment
+            metadata = webhook_response.metadata or {}
+            if metadata.get('type') == 'subscription':
+                plan_id = metadata.get('plan_id')
+                user_id = metadata.get('user_id')
+                if plan_id and user_id:
+                    # Activate subscription
+                    logger.info(f"Activating subscription {plan_id} for user {user_id}")
+                    # The activate_subscription endpoint handles the rest
+            
+            # Notify user of successful payment
+            user_id = metadata.get('user_id')
+            if user_id:
+                await create_notification(
+                    user_id=user_id,
+                    notification_type="payment_received",
+                    title="Paiement reçu",
+                    message="Votre paiement a été traité avec succès.",
+                    link="/dashboard"
+                )
         
         return {"received": True}
+        
     except Exception as e:
         logger.error(f"Webhook error: {str(e)}")
+        
+        # Try to handle raw Stripe events for transfers/payouts
+        try:
+            import json
+            event_data = json.loads(body)
+            event_type = event_data.get('type', '')
+            
+            # Handle transfer events
+            if event_type == 'transfer.created':
+                transfer = event_data.get('data', {}).get('object', {})
+                withdrawal_id = transfer.get('metadata', {}).get('withdrawal_id')
+                if withdrawal_id:
+                    await db.cashback_withdrawals.update_one(
+                        {"id": withdrawal_id},
+                        {"$set": {
+                            "stripe_transfer_id": transfer.get('id'),
+                            "status": "processing",
+                            "updated_at": datetime.now(timezone.utc).isoformat()
+                        }}
+                    )
+                    logger.info(f"Transfer created for withdrawal {withdrawal_id}")
+            
+            elif event_type == 'transfer.paid':
+                transfer = event_data.get('data', {}).get('object', {})
+                withdrawal_id = transfer.get('metadata', {}).get('withdrawal_id')
+                if withdrawal_id:
+                    withdrawal = await db.cashback_withdrawals.find_one({"id": withdrawal_id})
+                    if withdrawal:
+                        await db.cashback_withdrawals.update_one(
+                            {"id": withdrawal_id},
+                            {"$set": {
+                                "status": "completed",
+                                "completed_at": datetime.now(timezone.utc).isoformat()
+                            }}
+                        )
+                        
+                        # Notify user
+                        await create_notification(
+                            user_id=withdrawal['user_id'],
+                            notification_type="cashback_withdrawal",
+                            title="Retrait effectué",
+                            message=f"Votre retrait de {withdrawal['amount']:.2f} CHF a été transféré vers votre compte.",
+                            link="/dashboard/client?tab=cashback"
+                        )
+                        logger.info(f"Transfer paid for withdrawal {withdrawal_id}")
+            
+            elif event_type == 'transfer.failed':
+                transfer = event_data.get('data', {}).get('object', {})
+                withdrawal_id = transfer.get('metadata', {}).get('withdrawal_id')
+                if withdrawal_id:
+                    withdrawal = await db.cashback_withdrawals.find_one({"id": withdrawal_id})
+                    if withdrawal:
+                        # Refund the user
+                        await db.users.update_one(
+                            {"id": withdrawal['user_id']},
+                            {"$inc": {"cashback_balance": withdrawal['amount']}}
+                        )
+                        
+                        await db.cashback_withdrawals.update_one(
+                            {"id": withdrawal_id},
+                            {"$set": {
+                                "status": "failed",
+                                "error_message": "Transfert Stripe échoué",
+                                "updated_at": datetime.now(timezone.utc).isoformat()
+                            }}
+                        )
+                        
+                        # Notify user
+                        await create_notification(
+                            user_id=withdrawal['user_id'],
+                            notification_type="cashback_withdrawal",
+                            title="Retrait échoué",
+                            message=f"Votre retrait de {withdrawal['amount']:.2f} CHF a échoué. Le montant a été recrédité.",
+                            link="/dashboard/client?tab=cashback"
+                        )
+                        logger.info(f"Transfer failed for withdrawal {withdrawal_id}, refunded user")
+            
+            # Handle payout events
+            elif event_type == 'payout.paid':
+                payout = event_data.get('data', {}).get('object', {})
+                withdrawal_id = payout.get('metadata', {}).get('withdrawal_id')
+                if withdrawal_id:
+                    await db.cashback_withdrawals.update_one(
+                        {"id": withdrawal_id},
+                        {"$set": {
+                            "stripe_payout_id": payout.get('id'),
+                            "status": "completed",
+                            "completed_at": datetime.now(timezone.utc).isoformat()
+                        }}
+                    )
+                    logger.info(f"Payout paid for withdrawal {withdrawal_id}")
+            
+            elif event_type == 'payout.failed':
+                payout = event_data.get('data', {}).get('object', {})
+                withdrawal_id = payout.get('metadata', {}).get('withdrawal_id')
+                if withdrawal_id:
+                    withdrawal = await db.cashback_withdrawals.find_one({"id": withdrawal_id})
+                    if withdrawal:
+                        # Refund the user
+                        await db.users.update_one(
+                            {"id": withdrawal['user_id']},
+                            {"$inc": {"cashback_balance": withdrawal['amount']}}
+                        )
+                        
+                        await db.cashback_withdrawals.update_one(
+                            {"id": withdrawal_id},
+                            {"$set": {
+                                "status": "failed",
+                                "error_message": "Payout Stripe échoué",
+                                "updated_at": datetime.now(timezone.utc).isoformat()
+                            }}
+                        )
+                        logger.info(f"Payout failed for withdrawal {withdrawal_id}, refunded user")
+        
+        except json.JSONDecodeError:
+            pass
+        
         return {"received": True}
 
 # ============ CATEGORIES ROUTES ============
