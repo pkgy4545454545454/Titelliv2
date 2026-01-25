@@ -110,6 +110,24 @@ export const adminAPI = {
     null,
     { params: { is_certified: isCertified, is_labeled: isLabeled }, headers: getAuthHeaders() }
   ),
+  // Withdrawal management
+  withdrawals: (status = null, limit = 50, skip = 0) => axios.get(`${API}/admin/withdrawals`, { 
+    params: { status, limit, skip }, 
+    headers: getAuthHeaders() 
+  }),
+  withdrawalDetail: (withdrawalId) => axios.get(`${API}/admin/withdrawals/${withdrawalId}`, { headers: getAuthHeaders() }),
+  updateWithdrawalStatus: (withdrawalId, newStatus, adminNote = null) => axios.put(
+    `${API}/admin/withdrawals/${withdrawalId}/status`,
+    null,
+    { params: { new_status: newStatus, admin_note: adminNote }, headers: getAuthHeaders() }
+  ),
+  exportWithdrawalsCSV: (status = null, startDate = null, endDate = null) => {
+    const params = new URLSearchParams();
+    if (status) params.append('status', status);
+    if (startDate) params.append('start_date', startDate);
+    if (endDate) params.append('end_date', endDate);
+    return `${API}/admin/withdrawals/export?${params.toString()}`;
+  },
 };
 
 // Cashback
