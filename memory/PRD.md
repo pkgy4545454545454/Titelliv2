@@ -9,6 +9,51 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
 
 ## ✅ Fonctionnalités Complétées (25 Jan 2026)
 
+### Phase 33 : Système Comptabilité Admin Complet (TERMINÉ)
+
+**Accès Admin** : `https://[domain]/admin` avec `spa.luxury@titelli.com`
+
+1. **Section Comptabilité**
+   - ✅ Vue d'ensemble des finances de la plateforme
+   - ✅ 4 KPIs principaux : CA total, Commissions, Passif cashback, Commandes
+   - ✅ Détail des revenus (ventes + abonnements)
+   - ✅ Détail des commissions (5% commandes, frais gestion, 12% investissements)
+   - ✅ Statistiques cashback (distribué, utilisé, retiré, passif)
+   - ✅ Filtre par période (date début/fin)
+
+2. **Historique des Transactions**
+   - ✅ Liste complète de toutes les transactions
+   - ✅ Filtres par type : Commandes, Abonnements, Cashback, Retraits
+   - ✅ Affichage : date, type, description, montant, commission, statut
+
+3. **Export Comptable**
+   - ✅ **Export Excel** (.xlsx) avec 3 feuilles : Résumé, Transactions, Abonnements
+   - ✅ **Export PDF** avec tableaux formatés et couleurs
+   - ✅ Filtre par période appliqué aux exports
+
+4. **Dashboard Admin Retraits**
+   - ✅ Liste des demandes de retrait
+   - ✅ Filtres par statut (En attente, En cours, Complété, Échoué)
+   - ✅ Actions : Marquer complété / Échoué (avec remboursement auto)
+   - ✅ Export CSV des retraits
+   - ✅ Vue détaillée avec IBAN complet
+
+5. **Webhooks Stripe Améliorés**
+   - ✅ Gestion des événements transfer.created/paid/failed
+   - ✅ Gestion des événements payout.paid/failed
+   - ✅ Notification automatique au client
+   - ✅ Remboursement automatique si échec
+
+**Données actuelles :**
+- CA Total : 2,579.53 CHF
+- Commissions : 282.48 CHF
+- Passif Cashback : 27.35 CHF
+- 20 commandes (panier moyen 128.98 CHF)
+
+**Tests: 100% réussis (28/28 backend + UI vérifiée)**
+
+---
+
 ### Phase 32 : Système de Retrait Cashback (TERMINÉ)
 
 **Nouvelle fonctionnalité : Retrait de cashback vers compte bancaire**
