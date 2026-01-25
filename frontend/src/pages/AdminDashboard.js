@@ -282,6 +282,327 @@ const AdminDashboard = () => {
             </div>
           )}
 
+          {/* ===== COMPTABILITÉ TAB ===== */}
+          {activeTab === 'accounting' && (
+            <div>
+              {/* Header with export buttons */}
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
+                <div>
+                  <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                    Comptabilité
+                  </h1>
+                  <p className="text-gray-400 text-sm mt-1">Vue complète des finances de la plateforme</p>
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleExportExcel}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
+                  >
+                    <FileSpreadsheet className="w-4 h-4" />
+                    Excel
+                  </button>
+                  <button
+                    onClick={handleExportPDF}
+                    className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
+                  >
+                    <FileText className="w-4 h-4" />
+                    PDF
+                  </button>
+                </div>
+              </div>
+
+              {/* Date Range Filter */}
+              <div className="card-service rounded-xl p-4 mb-6">
+                <div className="flex flex-wrap items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Filter className="w-4 h-4 text-gray-400" />
+                    <span className="text-gray-400 text-sm">Période:</span>
+                  </div>
+                  <input
+                    type="date"
+                    value={dateRange.start}
+                    onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
+                    className="px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm"
+                  />
+                  <span className="text-gray-400">à</span>
+                  <input
+                    type="date"
+                    value={dateRange.end}
+                    onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
+                    className="px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm"
+                  />
+                  <button
+                    onClick={fetchAccountingData}
+                    className="flex items-center gap-2 px-4 py-2 bg-[#0047AB] text-white rounded-lg font-medium hover:bg-[#003d91] transition-colors"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${loadingAccounting ? 'animate-spin' : ''}`} />
+                    Actualiser
+                  </button>
+                </div>
+              </div>
+
+              {loadingAccounting ? (
+                <div className="flex items-center justify-center py-20">
+                  <div className="w-12 h-12 border-4 border-[#0047AB] border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : accountingSummary && (
+                <>
+                  {/* Key Metrics Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    {/* Total Revenue */}
+                    <div className="card-service rounded-xl p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 rounded-xl bg-green-500/20">
+                          <TrendingUp className="w-6 h-6 text-green-500" />
+                        </div>
+                        <ArrowUpRight className="w-5 h-5 text-green-500" />
+                      </div>
+                      <p className="text-3xl font-bold text-white">{accountingSummary.revenue?.total_revenue?.toFixed(2)} CHF</p>
+                      <p className="text-sm text-gray-400 mt-1">Chiffre d'affaires total</p>
+                    </div>
+
+                    {/* Commissions */}
+                    <div className="card-service rounded-xl p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 rounded-xl bg-[#D4AF37]/20">
+                          <DollarSign className="w-6 h-6 text-[#D4AF37]" />
+                        </div>
+                        <ArrowUpRight className="w-5 h-5 text-[#D4AF37]" />
+                      </div>
+                      <p className="text-3xl font-bold text-white">{accountingSummary.commissions?.total_commissions?.toFixed(2)} CHF</p>
+                      <p className="text-sm text-gray-400 mt-1">Commissions Titelli</p>
+                    </div>
+
+                    {/* Cashback Liability */}
+                    <div className="card-service rounded-xl p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 rounded-xl bg-orange-500/20">
+                          <Wallet className="w-6 h-6 text-orange-500" />
+                        </div>
+                        <ArrowDownRight className="w-5 h-5 text-orange-500" />
+                      </div>
+                      <p className="text-3xl font-bold text-white">{accountingSummary.cashback?.net_liability?.toFixed(2)} CHF</p>
+                      <p className="text-sm text-gray-400 mt-1">Passif cashback</p>
+                    </div>
+
+                    {/* Orders */}
+                    <div className="card-service rounded-xl p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 rounded-xl bg-blue-500/20">
+                          <ShoppingCart className="w-6 h-6 text-blue-500" />
+                        </div>
+                      </div>
+                      <p className="text-3xl font-bold text-white">{accountingSummary.orders?.total_count}</p>
+                      <p className="text-sm text-gray-400 mt-1">Commandes ({accountingSummary.orders?.average_order_value?.toFixed(2)} CHF moy.)</p>
+                    </div>
+                  </div>
+
+                  {/* Detailed Breakdown */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    {/* Revenue Breakdown */}
+                    <div className="card-service rounded-xl p-6">
+                      <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <TrendingUp className="w-5 h-5 text-green-500" />
+                        Détail des Revenus
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                          <span className="text-gray-300">Ventes (commandes)</span>
+                          <span className="text-white font-medium">{accountingSummary.revenue?.total_orders_revenue?.toFixed(2)} CHF</span>
+                        </div>
+                        <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                          <span className="text-gray-300">Abonnements</span>
+                          <span className="text-white font-medium">{accountingSummary.revenue?.subscription_revenue?.toFixed(2)} CHF</span>
+                        </div>
+                        <div className="flex justify-between items-center p-3 bg-green-500/10 rounded-lg border border-green-500/30">
+                          <span className="text-green-400 font-medium">Total</span>
+                          <span className="text-green-400 font-bold">{accountingSummary.revenue?.total_revenue?.toFixed(2)} CHF</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Commissions Breakdown */}
+                    <div className="card-service rounded-xl p-6">
+                      <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <DollarSign className="w-5 h-5 text-[#D4AF37]" />
+                        Détail des Commissions
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                          <span className="text-gray-300">Commission 5% (commandes)</span>
+                          <span className="text-white font-medium">{accountingSummary.commissions?.order_commissions_5pct?.toFixed(2)} CHF</span>
+                        </div>
+                        <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                          <span className="text-gray-300">Frais de gestion</span>
+                          <span className="text-white font-medium">{accountingSummary.commissions?.management_fees?.toFixed(2)} CHF</span>
+                        </div>
+                        <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                          <span className="text-gray-300">Commission 12% (investissements)</span>
+                          <span className="text-white font-medium">{accountingSummary.commissions?.investment_commissions_12pct?.toFixed(2)} CHF</span>
+                        </div>
+                        <div className="flex justify-between items-center p-3 bg-[#D4AF37]/10 rounded-lg border border-[#D4AF37]/30">
+                          <span className="text-[#D4AF37] font-medium">Total</span>
+                          <span className="text-[#D4AF37] font-bold">{accountingSummary.commissions?.total_commissions?.toFixed(2)} CHF</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Cashback Breakdown */}
+                    <div className="card-service rounded-xl p-6">
+                      <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <Wallet className="w-5 h-5 text-orange-500" />
+                        Cashback
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                          <span className="text-gray-300">Distribué aux clients</span>
+                          <span className="text-green-400 font-medium">+{accountingSummary.cashback?.total_distributed?.toFixed(2)} CHF</span>
+                        </div>
+                        <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                          <span className="text-gray-300">Utilisé (achats)</span>
+                          <span className="text-red-400 font-medium">-{accountingSummary.cashback?.total_used?.toFixed(2)} CHF</span>
+                        </div>
+                        <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                          <span className="text-gray-300">Retiré (virements)</span>
+                          <span className="text-red-400 font-medium">-{accountingSummary.cashback?.total_withdrawn?.toFixed(2)} CHF</span>
+                        </div>
+                        <div className="flex justify-between items-center p-3 bg-orange-500/10 rounded-lg border border-orange-500/30">
+                          <span className="text-orange-400 font-medium">Passif (à provisionner)</span>
+                          <span className="text-orange-400 font-bold">{accountingSummary.cashback?.net_liability?.toFixed(2)} CHF</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Withdrawals & Subscriptions */}
+                    <div className="card-service rounded-xl p-6">
+                      <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <CreditCard className="w-5 h-5 text-purple-500" />
+                        Retraits & Abonnements
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                          <span className="text-gray-300">Retraits en attente</span>
+                          <span className="text-yellow-400 font-medium">{accountingSummary.withdrawals?.pending_amount?.toFixed(2)} CHF</span>
+                        </div>
+                        <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                          <span className="text-gray-300">Retraits effectués</span>
+                          <span className="text-green-400 font-medium">{accountingSummary.withdrawals?.completed_amount?.toFixed(2)} CHF</span>
+                        </div>
+                        <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                          <span className="text-gray-300">Abonnements actifs</span>
+                          <span className="text-white font-medium">{accountingSummary.subscriptions?.active_count}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Transactions Table */}
+                  <div className="card-service rounded-xl overflow-hidden">
+                    <div className="p-6 border-b border-white/10">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-bold text-white">Historique des Transactions</h3>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => { setTransactionFilter(null); fetchAccountingData(); }}
+                            className={`px-3 py-1 rounded-lg text-sm ${!transactionFilter ? 'bg-[#0047AB] text-white' : 'bg-white/10 text-gray-300'}`}
+                          >
+                            Tous
+                          </button>
+                          <button
+                            onClick={() => { setTransactionFilter('order'); fetchAccountingData(); }}
+                            className={`px-3 py-1 rounded-lg text-sm ${transactionFilter === 'order' ? 'bg-[#0047AB] text-white' : 'bg-white/10 text-gray-300'}`}
+                          >
+                            Commandes
+                          </button>
+                          <button
+                            onClick={() => { setTransactionFilter('subscription'); fetchAccountingData(); }}
+                            className={`px-3 py-1 rounded-lg text-sm ${transactionFilter === 'subscription' ? 'bg-[#0047AB] text-white' : 'bg-white/10 text-gray-300'}`}
+                          >
+                            Abonnements
+                          </button>
+                          <button
+                            onClick={() => { setTransactionFilter('cashback'); fetchAccountingData(); }}
+                            className={`px-3 py-1 rounded-lg text-sm ${transactionFilter === 'cashback' ? 'bg-[#0047AB] text-white' : 'bg-white/10 text-gray-300'}`}
+                          >
+                            Cashback
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <table className="w-full">
+                      <thead className="bg-white/5">
+                        <tr>
+                          <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Date</th>
+                          <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Type</th>
+                          <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Description</th>
+                          <th className="text-right px-6 py-4 text-sm font-medium text-gray-400">Montant</th>
+                          <th className="text-right px-6 py-4 text-sm font-medium text-gray-400">Commission</th>
+                          <th className="text-center px-6 py-4 text-sm font-medium text-gray-400">Statut</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        {accountingTransactions.slice(0, 50).map((tx, idx) => (
+                          <tr key={tx.id || idx} className="hover:bg-white/5">
+                            <td className="px-6 py-4 text-sm text-gray-300">
+                              {tx.date ? new Date(tx.date).toLocaleDateString('fr-FR') : '-'}
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                tx.type === 'order' ? 'bg-blue-500/20 text-blue-400' :
+                                tx.type === 'subscription' ? 'bg-purple-500/20 text-purple-400' :
+                                tx.type === 'cashback' ? 'bg-green-500/20 text-green-400' :
+                                tx.type === 'withdrawal' ? 'bg-orange-500/20 text-orange-400' :
+                                'bg-gray-500/20 text-gray-400'
+                              }`}>
+                                {tx.type === 'order' ? 'Commande' :
+                                 tx.type === 'subscription' ? 'Abonnement' :
+                                 tx.type === 'cashback' ? 'Cashback' :
+                                 tx.type === 'withdrawal' ? 'Retrait' :
+                                 tx.type === 'payment' ? 'Paiement' : tx.type}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-white">{tx.description}</td>
+                            <td className={`px-6 py-4 text-sm font-medium text-right ${tx.amount >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                              {tx.amount >= 0 ? '+' : ''}{tx.amount?.toFixed(2)} CHF
+                            </td>
+                            <td className="px-6 py-4 text-sm text-[#D4AF37] text-right">
+                              {tx.commission > 0 ? `+${tx.commission?.toFixed(2)} CHF` : '-'}
+                            </td>
+                            <td className="px-6 py-4 text-center">
+                              <span className={`px-2 py-1 rounded-full text-xs ${
+                                tx.status === 'completed' || tx.status === 'paid' || tx.status === 'active' ? 'bg-green-500/20 text-green-400' :
+                                tx.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                                tx.status === 'failed' || tx.status === 'cancelled' ? 'bg-red-500/20 text-red-400' :
+                                'bg-gray-500/20 text-gray-400'
+                              }`}>
+                                {tx.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                        {accountingTransactions.length === 0 && (
+                          <tr>
+                            <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                              Aucune transaction trouvée
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                    {accountingTransactions.length > 50 && (
+                      <div className="p-4 text-center border-t border-white/10">
+                        <p className="text-sm text-gray-400">
+                          Affichage des 50 premières transactions sur {accountingTransactions.length}. 
+                          Exportez en Excel pour voir toutes les données.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
           {activeTab === 'withdrawals' && (
             <div>
               <div className="flex items-center justify-between mb-8">
