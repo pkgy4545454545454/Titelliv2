@@ -125,8 +125,8 @@ const SubscriptionsSection = () => {
   ];
 
   const optimisationPlans = [
-    { id: 'starter_2k', name: 'Starter 2K', price: 2000, features: ['8 publicités/mois', 'Formations business', 'Immobilier commercial', 'Expert conseil'] },
-    { id: 'starter_3k', name: 'Starter+ 3K', price: 3000, features: ['15 publicités/mois', '5h prestations OU 2 déjeuners', 'Support prioritaire'] },
+    { id: 'opti_starter_2k', name: 'Starter 2K', price: 2000, features: ['8 publicités/mois', 'Formations business', 'Immobilier commercial', 'Expert conseil'] },
+    { id: 'opti_starter_3k', name: 'Starter+ 3K', price: 3000, features: ['15 publicités/mois', '5h prestations OU 2 déjeuners', 'Support prioritaire'] },
     { id: 'opti_5k', name: 'Opti 5K', price: 5000, features: ['10h prestations', "3'000 CHF liquidés", 'Accès premium complet'] },
     { id: 'opti_10k', name: 'Opti 10K', price: 10000, features: ['20h prestations', "7'000 CHF liquidés", 'Fiscaliste dédié'] },
     { id: 'opti_20k', name: 'Opti 20K', price: 20000, features: ['25 publicités/mois', '40h prestations', "15'000 CHF liquidés"] },
