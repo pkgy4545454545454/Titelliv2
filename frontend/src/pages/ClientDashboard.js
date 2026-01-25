@@ -450,12 +450,63 @@ const ClientDashboard = () => {
 
   const fetchCashbackHistory = async () => {
     try {
-      const res = await cashbackAPI.history();
-      setCashback(res.data.balance || 0);
-      setCashbackHistory(res.data.transactions || []);
-      setCashbackStats(res.data.statistics || { total_earned: 0, total_used: 0, cashback_rate: '10%', transaction_count: 0 });
+      const [historyRes, infoRes, withdrawalsRes] = await Promise.all([
+        cashbackAPI.history(),
+        cashbackAPI.withdrawalInfo(),
+        cashbackAPI.withdrawalHistory()
+      ]);
+      setCashback(historyRes.data.balance || 0);
+      setCashbackHistory(historyRes.data.transactions || []);
+      setCashbackStats(historyRes.data.statistics || { total_earned: 0, total_used: 0, cashback_rate: '10%', transaction_count: 0 });
+      setWithdrawalInfo(infoRes.data);
+      setWithdrawalHistory(withdrawalsRes.data.withdrawals || []);
+      
+      // Pre-fill bank form if user has bank info
+      if (infoRes.data.account_holder) {
+        setBankForm(prev => ({ ...prev, bank_account_holder: infoRes.data.account_holder }));
+      }
     } catch (error) {
       console.error('Error fetching cashback history:', error);
+    }
+  };
+
+  const handleSaveBankInfo = async () => {
+    if (!bankForm.iban || !bankForm.bank_account_holder) {
+      toast.error('Veuillez remplir l\'IBAN et le nom du titulaire');
+      return;
+    }
+    
+    try {
+      await clientProfileAPI.update({
+        iban: bankForm.iban,
+        bank_account_holder: bankForm.bank_account_holder,
+        bic_swift: bankForm.bic_swift || null
+      });
+      toast.success('Coordonnées bancaires enregistrées');
+      setShowBankForm(false);
+      fetchCashbackHistory(); // Refresh to update withdrawal info
+    } catch (error) {
+      toast.error('Erreur lors de l\'enregistrement');
+    }
+  };
+
+  const handleWithdraw = async () => {
+    if (!withdrawalInfo.can_withdraw) {
+      toast.error(withdrawalInfo.reason_cannot_withdraw || 'Retrait impossible');
+      return;
+    }
+    
+    setWithdrawing(true);
+    try {
+      const res = await cashbackAPI.withdraw(); // Withdraw full balance
+      toast.success(res.data.message);
+      setShowWithdrawModal(false);
+      setCashback(res.data.new_balance);
+      fetchCashbackHistory(); // Refresh all data
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur lors du retrait');
+    } finally {
+      setWithdrawing(false);
     }
   };
 
