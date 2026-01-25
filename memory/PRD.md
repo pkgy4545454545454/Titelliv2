@@ -28,12 +28,32 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
    - ✅ Correction `handleSubscribe` dans SubscriptionsSection.js
    - ✅ Appel correct: `subscriptionsAPI.createCheckout(planId)`
    - ✅ Ouverture Stripe checkout en nouvelle fenêtre
+   - ✅ Correction IDs plans optimisation (starter_2k → opti_starter_2k)
+   - ✅ Correction IDs addons (extra_ads → pub_extra, etc.)
+   - ✅ Ajout fonction `handleAddonSubscribe` pour les options à la carte
 
 4. **Section Panier Client**
    - ✅ Nouvelle section panier complète dans ClientDashboard
    - ✅ Affichage articles groupés par entreprise
    - ✅ Contrôles quantité (+/-) et suppression
    - ✅ Résumé et bouton checkout
+
+5. **Bug Critique: Activation Abonnement**
+   - ✅ `activate_subscription` stocke maintenant dans DEUX collections:
+     - `db.subscriptions` (pour historique utilisateur)
+     - `db.enterprise_subscriptions` (pour algorithme)
+   - ✅ L'algorithme de feed peut maintenant accéder au tier correctement
+
+**Tests: 100% réussis (28 tests backend + UI vérifiée)**
+
+### Algorithme des Avantages par Tier
+
+| Tier | Plans | Publicités/mois | Fonctionnalités exclusives |
+|------|-------|-----------------|---------------------------|
+| free | aucun | 1 | Exposition basique |
+| basic | standard, guest | 1-2 | Cash-back, Gestion stocks |
+| premium | premium, premium_mvp | 4-6 | Services concurrents, Investisseurs |
+| optimisation | opti_* | 15+ | Tout + Expert, Labellisation |
 
 ---
 
