@@ -362,7 +362,7 @@ const SubscriptionsSection = () => {
                   </div>
                 </div>
                 <button 
-                  onClick={() => handleSubscribe(option.id, option.price)}
+                  onClick={() => handleAddonSubscribe(option.id)}
                   className="px-3 py-1.5 bg-[#0047AB]/20 text-[#0047AB] rounded-lg text-sm hover:bg-[#0047AB]/30 transition-colors"
                 >
                   Ajouter
