@@ -950,6 +950,31 @@ async def get_current_user(authorization: Optional[str] = Header(None)) -> dict:
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
     return user
 
+
+async def get_current_user_from_token_param(
+    authorization: Optional[str] = Header(None),
+    token: Optional[str] = Query(None)
+) -> dict:
+    """Alternative auth that accepts token via query parameter (for file downloads)"""
+    jwt_token = None
+    
+    # Try header first
+    if authorization and authorization.startswith("Bearer "):
+        jwt_token = authorization.split(" ")[1]
+    # Fallback to query parameter
+    elif token:
+        jwt_token = token
+    
+    if not jwt_token:
+        raise HTTPException(status_code=401, detail="Non authentifié")
+    
+    payload = decode_token(jwt_token)
+    user = await db.users.find_one({"id": payload["user_id"]}, {"_id": 0, "password": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+    return user
+
+
 # ============ TITELLI FEES CONFIG (PRODUCTION) ============
 
 TITELLI_FEES = {
