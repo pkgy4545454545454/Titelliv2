@@ -120,6 +120,10 @@ export const cashbackAPI = {
     params: { amount, order_id: orderId }, 
     headers: getAuthHeaders() 
   }),
+  // Withdrawal endpoints
+  withdrawalInfo: () => axios.get(`${API}/cashback/withdrawal-info`, { headers: getAuthHeaders() }),
+  withdraw: (amount = null) => axios.post(`${API}/cashback/withdraw`, { amount }, { headers: getAuthHeaders() }),
+  withdrawalHistory: () => axios.get(`${API}/cashback/withdrawals`, { headers: getAuthHeaders() }),
 };
 
 // ============ CLIENT DASHBOARD APIs ============
