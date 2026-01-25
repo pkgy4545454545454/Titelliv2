@@ -2562,18 +2562,184 @@ const ClientDashboard = () => {
                 Mon Cash-back
               </h1>
               
-              {/* Balance Card */}
+              {/* Balance Card with Withdraw Button */}
               <div className="card-service rounded-xl p-8 text-center mb-8">
                 <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-6">
                   <Wallet className="w-10 h-10 text-green-500" />
                 </div>
                 <p className="text-5xl font-bold text-white mb-2">{cashback.toFixed(2)} CHF</p>
                 <p className="text-gray-400 mb-4">Solde cash-back disponible</p>
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 rounded-full">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 rounded-full mb-6">
                   <TrendingUp className="w-4 h-4 text-green-500" />
                   <span className="text-green-500 font-semibold">10% de cashback sur tous vos achats !</span>
                 </div>
+                
+                {/* Withdraw Button */}
+                <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
+                  <button
+                    onClick={() => withdrawalInfo.has_bank_info ? setShowWithdrawModal(true) : setShowBankForm(true)}
+                    disabled={cashback < 50}
+                    className={`px-8 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all ${
+                      cashback >= 50 
+                        ? 'bg-[#D4AF37] text-black hover:bg-[#C4A030]' 
+                        : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    <CreditCard className="w-5 h-5" />
+                    Retirer vers mon compte
+                  </button>
+                  {!withdrawalInfo.has_bank_info && (
+                    <button
+                      onClick={() => setShowBankForm(true)}
+                      className="px-6 py-3 rounded-xl font-semibold bg-white/10 text-white hover:bg-white/20 transition-all flex items-center gap-2"
+                    >
+                      <Plus className="w-5 h-5" />
+                      Ajouter mon IBAN
+                    </button>
+                  )}
+                </div>
+                
+                {cashback < 50 && (
+                  <p className="text-sm text-gray-500 mt-4">
+                    Minimum de retrait : 50 CHF (il vous manque {(50 - cashback).toFixed(2)} CHF)
+                  </p>
+                )}
+                
+                {withdrawalInfo.has_bank_info && (
+                  <p className="text-sm text-gray-400 mt-4">
+                    Compte enregistré : {withdrawalInfo.iban_masked} ({withdrawalInfo.account_holder})
+                    <button 
+                      onClick={() => setShowBankForm(true)}
+                      className="ml-2 text-[#0047AB] hover:underline"
+                    >
+                      Modifier
+                    </button>
+                  </p>
+                )}
               </div>
+
+              {/* Bank Account Form Modal */}
+              {showBankForm && (
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+                  <div className="card-service rounded-xl p-6 w-full max-w-md">
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-xl font-bold text-white">Coordonnées bancaires</h2>
+                      <button onClick={() => setShowBankForm(false)} className="text-gray-400 hover:text-white">
+                        <X className="w-6 h-6" />
+                      </button>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">Nom du titulaire du compte *</label>
+                        <input
+                          type="text"
+                          value={bankForm.bank_account_holder}
+                          onChange={(e) => setBankForm({ ...bankForm, bank_account_holder: e.target.value })}
+                          placeholder="Jean Dupont"
+                          className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:border-[#D4AF37] focus:outline-none"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">IBAN *</label>
+                        <input
+                          type="text"
+                          value={bankForm.iban}
+                          onChange={(e) => setBankForm({ ...bankForm, iban: e.target.value.toUpperCase() })}
+                          placeholder="CH93 0076 2011 6238 5295 7"
+                          className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:border-[#D4AF37] focus:outline-none font-mono"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Format suisse: CH + 19 chiffres</p>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">BIC/SWIFT (optionnel)</label>
+                        <input
+                          type="text"
+                          value={bankForm.bic_swift}
+                          onChange={(e) => setBankForm({ ...bankForm, bic_swift: e.target.value.toUpperCase() })}
+                          placeholder="POFICHBEXXX"
+                          className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:border-[#D4AF37] focus:outline-none font-mono"
+                        />
+                      </div>
+                      
+                      <div className="p-4 bg-blue-500/10 rounded-xl border border-blue-500/30">
+                        <p className="text-sm text-blue-400 flex items-start gap-2">
+                          <Info className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                          Vos coordonnées bancaires sont sécurisées et utilisées uniquement pour les retraits de cashback.
+                        </p>
+                      </div>
+                      
+                      <button
+                        onClick={handleSaveBankInfo}
+                        className="w-full py-3 rounded-xl bg-[#D4AF37] text-black font-semibold hover:bg-[#C4A030] transition-colors"
+                      >
+                        Enregistrer
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Withdraw Confirmation Modal */}
+              {showWithdrawModal && (
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+                  <div className="card-service rounded-xl p-6 w-full max-w-md">
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-xl font-bold text-white">Confirmer le retrait</h2>
+                      <button onClick={() => setShowWithdrawModal(false)} className="text-gray-400 hover:text-white">
+                        <X className="w-6 h-6" />
+                      </button>
+                    </div>
+                    
+                    <div className="text-center mb-6">
+                      <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4">
+                        <CreditCard className="w-8 h-8 text-green-500" />
+                      </div>
+                      <p className="text-3xl font-bold text-white mb-2">{cashback.toFixed(2)} CHF</p>
+                      <p className="text-gray-400">sera transféré vers</p>
+                      <p className="text-white font-medium mt-2">
+                        {withdrawalInfo.iban_masked}<br />
+                        <span className="text-sm text-gray-400">{withdrawalInfo.account_holder}</span>
+                      </p>
+                    </div>
+                    
+                    <div className="p-4 bg-yellow-500/10 rounded-xl border border-yellow-500/30 mb-6">
+                      <p className="text-sm text-yellow-400 flex items-start gap-2">
+                        <Clock className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                        Délai de traitement : 1 à 5 jours ouvrables
+                      </p>
+                    </div>
+                    
+                    <div className="flex gap-4">
+                      <button
+                        onClick={() => setShowWithdrawModal(false)}
+                        className="flex-1 py-3 rounded-xl bg-white/10 text-white font-semibold hover:bg-white/20 transition-colors"
+                      >
+                        Annuler
+                      </button>
+                      <button
+                        onClick={handleWithdraw}
+                        disabled={withdrawing}
+                        className="flex-1 py-3 rounded-xl bg-green-500 text-white font-semibold hover:bg-green-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                      >
+                        {withdrawing ? (
+                          <>
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            Traitement...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle className="w-5 h-5" />
+                            Confirmer
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
               
               {/* Stats Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
