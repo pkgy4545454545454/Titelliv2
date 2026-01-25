@@ -2144,7 +2144,6 @@ async def withdraw_cashback(
     status_message = "en cours de traitement automatique" if stripe_success else "enregistré et sera traité sous 1-3 jours ouvrables"
     
     await create_notification(
-        db=db,
         user_id=current_user['id'],
         notification_type="cashback_withdrawal",
         title="Retrait enregistré",
