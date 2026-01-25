@@ -2778,6 +2778,49 @@ const ClientDashboard = () => {
                 </div>
               </div>
               
+              {/* Withdrawal History */}
+              {withdrawalHistory.length > 0 && (
+                <div className="card-service rounded-xl p-6 mb-8">
+                  <h2 className="text-lg font-semibold text-white mb-4">Historique des retraits</h2>
+                  <div className="space-y-3">
+                    {withdrawalHistory.map((w) => (
+                      <div key={w.id} className="flex items-center justify-between p-4 bg-white/5 rounded-xl">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                            w.status === 'completed' ? 'bg-green-500/20' : 
+                            w.status === 'failed' ? 'bg-red-500/20' : 'bg-yellow-500/20'
+                          }`}>
+                            {w.status === 'completed' ? (
+                              <CheckCircle className="w-5 h-5 text-green-500" />
+                            ) : w.status === 'failed' ? (
+                              <XCircle className="w-5 h-5 text-red-500" />
+                            ) : (
+                              <Clock className="w-5 h-5 text-yellow-500" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-white font-medium">Retrait vers {w.iban}</p>
+                            <p className="text-sm text-gray-400">
+                              {new Date(w.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="font-semibold text-[#D4AF37]">-{w.amount.toFixed(2)} CHF</span>
+                          <p className={`text-xs ${
+                            w.status === 'completed' ? 'text-green-500' : 
+                            w.status === 'failed' ? 'text-red-500' : 'text-yellow-500'
+                          }`}>
+                            {w.status === 'completed' ? 'Terminé' : 
+                             w.status === 'failed' ? 'Échoué' : 'En cours'}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
               {/* Transaction History */}
               <div className="card-service rounded-xl p-6">
                 <h2 className="text-lg font-semibold text-white mb-4">Historique des transactions</h2>
