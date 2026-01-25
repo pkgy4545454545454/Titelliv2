@@ -27,10 +27,55 @@ const EnterprisePage = () => {
   const [selectedMedia, setSelectedMedia] = useState(null); // For lightbox
   const [isMyProvider, setIsMyProvider] = useState(false);
   const [providerLoading, setProviderLoading] = useState(false);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [bookingForm, setBookingForm] = useState({
+    service_id: '',
+    service_name: '',
+    date: '',
+    time: '',
+    notes: ''
+  });
+  const [bookingLoading, setBookingLoading] = useState(false);
   const videoRef = useRef(null);
 
   const handleAddToCart = (item) => {
     addItem(item, enterprise);
+  };
+
+  const handleBookingSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!isAuthenticated) {
+      toast.error('Connectez-vous pour réserver');
+      navigate('/auth');
+      return;
+    }
+    
+    if (!bookingForm.date || !bookingForm.time) {
+      toast.error('Veuillez sélectionner une date et une heure');
+      return;
+    }
+    
+    setBookingLoading(true);
+    try {
+      const startDateTime = `${bookingForm.date}T${bookingForm.time}:00`;
+      
+      await bookingAPI.create({
+        enterprise_id: id,
+        service_id: bookingForm.service_id || null,
+        service_name: bookingForm.service_name || 'Consultation',
+        start_datetime: startDateTime,
+        notes: bookingForm.notes
+      });
+      
+      toast.success('Demande de RDV envoyée ! L\'entreprise vous confirmera bientôt.');
+      setShowBookingModal(false);
+      setBookingForm({ service_id: '', service_name: '', date: '', time: '', notes: '' });
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur lors de la réservation');
+    } finally {
+      setBookingLoading(false);
+    }
   };
 
   const checkIfMyProvider = async () => {
