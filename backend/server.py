@@ -1231,6 +1231,10 @@ async def create_enterprise(data: EnterpriseCreate, current_user: dict = Depends
     # Insert and return without _id
     insert_doc = enterprise_dict.copy()
     await db.enterprises.insert_one(insert_doc)
+    
+    # Sync to SalonPro
+    asyncio.create_task(sync_enterprise_to_salonpro(enterprise_dict, current_user))
+    
     return enterprise_dict
 
 @api_router.get("/enterprises")
