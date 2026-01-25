@@ -901,12 +901,211 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {['enterprises', 'orders', 'payments', 'settings'].includes(activeTab) && (
-            <div className="card-service rounded-xl p-12 text-center">
-              <h2 className="text-xl font-bold text-white mb-4">
-                {menuItems.find(m => m.id === activeTab)?.label}
-              </h2>
-              <p className="text-gray-400">Section en cours de développement</p>
+          {/* Enterprises Section */}
+          {activeTab === 'enterprises' && (
+            <div>
+              <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Entreprises
+              </h1>
+              <div className="card-service rounded-xl overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-white/5">
+                    <tr>
+                      <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Entreprise</th>
+                      <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Catégorie</th>
+                      <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Statut</th>
+                      <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Créé le</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {stats?.recent_enterprises?.map((e) => (
+                      <tr key={e.id} className="hover:bg-white/5">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            {e.logo ? (
+                              <img src={e.logo} alt={e.business_name} className="w-10 h-10 rounded-full object-cover" />
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-[#0047AB]/20 flex items-center justify-center">
+                                <Building2 className="w-5 h-5 text-[#0047AB]" />
+                              </div>
+                            )}
+                            <div>
+                              <p className="text-white font-medium">{e.business_name}</p>
+                              <p className="text-gray-400 text-sm">{e.city || 'Non spécifié'}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-gray-300">{e.category || 'N/A'}</td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2 py-1 rounded-full text-xs ${
+                            e.is_verified ? 'bg-green-500/20 text-green-500' : 'bg-yellow-500/20 text-yellow-500'
+                          }`}>
+                            {e.is_verified ? 'Vérifié' : 'En attente'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-gray-400 text-sm">
+                          {e.created_at ? new Date(e.created_at).toLocaleDateString('fr-FR') : 'N/A'}
+                        </td>
+                      </tr>
+                    ))}
+                    {(!stats?.recent_enterprises || stats.recent_enterprises.length === 0) && (
+                      <tr>
+                        <td colSpan={4} className="px-6 py-12 text-center text-gray-500">
+                          Aucune entreprise trouvée
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Orders Section */}
+          {activeTab === 'orders' && (
+            <div>
+              <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Commandes
+              </h1>
+              <div className="card-service rounded-xl overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-white/5">
+                    <tr>
+                      <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Commande</th>
+                      <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Client</th>
+                      <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Montant</th>
+                      <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Statut</th>
+                      <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {stats?.recent_orders?.map((o) => (
+                      <tr key={o.id} className="hover:bg-white/5">
+                        <td className="px-6 py-4">
+                          <p className="text-white font-medium">#{o.id?.slice(0, 8)}</p>
+                        </td>
+                        <td className="px-6 py-4 text-gray-300">{o.user_id?.slice(0, 8) || 'N/A'}</td>
+                        <td className="px-6 py-4 text-[#D4AF37] font-medium">{o.total?.toFixed(2)} CHF</td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2 py-1 rounded-full text-xs ${
+                            o.status === 'completed' ? 'bg-green-500/20 text-green-500' :
+                            o.status === 'pending' ? 'bg-yellow-500/20 text-yellow-500' :
+                            o.status === 'cancelled' ? 'bg-red-500/20 text-red-500' :
+                            'bg-blue-500/20 text-blue-500'
+                          }`}>
+                            {o.status === 'completed' ? 'Complété' :
+                             o.status === 'pending' ? 'En attente' :
+                             o.status === 'cancelled' ? 'Annulé' : o.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-gray-400 text-sm">
+                          {o.created_at ? new Date(o.created_at).toLocaleDateString('fr-FR') : 'N/A'}
+                        </td>
+                      </tr>
+                    ))}
+                    {(!stats?.recent_orders || stats.recent_orders.length === 0) && (
+                      <tr>
+                        <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                          Aucune commande trouvée
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Payments Section */}
+          {activeTab === 'payments' && (
+            <div>
+              <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Paiements
+              </h1>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="card-service rounded-xl p-6">
+                  <p className="text-gray-400 text-sm mb-2">Total Revenus</p>
+                  <p className="text-3xl font-bold text-white">{accountingSummary?.revenue?.total_revenue?.toFixed(2) || '0.00'} CHF</p>
+                </div>
+                <div className="card-service rounded-xl p-6">
+                  <p className="text-gray-400 text-sm mb-2">Commissions</p>
+                  <p className="text-3xl font-bold text-[#D4AF37]">{accountingSummary?.commissions?.total_commissions?.toFixed(2) || '0.00'} CHF</p>
+                </div>
+                <div className="card-service rounded-xl p-6">
+                  <p className="text-gray-400 text-sm mb-2">Retraits en attente</p>
+                  <p className="text-3xl font-bold text-orange-500">{accountingSummary?.withdrawals?.pending_amount?.toFixed(2) || '0.00'} CHF</p>
+                </div>
+              </div>
+              <div className="card-service rounded-xl p-6">
+                <p className="text-gray-400 text-center">
+                  Pour voir les détails des transactions, consultez la section <button onClick={() => setActiveTab('accounting')} className="text-[#0047AB] hover:underline">Comptabilité</button>
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Settings Section */}
+          {activeTab === 'settings' && (
+            <div>
+              <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Paramètres
+              </h1>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="card-service rounded-xl p-6">
+                  <h3 className="text-lg font-bold text-white mb-4">Taux de Commission</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between p-3 bg-white/5 rounded-lg">
+                      <span className="text-gray-300">Commission sur commandes</span>
+                      <span className="text-[#D4AF37] font-bold">5%</span>
+                    </div>
+                    <div className="flex justify-between p-3 bg-white/5 rounded-lg">
+                      <span className="text-gray-300">Commission sur investissements</span>
+                      <span className="text-[#D4AF37] font-bold">12%</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="card-service rounded-xl p-6">
+                  <h3 className="text-lg font-bold text-white mb-4">Cashback Client</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between p-3 bg-white/5 rounded-lg">
+                      <span className="text-gray-300">Plan Gratuit</span>
+                      <span className="text-green-500 font-bold">1%</span>
+                    </div>
+                    <div className="flex justify-between p-3 bg-white/5 rounded-lg">
+                      <span className="text-gray-300">Plan Premium</span>
+                      <span className="text-green-500 font-bold">10%</span>
+                    </div>
+                    <div className="flex justify-between p-3 bg-white/5 rounded-lg">
+                      <span className="text-gray-300">Plan VIP</span>
+                      <span className="text-green-500 font-bold">15%</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="card-service rounded-xl p-6">
+                  <h3 className="text-lg font-bold text-white mb-4">Retraits</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between p-3 bg-white/5 rounded-lg">
+                      <span className="text-gray-300">Montant minimum</span>
+                      <span className="text-white font-bold">50 CHF</span>
+                    </div>
+                    <div className="flex justify-between p-3 bg-white/5 rounded-lg">
+                      <span className="text-gray-300">Délai de traitement</span>
+                      <span className="text-white font-bold">1-5 jours</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="card-service rounded-xl p-6">
+                  <h3 className="text-lg font-bold text-white mb-4">Admins Autorisés</h3>
+                  <div className="space-y-3">
+                    <div className="p-3 bg-white/5 rounded-lg">
+                      <span className="text-gray-300">admin@titelli.com</span>
+                    </div>
+                    <div className="p-3 bg-white/5 rounded-lg">
+                      <span className="text-gray-300">spa.luxury@titelli.com</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </main>
