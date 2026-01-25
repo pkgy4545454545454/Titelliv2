@@ -4415,6 +4415,118 @@ async def delete_agenda_event(event_id: str, current_user: dict = Depends(get_cu
     await db.agenda.delete_one({"id": event_id, "enterprise_id": enterprise['id']})
     return {"message": "Événement supprimé"}
 
+# ============ ENTERPRISE CONTACTS ROUTES ============
+
+class EnterpriseContactCreate(BaseModel):
+    name: str
+    company: Optional[str] = None
+    contact_type: str = "client"  # client, supplier, partner, other
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    notes: Optional[str] = None
+    tags: List[str] = []
+
+@api_router.get("/enterprise/contacts")
+async def get_enterprise_contacts(
+    current_user: dict = Depends(get_current_user),
+    contact_type: Optional[str] = None,
+    search: Optional[str] = None
+):
+    """Get all contacts for the enterprise"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        return {"contacts": [], "total": 0}
+    
+    query = {"enterprise_id": enterprise['id']}
+    if contact_type:
+        query["contact_type"] = contact_type
+    if search:
+        query["$or"] = [
+            {"name": {"$regex": search, "$options": "i"}},
+            {"company": {"$regex": search, "$options": "i"}},
+            {"email": {"$regex": search, "$options": "i"}}
+        ]
+    
+    contacts = await db.enterprise_contacts.find(query, {"_id": 0}).sort("name", 1).to_list(500)
+    total = await db.enterprise_contacts.count_documents({"enterprise_id": enterprise['id']})
+    
+    # Count by type
+    type_counts = {}
+    for ct in ["client", "supplier", "partner", "other"]:
+        type_counts[ct] = await db.enterprise_contacts.count_documents({
+            "enterprise_id": enterprise['id'],
+            "contact_type": ct
+        })
+    
+    return {"contacts": contacts, "total": total, "type_counts": type_counts}
+
+@api_router.post("/enterprise/contacts")
+async def create_enterprise_contact(contact: EnterpriseContactCreate, current_user: dict = Depends(get_current_user)):
+    """Add a new contact"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    contact_doc = {
+        "id": str(uuid.uuid4()),
+        "enterprise_id": enterprise['id'],
+        **contact.model_dump(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.enterprise_contacts.insert_one(contact_doc)
+    del contact_doc['_id']
+    return contact_doc
+
+@api_router.put("/enterprise/contacts/{contact_id}")
+async def update_enterprise_contact(contact_id: str, contact: EnterpriseContactCreate, current_user: dict = Depends(get_current_user)):
+    """Update an existing contact"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    existing = await db.enterprise_contacts.find_one({"id": contact_id, "enterprise_id": enterprise['id']})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Contact non trouvé")
+    
+    await db.enterprise_contacts.update_one(
+        {"id": contact_id, "enterprise_id": enterprise['id']},
+        {"$set": {**contact.model_dump(), "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    updated = await db.enterprise_contacts.find_one({"id": contact_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/enterprise/contacts/{contact_id}")
+async def delete_enterprise_contact(contact_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a contact"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    result = await db.enterprise_contacts.delete_one({"id": contact_id, "enterprise_id": enterprise['id']})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Contact non trouvé")
+    
+    return {"message": "Contact supprimé"}
+
+@api_router.get("/enterprise/contacts/{contact_id}")
+async def get_enterprise_contact(contact_id: str, current_user: dict = Depends(get_current_user)):
+    """Get a single contact"""
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    contact = await db.enterprise_contacts.find_one(
+        {"id": contact_id, "enterprise_id": enterprise['id']},
+        {"_id": 0}
+    )
+    if not contact:
+        raise HTTPException(status_code=404, detail="Contact non trouvé")
+    
+    return contact
+
 # ============ TEAM/PERSONNEL ROUTES ============
 
 class TeamMemberCreate(BaseModel):
