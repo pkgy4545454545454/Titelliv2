@@ -800,6 +800,7 @@ NOTIFICATION_TYPES = {
     "order_placed": {"icon": "shopping-cart", "color": "green"},
     "order_status": {"icon": "package", "color": "blue"},
     "cashback_earned": {"icon": "wallet", "color": "yellow"},
+    "cashback_withdrawal": {"icon": "credit-card", "color": "green"},
     "friend_request": {"icon": "user-plus", "color": "purple"},
     "friend_accepted": {"icon": "users", "color": "green"},
     "message_received": {"icon": "message-square", "color": "blue"},
