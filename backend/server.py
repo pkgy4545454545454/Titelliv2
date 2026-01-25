@@ -4597,6 +4597,10 @@ class ClientProfileUpdate(BaseModel):
     twitter: Optional[str] = None
     website: Optional[str] = None
     bio: Optional[str] = None
+    # Bank account info for cashback withdrawals
+    iban: Optional[str] = None
+    bank_account_holder: Optional[str] = None
+    bic_swift: Optional[str] = None
 
 @api_router.put("/client/profile")
 async def update_client_profile(profile_data: ClientProfileUpdate, current_user: dict = Depends(get_current_user)):
