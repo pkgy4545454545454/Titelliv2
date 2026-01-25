@@ -1190,22 +1190,7 @@ const EnterpriseDashboard = () => {
 
           {/* Contacts */}
           {activeTab === 'contacts' && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
-                  Contacts
-                </h1>
-                <button className="btn-primary">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Ajouter
-                </button>
-              </div>
-              <div className="card-service rounded-xl p-8 text-center">
-                <Phone className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-                <p className="text-gray-400 mb-2">Aucun contact enregistré</p>
-                <p className="text-sm text-gray-500">Ajoutez vos fournisseurs, partenaires et clients importants</p>
-              </div>
-            </div>
+            <ContactsSection contacts={contacts} onRefresh={fetchAllData} />
           )}
 
           {/* Support */}
