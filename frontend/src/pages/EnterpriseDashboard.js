@@ -2803,6 +2803,253 @@ const ContactsSection = ({ contacts, onRefresh }) => {
   );
 };
 
+// Messages Section Component
+const MessagesSection = () => {
+  const [conversations, setConversations] = useState([]);
+  const [selectedConversation, setSelectedConversation] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    fetchConversations();
+  }, []);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
+
+  const fetchConversations = async () => {
+    try {
+      const res = await messagesAPI.getConversations();
+      setConversations(res.data.conversations || []);
+    } catch (error) {
+      console.error('Error fetching conversations:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const selectConversation = async (conv) => {
+    setSelectedConversation(conv);
+    try {
+      const res = await messagesAPI.getMessages(conv.partner.id);
+      setMessages(res.data.messages || []);
+      // Refresh conversations to update unread count
+      fetchConversations();
+    } catch (error) {
+      toast.error('Erreur lors du chargement des messages');
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !selectedConversation) return;
+    
+    setSending(true);
+    try {
+      const res = await messagesAPI.send(selectedConversation.partner.id, newMessage.trim());
+      setMessages([...messages, res.data]);
+      setNewMessage('');
+      fetchConversations();
+    } catch (error) {
+      toast.error('Erreur lors de l\'envoi');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const formatTime = (dateStr) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+      return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    } else if (diffDays === 1) {
+      return 'Hier';
+    } else if (diffDays < 7) {
+      return date.toLocaleDateString('fr-FR', { weekday: 'short' });
+    } else {
+      return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+    }
+  };
+
+  const getInitial = (partner) => {
+    if (!partner) return '?';
+    return (partner.first_name || partner.business_name || '?').charAt(0).toUpperCase();
+  };
+
+  const getPartnerName = (partner) => {
+    if (!partner) return 'Inconnu';
+    if (partner.business_name) return partner.business_name;
+    return `${partner.first_name || ''} ${partner.last_name || ''}`.trim() || 'Inconnu';
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="w-10 h-10 border-4 border-[#0047AB] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+        Messagerie
+      </h1>
+
+      <div className="card-service rounded-xl overflow-hidden" style={{ height: '600px' }}>
+        <div className="flex h-full">
+          {/* Conversation List */}
+          <div className={`${selectedConversation ? 'hidden md:block' : ''} w-full md:w-1/3 border-r border-white/10 overflow-y-auto`}>
+            {conversations.length > 0 ? (
+              <div className="divide-y divide-white/10">
+                {conversations.map((conv) => (
+                  <button
+                    key={conv.partner?.id}
+                    onClick={() => selectConversation(conv)}
+                    className={`w-full p-4 text-left hover:bg-white/5 transition-colors ${
+                      selectedConversation?.partner?.id === conv.partner?.id ? 'bg-white/10' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-gradient-to-br from-[#0047AB] to-[#D4AF37] rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-white font-bold text-lg">
+                          {getInitial(conv.partner)}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <p className="text-white font-medium truncate">
+                            {getPartnerName(conv.partner)}
+                          </p>
+                          <span className="text-xs text-gray-500">
+                            {formatTime(conv.last_message?.created_at)}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm text-gray-400 truncate pr-2">
+                            {conv.last_message?.content || 'Pas de message'}
+                          </p>
+                          {conv.unread_count > 0 && (
+                            <span className="bg-[#0047AB] text-white text-xs px-2 py-0.5 rounded-full">
+                              {conv.unread_count}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full p-6 text-center">
+                <MessageSquare className="w-12 h-12 text-gray-500 mb-4" />
+                <p className="text-gray-400">Aucune conversation</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Vos échanges avec les clients apparaîtront ici
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Messages Area */}
+          <div className={`${selectedConversation ? '' : 'hidden md:flex'} flex-1 flex flex-col`}>
+            {selectedConversation ? (
+              <>
+                {/* Header */}
+                <div className="p-4 border-b border-white/10 flex items-center gap-3">
+                  <button 
+                    onClick={() => setSelectedConversation(null)}
+                    className="md:hidden p-2 hover:bg-white/10 rounded-lg"
+                  >
+                    <ChevronRight className="w-5 h-5 text-gray-400 rotate-180" />
+                  </button>
+                  <div className="w-10 h-10 bg-gradient-to-br from-[#0047AB] to-[#D4AF37] rounded-full flex items-center justify-center">
+                    <span className="text-white font-bold">
+                      {getInitial(selectedConversation.partner)}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-white font-medium">
+                      {getPartnerName(selectedConversation.partner)}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {selectedConversation.partner?.user_type === 'client' ? 'Client' : 'Utilisateur'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Messages */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  {messages.map((msg) => {
+                    const isOwn = msg.sender_id !== selectedConversation.partner?.id;
+                    return (
+                      <div
+                        key={msg.id}
+                        className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div
+                          className={`max-w-[70%] p-3 rounded-2xl ${
+                            isOwn
+                              ? 'bg-[#0047AB] text-white rounded-br-md'
+                              : 'bg-white/10 text-white rounded-bl-md'
+                          }`}
+                        >
+                          <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                          <p className={`text-xs mt-1 ${isOwn ? 'text-blue-200' : 'text-gray-500'}`}>
+                            {formatTime(msg.created_at)}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div ref={messagesEndRef} />
+                </div>
+
+                {/* Input */}
+                <div className="p-4 border-t border-white/10">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Écrivez un message..."
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+                      className="input-dark flex-1"
+                      disabled={sending}
+                    />
+                    <button
+                      onClick={sendMessage}
+                      disabled={!newMessage.trim() || sending}
+                      className="btn-primary px-4 disabled:opacity-50"
+                    >
+                      <Send className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full p-6 text-center">
+                <MessageSquare className="w-16 h-16 text-gray-500 mb-4" />
+                <p className="text-gray-400 text-lg">Sélectionnez une conversation</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Choisissez une conversation dans la liste pour voir les messages
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Team Section Component
 const TeamSection = ({ team, teamOrders, onDelete, onRefresh }) => {
   const [showAdd, setShowAdd] = useState(false);
