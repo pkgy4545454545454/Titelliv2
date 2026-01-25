@@ -2201,7 +2201,7 @@ async def export_withdrawals_csv(
     status: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user_from_token_param)
 ):
     """Export withdrawals to CSV (admin only)"""
     if not is_admin(current_user):
@@ -2530,7 +2530,7 @@ async def get_all_transactions(
 async def export_accounting_excel(
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user_from_token_param)
 ):
     """Export accounting data to Excel (admin only)"""
     if not is_admin(current_user):
@@ -2739,7 +2739,7 @@ async def export_accounting_excel(
 async def export_accounting_pdf(
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user_from_token_param)
 ):
     """Export accounting data to PDF (admin only)"""
     if not is_admin(current_user):
