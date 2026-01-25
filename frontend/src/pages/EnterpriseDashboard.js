@@ -234,6 +234,10 @@ const EnterpriseDashboard = () => {
     },
   ];
 
+  // Admin emails that have access to admin panel
+  const ADMIN_EMAILS = ['admin@titelli.com', 'spa.luxury@titelli.com'];
+  const isAdmin = ADMIN_EMAILS.includes(user?.email);
+
   // Notification counts for menu items
   const getNotificationCount = (key) => {
     switch(key) {
