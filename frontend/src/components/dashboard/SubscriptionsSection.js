@@ -134,20 +134,20 @@ const SubscriptionsSection = () => {
   ];
 
   const alacarteOptions = [
-    { id: 'extra_ads', name: 'Publicités extra', price: 200, period: '/mois', description: '+5 publicités par mois' },
-    { id: 'investors', name: 'Accès Investisseurs', price: 300, period: '/mois', description: 'Visibilité auprès des investisseurs' },
+    { id: 'pub_extra', name: 'Publicités extra', price: 200, period: '/mois', description: '+2 publicités + 1 vidéo par mois' },
+    { id: 'investors_access', name: 'Accès Investisseurs', price: 300, period: '/mois', description: 'Visibilité auprès des investisseurs' },
     { id: 'delivery_24', name: 'Livraison 24/24', price: 300, period: '/mois', description: 'Service de livraison permanent' },
-    { id: 'local', name: 'Local commercial', price: 300, period: '/mois', description: 'Accès au local 24h/24' },
-    { id: 'suppliers', name: 'Accès Fournisseurs', price: 500, period: '/mois', description: 'Réseau de fournisseurs exclusifs' },
-    { id: 'training', name: 'Formations', price: 200, period: '/mois', description: 'Formations business mensuelles' },
-    { id: 'recruitment', name: 'Recrutement', price: 200, period: '/mois', description: 'Aide au recrutement' },
-    { id: 'realestate', name: 'Immobilier', price: 200, period: '/mois', description: 'Annonces immobilières' },
-    { id: 'expert', name: 'Expert conseil', price: 1000, period: '/mois', description: 'Conseiller dédié' },
-    { id: 'tax', name: 'Fiscaliste', price: 4000, period: '/mois', description: 'Accompagnement fiscal' },
-    { id: 'services', name: 'Prestations liquidées', price: 1000, period: '/mois', description: '10h de prestations' },
-    { id: 'labelling', name: 'Expert labellisation', price: 400, period: 'ponctuel', description: 'Accompagnement certification' },
-    { id: 'services_20h', name: '20h Prestations', price: 1000, period: 'ponctuel', description: '20 heures de prestations' },
-    { id: 'lunches', name: '20 déjeuners équipe', price: 2000, period: 'ponctuel', description: "Déjeuners d'équipe" },
+    { id: 'local_access', name: 'Local commercial', price: 300, period: '/mois', description: 'Accès au local 24h/24' },
+    { id: 'suppliers_access', name: 'Accès Fournisseurs', price: 500, period: '/mois', description: 'Réseau de fournisseurs exclusifs' },
+    { id: 'premium_trainings', name: 'Formations', price: 200, period: '/mois', description: 'Formations business mensuelles' },
+    { id: 'instant_recruitment', name: 'Recrutement', price: 200, period: '/mois', description: 'Aide au recrutement' },
+    { id: 'real_estate_access', name: 'Immobilier', price: 200, period: '/mois', description: 'Annonces immobilières' },
+    { id: 'expert_conseil', name: 'Expert conseil', price: 1000, period: '/mois', description: 'Conseiller dédié' },
+    { id: 'fiscaliste', name: 'Fiscaliste', price: 4000, period: '/mois', description: 'Accompagnement fiscal' },
+    { id: 'prestation_liquidee', name: 'Prestations liquidées', price: 1000, period: '/mois', description: '800 CHF de prestations' },
+    { id: 'expert_label', name: 'Expert labellisation', price: 400, period: 'ponctuel', description: 'Accompagnement certification' },
+    { id: 'prestation_20h', name: '20h Prestations', price: 1000, period: 'ponctuel', description: '20 heures de prestations' },
+    { id: 'dejeuner_equipe', name: '20 déjeuners équipe', price: 2000, period: 'ponctuel', description: "Déjeuners d'équipe" },
   ];
 
   if (loading) {
