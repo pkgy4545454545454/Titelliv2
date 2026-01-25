@@ -181,7 +181,7 @@ class TestMessagingSystem:
         test_message = f"TEST_Message_{uuid.uuid4().hex[:8]}"
         
         response = requests.post(f"{BASE_URL}/api/messages", headers=client_headers, json={
-            "receiver_id": admin_id,
+            "recipient_id": admin_id,
             "content": test_message
         })
         
