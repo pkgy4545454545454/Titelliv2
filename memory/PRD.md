@@ -9,6 +9,55 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
 
 ## ✅ Fonctionnalités Complétées (25 Jan 2026)
 
+### Phase 37 : Intégration Titelli ↔ SalonPro - Système Webhooks (TERMINÉ)
+
+**Système de synchronisation bidirectionnelle entre Titelli et SalonPro :**
+
+1. **Webhooks Sortants (Titelli → SalonPro)**
+   - ✅ `sync_enterprise_to_salonpro()` - Sync profil entreprise lors de l'inscription
+   - ✅ `sync_appointment_to_salonpro()` - Sync RDV lors de la prise de rendez-vous
+   - ✅ `sync_service_to_salonpro()` - Sync services/produits
+   - ✅ Configuration via variables d'environnement : `SALONPRO_WEBHOOK_URL`, `SALONPRO_WEBHOOK_SECRET`
+
+2. **Webhooks Entrants (SalonPro → Titelli)**
+   - ✅ `POST /api/webhook/salonpro` - Endpoint pour recevoir les webhooks SalonPro
+   - ✅ Events supportés : `appointment_created`, `appointment_updated`, `appointment_cancelled`, `service_created`
+   - ✅ Sécurité via secret partagé
+
+3. **Prise de RDV Client (NOUVELLE FONCTIONNALITÉ)**
+   - ✅ Modal de réservation sur la page entreprise
+   - ✅ Sélection service + date + heure + message
+   - ✅ Notification automatique à l'entreprise
+   - ✅ Sync automatique vers SalonPro
+   - ✅ Status: pending → confirmed → completed
+
+**APIs créées :**
+```
+# Booking (Prise de RDV)
+POST   /api/booking/appointment                    # Client réserve chez une entreprise
+GET    /api/booking/my-appointments                # Mes RDV (client)
+GET    /api/booking/enterprise/{id}/availability   # Disponibilités entreprise
+PUT    /api/booking/{id}/status                    # Confirmer/Annuler RDV
+
+# Webhook SalonPro
+POST   /api/webhook/salonpro                       # Recevoir events de SalonPro
+```
+
+**Variables d'environnement ajoutées :**
+```
+SALONPRO_WEBHOOK_URL=https://salonpro.preview.emergentagent.com  # URL de SalonPro
+SALONPRO_WEBHOOK_SECRET=titelli_salonpro_sync_secret             # Secret partagé
+```
+
+**Données partagées entre les deux sites :**
+- Même ID entreprise (`enterprise_id`)
+- Même ID client (`client_id`) 
+- Même base MongoDB pour les profils entreprise
+
+**Tests: Validés via curl + screenshots**
+
+---
+
 ### Phase 36 : Sections Communication Entreprise - Mode Production (TERMINÉ)
 
 **Nouvelles fonctionnalités implémentées :**
