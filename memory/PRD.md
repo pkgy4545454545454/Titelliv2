@@ -9,6 +9,42 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
 
 ## ✅ Fonctionnalités Complétées (25 Jan 2026)
 
+### Phase 36 : Sections Communication Entreprise - Mode Production (TERMINÉ)
+
+**Nouvelles fonctionnalités implémentées :**
+
+1. **Section Contacts Entreprise (NOUVELLE)**
+   - ✅ CRUD complet pour gérer les contacts (clients, fournisseurs, partenaires)
+   - ✅ Backend : `/api/enterprise/contacts` (GET, POST, PUT, DELETE)
+   - ✅ Filtres par type de contact et recherche
+   - ✅ Système de tags personnalisés
+   - ✅ Statistiques par type de contact
+   - ✅ Interface modale d'ajout/édition
+
+2. **Section Messagerie Entreprise (NOUVELLE)**
+   - ✅ Interface de chat complète avec liste de conversations
+   - ✅ Affichage des messages en temps réel
+   - ✅ Envoi de nouveaux messages
+   - ✅ Compteur de messages non lus
+   - ✅ Responsive mobile (liste et conversation séparées)
+
+3. **Section Agenda (déjà existante)**
+   - ✅ Fonctionnelle avec CRUD complet
+
+**APIs créées :**
+```
+# Contacts Entreprise
+GET    /api/enterprise/contacts       # Liste + stats par type
+POST   /api/enterprise/contacts       # Créer contact
+PUT    /api/enterprise/contacts/{id}  # Modifier contact
+DELETE /api/enterprise/contacts/{id}  # Supprimer contact
+GET    /api/enterprise/contacts/{id}  # Détail contact
+```
+
+**Tests: Validés via curl + screenshots**
+
+---
+
 ### Phase 35 : Contrôle Global Production-Ready & Bug Fix Export PDF (TERMINÉ)
 
 **Bug corrigé : Export PDF/Excel ne fonctionnait pas**
