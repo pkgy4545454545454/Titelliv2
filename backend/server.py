@@ -2161,69 +2161,6 @@ async def withdraw_cashback(
         "estimated_arrival": "1-3 jours ouvrables" if stripe_success else "3-5 jours ouvrables",
         "note": None if stripe_success else "Votre demande sera traitée manuellement par notre équipe"
     }
-        
-        # Deduct from user's cashback balance
-        await db.users.update_one(
-            {"id": current_user['id']},
-            {"$inc": {"cashback_balance": -withdrawal_amount}}
-        )
-        
-        # Record cashback transaction
-        transaction = {
-            "id": str(uuid.uuid4()),
-            "user_id": current_user['id'],
-            "amount": -withdrawal_amount,
-            "type": "withdrawal",
-            "description": f"Retrait vers compte bancaire ****{iban_clean[-4:]}",
-            "withdrawal_id": withdrawal_id,
-            "created_at": datetime.now(timezone.utc).isoformat()
-        }
-        await db.cashback_transactions.insert_one(transaction)
-        
-        # Notify user
-        await create_notification(
-            db=db,
-            user_id=current_user['id'],
-            notification_type="cashback_withdrawal",
-            title="Retrait en cours",
-            message=f"Votre retrait de {withdrawal_amount:.2f} CHF est en cours de traitement. Délai: 1-5 jours ouvrables.",
-            link="/dashboard/client?tab=cashback"
-        )
-        
-        # Update withdrawal status to completed
-        await db.cashback_withdrawals.update_one(
-            {"id": withdrawal_id},
-            {"$set": {
-                "status": "completed",
-                "completed_at": datetime.now(timezone.utc).isoformat()
-            }}
-        )
-        
-        return {
-            "success": True,
-            "message": f"Retrait de {withdrawal_amount:.2f} CHF initié avec succès",
-            "withdrawal_id": withdrawal_id,
-            "new_balance": current_balance - withdrawal_amount,
-            "estimated_arrival": "1-5 jours ouvrables"
-        }
-        
-    except stripe.error.StripeError as e:
-        logger.error(f"Stripe withdrawal error: {e}")
-        # Update withdrawal status to failed
-        await db.cashback_withdrawals.update_one(
-            {"id": withdrawal_id},
-            {"$set": {
-                "status": "failed",
-                "error_message": str(e)
-            }}
-        )
-        raise HTTPException(
-            status_code=500, 
-            detail=f"Erreur Stripe: {str(e)}. Veuillez réessayer ou contacter le support."
-        )
-    except Exception as e:
-        logger.error(f"Withdrawal error: {e}")
-        raise HTTPException(status_code=500, detail="Erreur lors du retrait. Veuillez réessayer.")
 
 @api_router.get("/cashback/withdrawals")
 async def get_withdrawal_history(current_user: dict = Depends(get_current_user)):
