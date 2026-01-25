@@ -2262,6 +2262,589 @@ async def get_withdrawal_detail(
         "user": user
     }
 
+# ============ COMPTABILITÉ / ACCOUNTING ROUTES ============
+
+@api_router.get("/admin/accounting/summary")
+async def get_accounting_summary(
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get comprehensive accounting summary (admin only)"""
+    if not is_admin(current_user):
+        raise HTTPException(status_code=403, detail="Admin uniquement")
+    
+    # Build date filter
+    date_filter = {}
+    if start_date:
+        date_filter["$gte"] = start_date
+    if end_date:
+        date_filter["$lte"] = end_date
+    
+    order_query = {"created_at": date_filter} if date_filter else {}
+    
+    # 1. Orders and Revenue
+    all_orders = await db.orders.find(order_query, {"_id": 0}).to_list(10000)
+    total_orders = len(all_orders)
+    total_revenue = sum(o.get('total', 0) for o in all_orders)
+    management_fees = sum(o.get('management_fee', 0) for o in all_orders)
+    
+    # Orders by status
+    orders_by_status = {}
+    for o in all_orders:
+        status = o.get('status', 'unknown')
+        orders_by_status[status] = orders_by_status.get(status, 0) + 1
+    
+    # 2. Subscriptions Revenue
+    all_subscriptions = await db.subscriptions.find({}, {"_id": 0}).to_list(10000)
+    subscription_revenue = sum(s.get('price', 0) for s in all_subscriptions if s.get('is_active'))
+    active_subscriptions = len([s for s in all_subscriptions if s.get('is_active')])
+    
+    # Subscriptions by plan
+    subs_by_plan = {}
+    for s in all_subscriptions:
+        if s.get('is_active'):
+            plan = s.get('plan_name', 'unknown')
+            subs_by_plan[plan] = subs_by_plan.get(plan, 0) + 1
+    
+    # 3. Cashback Statistics
+    all_cashback_tx = await db.cashback_transactions.find({}, {"_id": 0}).to_list(10000)
+    cashback_distributed = sum(tx.get('amount', 0) for tx in all_cashback_tx if tx.get('amount', 0) > 0)
+    cashback_used = abs(sum(tx.get('amount', 0) for tx in all_cashback_tx if tx.get('amount', 0) < 0 and tx.get('type') != 'withdrawal'))
+    cashback_withdrawn = abs(sum(tx.get('amount', 0) for tx in all_cashback_tx if tx.get('type') == 'withdrawal'))
+    
+    # 4. Withdrawals
+    all_withdrawals = await db.cashback_withdrawals.find({}, {"_id": 0}).to_list(10000)
+    withdrawals_total = sum(w.get('amount', 0) for w in all_withdrawals)
+    withdrawals_pending = sum(w.get('amount', 0) for w in all_withdrawals if w.get('status') in ['pending', 'manual_processing'])
+    withdrawals_completed = sum(w.get('amount', 0) for w in all_withdrawals if w.get('status') == 'completed')
+    
+    # 5. Investments
+    all_investments = await db.investments.find({}, {"_id": 0}).to_list(10000) if await db.list_collection_names() and 'investments' in await db.list_collection_names() else []
+    total_invested = sum(i.get('amount', 0) for i in all_investments)
+    investment_commissions = sum(i.get('titelli_commission_12pct', 0) for i in all_investments)
+    
+    # 6. Payment Transactions
+    all_payments = await db.payment_transactions.find({}, {"_id": 0}).to_list(10000)
+    payments_completed = sum(p.get('amount', 0) for p in all_payments if p.get('payment_status') == 'paid')
+    
+    # 7. Finance Transactions (enterprise side)
+    all_finance_tx = await db.finance_transactions.find({}, {"_id": 0}).to_list(10000)
+    
+    # Calculate commissions (5% on orders)
+    commission_rate = 0.05  # 5%
+    total_commissions = total_revenue * commission_rate
+    
+    return {
+        "period": {
+            "start_date": start_date or "all",
+            "end_date": end_date or "all"
+        },
+        "revenue": {
+            "total_orders_revenue": round(total_revenue, 2),
+            "subscription_revenue": round(subscription_revenue, 2),
+            "total_revenue": round(total_revenue + subscription_revenue, 2)
+        },
+        "commissions": {
+            "order_commissions_5pct": round(total_commissions, 2),
+            "management_fees": round(management_fees, 2),
+            "investment_commissions_12pct": round(investment_commissions, 2),
+            "total_commissions": round(total_commissions + management_fees + investment_commissions, 2)
+        },
+        "orders": {
+            "total_count": total_orders,
+            "by_status": orders_by_status,
+            "average_order_value": round(total_revenue / total_orders, 2) if total_orders > 0 else 0
+        },
+        "subscriptions": {
+            "active_count": active_subscriptions,
+            "total_revenue": round(subscription_revenue, 2),
+            "by_plan": subs_by_plan
+        },
+        "cashback": {
+            "total_distributed": round(cashback_distributed, 2),
+            "total_used": round(cashback_used, 2),
+            "total_withdrawn": round(cashback_withdrawn, 2),
+            "net_liability": round(cashback_distributed - cashback_used - cashback_withdrawn, 2)
+        },
+        "withdrawals": {
+            "total_requested": round(withdrawals_total, 2),
+            "pending_amount": round(withdrawals_pending, 2),
+            "completed_amount": round(withdrawals_completed, 2),
+            "count": len(all_withdrawals)
+        },
+        "investments": {
+            "total_invested": round(total_invested, 2),
+            "commissions_earned": round(investment_commissions, 2)
+        },
+        "payments": {
+            "total_processed": round(payments_completed, 2),
+            "transaction_count": len([p for p in all_payments if p.get('payment_status') == 'paid'])
+        }
+    }
+
+@api_router.get("/admin/accounting/transactions")
+async def get_all_transactions(
+    transaction_type: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    limit: int = 100,
+    skip: int = 0,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get all financial transactions (admin only)"""
+    if not is_admin(current_user):
+        raise HTTPException(status_code=403, detail="Admin uniquement")
+    
+    transactions = []
+    
+    # Build date filter
+    date_query = {}
+    if start_date:
+        date_query["$gte"] = start_date
+    if end_date:
+        date_query["$lte"] = end_date
+    
+    base_query = {"created_at": date_query} if date_query else {}
+    
+    # 1. Orders
+    if not transaction_type or transaction_type == 'order':
+        orders = await db.orders.find(base_query, {"_id": 0}).to_list(10000)
+        for o in orders:
+            transactions.append({
+                "id": o.get('id'),
+                "type": "order",
+                "date": o.get('created_at'),
+                "description": f"Commande #{o.get('id', '')[:8]}",
+                "amount": o.get('total', 0),
+                "commission": o.get('management_fee', 0),
+                "status": o.get('status'),
+                "user_id": o.get('user_id'),
+                "enterprise_id": o.get('enterprise_id')
+            })
+    
+    # 2. Subscriptions
+    if not transaction_type or transaction_type == 'subscription':
+        subs = await db.subscriptions.find(base_query, {"_id": 0}).to_list(10000)
+        for s in subs:
+            transactions.append({
+                "id": s.get('id'),
+                "type": "subscription",
+                "date": s.get('created_at'),
+                "description": f"Abonnement {s.get('plan_name', '')}",
+                "amount": s.get('price', 0),
+                "commission": s.get('price', 0),  # 100% for subscriptions
+                "status": "active" if s.get('is_active') else "inactive",
+                "user_id": s.get('user_id'),
+                "enterprise_id": None
+            })
+    
+    # 3. Cashback Transactions
+    if not transaction_type or transaction_type == 'cashback':
+        cashback_txs = await db.cashback_transactions.find(base_query, {"_id": 0}).to_list(10000)
+        for tx in cashback_txs:
+            transactions.append({
+                "id": tx.get('id'),
+                "type": "cashback",
+                "date": tx.get('created_at'),
+                "description": tx.get('description', 'Cashback'),
+                "amount": tx.get('amount', 0),
+                "commission": 0,
+                "status": tx.get('type', 'earned'),
+                "user_id": tx.get('user_id'),
+                "enterprise_id": None
+            })
+    
+    # 4. Withdrawals
+    if not transaction_type or transaction_type == 'withdrawal':
+        withdrawals = await db.cashback_withdrawals.find(base_query, {"_id": 0}).to_list(10000)
+        for w in withdrawals:
+            transactions.append({
+                "id": w.get('id'),
+                "type": "withdrawal",
+                "date": w.get('created_at'),
+                "description": f"Retrait vers {w.get('iban_masked', '****')}",
+                "amount": -w.get('amount', 0),
+                "commission": 0,
+                "status": w.get('status'),
+                "user_id": w.get('user_id'),
+                "enterprise_id": None
+            })
+    
+    # 5. Payment Transactions
+    if not transaction_type or transaction_type == 'payment':
+        payments = await db.payment_transactions.find(base_query, {"_id": 0}).to_list(10000)
+        for p in payments:
+            transactions.append({
+                "id": p.get('id'),
+                "type": "payment",
+                "date": p.get('created_at'),
+                "description": f"Paiement Stripe #{p.get('session_id', '')[:8] if p.get('session_id') else 'N/A'}",
+                "amount": p.get('amount', 0),
+                "commission": 0,
+                "status": p.get('payment_status', 'pending'),
+                "user_id": p.get('user_id'),
+                "enterprise_id": None
+            })
+    
+    # Sort by date descending
+    transactions.sort(key=lambda x: x.get('date') or '', reverse=True)
+    
+    # Pagination
+    total = len(transactions)
+    transactions = transactions[skip:skip + limit]
+    
+    return {
+        "transactions": transactions,
+        "total": total,
+        "limit": limit,
+        "skip": skip
+    }
+
+@api_router.get("/admin/accounting/export/excel")
+async def export_accounting_excel(
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Export accounting data to Excel (admin only)"""
+    if not is_admin(current_user):
+        raise HTTPException(status_code=403, detail="Admin uniquement")
+    
+    import io
+    
+    try:
+        import openpyxl
+        from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+        from openpyxl.utils import get_column_letter
+    except ImportError:
+        raise HTTPException(status_code=500, detail="openpyxl non installé")
+    
+    # Get all data
+    summary = await get_accounting_summary(start_date, end_date, current_user)
+    transactions_data = await get_all_transactions(None, start_date, end_date, 10000, 0, current_user)
+    
+    # Create workbook
+    wb = openpyxl.Workbook()
+    
+    # ===== Sheet 1: Summary =====
+    ws_summary = wb.active
+    ws_summary.title = "Résumé"
+    
+    # Styles
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="0047AB", end_color="0047AB", fill_type="solid")
+    gold_fill = PatternFill(start_color="D4AF37", end_color="D4AF37", fill_type="solid")
+    thin_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # Title
+    ws_summary['A1'] = "RAPPORT COMPTABLE - TITELLI"
+    ws_summary['A1'].font = Font(bold=True, size=16)
+    ws_summary['A2'] = f"Période: {start_date or 'Début'} - {end_date or 'Aujourd\\'hui'}"
+    ws_summary['A3'] = f"Généré le: {datetime.now(timezone.utc).strftime('%d/%m/%Y %H:%M')}"
+    
+    # Revenue Section
+    row = 5
+    ws_summary[f'A{row}'] = "REVENUS"
+    ws_summary[f'A{row}'].font = header_font
+    ws_summary[f'A{row}'].fill = header_fill
+    ws_summary.merge_cells(f'A{row}:C{row}')
+    
+    row += 1
+    ws_summary[f'A{row}'] = "Chiffre d'affaires commandes"
+    ws_summary[f'C{row}'] = f"{summary['revenue']['total_orders_revenue']:.2f} CHF"
+    row += 1
+    ws_summary[f'A{row}'] = "Revenus abonnements"
+    ws_summary[f'C{row}'] = f"{summary['revenue']['subscription_revenue']:.2f} CHF"
+    row += 1
+    ws_summary[f'A{row}'] = "TOTAL REVENUS"
+    ws_summary[f'A{row}'].font = Font(bold=True)
+    ws_summary[f'C{row}'] = f"{summary['revenue']['total_revenue']:.2f} CHF"
+    ws_summary[f'C{row}'].font = Font(bold=True)
+    
+    # Commissions Section
+    row += 2
+    ws_summary[f'A{row}'] = "COMMISSIONS TITELLI"
+    ws_summary[f'A{row}'].font = header_font
+    ws_summary[f'A{row}'].fill = gold_fill
+    ws_summary.merge_cells(f'A{row}:C{row}')
+    
+    row += 1
+    ws_summary[f'A{row}'] = "Commissions commandes (5%)"
+    ws_summary[f'C{row}'] = f"{summary['commissions']['order_commissions_5pct']:.2f} CHF"
+    row += 1
+    ws_summary[f'A{row}'] = "Frais de gestion"
+    ws_summary[f'C{row}'] = f"{summary['commissions']['management_fees']:.2f} CHF"
+    row += 1
+    ws_summary[f'A{row}'] = "Commissions investissements (12%)"
+    ws_summary[f'C{row}'] = f"{summary['commissions']['investment_commissions_12pct']:.2f} CHF"
+    row += 1
+    ws_summary[f'A{row}'] = "TOTAL COMMISSIONS"
+    ws_summary[f'A{row}'].font = Font(bold=True)
+    ws_summary[f'C{row}'] = f"{summary['commissions']['total_commissions']:.2f} CHF"
+    ws_summary[f'C{row}'].font = Font(bold=True)
+    
+    # Cashback Section
+    row += 2
+    ws_summary[f'A{row}'] = "CASHBACK"
+    ws_summary[f'A{row}'].font = header_font
+    ws_summary[f'A{row}'].fill = PatternFill(start_color="28A745", end_color="28A745", fill_type="solid")
+    ws_summary.merge_cells(f'A{row}:C{row}')
+    
+    row += 1
+    ws_summary[f'A{row}'] = "Cashback distribué"
+    ws_summary[f'C{row}'] = f"{summary['cashback']['total_distributed']:.2f} CHF"
+    row += 1
+    ws_summary[f'A{row}'] = "Cashback utilisé"
+    ws_summary[f'C{row}'] = f"{summary['cashback']['total_used']:.2f} CHF"
+    row += 1
+    ws_summary[f'A{row}'] = "Cashback retiré"
+    ws_summary[f'C{row}'] = f"{summary['cashback']['total_withdrawn']:.2f} CHF"
+    row += 1
+    ws_summary[f'A{row}'] = "Passif cashback (à provisionner)"
+    ws_summary[f'A{row}'].font = Font(bold=True)
+    ws_summary[f'C{row}'] = f"{summary['cashback']['net_liability']:.2f} CHF"
+    ws_summary[f'C{row}'].font = Font(bold=True)
+    
+    # Withdrawals Section
+    row += 2
+    ws_summary[f'A{row}'] = "RETRAITS"
+    ws_summary[f'A{row}'].font = header_font
+    ws_summary[f'A{row}'].fill = PatternFill(start_color="FFC107", end_color="FFC107", fill_type="solid")
+    ws_summary.merge_cells(f'A{row}:C{row}')
+    
+    row += 1
+    ws_summary[f'A{row}'] = "Retraits demandés"
+    ws_summary[f'C{row}'] = f"{summary['withdrawals']['total_requested']:.2f} CHF"
+    row += 1
+    ws_summary[f'A{row}'] = "En attente de traitement"
+    ws_summary[f'C{row}'] = f"{summary['withdrawals']['pending_amount']:.2f} CHF"
+    row += 1
+    ws_summary[f'A{row}'] = "Retraits effectués"
+    ws_summary[f'C{row}'] = f"{summary['withdrawals']['completed_amount']:.2f} CHF"
+    
+    # Orders Section
+    row += 2
+    ws_summary[f'A{row}'] = "STATISTIQUES COMMANDES"
+    ws_summary[f'A{row}'].font = header_font
+    ws_summary[f'A{row}'].fill = header_fill
+    ws_summary.merge_cells(f'A{row}:C{row}')
+    
+    row += 1
+    ws_summary[f'A{row}'] = "Nombre total de commandes"
+    ws_summary[f'C{row}'] = summary['orders']['total_count']
+    row += 1
+    ws_summary[f'A{row}'] = "Panier moyen"
+    ws_summary[f'C{row}'] = f"{summary['orders']['average_order_value']:.2f} CHF"
+    
+    # Column widths
+    ws_summary.column_dimensions['A'].width = 35
+    ws_summary.column_dimensions['B'].width = 5
+    ws_summary.column_dimensions['C'].width = 20
+    
+    # ===== Sheet 2: Transactions =====
+    ws_tx = wb.create_sheet("Transactions")
+    
+    # Headers
+    headers = ["Date", "Type", "Description", "Montant (CHF)", "Commission (CHF)", "Statut", "ID Utilisateur"]
+    for col, header in enumerate(headers, 1):
+        cell = ws_tx.cell(row=1, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.border = thin_border
+    
+    # Data
+    for row_idx, tx in enumerate(transactions_data['transactions'], 2):
+        ws_tx.cell(row=row_idx, column=1, value=tx.get('date', '')[:19] if tx.get('date') else '')
+        ws_tx.cell(row=row_idx, column=2, value=tx.get('type', ''))
+        ws_tx.cell(row=row_idx, column=3, value=tx.get('description', ''))
+        ws_tx.cell(row=row_idx, column=4, value=round(tx.get('amount', 0), 2))
+        ws_tx.cell(row=row_idx, column=5, value=round(tx.get('commission', 0), 2))
+        ws_tx.cell(row=row_idx, column=6, value=tx.get('status', ''))
+        ws_tx.cell(row=row_idx, column=7, value=tx.get('user_id', '')[:8] if tx.get('user_id') else '')
+    
+    # Column widths
+    ws_tx.column_dimensions['A'].width = 20
+    ws_tx.column_dimensions['B'].width = 15
+    ws_tx.column_dimensions['C'].width = 40
+    ws_tx.column_dimensions['D'].width = 15
+    ws_tx.column_dimensions['E'].width = 15
+    ws_tx.column_dimensions['F'].width = 15
+    ws_tx.column_dimensions['G'].width = 15
+    
+    # ===== Sheet 3: Subscriptions Detail =====
+    ws_subs = wb.create_sheet("Abonnements")
+    
+    subs_headers = ["ID", "Plan", "Prix (CHF)", "Date début", "Statut", "Utilisateur"]
+    for col, header in enumerate(subs_headers, 1):
+        cell = ws_subs.cell(row=1, column=col, value=header)
+        cell.font = header_font
+        cell.fill = gold_fill
+    
+    all_subs = await db.subscriptions.find({}, {"_id": 0}).to_list(10000)
+    for row_idx, s in enumerate(all_subs, 2):
+        ws_subs.cell(row=row_idx, column=1, value=s.get('id', '')[:8])
+        ws_subs.cell(row=row_idx, column=2, value=s.get('plan_name', ''))
+        ws_subs.cell(row=row_idx, column=3, value=s.get('price', 0))
+        ws_subs.cell(row=row_idx, column=4, value=str(s.get('started_at', ''))[:10])
+        ws_subs.cell(row=row_idx, column=5, value='Actif' if s.get('is_active') else 'Inactif')
+        ws_subs.cell(row=row_idx, column=6, value=s.get('user_id', '')[:8])
+    
+    # Save to buffer
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    
+    from fastapi.responses import Response
+    return Response(
+        content=output.getvalue(),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": f"attachment; filename=comptabilite_titelli_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.xlsx"
+        }
+    )
+
+@api_router.get("/admin/accounting/export/pdf")
+async def export_accounting_pdf(
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Export accounting data to PDF (admin only)"""
+    if not is_admin(current_user):
+        raise HTTPException(status_code=403, detail="Admin uniquement")
+    
+    import io
+    
+    try:
+        from reportlab.lib import colors
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.units import cm
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    except ImportError:
+        raise HTTPException(status_code=500, detail="reportlab non installé")
+    
+    # Get data
+    summary = await get_accounting_summary(start_date, end_date, current_user)
+    
+    # Create PDF
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=2*cm, bottomMargin=2*cm)
+    
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=20, textColor=colors.HexColor('#0047AB'))
+    subtitle_style = ParagraphStyle('Subtitle', parent=styles['Normal'], fontSize=10, textColor=colors.gray)
+    section_style = ParagraphStyle('Section', parent=styles['Heading2'], fontSize=14, textColor=colors.HexColor('#D4AF37'))
+    
+    elements = []
+    
+    # Title
+    elements.append(Paragraph("RAPPORT COMPTABLE - TITELLI", title_style))
+    elements.append(Paragraph(f"Période: {start_date or 'Début'} - {end_date or 'Aujourd\\'hui'}", subtitle_style))
+    elements.append(Paragraph(f"Généré le: {datetime.now(timezone.utc).strftime('%d/%m/%Y %H:%M')}", subtitle_style))
+    elements.append(Spacer(1, 20))
+    
+    # Revenue Table
+    elements.append(Paragraph("REVENUS", section_style))
+    revenue_data = [
+        ["Description", "Montant (CHF)"],
+        ["Chiffre d'affaires commandes", f"{summary['revenue']['total_orders_revenue']:.2f}"],
+        ["Revenus abonnements", f"{summary['revenue']['subscription_revenue']:.2f}"],
+        ["TOTAL REVENUS", f"{summary['revenue']['total_revenue']:.2f}"],
+    ]
+    revenue_table = Table(revenue_data, colWidths=[10*cm, 5*cm])
+    revenue_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0047AB')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
+        ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor('#E8F0FE')),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.gray),
+        ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
+    ]))
+    elements.append(revenue_table)
+    elements.append(Spacer(1, 15))
+    
+    # Commissions Table
+    elements.append(Paragraph("COMMISSIONS TITELLI", section_style))
+    comm_data = [
+        ["Description", "Montant (CHF)"],
+        ["Commissions commandes (5%)", f"{summary['commissions']['order_commissions_5pct']:.2f}"],
+        ["Frais de gestion", f"{summary['commissions']['management_fees']:.2f}"],
+        ["Commissions investissements (12%)", f"{summary['commissions']['investment_commissions_12pct']:.2f}"],
+        ["TOTAL COMMISSIONS", f"{summary['commissions']['total_commissions']:.2f}"],
+    ]
+    comm_table = Table(comm_data, colWidths=[10*cm, 5*cm])
+    comm_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#D4AF37')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
+        ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor('#FFF8E7')),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.gray),
+        ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
+    ]))
+    elements.append(comm_table)
+    elements.append(Spacer(1, 15))
+    
+    # Cashback Table
+    elements.append(Paragraph("CASHBACK", section_style))
+    cashback_data = [
+        ["Description", "Montant (CHF)"],
+        ["Cashback distribué", f"{summary['cashback']['total_distributed']:.2f}"],
+        ["Cashback utilisé par clients", f"{summary['cashback']['total_used']:.2f}"],
+        ["Cashback retiré", f"{summary['cashback']['total_withdrawn']:.2f}"],
+        ["Passif cashback (à provisionner)", f"{summary['cashback']['net_liability']:.2f}"],
+    ]
+    cashback_table = Table(cashback_data, colWidths=[10*cm, 5*cm])
+    cashback_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#28A745')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.gray),
+        ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
+    ]))
+    elements.append(cashback_table)
+    elements.append(Spacer(1, 15))
+    
+    # Statistics Table
+    elements.append(Paragraph("STATISTIQUES", section_style))
+    stats_data = [
+        ["Métrique", "Valeur"],
+        ["Nombre de commandes", str(summary['orders']['total_count'])],
+        ["Panier moyen", f"{summary['orders']['average_order_value']:.2f} CHF"],
+        ["Abonnements actifs", str(summary['subscriptions']['active_count'])],
+        ["Retraits en attente", f"{summary['withdrawals']['pending_amount']:.2f} CHF"],
+    ]
+    stats_table = Table(stats_data, colWidths=[10*cm, 5*cm])
+    stats_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#6C757D')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.gray),
+        ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
+    ]))
+    elements.append(stats_table)
+    
+    doc.build(elements)
+    buffer.seek(0)
+    
+    from fastapi.responses import Response
+    return Response(
+        content=buffer.getvalue(),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"attachment; filename=rapport_comptable_titelli_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.pdf"
+        }
+    )
+
 # ============ CASHBACK ROUTES ============
 
 @api_router.get("/cashback/balance")
