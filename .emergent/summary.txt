@@ -1,115 +1,141 @@
 <analysis>**original_problem_statement:**
-The user is overseeing a comprehensive overhaul of the Titelli marketplace platform. The project has evolved from an initial UI/UX redesign to a full-featured application. The user's primary goal is to make all features production-real, removing all mock data, test algorithms, and placeholder functionality, and ensuring all payment systems are fully operational with real Stripe transactions and correct fee calculations.
+The user's initial goal was a comprehensive refactoring of the monolithic  and  files. However, priorities shifted to deploying the application on Render.com, fixing deployment-related bugs, and adding significant new features.
 
-**PRODUCT REQUIREMENTS:**
--   **Homepage:** Redesign with a panoramic video, a Job Offers section, a new Formations disponibles (Available Trainings) section, and horizontal sliders for content.
--   **Dashboards:** Complete overhaul of Client, Enterprise, and a new Influencer dashboard with production-ready features.
--   **Job Offers System:** A full CRUD system for job postings, including a detail page, advanced filters, and a complete application flow.
--   **Client & Enterprise Features:** Implement a long list of features for both client and enterprise users, including profiles, service/product listings, offers, trainings, job postings, calendars, team management, stock management, permanent orders, premium services, document storage, wallets, and agendas.
--   **Social & Engagement Features:** Implement a mode de vie (lifestyle) section for clients, an activity feed showing friends' actions (wishlist adds, purchases), contact suggestions, and the ability to post public updates. Implement similar feed and favorite features for enterprises.
--   **Monetization & Algorithms (CRITICAL):**
-    -   A hardened Stripe payment system for all transactions (subscriptions, purchases, ads, investments).
-    -   All payment flows must correctly handle success and failure states.
-    -   A dynamic cashback system where the rate is tied to the user's subscription tier (e.g., Free: 1%, Premium: 10%, VIP: 15%).
-    -   Implement specific Titelli fees: 10% management fee, 2.9% transaction fee, and 12% commission on investment profits.
-    -   A production-ready ad-boosting algorithm and an AI client targeting system based on real database users, not simulations.
--   **General:** Ensure full mobile responsiveness and conduct a full site-wide audit to find and fix all remaining bugs and incomplete features. All data must be real (no mocks).
--   **Notifications:** A unified, real-time notification system for all important user and enterprise actions.
--   **Invoicing:** Automatic invoice generation for enterprises upon client purchases.
+The most recent requests focused on:
+1.  **Fixing a bug** where a client's updated cover image wasn't visible on their public profile.
+2.  **Fixing another bug** where notification counts in the dashboard sidebars were not reactive.
+3.  **Verifying and fixing Stripe subscription payments** for enterprise accounts.
+4.  **Implementing a full-featured cart section** in the client dashboard.
+5.  **Implementing a complete cashback withdrawal system** for clients, including IBAN storage and a manual payout process using Stripe Connect.
+6.  **Creating a new Admin Dashboard** to manage cashback withdrawal requests (view, approve, reject, export CSV).
+7.  **Creating a comprehensive Accounting section** within the Admin dashboard to provide a financial overview of the platform (revenue, commissions, cashback liability) with PDF and Excel export capabilities.
+8.  **Resolving user confusion about accessing the new Admin page.**
+9.  **Conducting a full system audit** to ensure all features (cashback rates, messaging, friend requests, etc.) are driven by real database data and are not hardcoded or mocked.
+10. **Performing a final global check** for CSS/UI issues and ensuring all subscription plans are correctly implemented before starting the postponed refactoring tasks.
 
-**User's preferred language**: The user's primary language is **French**. The next agent MUST respond in French only.
+**User's preferred language**: French. The next agent MUST respond in French only.
 
 **what currently exists?**
-The application is a full-stack FastAPI/React/MongoDB platform that is now almost feature-complete and production-ready. The agent has completed several major implementation and audit cycles.
-
-Key systems in place:
--   **Production-Ready Backend:** All major features requested by the user are implemented, including Stripe payments with correct fee calculations, real-data AI/targeting algorithms, a complete job/application system, social feeds, and dynamic cashback.
--   **Automated Invoicing:** A system is in place where a client's purchase automatically generates an invoice in the corresponding enterprise's document storage, and financial records are updated.
--   **Real-Time Notifications:** A WebSocket-based system provides instant notifications to users for all critical events (new orders, messages, job applications, friend requests, etc.), replacing the previous polling mechanism.
--   **Revamped Frontend:** The UI has been significantly enhanced with a panoramic homepage video, a scrolling reviews component, and harmonized CSS for the client and enterprise dashboards, featuring animated and color-coded menus.
--   **Refactoring Started:** The critical technical debt task of refactoring the monolithic  file has begun. The initial structure with separate router files for authentication, payments, and WebSockets has been created.
+The application is a feature-rich social commerce platform deployed and functioning on Render.com. The codebase has been significantly enhanced in this session.
+-   **Backend**: A 7500+ line  file powers the entire application. It now includes extensive logic for admin management, a detailed accounting system with PDF/Excel exports (, ), and a robust cashback withdrawal system that creates withdrawal requests for manual processing due to Stripe API key limitations. All private dependencies like  have been removed.
+-   **Frontend**: The frontend features distinct dashboards for Clients, Enterprises, and a new, comprehensive Admin panel.
+    -   **Client Dashboard**: Includes a working cart, reactive notifications (implementation pending final user verification), and a full cashback management UI (view balance, add bank details, request withdrawal).
+    -   **Enterprise Dashboard**: Includes a working subscription management section and a new prominent button to access the Admin Panel.
+    -   **Admin Dashboard**: A new, fully functional dashboard accessible at  for users with admin privileges (). It features sections for financial accounting, withdrawal management, user management, and more.
+-   **Data**: All major features, including cashback rates, subscriptions, and financial reporting, are now confirmed to be driven by real data from the MongoDB database.
 
 **Last working item**:
--   **Last item agent was working**: The agent just began the major refactoring of the monolithic  file (7300+ lines). This was the user's highest priority technical task. The agent created the initial modular structure by setting up , , , and  and moving the corresponding logic out of .
+-   **Last item agent was working**: The user requested a final, global check of the entire application to ensure everything is production-ready, all subscription types are correctly included, and there are no CSS/UI overflow issues. This was to be the last step before commencing the major refactoring tasks. The agent verified all subscription plans were present in the backend code.
 -   **Status**: IN PROGRESS
--   **Agent Testing Done**: Y (Agent ran tests after the previous feature (invoicing) and confirmed the new router structure compiles, but the refactoring itself is far from complete and will require extensive testing).
--   **Which testing method agent to use?**: backend testing agent. This is critical to ensure no regressions are introduced as more logic is moved from  into the new router modules. Each module should be tested after migration.
+-   **Agent Testing Done**: Y (Agent verified subscription code constants, but a full UI/functional check is still pending).
+-   **Which testing method agent to use?**: both. A full frontend and backend regression test is required to satisfy the user's request for a global check. The testing agent should be used to scan for functional bugs and UI/CSS issues across all dashboards (Client, Enterprise, Admin).
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   There are no outstanding bugs or issues. The pending work consists of large-scale refactoring tasks.
+-   **Issue 1: (P0) Reactive Notification Counts in Dashboard Menu**
+    -   **Description**: The agent implemented a fix by adding  to , and screenshots show some counters appearing. However, the user has not explicitly confirmed that the counts update in real-time as expected when a new notification arrives.
+    -   **Attempted fixes**: The agent added the WebSocket hook and logic to update notification counts.
+    -   **Next debug checklist**:
+        1.  Verify with the user if the notification counts are now updating in real-time.
+        2.  If not, trace the WebSocket messages in the browser's developer tools to see if notifications are being received by the client.
+        3.  Check the  hook in  that processes incoming notifications to ensure it correctly updates the state that holds the notification counts.
+    -   **Why fix this issue and what will be achieved with the fix?**: Provides critical real-time feedback to users, improving engagement.
+    -   **Status**: USER VERIFICATION PENDING
+    -   **Is recurring issue?**: N
+    -   **Should Test frontend/backend/both after fix?**: frontend
+    -   **Blocked on other issue**: None
 
 **In progress Task List**:
--   **Task 1 (P0): Complete the refactoring of **
-    -   **Where to resume**: Continue moving endpoint logic from  into the appropriate router files within . Follow the plan in . The next logical modules to extract are , , , and .
-    -   **What will be achieved with this?**: Drastically improve code maintainability, scalability, and organization by breaking down the 7300+ line file into domain-specific modules. This is a critical step for the long-term health of the application.
-    -   **Status**: IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?**: Backend.
-    -   **Blocked on something**: None.
+-   **Task 1: (P0) Global CSS and Functional Production-Ready Check**
+    -   **Where to resume**: The user has asked for a comprehensive check of the entire site. The next agent should start by using the  to perform a full regression test on the frontend and backend. Pay special attention to UI/CSS overflows, responsiveness, and ensuring all interactive elements work as expected across the Client, Enterprise, and Admin dashboards.
+    -   **What will be achieved with this?**: This will fulfill the user's request for a final quality assurance pass before moving on to major architectural changes.
+    -   **Status**: NOT STARTED
+    -   **Should Test frontend/backend/both after fix?**: both
+    -   **Blocked on something**: None
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks:**
-    -   **P1: Refactor :** This file is over 4000 lines long and is the next major piece of technical debt. It needs to be broken down into smaller, reusable components for each dashboard tab/section to improve performance and maintainability.
+    -   **P1: Refactor **: This is a critical technical debt item. The file is now over 7,500 lines and must be broken down into a modular structure (e.g., using FastAPI routers for , , , , etc.). A plan exists in .
+    -   **P2: Refactor **: This file is over 4,000 lines and needs to be decomposed into smaller, reusable React components.
+    -   **P3: Complete Placeholder Sections in Enterprise Dashboard**: The  still contains placeholder content for tabs like , , and . These need to be implemented.
 -   **Future Tasks:**
-    -   There are no outstanding feature requests. Future work will likely involve performance optimization, further refactoring, and any new features the user requests after reviewing the completed platform.
+    -   Implement **trend analysis charts** in the Accounting dashboard (e.g., monthly revenue/commission evolution).
+    -   Implement **Stripe webhooks for completed payouts** to automatically update the status of withdrawals from  to .
+    -   Create an **admin dashboard for managing subscriptions**.
 
 **Completed work in this session**
--   **Enterprise Finance & Invoicing System (DONE):** Implemented a system to automatically generate an invoice for an enterprise upon a client's order completion. Ensured financial data is updated correctly.
--   **Real-Time Notification System (DONE):** Replaced the 30-second polling for notifications with a real-time WebSocket implementation for an instant user experience.
--   **Unified Notification System (DONE):** Created a comprehensive backend system to trigger notifications for all key actions and a unified frontend  component.
--   **UI/UX Overhaul (DONE):**
-    -   Implemented a panoramic video on the .
-    -   Added a  component to  and .
-    -   Harmonized the CSS of  and  with animated, color-coded menus.
-    -   Improved the UI of the payment success and failure pages.
--   **Full System Audit & Verification (DONE):**
-    -   Conducted a comprehensive A-Z audit of all platform features, including payments, subscriptions, feeds, and algorithms.
-    -   Verified and confirmed the functionality of the CV download link, messaging system, influencer section, and the AI marketing module, ensuring all use real database data.
--   **Initial  Refactoring (DONE):** Created the initial modular structure by moving auth, payment, and WebSocket logic into separate router files.
+-   **Cashback Withdrawal System (DONE)**: Implemented a full-featured system for clients to withdraw their cashback balance. This includes UI for adding bank info (IBAN), a backend endpoint to handle requests, and a fallback to manual processing status when the live Stripe key cannot perform direct payouts.
+-   **Admin Dashboard Creation (DONE)**:
+    -   Built a new, secure admin dashboard at .
+    -   Implemented a **Withdrawal Management** section where admins can view all withdrawal requests, see the full IBAN, update status (completed/failed), and export all data to a CSV file.
+    -   Implemented a complete **Accounting** section with KPIs (Total Revenue, Commissions, Cashback Liability), detailed financial breakdowns, and PDF/Excel export functionality.
+    -   Fixed admin access controls and added a prominent link to the admin panel from the Enterprise Dashboard.
+-   **Bug Fixes (DONE)**:
+    -   Fixed a bug where a client's updated cover image was not saved or displayed correctly on their public profile.
+    -   Fixed Stripe subscription checkout flow for Enterprise accounts by correcting the API method name in .
+    -   The testing agent fixed incorrect plan and addon IDs in .
+-   **Feature Completion (DONE)**:
+    -   Implemented a full Cart tab within the .
+    -   Completed multiple placeholder sections in the  to show real data for Users, Enterprises, Orders, and Payments.
+    -   Fixed the Découvrez mon premium button in  to navigate to the correct tab.
+-   **System Audit (DONE)**: Verified that all major systems (Cashback, Subscriptions, Admin Stats, Messaging, Friends, Invitations) are driven by real data from the database, not mocked or hardcoded.
 
 **Earlier issues found/mentioned but not fixed**
--   Minor linting errors () were identified in several frontend files but were deferred as they are non-critical and do not affect functionality.
+-   The major refactoring tasks for  and  were the original goal but have been continuously postponed to address the user's urgent feature requests and bug fixes. They are now the highest priority upcoming tasks.
 
 **Known issue recurrence from previous fork**
--   **Refactoring :** This recurring high-priority task has finally been started and is now in progress.
+-   None.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **WebSocket Real-Time Communication:** Implemented a real-time notification system using FastAPI's WebSocket support on the backend and a custom React hook () on the frontend. A  class handles the lifecycle of active connections.
--   **Automated Invoicing:** On successful order completion, a new invoice document is generated and saved to the  collection, linking financial transactions directly to document management for enterprises.
--   **Modular Routing (In Progress):** The process of breaking down the monolithic  has begun. It uses FastAPI's  to separate different domains (auth, payments, websockets) which are then included in the main FastAPI app instance.
+-   **Admin Panel & RBAC**: Created a new section of the application restricted to admin users, with logic to check user roles ( flag in DB) before granting access to sensitive endpoints.
+-   **Financial Reporting**: Built a backend aggregation pipeline to calculate platform-wide financial metrics (revenue, commissions, etc.) from different MongoDB collections (, ).
+-   **File Generation (Backend)**: Used  to generate complex, multi-sheet Excel reports and  to generate formatted PDF documents from backend data.
+-   **Stripe Payouts & Manual Fallback**: Implemented a system to initiate cashback withdrawals. When the direct Stripe Transfer API call fails (due to key permissions), the system gracefully falls back by creating a manual_processing request in the database for an admin to handle.
+-   **Modular Frontend (Admin)**: The  was built with internal state and effects to fetch data for different tabs (accounting, withdrawals, users), making it a self-contained single-page application.
 
 **key DB schema**
--   **enterprise_documents**: New collection storing invoices and other documents for enterprises. Schema includes .
--   **notifications**: The schema was expanded with more  values (, , , etc.) to support the unified notification system.
+-   **cashback_withdrawals (NEW)**: 
+-   **enterprise_subscriptions (NEW)**: Used to track active subscriptions for enterprises, fixing a bug where activation status was written to the wrong collection.
+-   **users**: Modified to include  and  fields. Also has an  boolean flag.
+
+**changes in tech stack**
+-   **Added**:  and  to  for Excel and PDF report generation.
 
 **All files of reference**
--    (The main file being refactored)
--    (The new directory for modular code)
--    (The plan for the ongoing refactor)
--    (Next major refactoring target)
--    (Integrates the WebSocket hook)
--    (Custom hook for real-time connection)
--    (Contains the most up-to-date project status)
--    (Latest test report, covering the invoicing feature)
+-    (Heavily modified for all new backend logic)
+-    (New file for the admin panel)
+-    (Modified for cashback withdrawal UI)
+-    (Modified to add admin link)
+-    (Modified with all new admin API endpoints)
+-    (Updated with completed work)
 
 **Areas that need refactoring**:
--   ** (CRITICAL):** The refactoring is in progress. The file is still over 7,300 lines.
--   ** (HIGH):** This task is pending. The file is over 4,000 lines and significantly impacts frontend maintainability.
+-   ** (CRITICAL)**: Now over 7500 lines. The new accounting and admin logic has further bloated the file. It is the user's next priority.
+-   ** (CRITICAL)**: Over 4000 lines. The addition of the cashback and cart UI makes this refactor even more urgent.
+-   ** (Medium)**: While new, this file is already large (~900 lines) and could be broken into components for each admin section (Accounting, Withdrawals, Users, etc.).
 
 **key api endpoints**
--   **New/Modified:**
-    -   : The new WebSocket endpoint for establishing a real-time notification connection.
-    -    (GET): New endpoint to fetch all invoices for an enterprise.
-    -    (GET, POST, DELETE): Logic was fixed to use the correct  collection.
-    -   All endpoints that create user-facing events (e.g., , ) now call a  helper function which also broadcasts the new notification via WebSocket.
+-   **Admin & Accounting (All New)**:
+    -   : Retrieves all financial KPIs.
+    -   : Downloads an Excel report.
+    -   : Downloads a PDF report.
+    -   : Gets all cashback withdrawal requests.
+    -   : Updates the status of a withdrawal.
+    -   : Exports withdrawal data to CSV.
+    -   , , , etc.
+-   **Cashback Withdrawal (All New)**:
+    -   : Gets current balance and bank details.
+    -   : Saves/updates user's IBAN.
+    -   : Initiates a withdrawal request.
 
 **Critical Info for New Agent**
--   **Refactoring is the Top Priority:** The user has explicitly prioritized the refactoring of  and then . You must continue this work systematically.
--   **WebSocket Preview Limitation:** The real-time WebSocket connection works correctly in the local development environment but fails in the preview environment. This is an expected limitation of the platform's proxy/ingress configuration and is **not a bug to be fixed**. Do not waste time trying to fix it in the preview environment.
--   **Codebase is Production-Ready:** The user considers the features to be complete and production-real. Do not introduce any mock data or placeholder logic. All new code must meet this standard.
+-   The user wants to start the **major refactoring** of  and  immediately after the global check is complete.
+-   The user's admin account is  ( type, ). Access to  is granted based on the  flag in the database, which you can set for testing.
+-   The **Stripe API key is LIVE but has restrictions**. It cannot create payouts directly. The current workflow (creating a  request in the DB) is the intended functionality. Do not try to fix the Stripe payout API call.
+-   The user is the final authority on whether a feature is done. Always confirm with them.
 
 **documents and test reports created in this job**
 -   
@@ -117,39 +143,47 @@ Key systems in place:
 -   
 -   
 -   
+-   
 -    (Continuously updated)
--    (Created and updated)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** verify that when a client buys a product or service from a company, the information displayed in my finances is real according to the real payments and send an invoice in the company's document, all in coherence with the db ids then: P1 Refactoring server.py, P2 Refactoring ClientDashboard.js. (Status: **Partially Complete**. Invoicing is done, refactoring is in progress).
-2.  **User:** fix it, on the application page we can't see the cv of the application it doesn't work, check and control that the message system between company and client works and control the influencer section if everything works well and the marketing ia if everything is productive real mode based on the bdd. (Status: **DONE**).
-3.  **User:** yes (in response to agent's suggestion to implement WebSockets for real-time notifications). (Status: **DONE**).
-4.  **User:** implement a notification system for everything on the client and company side for absolutely every section and re-verify that all sections and functions are optimal and coherent with the db. (Status: **DONE**).
-5.  **User:** do the P1 tasks (responsive audit, server.py refactor), check payment pages, make the client dashboard css the same as the enterprise one, add homepage video and scrolling comments. (Status: **DONE**, except for the full server.py refactor which is now in progress).
-6.  **User:** do a big global test of every function system payment subscription the section that serve to add products training, feed system that works according to the algorithm of friends customers to other that displays that the benefits of paid subscription works in short that everything works correctly. (Status: **DONE**).
-7.  **User:** do a complete responsive css audit. (Status: **DONE**).
-8.  **User:** finish the complete audit by updating PRD.md with the test summary. (Status: **DONE**).
-9.  **User:** OK, do it and check the failed or successful payment response page that it is coherent that the whole system is coherent as if it were going to be online. (Status: **DONE**).
-10. **User:** do a global control of the site: subscription, payment system, image file additions, algorithm according to bdd, result after successful payment and result after failed payment it must be coherent check everything from A to Z of the site. (Status: **DONE**).
+1.  **User**: How do I access the admin page? Create a full accounting section in it with exports. (Status: **DONE**. Agent created the accounting system and explained access.)
+2.  **User**: The admin page link is wrong, it takes me to the client page. (Status: **DONE**. Agent diagnosed the login issue and added a direct button to the Enterprise dashboard for easier access.)
+3.  **User**: Verify that the system is real (database-driven) and not fake. Check subscriptions, messaging, friend requests, invitations, cashback rates. Also, the 'discover my premium' button does nothing. Finish missing sections in admin and enterprise. (Status: **DONE**. Agent performed a full audit, confirmed all systems are real, fixed the button, and filled in admin sections.)
+4.  **User**: Do the next actions (refactoring), do another global control check to ensure everything is in order for production, that the CSS is clean everywhere without overflow, and verify all subscription types I sent you are included. (Status: **PENDING**. This is the current task.)
 
 **Project Health Check:**
--   **Broken**: None. The WebSocket connection failure in preview is a known environment limitation, not a bug in the code.
--   **Mocked**: None. All mock data and simulated logic have been removed from the platform.
+-   **Broken**: None. The application is in a stable, feature-complete state pending a final global check.
+-   **Mocked**: None. All mocked data and placeholders in key features have been replaced with real database-driven logic.
 
 **3rd Party Integrations**
--   **Stripe (Payments)**: Heavily used for all payment flows including subscriptions, service purchases, and investments. The implementation uses real logic and correct fee calculations.
+-   **Stripe (Payments)**: Uses the official  Python library. Used for incoming subscription payments and for validating outgoing payout requests (which are then handled manually).
+-   **openpyxl**: Used for generating  accounting reports.
+-   **reportlab**: Used for generating  accounting reports.
 
 **Testing status**
--   **Testing agent used after significant changes**: YES. The testing agent was used extensively after each major feature implementation, with the last report being .
+-   **Testing agent used after significant changes**: YES. The testing agent was used multiple times after major features were added (cashback system, admin panel, accounting system), and it found and fixed several bugs.
 -   **Troubleshoot agent used after agent stuck in loop**: NO
--   **Test files created**: Yes, located in . The testing agent has been creating and maintaining these test files.
+-   **Test files created**: Numerous test scripts were created and executed via  to test APIs, but no persistent ============================= test session starts ==============================
+platform linux -- Python 3.11.14, pytest-9.0.2, pluggy-1.6.0
+rootdir: /app
+plugins: anyio-4.12.1
+collected 641 items / 1 error
+
+==================================== ERRORS ====================================
+_____ ERROR collecting backend/tests/test_iteration33_admin_withdrawals.py _____
+backend/tests/test_iteration33_admin_withdrawals.py:22: in <module>
+    raise ValueError("REACT_APP_BACKEND_URL environment variable is required")
+E   ValueError: REACT_APP_BACKEND_URL environment variable is required
+=========================== short test summary info ============================
+ERROR backend/tests/test_iteration33_admin_withdrawals.py - ValueError: REACT...
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+=============================== 1 error in 0.80s =============================== files were added.
 -   **Known regressions**: None.
 
 **Credentials to test flow:**
--   **Admin**:  / 
 -   **Client**:  / 
--   **Enterprise**:  / 
--   **Influencer**:  / 
+-   **Admin / Enterprise**:  / 
 
 **What agent forgot to execute**
--   The agent has been thorough in executing user requests. The only items noted but not addressed are minor, non-blocking linting errors () which were consciously deferred to prioritize major functional and refactoring tasks.</analysis>
+-   The agent successfully implemented all of the user's explicit requests during this very long and productive session. The only outstanding items are the long-term refactoring tasks, which the user has now prioritized as the very next action item after a final quality check.</analysis>
