@@ -3,7 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import { 
   LayoutDashboard, Users, Building2, ShoppingCart, CreditCard, BarChart3,
   CheckCircle, Award, Crown, TrendingUp, DollarSign, Eye, Settings, Wallet,
-  Download, Clock, XCircle, AlertCircle
+  Download, Clock, XCircle, AlertCircle, FileText, FileSpreadsheet, 
+  ArrowUpRight, ArrowDownRight, Filter, RefreshCw
 } from 'lucide-react';
 import { adminAPI } from '../services/api';
 import { toast } from 'sonner';
