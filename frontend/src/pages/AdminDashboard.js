@@ -57,12 +57,48 @@ const AdminDashboard = () => {
 
   const menuItems = [
     { id: 'overview', label: 'Vue d\'ensemble', icon: LayoutDashboard },
+    { id: 'withdrawals', label: 'Retraits', icon: Wallet },
     { id: 'users', label: 'Utilisateurs', icon: Users },
     { id: 'enterprises', label: 'Entreprises', icon: Building2 },
     { id: 'orders', label: 'Commandes', icon: ShoppingCart },
     { id: 'payments', label: 'Paiements', icon: CreditCard },
     { id: 'settings', label: 'Paramètres', icon: Settings },
   ];
+
+  // Fetch withdrawals when tab changes
+  useEffect(() => {
+    if (activeTab === 'withdrawals') {
+      fetchWithdrawals();
+    }
+  }, [activeTab, withdrawalFilter]);
+
+  const fetchWithdrawals = async () => {
+    try {
+      const res = await adminAPI.withdrawals(withdrawalFilter);
+      setWithdrawals(res.data.withdrawals || []);
+      setWithdrawalStats(res.data.status_counts || {});
+    } catch (error) {
+      console.error('Error fetching withdrawals:', error);
+    }
+  };
+
+  const handleUpdateWithdrawalStatus = async (withdrawalId, newStatus, adminNote = null) => {
+    try {
+      await adminAPI.updateWithdrawalStatus(withdrawalId, newStatus, adminNote);
+      toast.success(`Statut mis à jour: ${newStatus}`);
+      fetchWithdrawals();
+      setSelectedWithdrawal(null);
+    } catch (error) {
+      toast.error('Erreur lors de la mise à jour');
+    }
+  };
+
+  const handleExportCSV = () => {
+    const token = localStorage.getItem('token');
+    const url = adminAPI.exportWithdrawalsCSV(withdrawalFilter);
+    // Open in new window with auth header workaround
+    window.open(`${url}&token=${token}`, '_blank');
+  };
 
   if (loading) {
     return (
