@@ -4519,6 +4519,230 @@ async def delete_agenda_event(event_id: str, current_user: dict = Depends(get_cu
     await db.agenda.delete_one({"id": event_id, "enterprise_id": enterprise['id']})
     return {"message": "Événement supprimé"}
 
+# ============ CLIENT BOOKING (PRISE DE RDV) ============
+
+class ClientBookingCreate(BaseModel):
+    """Model for client booking an appointment with an enterprise"""
+    enterprise_id: str
+    service_id: Optional[str] = None
+    service_name: Optional[str] = None
+    start_datetime: str
+    end_datetime: Optional[str] = None
+    notes: Optional[str] = None
+
+@api_router.post("/booking/appointment")
+async def create_client_booking(booking: ClientBookingCreate, current_user: dict = Depends(get_current_user)):
+    """
+    Client books an appointment with an enterprise.
+    This syncs to both Titelli agenda and SalonPro.
+    """
+    # Verify enterprise exists
+    enterprise = await db.enterprises.find_one({"id": booking.enterprise_id}, {"_id": 0})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    # Get service details if provided
+    service = None
+    service_name = booking.service_name
+    service_duration = 60  # Default 60 minutes
+    service_price = None
+    
+    if booking.service_id:
+        service = await db.services_products.find_one({"id": booking.service_id}, {"_id": 0})
+        if service:
+            service_name = service.get('name', service_name)
+            service_duration = service.get('duration', 60)
+            service_price = service.get('price')
+    
+    # Calculate end_datetime if not provided
+    start_dt = datetime.fromisoformat(booking.start_datetime.replace('Z', '+00:00'))
+    if booking.end_datetime:
+        end_datetime = booking.end_datetime
+    else:
+        end_dt = start_dt + timedelta(minutes=service_duration)
+        end_datetime = end_dt.isoformat()
+    
+    # Create appointment document
+    appointment_id = str(uuid.uuid4())
+    appointment_doc = {
+        "id": appointment_id,
+        "enterprise_id": booking.enterprise_id,
+        "client_id": current_user['id'],
+        "client_name": f"{current_user.get('first_name', '')} {current_user.get('last_name', '')}".strip(),
+        "service_id": booking.service_id,
+        "service_name": service_name,
+        "service_price": service_price,
+        "duration": service_duration,
+        "title": f"RDV - {current_user.get('first_name', 'Client')} - {service_name or 'Consultation'}",
+        "description": booking.notes,
+        "event_type": "appointment",
+        "start_datetime": booking.start_datetime,
+        "end_datetime": end_datetime,
+        "notes": booking.notes,
+        "status": "pending",  # pending, confirmed, cancelled, completed
+        "color": "#0047AB",
+        "source": "titelli_booking",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    # Insert into agenda collection
+    await db.agenda.insert_one(appointment_doc)
+    del appointment_doc['_id']
+    
+    # Also insert into a dedicated bookings collection for tracking
+    booking_record = {
+        **appointment_doc,
+        "enterprise_name": enterprise.get('business_name'),
+        "client_email": current_user.get('email'),
+        "client_phone": current_user.get('phone')
+    }
+    await db.bookings.insert_one(booking_record)
+    
+    # Create notification for enterprise
+    enterprise_user = await db.users.find_one({"id": enterprise.get('user_id')})
+    if enterprise_user:
+        notification = {
+            "id": str(uuid.uuid4()),
+            "user_id": enterprise_user['id'],
+            "title": "Nouvelle demande de RDV",
+            "message": f"{current_user.get('first_name', 'Un client')} souhaite prendre RDV pour {service_name or 'une consultation'}",
+            "notification_type": "booking_request",
+            "data": {
+                "booking_id": appointment_id,
+                "client_id": current_user['id'],
+                "service_name": service_name
+            },
+            "is_read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(notification)
+    
+    # Sync to SalonPro
+    asyncio.create_task(sync_appointment_to_salonpro(appointment_doc, enterprise, current_user, service))
+    
+    return {
+        "message": "Demande de RDV envoyée",
+        "booking": appointment_doc
+    }
+
+@api_router.get("/booking/my-appointments")
+async def get_client_appointments(current_user: dict = Depends(get_current_user)):
+    """Get all appointments for the current client"""
+    appointments = await db.bookings.find(
+        {"client_id": current_user['id']},
+        {"_id": 0}
+    ).sort("start_datetime", -1).to_list(100)
+    
+    return {"appointments": appointments}
+
+@api_router.get("/booking/enterprise/{enterprise_id}/availability")
+async def get_enterprise_availability(
+    enterprise_id: str,
+    date: Optional[str] = None
+):
+    """Get available time slots for an enterprise on a specific date"""
+    enterprise = await db.enterprises.find_one({"id": enterprise_id}, {"_id": 0})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    # Get existing appointments for the date
+    query = {"enterprise_id": enterprise_id}
+    if date:
+        query["start_datetime"] = {"$regex": f"^{date}"}
+    
+    existing_appointments = await db.agenda.find(
+        query,
+        {"_id": 0, "start_datetime": 1, "end_datetime": 1, "status": 1}
+    ).to_list(100)
+    
+    # Return enterprise info with existing appointments
+    return {
+        "enterprise": {
+            "id": enterprise_id,
+            "business_name": enterprise.get('business_name'),
+            "opening_hours": enterprise.get('opening_hours', {}),
+        },
+        "booked_slots": [
+            {
+                "start": apt.get('start_datetime'),
+                "end": apt.get('end_datetime'),
+                "status": apt.get('status')
+            }
+            for apt in existing_appointments
+            if apt.get('status') not in ['cancelled']
+        ]
+    }
+
+@api_router.put("/booking/{booking_id}/status")
+async def update_booking_status(
+    booking_id: str,
+    status: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update booking status (enterprise confirms/cancels)"""
+    # Check if user is the enterprise owner
+    booking = await db.bookings.find_one({"id": booking_id})
+    if not booking:
+        raise HTTPException(status_code=404, detail="RDV non trouvé")
+    
+    enterprise = await db.enterprises.find_one({"id": booking['enterprise_id']})
+    if not enterprise or enterprise.get('user_id') != current_user['id']:
+        # Also allow the client to cancel their own booking
+        if booking.get('client_id') != current_user['id'] or status != 'cancelled':
+            raise HTTPException(status_code=403, detail="Non autorisé")
+    
+    valid_statuses = ['pending', 'confirmed', 'cancelled', 'completed']
+    if status not in valid_statuses:
+        raise HTTPException(status_code=400, detail=f"Statut invalide. Valeurs: {valid_statuses}")
+    
+    # Update in both collections
+    await db.bookings.update_one(
+        {"id": booking_id},
+        {"$set": {"status": status, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    await db.agenda.update_one(
+        {"id": booking_id},
+        {"$set": {"status": status, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    # Notify the other party
+    if status == 'confirmed':
+        notify_user_id = booking.get('client_id')
+        message = f"Votre RDV avec {enterprise.get('business_name')} a été confirmé"
+    elif status == 'cancelled':
+        if current_user['id'] == booking.get('client_id'):
+            notify_user_id = enterprise.get('user_id')
+            message = f"Le client a annulé son RDV"
+        else:
+            notify_user_id = booking.get('client_id')
+            message = f"Votre RDV avec {enterprise.get('business_name')} a été annulé"
+    else:
+        notify_user_id = None
+        message = None
+    
+    if notify_user_id and message:
+        notification = {
+            "id": str(uuid.uuid4()),
+            "user_id": notify_user_id,
+            "title": "Mise à jour RDV",
+            "message": message,
+            "notification_type": "booking_update",
+            "data": {"booking_id": booking_id, "status": status},
+            "is_read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(notification)
+    
+    # Sync status update to SalonPro
+    await send_webhook_to_salonpro("appointment_updated", {
+        "appointment_id": booking_id,
+        "enterprise_id": booking.get('enterprise_id'),
+        "status": status,
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return {"message": f"Statut mis à jour: {status}"}
+
 # ============ ENTERPRISE CONTACTS ROUTES ============
 
 class EnterpriseContactCreate(BaseModel):
