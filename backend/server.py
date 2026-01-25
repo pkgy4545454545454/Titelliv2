@@ -17,6 +17,7 @@ import shutil
 import base64
 import asyncio
 import json
+import httpx
 from stripe_helper import StripeCheckout, CheckoutSessionResponse, CheckoutStatusResponse, CheckoutSessionRequest
 
 ROOT_DIR = Path(__file__).parent
@@ -37,6 +38,10 @@ JWT_ALGORITHM = "HS256"
 # Stripe Config
 STRIPE_API_KEY = os.environ.get('STRIPE_API_KEY')
 
+# SalonPro Webhook Config
+SALONPRO_WEBHOOK_URL = os.environ.get('SALONPRO_WEBHOOK_URL', '')
+SALONPRO_WEBHOOK_SECRET = os.environ.get('SALONPRO_WEBHOOK_SECRET', 'titelli_salonpro_sync_secret')
+
 # Create the main app
 app = FastAPI(title="Titelli API", version="1.0.0")
 
@@ -46,6 +51,101 @@ api_router = APIRouter(prefix="/api")
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+
+# ============ SALONPRO WEBHOOK FUNCTIONS ============
+
+async def send_webhook_to_salonpro(event_type: str, data: dict):
+    """Send webhook to SalonPro for synchronization"""
+    if not SALONPRO_WEBHOOK_URL:
+        logger.info(f"SalonPro webhook not configured, skipping {event_type}")
+        return None
+    
+    payload = {
+        "event_type": event_type,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "secret": SALONPRO_WEBHOOK_SECRET,
+        "data": data
+    }
+    
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.post(
+                f"{SALONPRO_WEBHOOK_URL}/api/webhook/titelli",
+                json=payload,
+                headers={"Content-Type": "application/json"}
+            )
+            logger.info(f"SalonPro webhook {event_type}: {response.status_code}")
+            return response.status_code
+    except Exception as e:
+        logger.error(f"SalonPro webhook error: {str(e)}")
+        return None
+
+
+async def sync_enterprise_to_salonpro(enterprise: dict, user: dict = None):
+    """Sync enterprise profile to SalonPro"""
+    sync_data = {
+        "enterprise_id": enterprise.get('id'),
+        "user_id": enterprise.get('user_id'),
+        "business_name": enterprise.get('business_name'),
+        "category": enterprise.get('category'),
+        "description": enterprise.get('description'),
+        "address": enterprise.get('address'),
+        "city": enterprise.get('city'),
+        "phone": enterprise.get('phone'),
+        "email": user.get('email') if user else enterprise.get('email'),
+        "logo": enterprise.get('logo'),
+        "cover_image": enterprise.get('cover_image'),
+        "opening_hours": enterprise.get('opening_hours'),
+        "is_certified": enterprise.get('is_certified', False),
+        "is_labeled": enterprise.get('is_labeled', False),
+        "is_premium": enterprise.get('is_premium', False),
+        "created_at": enterprise.get('created_at')
+    }
+    
+    await send_webhook_to_salonpro("enterprise_created", sync_data)
+
+
+async def sync_appointment_to_salonpro(appointment: dict, enterprise: dict, client_user: dict = None, service: dict = None):
+    """Sync appointment/RDV to SalonPro"""
+    sync_data = {
+        "appointment_id": appointment.get('id'),
+        "enterprise_id": enterprise.get('id'),
+        "enterprise_name": enterprise.get('business_name'),
+        "client_id": appointment.get('client_id'),
+        "client_name": appointment.get('client_name') or (f"{client_user.get('first_name', '')} {client_user.get('last_name', '')}" if client_user else ""),
+        "client_email": client_user.get('email') if client_user else None,
+        "client_phone": client_user.get('phone') if client_user else None,
+        "service_id": appointment.get('service_id'),
+        "service_name": service.get('name') if service else appointment.get('service_name'),
+        "service_price": service.get('price') if service else appointment.get('service_price'),
+        "service_duration": service.get('duration') if service else appointment.get('duration'),
+        "start_datetime": appointment.get('start_datetime'),
+        "end_datetime": appointment.get('end_datetime'),
+        "notes": appointment.get('notes'),
+        "status": appointment.get('status', 'pending'),
+        "created_at": appointment.get('created_at')
+    }
+    
+    await send_webhook_to_salonpro("appointment_created", sync_data)
+
+
+async def sync_service_to_salonpro(service: dict, enterprise_id: str):
+    """Sync service/product to SalonPro"""
+    sync_data = {
+        "service_id": service.get('id'),
+        "enterprise_id": enterprise_id,
+        "name": service.get('name'),
+        "description": service.get('description'),
+        "price": service.get('price'),
+        "duration": service.get('duration'),
+        "category": service.get('category'),
+        "type": service.get('type'),
+        "image": service.get('image'),
+        "is_active": service.get('is_active', True)
+    }
+    
+    await send_webhook_to_salonpro("service_created", sync_data)
 
 
 # ============ WEBSOCKET CONNECTION MANAGER ============
