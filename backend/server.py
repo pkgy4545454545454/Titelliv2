@@ -2545,7 +2545,8 @@ async def export_accounting_excel(
     # Title
     ws_summary['A1'] = "RAPPORT COMPTABLE - TITELLI"
     ws_summary['A1'].font = Font(bold=True, size=16)
-    ws_summary['A2'] = f"Période: {start_date or 'Début'} - {end_date or 'Aujourd\\'hui'}"
+    today_str = "Aujourd'hui"
+    ws_summary['A2'] = f"Période: {start_date or 'Début'} - {end_date or today_str}"
     ws_summary['A3'] = f"Généré le: {datetime.now(timezone.utc).strftime('%d/%m/%Y %H:%M')}"
     
     # Revenue Section
@@ -2746,7 +2747,8 @@ async def export_accounting_pdf(
     
     # Title
     elements.append(Paragraph("RAPPORT COMPTABLE - TITELLI", title_style))
-    elements.append(Paragraph(f"Période: {start_date or 'Début'} - {end_date or 'Aujourd\\'hui'}", subtitle_style))
+    today_str = "Aujourd'hui"
+    elements.append(Paragraph(f"Période: {start_date or 'Début'} - {end_date or today_str}", subtitle_style))
     elements.append(Paragraph(f"Généré le: {datetime.now(timezone.utc).strftime('%d/%m/%Y %H:%M')}", subtitle_style))
     elements.append(Spacer(1, 20))
     
