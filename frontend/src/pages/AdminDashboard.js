@@ -108,7 +108,7 @@ const AdminDashboard = () => {
     );
   }
 
-  if (user?.email !== 'admin@titelli.com') {
+  if (!ADMIN_EMAILS.includes(user?.email)) {
     return (
       <div className="min-h-screen bg-[#050505] pt-24 flex items-center justify-center">
         <div className="text-center">
