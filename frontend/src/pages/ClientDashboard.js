@@ -1353,9 +1353,13 @@ const ClientDashboard = () => {
                     </div>
                     <div className="flex-1">
                       <h2 className="text-xl font-bold text-white mb-2">Passez à Premium</h2>
-                      <p className="text-gray-400">Accédez à des offres exclusives, un service premium et bien plus encore.</p>
+                      <p className="text-gray-400">Accédez à des offres exclusives, un service premium et jusqu'à 15% de cashback.</p>
                     </div>
-                    <button className="btn-primary" data-testid="upgrade-premium">
+                    <button 
+                      onClick={() => setActiveTab('premium')} 
+                      className="btn-primary" 
+                      data-testid="upgrade-premium"
+                    >
                       Découvrir
                     </button>
                   </div>
