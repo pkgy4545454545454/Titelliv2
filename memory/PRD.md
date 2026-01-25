@@ -528,11 +528,17 @@ DELETE /api/client/providers/{id}
 - ✅ ~~Commentaires défilants~~ - TERMINÉ (Iteration 25)
 - ✅ ~~Pages paiement cohérentes~~ - TERMINÉ (Iteration 25)
 - ✅ ~~WebSocket temps réel~~ - TERMINÉ (Iteration 27)
-- 🔄 Refactoring `server.py` → modules (voir REFACTORING_PLAN.md) - EN COURS (7% fait)
+- ✅ ~~Export PDF/Excel Admin~~ - TERMINÉ (Iteration 35) - Bug token corrigé
+- ✅ ~~Contrôle global production-ready~~ - TERMINÉ (Iteration 35) - 100% backend, 100% frontend
+- 🔄 Refactoring `server.py` → modules (voir REFACTORING_PLAN.md) - PROCHAINE PRIORITÉ
 
 ### 🟡 P2 - Futur
-- [ ] Intégrer routers refactorisés dans server.py
-- [ ] Refactoring ClientDashboard.js (4000+ lignes)
+- [ ] Refactoring `server.py` (7500+ lignes → modules FastAPI)
+- [ ] Refactoring ClientDashboard.js (4000+ lignes → composants)
+- [ ] Refactoring AdminDashboard.js (900+ lignes → composants)
+- [ ] Sections placeholder EnterpriseDashboard (ia_clients, guests, investments)
+- [ ] Graphiques tendances dans Comptabilité Admin
+- [ ] Webhooks Stripe pour payouts automatiques
 - ✅ ~~Dashboard client sections~~ - IMPLÉMENTÉ
 
 ---
@@ -542,17 +548,20 @@ DELETE /api/client/providers/{id}
 ```
 /app/
 ├── backend/
-│   ├── server.py              # +300 lignes (nouvelles APIs client)
+│   ├── server.py              # 7500+ lignes (backend monolithique à refactoriser)
+│   ├── stripe_helper.py       # Helper Stripe natif
 │   └── tests/
-│       └── test_client_dashboard_new_sections.py  # NEW (375 lignes)
+│       └── test_iteration35_production_ready.py  # Tests contrôle global
 └── frontend/
     └── src/
         ├── pages/
-        │   └── ClientDashboard.js  # +700 lignes (nouvelles sections)
+        │   ├── AdminDashboard.js     # Dashboard admin complet
+        │   ├── ClientDashboard.js    # Dashboard client (4000+ lignes)
+        │   └── EnterpriseDashboard.js # Dashboard entreprise
         └── services/
-            └── api.js              # +40 lignes (nouvelles APIs)
+            └── api.js                # Toutes les APIs frontend
 ```
 
 ---
 
-*Dernière mise à jour: 23 Jan 2026 - Dashboard client production-ready*
+*Dernière mise à jour: 25 Jan 2026 - Phase 35 : Contrôle global terminé, Export PDF/Excel corrigé*
