@@ -1176,16 +1176,7 @@ const EnterpriseDashboard = () => {
 
           {/* Messagerie */}
           {activeTab === 'messages' && (
-            <div className="space-y-6">
-              <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
-                Messagerie
-              </h1>
-              <div className="card-service rounded-xl p-8 text-center">
-                <MessageSquare className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-                <p className="text-gray-400 mb-2">Aucun message</p>
-                <p className="text-sm text-gray-500">Vos conversations avec les clients apparaîtront ici</p>
-              </div>
-            </div>
+            <MessagesSection />
           )}
 
           {/* Contacts */}
