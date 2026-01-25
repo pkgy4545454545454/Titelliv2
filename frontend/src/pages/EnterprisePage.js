@@ -1073,6 +1073,117 @@ const EnterprisePage = () => {
           </div>
         </div>
       )}
+
+      {/* Booking Modal */}
+      {showBookingModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="card-service rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold text-white">
+                Réserver chez {enterprise?.business_name}
+              </h3>
+              <button 
+                onClick={() => setShowBookingModal(false)}
+                className="p-2 hover:bg-white/10 rounded-lg"
+              >
+                <X className="w-5 h-5 text-gray-400" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleBookingSubmit} className="space-y-4">
+              {/* Service Selection */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Service (optionnel)</label>
+                <select
+                  value={bookingForm.service_id}
+                  onChange={(e) => {
+                    const selected = services.find(s => s.id === e.target.value);
+                    setBookingForm({
+                      ...bookingForm,
+                      service_id: e.target.value,
+                      service_name: selected?.name || ''
+                    });
+                  }}
+                  className="input-dark w-full"
+                >
+                  <option value="">Sélectionner un service</option>
+                  {services.filter(s => s.type === 'service').map(s => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} - {s.price} CHF
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              {/* Date */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Date *</label>
+                <input
+                  type="date"
+                  value={bookingForm.date}
+                  onChange={(e) => setBookingForm({...bookingForm, date: e.target.value})}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="input-dark w-full"
+                  required
+                />
+              </div>
+              
+              {/* Time */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Heure *</label>
+                <select
+                  value={bookingForm.time}
+                  onChange={(e) => setBookingForm({...bookingForm, time: e.target.value})}
+                  className="input-dark w-full"
+                  required
+                >
+                  <option value="">Sélectionner une heure</option>
+                  {['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', 
+                    '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00'].map(time => (
+                    <option key={time} value={time}>{time}</option>
+                  ))}
+                </select>
+              </div>
+              
+              {/* Notes */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Message (optionnel)</label>
+                <textarea
+                  value={bookingForm.notes}
+                  onChange={(e) => setBookingForm({...bookingForm, notes: e.target.value})}
+                  placeholder="Informations complémentaires pour votre RDV..."
+                  className="input-dark w-full h-24 resize-none"
+                />
+              </div>
+              
+              {/* Submit */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowBookingModal(false)}
+                  className="btn-secondary flex-1"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  disabled={bookingLoading}
+                  className="btn-primary flex-1 flex items-center justify-center gap-2"
+                >
+                  {bookingLoading ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <CalendarIcon className="w-5 h-5" />
+                      Envoyer la demande
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
