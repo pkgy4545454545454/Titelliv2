@@ -43,6 +43,23 @@ const SubscriptionsSection = () => {
     }
   };
 
+  const handleAddonSubscribe = async (addonId) => {
+    try {
+      toast.loading('Redirection vers le paiement...');
+      const response = await subscriptionsAPI.createAddonCheckout(addonId);
+      toast.dismiss();
+      if (response.data.url) {
+        window.open(response.data.url, '_blank');
+      } else {
+        toast.error('Erreur: URL de paiement non reçue');
+      }
+    } catch (error) {
+      toast.dismiss();
+      console.error('Addon subscription error:', error);
+      toast.error(error.response?.data?.detail || 'Erreur lors de la souscription');
+    }
+  };
+
   const baseFeatures = [
     { icon: FileText, text: 'Fiches exigences clients' },
     { icon: Calendar, text: 'Calendrier client' },
