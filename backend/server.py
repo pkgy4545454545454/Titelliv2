@@ -1999,8 +1999,8 @@ async def create_addon_checkout(
 
 @api_router.get("/admin/stats")
 async def get_admin_stats(current_user: dict = Depends(get_current_user)):
-    # Simple admin check (in production, use proper role system)
-    if current_user.get('email') != 'admin@titelli.com':
+    # Check if user is admin
+    if not is_admin(current_user):
         raise HTTPException(status_code=403, detail="Admin uniquement")
     
     total_users = await db.users.count_documents({})
