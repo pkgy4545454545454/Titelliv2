@@ -9,6 +9,34 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
 
 ## ✅ Fonctionnalités Complétées (25 Jan 2026)
 
+### Phase 35 : Contrôle Global Production-Ready & Bug Fix Export PDF (TERMINÉ)
+
+**Bug corrigé : Export PDF/Excel ne fonctionnait pas**
+- ✅ Problème : `localStorage.getItem('token')` au lieu de `'titelli_token'`
+- ✅ Solution : Correction dans AdminDashboard.js (lignes 113, 120, 155)
+- ✅ Backend : Ajout de `get_current_user_from_token_param` pour accepter token via query parameter
+- ✅ Import `Query` ajouté dans FastAPI
+
+**Contrôle global effectué :**
+- ✅ Backend : 100% (28/28 tests passés)
+- ✅ Frontend : 100% - Aucun problème critique
+- ✅ Aucun overflow CSS détecté (desktop et mobile)
+- ✅ Toutes les données sont réelles (MongoDB)
+
+**Données actuelles (vérifiées via test) :**
+- 41 utilisateurs
+- 12 entreprises  
+- 20 commandes
+- 17 avis
+- CA Total : 2,579.53 CHF
+- Commissions : 282.48 CHF
+- Passif Cashback : 27.35 CHF
+- Cashback client test : 100.82 CHF
+
+**Tests: 100% réussis (iteration_35.json)**
+
+---
+
 ### Phase 34 : Audit Système - Vérification Données Réelles (TERMINÉ)
 
 **Tous les systèmes vérifiés comme RÉELS (basés sur MongoDB) :**
