@@ -2,10 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { 
   LayoutDashboard, Users, Building2, ShoppingCart, CreditCard, BarChart3,
-  CheckCircle, Award, Crown, TrendingUp, DollarSign, Eye, Settings
+  CheckCircle, Award, Crown, TrendingUp, DollarSign, Eye, Settings, Wallet,
+  Download, Clock, XCircle, AlertCircle
 } from 'lucide-react';
 import { adminAPI } from '../services/api';
 import { toast } from 'sonner';
+
+// List of admin emails
+const ADMIN_EMAILS = ['admin@titelli.com', 'spa.luxury@titelli.com'];
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -13,6 +17,12 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Withdrawals state
+  const [withdrawals, setWithdrawals] = useState([]);
+  const [withdrawalStats, setWithdrawalStats] = useState({});
+  const [withdrawalFilter, setWithdrawalFilter] = useState(null);
+  const [selectedWithdrawal, setSelectedWithdrawal] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
