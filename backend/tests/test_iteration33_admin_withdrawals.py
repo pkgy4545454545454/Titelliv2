@@ -588,16 +588,18 @@ class TestClientCashbackWithdrawal:
         assert response.status_code == 200, f"Failed to get withdrawal history: {response.text}"
         
         data = response.json()
-        assert isinstance(data, list)
+        # API returns {"withdrawals": [...]}
+        withdrawals = data.get("withdrawals", data) if isinstance(data, dict) else data
+        assert isinstance(withdrawals, list)
         
-        if data:
-            withdrawal = data[0]
+        if withdrawals:
+            withdrawal = withdrawals[0]
             assert "id" in withdrawal
             assert "amount" in withdrawal
             assert "status" in withdrawal
             assert "created_at" in withdrawal
         
-        print(f"✓ Client withdrawal history retrieved. Count: {len(data)}")
+        print(f"✓ Client withdrawal history retrieved. Count: {len(withdrawals)}")
 
 
 class TestNotifications:
@@ -620,11 +622,13 @@ class TestNotifications:
         assert response.status_code == 200, f"Failed to get notifications: {response.text}"
         
         data = response.json()
-        assert isinstance(data, list)
+        # API returns {"notifications": [...], "unread_count": N}
+        notifications = data.get("notifications", data) if isinstance(data, dict) else data
+        assert isinstance(notifications, list)
         
         # Check for withdrawal-related notifications
-        withdrawal_notifications = [n for n in data if n.get("notification_type") == "cashback_withdrawal"]
-        print(f"✓ Notifications retrieved. Total: {len(data)}, Withdrawal-related: {len(withdrawal_notifications)}")
+        withdrawal_notifications = [n for n in notifications if n.get("notification_type") == "cashback_withdrawal"]
+        print(f"✓ Notifications retrieved. Total: {len(notifications)}, Withdrawal-related: {len(withdrawal_notifications)}")
 
 
 if __name__ == "__main__":
