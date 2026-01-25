@@ -25,6 +25,15 @@ const AdminDashboard = () => {
   const [withdrawalFilter, setWithdrawalFilter] = useState(null);
   const [selectedWithdrawal, setSelectedWithdrawal] = useState(null);
 
+  // Enterprises state
+  const [enterprises, setEnterprises] = useState([]);
+  
+  // Orders state  
+  const [allOrders, setAllOrders] = useState([]);
+  
+  // Payments state
+  const [payments, setPayments] = useState([]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -33,6 +42,8 @@ const AdminDashboard = () => {
           adminAPI.users()
         ]);
         setStats(statsRes.data);
+        setEnterprises(statsRes.data.recent_enterprises || []);
+        setAllOrders(statsRes.data.recent_orders || []);
         setUsers(usersRes.data.users);
       } catch (error) {
         console.error('Error fetching admin data:', error);
