@@ -532,6 +532,18 @@ export const messagesAPI = {
   send: (recipientId, content, messageType = 'text') => axios.post(`${API}/messages`, { recipient_id: recipientId, content, message_type: messageType }, { headers: getAuthHeaders() }),
 };
 
+// Booking / Prise de RDV
+export const bookingAPI = {
+  // Client books appointment with enterprise
+  create: (data) => axios.post(`${API}/booking/appointment`, data, { headers: getAuthHeaders() }),
+  // Get client's appointments
+  myAppointments: () => axios.get(`${API}/booking/my-appointments`, { headers: getAuthHeaders() }),
+  // Get enterprise availability
+  getAvailability: (enterpriseId, date = null) => axios.get(`${API}/booking/enterprise/${enterpriseId}/availability`, { params: { date } }),
+  // Update booking status
+  updateStatus: (bookingId, status) => axios.put(`${API}/booking/${bookingId}/status`, null, { params: { status }, headers: getAuthHeaders() }),
+};
+
 export const statsAPI = {
   trackProfileView: (userId) => axios.post(`${API}/track/profile-view/${userId}`, null, { headers: getAuthHeaders() }),
   getProfileViews: () => axios.get(`${API}/stats/profile-views`, { headers: getAuthHeaders() }),
