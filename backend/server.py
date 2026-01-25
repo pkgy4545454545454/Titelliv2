@@ -9223,6 +9223,123 @@ async def websocket_presence(websocket: WebSocket, token: str = None):
             pass
 
 
+# ============ SALONPRO WEBHOOK ENDPOINTS (INCOMING) ============
+
+class SalonProWebhookPayload(BaseModel):
+    event_type: str
+    timestamp: Optional[str] = None
+    secret: str
+    data: Dict[str, Any]
+
+@api_router.post("/webhook/salonpro")
+async def receive_salonpro_webhook(payload: SalonProWebhookPayload):
+    """
+    Receive webhooks from SalonPro for bidirectional sync.
+    Events: appointment_created, appointment_updated, appointment_cancelled
+    """
+    # Verify secret
+    if payload.secret != SALONPRO_WEBHOOK_SECRET:
+        raise HTTPException(status_code=401, detail="Invalid webhook secret")
+    
+    event_type = payload.event_type
+    data = payload.data
+    
+    logger.info(f"Received SalonPro webhook: {event_type}")
+    
+    try:
+        if event_type == "appointment_created":
+            # SalonPro created an appointment, sync to Titelli
+            appointment_doc = {
+                "id": data.get('appointment_id') or str(uuid.uuid4()),
+                "enterprise_id": data.get('enterprise_id'),
+                "client_id": data.get('client_id'),
+                "client_name": data.get('client_name'),
+                "service_id": data.get('service_id'),
+                "service_name": data.get('service_name'),
+                "title": f"RDV - {data.get('client_name', 'Client')} - {data.get('service_name', 'Service')}",
+                "event_type": "appointment",
+                "start_datetime": data.get('start_datetime'),
+                "end_datetime": data.get('end_datetime'),
+                "notes": data.get('notes'),
+                "status": data.get('status', 'pending'),
+                "color": "#D4AF37",  # Gold color for SalonPro appointments
+                "source": "salonpro",
+                "created_at": data.get('created_at') or datetime.now(timezone.utc).isoformat()
+            }
+            
+            # Check if already exists
+            existing = await db.agenda.find_one({"id": appointment_doc['id']})
+            if not existing:
+                await db.agenda.insert_one(appointment_doc)
+                logger.info(f"Created appointment from SalonPro: {appointment_doc['id']}")
+            
+        elif event_type == "appointment_updated":
+            # Update appointment status
+            appointment_id = data.get('appointment_id')
+            if appointment_id:
+                update_data = {
+                    "status": data.get('status'),
+                    "updated_at": datetime.now(timezone.utc).isoformat()
+                }
+                if data.get('start_datetime'):
+                    update_data['start_datetime'] = data.get('start_datetime')
+                if data.get('end_datetime'):
+                    update_data['end_datetime'] = data.get('end_datetime')
+                
+                await db.agenda.update_one(
+                    {"id": appointment_id},
+                    {"$set": update_data}
+                )
+                await db.bookings.update_one(
+                    {"id": appointment_id},
+                    {"$set": update_data}
+                )
+                logger.info(f"Updated appointment from SalonPro: {appointment_id}")
+                
+        elif event_type == "appointment_cancelled":
+            appointment_id = data.get('appointment_id')
+            if appointment_id:
+                await db.agenda.update_one(
+                    {"id": appointment_id},
+                    {"$set": {"status": "cancelled", "updated_at": datetime.now(timezone.utc).isoformat()}}
+                )
+                await db.bookings.update_one(
+                    {"id": appointment_id},
+                    {"$set": {"status": "cancelled", "updated_at": datetime.now(timezone.utc).isoformat()}}
+                )
+                logger.info(f"Cancelled appointment from SalonPro: {appointment_id}")
+        
+        elif event_type == "service_created":
+            # Sync service from SalonPro
+            service_doc = {
+                "id": data.get('service_id') or str(uuid.uuid4()),
+                "enterprise_id": data.get('enterprise_id'),
+                "name": data.get('name'),
+                "description": data.get('description'),
+                "price": data.get('price'),
+                "duration": data.get('duration'),
+                "category": data.get('category'),
+                "type": "service",
+                "source": "salonpro",
+                "is_active": True,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            
+            existing = await db.services_products.find_one({"id": service_doc['id']})
+            if not existing:
+                await db.services_products.insert_one(service_doc)
+                logger.info(f"Created service from SalonPro: {service_doc['id']}")
+        
+        return {"status": "ok", "event_type": event_type}
+        
+    except Exception as e:
+        logger.error(f"SalonPro webhook processing error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Include the api_router in the main app
+app.include_router(api_router)
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
