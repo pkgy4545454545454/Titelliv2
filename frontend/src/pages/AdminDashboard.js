@@ -113,7 +113,7 @@ const AdminDashboard = () => {
       <div className="min-h-screen bg-[#050505] pt-24 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white mb-4">Accès refusé</h1>
-          <p className="text-gray-400">Vous n'avez pas les droits d'accès à cette page.</p>
+          <p className="text-gray-400">Vous n&apos;avez pas les droits d&apos;accès à cette page.</p>
         </div>
       </div>
     );
