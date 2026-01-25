@@ -10,7 +10,7 @@ import {
   UserPlus, ClipboardList, AlertTriangle, Box, ArrowUpDown, Upload, Image, X,
   Search, Rss, Newspaper, Truck, Activity, Phone, Heart, HelpCircle, Info,
   Handshake, UserCircle, Receipt, Send, Crown, Zap, Check, ChevronDown, Camera,
-  Menu
+  Menu, Shield
 } from 'lucide-react';
 import { 
   enterpriseAPI, servicesProductsAPI, orderAPI, paymentAPI, offersAPI,
