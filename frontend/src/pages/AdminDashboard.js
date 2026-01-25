@@ -110,14 +110,14 @@ const AdminDashboard = () => {
   };
 
   const handleExportExcel = async () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('titelli_token');
     const url = adminAPI.exportAccountingExcel(dateRange.start || null, dateRange.end || null);
     window.open(`${url}&token=${token}`, '_blank');
     toast.success('Export Excel en cours...');
   };
 
   const handleExportPDF = async () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('titelli_token');
     const url = adminAPI.exportAccountingPDF(dateRange.start || null, dateRange.end || null);
     window.open(`${url}&token=${token}`, '_blank');
     toast.success('Export PDF en cours...');
@@ -152,7 +152,7 @@ const AdminDashboard = () => {
   };
 
   const handleExportCSV = () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('titelli_token');
     const url = adminAPI.exportWithdrawalsCSV(withdrawalFilter);
     // Open in new window with auth header workaround
     window.open(`${url}&token=${token}`, '_blank');
