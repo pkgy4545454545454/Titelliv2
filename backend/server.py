@@ -2003,9 +2003,15 @@ async def withdraw_cashback(
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Withdraw cashback to client's bank account via Stripe.
+    Withdraw cashback to client's bank account.
     Minimum withdrawal: 50 CHF
     Requires: IBAN and bank_account_holder in client profile
+    
+    Process:
+    1. Creates withdrawal request in database
+    2. Deducts amount from user's cashback balance
+    3. Attempts Stripe transfer (if API allows)
+    4. Falls back to manual processing if Stripe API is restricted
     """
     import stripe
     stripe.api_key = STRIPE_API_KEY
@@ -2049,30 +2055,53 @@ async def withdraw_cashback(
             detail=f"Solde insuffisant. Disponible: {current_balance:.2f} CHF"
         )
     
+    # Create withdrawal record first
+    withdrawal_id = str(uuid.uuid4())
+    withdrawal_record = {
+        "id": withdrawal_id,
+        "user_id": current_user['id'],
+        "user_email": user.get('email'),
+        "amount": withdrawal_amount,
+        "currency": "chf",
+        "iban": iban_clean,  # Store full IBAN for manual processing
+        "iban_masked": f"****{iban_clean[-4:]}",
+        "account_holder": account_holder,
+        "bic_swift": user.get('bic_swift'),
+        "status": "pending",
+        "stripe_transfer_id": None,
+        "stripe_payout_id": None,
+        "processing_note": None,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "completed_at": None
+    }
+    await db.cashback_withdrawals.insert_one(withdrawal_record)
+    
+    # Deduct from user's cashback balance immediately
+    await db.users.update_one(
+        {"id": current_user['id']},
+        {"$inc": {"cashback_balance": -withdrawal_amount}}
+    )
+    
+    # Record cashback transaction
+    transaction = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user['id'],
+        "amount": -withdrawal_amount,
+        "type": "withdrawal",
+        "description": f"Retrait vers compte bancaire ****{iban_clean[-4:]}",
+        "withdrawal_id": withdrawal_id,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.cashback_transactions.insert_one(transaction)
+    
+    # Try Stripe transfer (may fail if API key is restricted)
+    stripe_success = False
+    stripe_error_msg = None
+    
     try:
-        # Create withdrawal record first (pending status)
-        withdrawal_id = str(uuid.uuid4())
-        withdrawal_record = {
-            "id": withdrawal_id,
-            "user_id": current_user['id'],
-            "amount": withdrawal_amount,
-            "currency": "chf",
-            "iban": iban_clean[-4:].rjust(len(iban_clean), '*'),  # Masked IBAN for security
-            "account_holder": account_holder,
-            "status": "pending",
-            "stripe_transfer_id": None,
-            "stripe_payout_id": None,
-            "error_message": None,
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "completed_at": None
-        }
-        await db.cashback_withdrawals.insert_one(withdrawal_record)
-        
-        # Convert to centimes for Stripe (CHF uses 2 decimal places)
         amount_centimes = int(withdrawal_amount * 100)
         
         # Create a Transfer to the connected account
-        # This moves funds from your platform's Stripe balance to the connected account
         transfer = stripe.Transfer.create(
             amount=amount_centimes,
             currency="chf",
@@ -2092,42 +2121,46 @@ async def withdraw_cashback(
             {"id": withdrawal_id},
             {"$set": {
                 "stripe_transfer_id": transfer.id,
-                "status": "transferred"
+                "status": "processing",
+                "processing_note": "Transfert Stripe effectué, payout en cours"
             }}
         )
+        stripe_success = True
         
-        # Now create a payout from the connected account to the bank
-        # Note: This requires the connected account to have the bank account set up
-        # For direct bank payouts, we'll use the platform's payout capability
-        try:
-            payout = stripe.Payout.create(
-                amount=amount_centimes,
-                currency="chf",
-                metadata={
-                    "withdrawal_id": withdrawal_id,
-                    "user_id": current_user['id'],
-                    "destination_iban": iban_clean[-4:]
-                },
-                stripe_account=STRIPE_CONNECT_ACCOUNT_ID
-            )
-            
-            await db.cashback_withdrawals.update_one(
-                {"id": withdrawal_id},
-                {"$set": {
-                    "stripe_payout_id": payout.id,
-                    "status": "processing"
-                }}
-            )
-        except stripe.error.StripeError as payout_error:
-            # Transfer succeeded but payout failed - log for manual processing
-            logger.warning(f"Payout failed for withdrawal {withdrawal_id}: {payout_error}")
-            await db.cashback_withdrawals.update_one(
-                {"id": withdrawal_id},
-                {"$set": {
-                    "status": "payout_pending",
-                    "error_message": f"Payout en attente de traitement manuel: {str(payout_error)}"
-                }}
-            )
+    except stripe.error.StripeError as e:
+        stripe_error_msg = str(e)
+        logger.warning(f"Stripe transfer failed for withdrawal {withdrawal_id}: {e}")
+        
+        # Mark for manual processing
+        await db.cashback_withdrawals.update_one(
+            {"id": withdrawal_id},
+            {"$set": {
+                "status": "manual_processing",
+                "processing_note": f"Traitement manuel requis. Erreur Stripe: {stripe_error_msg[:200]}"
+            }}
+        )
+    
+    # Notify user
+    status_message = "en cours de traitement automatique" if stripe_success else "enregistré et sera traité sous 1-3 jours ouvrables"
+    
+    await create_notification(
+        db=db,
+        user_id=current_user['id'],
+        notification_type="cashback_withdrawal",
+        title="Retrait enregistré",
+        message=f"Votre retrait de {withdrawal_amount:.2f} CHF est {status_message}.",
+        link="/dashboard/client?tab=cashback"
+    )
+    
+    return {
+        "success": True,
+        "message": f"Retrait de {withdrawal_amount:.2f} CHF enregistré avec succès",
+        "withdrawal_id": withdrawal_id,
+        "new_balance": current_balance - withdrawal_amount,
+        "status": "processing" if stripe_success else "manual_processing",
+        "estimated_arrival": "1-3 jours ouvrables" if stripe_success else "3-5 jours ouvrables",
+        "note": None if stripe_success else "Votre demande sera traitée manuellement par notre équipe"
+    }
         
         # Deduct from user's cashback balance
         await db.users.update_one(
