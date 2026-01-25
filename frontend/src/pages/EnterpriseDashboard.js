@@ -2451,6 +2451,382 @@ const AgendaSection = ({ agenda, onRefresh }) => {
   );
 };
 
+// Contacts Section Component
+const ContactsSection = ({ contacts, onRefresh }) => {
+  const [showAdd, setShowAdd] = useState(false);
+  const [editingContact, setEditingContact] = useState(null);
+  const [filterType, setFilterType] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [formData, setFormData] = useState({
+    name: '', company: '', contact_type: 'client', email: '', phone: '', address: '', notes: '', tags: []
+  });
+  const [tagInput, setTagInput] = useState('');
+
+  const contactTypes = [
+    { id: 'client', label: 'Client', color: 'bg-green-500', icon: Users },
+    { id: 'supplier', label: 'Fournisseur', color: 'bg-blue-500', icon: Truck },
+    { id: 'partner', label: 'Partenaire', color: 'bg-purple-500', icon: Handshake },
+    { id: 'other', label: 'Autre', color: 'bg-gray-500', icon: UserCircle }
+  ];
+
+  const resetForm = () => {
+    setFormData({ name: '', company: '', contact_type: 'client', email: '', phone: '', address: '', notes: '', tags: [] });
+    setTagInput('');
+    setEditingContact(null);
+    setShowAdd(false);
+  };
+
+  const addContact = async () => {
+    if (!formData.name.trim()) {
+      toast.error('Le nom est requis');
+      return;
+    }
+    try {
+      await enterpriseContactsAPI.create(formData);
+      toast.success('Contact ajouté');
+      resetForm();
+      onRefresh();
+    } catch (error) {
+      toast.error('Erreur lors de l\'ajout');
+    }
+  };
+
+  const updateContact = async () => {
+    if (!formData.name.trim()) {
+      toast.error('Le nom est requis');
+      return;
+    }
+    try {
+      await enterpriseContactsAPI.update(editingContact.id, formData);
+      toast.success('Contact mis à jour');
+      resetForm();
+      onRefresh();
+    } catch (error) {
+      toast.error('Erreur lors de la mise à jour');
+    }
+  };
+
+  const deleteContact = async (id) => {
+    if (!window.confirm('Supprimer ce contact ?')) return;
+    try {
+      await enterpriseContactsAPI.delete(id);
+      toast.success('Contact supprimé');
+      onRefresh();
+    } catch (error) {
+      toast.error('Erreur lors de la suppression');
+    }
+  };
+
+  const startEdit = (contact) => {
+    setEditingContact(contact);
+    setFormData({
+      name: contact.name || '',
+      company: contact.company || '',
+      contact_type: contact.contact_type || 'client',
+      email: contact.email || '',
+      phone: contact.phone || '',
+      address: contact.address || '',
+      notes: contact.notes || '',
+      tags: contact.tags || []
+    });
+    setShowAdd(true);
+  };
+
+  const addTag = () => {
+    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
+      setFormData({ ...formData, tags: [...formData.tags, tagInput.trim()] });
+      setTagInput('');
+    }
+  };
+
+  const removeTag = (tag) => {
+    setFormData({ ...formData, tags: formData.tags.filter(t => t !== tag) });
+  };
+
+  const filteredContacts = (contacts.contacts || []).filter(c => {
+    if (filterType && c.contact_type !== filterType) return false;
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
+      return c.name?.toLowerCase().includes(search) || 
+             c.company?.toLowerCase().includes(search) ||
+             c.email?.toLowerCase().includes(search);
+    }
+    return true;
+  });
+
+  const getTypeInfo = (type) => contactTypes.find(t => t.id === type) || contactTypes[3];
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+          Contacts
+        </h1>
+        <button onClick={() => setShowAdd(true)} className="btn-primary flex items-center gap-2">
+          <Plus className="w-4 h-4" /> Ajouter un contact
+        </button>
+      </div>
+
+      {/* Stats by type */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {contactTypes.map(type => (
+          <button
+            key={type.id}
+            onClick={() => setFilterType(filterType === type.id ? null : type.id)}
+            className={`card-service rounded-xl p-4 text-left transition-all ${filterType === type.id ? 'ring-2 ring-[#0047AB]' : ''}`}
+          >
+            <div className={`w-10 h-10 ${type.color} rounded-lg flex items-center justify-center mb-2`}>
+              <type.icon className="w-5 h-5 text-white" />
+            </div>
+            <p className="text-2xl font-bold text-white">{contacts.type_counts?.[type.id] || 0}</p>
+            <p className="text-sm text-gray-400">{type.label}s</p>
+          </button>
+        ))}
+      </div>
+
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Rechercher un contact..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="input-dark w-full pl-10"
+        />
+      </div>
+
+      {/* Contact list */}
+      {filteredContacts.length > 0 ? (
+        <div className="space-y-3">
+          {filteredContacts.map((contact) => {
+            const typeInfo = getTypeInfo(contact.contact_type);
+            return (
+              <div key={contact.id} className="card-service rounded-xl p-4 hover:bg-white/5 transition-colors">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-4">
+                    <div className={`w-12 h-12 ${typeInfo.color} rounded-full flex items-center justify-center flex-shrink-0`}>
+                      <span className="text-white font-bold text-lg">
+                        {contact.name?.charAt(0)?.toUpperCase() || '?'}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-white font-semibold">{contact.name}</p>
+                        <span className={`px-2 py-0.5 ${typeInfo.color} rounded-full text-xs text-white`}>
+                          {typeInfo.label}
+                        </span>
+                      </div>
+                      {contact.company && (
+                        <p className="text-gray-400 text-sm">{contact.company}</p>
+                      )}
+                      <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-400">
+                        {contact.email && (
+                          <a href={`mailto:${contact.email}`} className="flex items-center gap-1 hover:text-[#0047AB]">
+                            <MessageSquare className="w-4 h-4" />
+                            {contact.email}
+                          </a>
+                        )}
+                        {contact.phone && (
+                          <a href={`tel:${contact.phone}`} className="flex items-center gap-1 hover:text-green-400">
+                            <Phone className="w-4 h-4" />
+                            {contact.phone}
+                          </a>
+                        )}
+                      </div>
+                      {contact.tags?.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {contact.tags.map((tag, i) => (
+                            <span key={i} className="px-2 py-0.5 bg-white/10 rounded text-xs text-gray-300">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => startEdit(contact)} className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white">
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => deleteContact(contact.id)} className="p-2 hover:bg-red-500/20 rounded-lg text-gray-400 hover:text-red-400">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="card-service rounded-xl p-12 text-center">
+          <Phone className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+          <p className="text-gray-400 mb-2">
+            {searchTerm || filterType ? 'Aucun contact trouvé' : 'Aucun contact enregistré'}
+          </p>
+          <p className="text-sm text-gray-500">
+            Ajoutez vos fournisseurs, partenaires et clients importants
+          </p>
+        </div>
+      )}
+
+      {/* Add/Edit Modal */}
+      {showAdd && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="card-service rounded-xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold text-white">
+                {editingContact ? 'Modifier le contact' : 'Nouveau contact'}
+              </h3>
+              <button onClick={resetForm} className="p-2 hover:bg-white/10 rounded-lg">
+                <X className="w-5 h-5 text-gray-400" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              {/* Name */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Nom *</label>
+                <input
+                  type="text"
+                  placeholder="Nom du contact"
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="input-dark w-full"
+                />
+              </div>
+
+              {/* Company */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Entreprise</label>
+                <input
+                  type="text"
+                  placeholder="Nom de l'entreprise"
+                  value={formData.company}
+                  onChange={(e) => setFormData({...formData, company: e.target.value})}
+                  className="input-dark w-full"
+                />
+              </div>
+
+              {/* Type */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Type de contact</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {contactTypes.map(type => (
+                    <button
+                      key={type.id}
+                      type="button"
+                      onClick={() => setFormData({...formData, contact_type: type.id})}
+                      className={`p-3 rounded-lg flex items-center gap-2 transition-all ${
+                        formData.contact_type === type.id
+                          ? `${type.color} text-white`
+                          : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                      }`}
+                    >
+                      <type.icon className="w-4 h-4" />
+                      {type.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Email & Phone */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Email</label>
+                  <input
+                    type="email"
+                    placeholder="email@exemple.com"
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    className="input-dark w-full"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Téléphone</label>
+                  <input
+                    type="tel"
+                    placeholder="+41 21 123 45 67"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    className="input-dark w-full"
+                  />
+                </div>
+              </div>
+
+              {/* Address */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Adresse</label>
+                <input
+                  type="text"
+                  placeholder="Adresse complète"
+                  value={formData.address}
+                  onChange={(e) => setFormData({...formData, address: e.target.value})}
+                  className="input-dark w-full"
+                />
+              </div>
+
+              {/* Tags */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Tags</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Ajouter un tag"
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                    className="input-dark flex-1"
+                  />
+                  <button type="button" onClick={addTag} className="btn-secondary px-4">
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+                {formData.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {formData.tags.map((tag, i) => (
+                      <span key={i} className="px-2 py-1 bg-white/10 rounded flex items-center gap-1 text-sm text-gray-300">
+                        {tag}
+                        <button type="button" onClick={() => removeTag(tag)} className="hover:text-red-400">
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Notes */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Notes</label>
+                <textarea
+                  placeholder="Notes supplémentaires..."
+                  value={formData.notes}
+                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                  className="input-dark w-full h-24 resize-none"
+                />
+              </div>
+
+              {/* Buttons */}
+              <div className="flex gap-3 pt-4">
+                <button onClick={resetForm} className="btn-secondary flex-1">
+                  Annuler
+                </button>
+                <button 
+                  onClick={editingContact ? updateContact : addContact} 
+                  className="btn-primary flex-1"
+                >
+                  {editingContact ? 'Mettre à jour' : 'Ajouter'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Team Section Component
 const TeamSection = ({ team, teamOrders, onDelete, onRefresh }) => {
   const [showAdd, setShowAdd] = useState(false);
