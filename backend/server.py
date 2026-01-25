@@ -1903,6 +1903,216 @@ async def verify_user(user_id: str, is_certified: bool = False, is_labeled: bool
     
     return {"message": "Utilisateur vérifié"}
 
+# ============ ADMIN WITHDRAWAL MANAGEMENT ============
+
+# List of admin emails (can be expanded)
+ADMIN_EMAILS = ['admin@titelli.com', 'spa.luxury@titelli.com']
+
+def is_admin(user: dict) -> bool:
+    """Check if user is an admin"""
+    return user.get('email') in ADMIN_EMAILS or user.get('user_type') == 'admin'
+
+@api_router.get("/admin/withdrawals")
+async def get_all_withdrawals(
+    status: Optional[str] = None,
+    limit: int = 50,
+    skip: int = 0,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get all withdrawal requests (admin only)"""
+    if not is_admin(current_user):
+        raise HTTPException(status_code=403, detail="Admin uniquement")
+    
+    query = {}
+    if status:
+        query["status"] = status
+    
+    withdrawals = await db.cashback_withdrawals.find(
+        query, {"_id": 0}
+    ).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+    
+    # Get total count
+    total = await db.cashback_withdrawals.count_documents(query)
+    
+    # Get counts by status
+    status_counts = {
+        "pending": await db.cashback_withdrawals.count_documents({"status": "pending"}),
+        "manual_processing": await db.cashback_withdrawals.count_documents({"status": "manual_processing"}),
+        "processing": await db.cashback_withdrawals.count_documents({"status": "processing"}),
+        "completed": await db.cashback_withdrawals.count_documents({"status": "completed"}),
+        "failed": await db.cashback_withdrawals.count_documents({"status": "failed"})
+    }
+    
+    return {
+        "withdrawals": withdrawals,
+        "total": total,
+        "status_counts": status_counts
+    }
+
+@api_router.put("/admin/withdrawals/{withdrawal_id}/status")
+async def update_withdrawal_status(
+    withdrawal_id: str,
+    new_status: str,
+    admin_note: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update withdrawal status (admin only)"""
+    if not is_admin(current_user):
+        raise HTTPException(status_code=403, detail="Admin uniquement")
+    
+    valid_statuses = ["pending", "processing", "completed", "failed", "manual_processing"]
+    if new_status not in valid_statuses:
+        raise HTTPException(status_code=400, detail=f"Statut invalide. Valeurs acceptées: {valid_statuses}")
+    
+    withdrawal = await db.cashback_withdrawals.find_one({"id": withdrawal_id})
+    if not withdrawal:
+        raise HTTPException(status_code=404, detail="Retrait non trouvé")
+    
+    update_data = {
+        "status": new_status,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "updated_by": current_user['email']
+    }
+    
+    if admin_note:
+        update_data["admin_note"] = admin_note
+    
+    if new_status == "completed":
+        update_data["completed_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.cashback_withdrawals.update_one(
+        {"id": withdrawal_id},
+        {"$set": update_data}
+    )
+    
+    # Notify user about status change
+    status_messages = {
+        "processing": "Votre retrait est en cours de traitement.",
+        "completed": f"Votre retrait de {withdrawal['amount']:.2f} CHF a été effectué avec succès.",
+        "failed": f"Votre retrait de {withdrawal['amount']:.2f} CHF a échoué. Veuillez contacter le support."
+    }
+    
+    if new_status in status_messages:
+        await create_notification(
+            user_id=withdrawal['user_id'],
+            notification_type="cashback_withdrawal",
+            title="Mise à jour de votre retrait",
+            message=status_messages[new_status],
+            link="/dashboard/client?tab=cashback"
+        )
+    
+    # If failed, refund the cashback
+    if new_status == "failed":
+        await db.users.update_one(
+            {"id": withdrawal['user_id']},
+            {"$inc": {"cashback_balance": withdrawal['amount']}}
+        )
+        
+        # Record refund transaction
+        refund_tx = {
+            "id": str(uuid.uuid4()),
+            "user_id": withdrawal['user_id'],
+            "amount": withdrawal['amount'],
+            "type": "refund",
+            "description": f"Remboursement retrait échoué #{withdrawal_id[:8]}",
+            "withdrawal_id": withdrawal_id,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.cashback_transactions.insert_one(refund_tx)
+    
+    return {"message": f"Statut mis à jour: {new_status}", "withdrawal_id": withdrawal_id}
+
+@api_router.get("/admin/withdrawals/export")
+async def export_withdrawals_csv(
+    status: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Export withdrawals to CSV (admin only)"""
+    if not is_admin(current_user):
+        raise HTTPException(status_code=403, detail="Admin uniquement")
+    
+    import csv
+    import io
+    
+    query = {}
+    if status:
+        query["status"] = status
+    if start_date:
+        query["created_at"] = {"$gte": start_date}
+    if end_date:
+        if "created_at" in query:
+            query["created_at"]["$lte"] = end_date
+        else:
+            query["created_at"] = {"$lte": end_date}
+    
+    withdrawals = await db.cashback_withdrawals.find(
+        query, {"_id": 0}
+    ).sort("created_at", -1).to_list(10000)
+    
+    # Create CSV
+    output = io.StringIO()
+    writer = csv.writer(output, delimiter=';')
+    
+    # Header
+    writer.writerow([
+        'ID', 'Date', 'Email', 'Titulaire', 'IBAN', 'BIC/SWIFT',
+        'Montant (CHF)', 'Statut', 'Note Admin', 'Date Complété'
+    ])
+    
+    # Data rows
+    for w in withdrawals:
+        writer.writerow([
+            w.get('id', ''),
+            w.get('created_at', '')[:19] if w.get('created_at') else '',
+            w.get('user_email', ''),
+            w.get('account_holder', ''),
+            w.get('iban', ''),
+            w.get('bic_swift', ''),
+            f"{w.get('amount', 0):.2f}",
+            w.get('status', ''),
+            w.get('admin_note', ''),
+            w.get('completed_at', '')[:19] if w.get('completed_at') else ''
+        ])
+    
+    csv_content = output.getvalue()
+    output.close()
+    
+    # Return as downloadable file
+    from fastapi.responses import Response
+    return Response(
+        content=csv_content,
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f"attachment; filename=withdrawals_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.csv"
+        }
+    )
+
+@api_router.get("/admin/withdrawals/{withdrawal_id}")
+async def get_withdrawal_detail(
+    withdrawal_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get detailed withdrawal info (admin only)"""
+    if not is_admin(current_user):
+        raise HTTPException(status_code=403, detail="Admin uniquement")
+    
+    withdrawal = await db.cashback_withdrawals.find_one({"id": withdrawal_id}, {"_id": 0})
+    if not withdrawal:
+        raise HTTPException(status_code=404, detail="Retrait non trouvé")
+    
+    # Get user info
+    user = await db.users.find_one(
+        {"id": withdrawal['user_id']}, 
+        {"_id": 0, "password_hash": 0}
+    )
+    
+    return {
+        "withdrawal": withdrawal,
+        "user": user
+    }
+
 # ============ CASHBACK ROUTES ============
 
 @api_router.get("/cashback/balance")
