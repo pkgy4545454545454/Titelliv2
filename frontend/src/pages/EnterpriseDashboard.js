@@ -211,7 +211,7 @@ const EnterpriseDashboard = () => {
       items: [
         { id: 'messages', label: 'Messagerie', icon: MessageSquare, notifKey: 'messages' },
         { id: 'contacts', label: 'Contacts', icon: Phone },
-        { id: 'agenda', label: 'Agenda', icon: Calendar },
+        { id: 'salonpro_planning', label: 'Voir Planning', icon: Calendar, isExternal: true, color: 'text-green-400' },
       ]
     },
     {
