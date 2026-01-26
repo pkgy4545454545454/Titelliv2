@@ -96,7 +96,7 @@ const ProductsPage = () => {
             className="w-full h-full object-cover"
             poster="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920&q=80"
           >
-            <source src={`${process.env.REACT_APP_BACKEND_URL}/api/uploads/video_produits.mp4`} type="video/mp4" />
+            <source src={`${process.env.REACT_APP_BACKEND_URL}/api/uploads/video_produits_v2.mp4`} type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/70 via-[#050505]/50 to-[#050505]" />
         </div>
