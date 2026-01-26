@@ -1599,6 +1599,15 @@ async def create_order(data: OrderCreate, current_user: dict = Depends(get_curre
         data={"order_id": order_dict['id'], "total": total}
     )
     
+    # === Sync order to SalonPro ===
+    if enterprise:
+        asyncio.create_task(sync_order_to_salonpro(
+            order_dict, 
+            enterprise, 
+            current_user, 
+            [item.model_dump() for item in data.items]
+        ))
+    
     return order_dict
 
 @api_router.get("/orders")
