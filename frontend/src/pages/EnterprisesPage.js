@@ -54,7 +54,7 @@ const EnterprisesPage = () => {
 
   return (
     <div className="min-h-screen bg-[#050505] pt-24" data-testid="enterprises-page">
-      {/* Hero with Video Background */}
+      {/* Hero with Video Background - Generated with Sora 2 AI */}
       <div className="relative h-[40vh] min-h-[300px] overflow-hidden">
         {/* Video Background */}
         <div className="absolute inset-0">
@@ -66,7 +66,7 @@ const EnterprisesPage = () => {
             className="w-full h-full object-cover"
             poster="https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1920&q=80"
           >
-            <source src="https://assets.mixkit.co/videos/preview/mixkit-business-team-meeting-in-office-4815-large.mp4" type="video/mp4" />
+            <source src={`${process.env.REACT_APP_BACKEND_URL}/api/uploads/video_services.mp4`} type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/70 via-[#050505]/50 to-[#050505]" />
         </div>
