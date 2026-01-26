@@ -148,6 +148,41 @@ async def sync_service_to_salonpro(service: dict, enterprise_id: str):
     await send_webhook_to_salonpro("service_created", sync_data)
 
 
+async def sync_order_to_salonpro(order: dict, enterprise: dict, client_user: dict, items: list):
+    """Sync order/commande to SalonPro for 'Commandes validées' section"""
+    sync_data = {
+        "order_id": order.get('id'),
+        "enterprise_id": enterprise.get('id'),
+        "enterprise_name": enterprise.get('business_name'),
+        "client_id": order.get('user_id'),
+        "client_name": f"{client_user.get('first_name', '')} {client_user.get('last_name', '')}",
+        "client_email": client_user.get('email'),
+        "client_phone": client_user.get('phone'),
+        "items": items,
+        "subtotal": order.get('subtotal'),
+        "transaction_fee": order.get('transaction_fee'),
+        "total": order.get('total'),
+        "delivery_address": order.get('delivery_address'),
+        "notes": order.get('notes'),
+        "status": order.get('status', 'pending'),
+        "created_at": order.get('created_at')
+    }
+    
+    await send_webhook_to_salonpro("order_created", sync_data)
+
+
+async def sync_order_status_to_salonpro(order_id: str, new_status: str, enterprise_id: str):
+    """Sync order status update to SalonPro"""
+    sync_data = {
+        "order_id": order_id,
+        "enterprise_id": enterprise_id,
+        "status": new_status,
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await send_webhook_to_salonpro("order_status_updated", sync_data)
+
+
 # ============ WEBSOCKET CONNECTION MANAGER ============
 
 class ConnectionManager:
