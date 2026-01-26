@@ -1245,6 +1245,45 @@ async def login(credentials: UserLogin):
 async def get_me(current_user: dict = Depends(get_current_user)):
     return current_user
 
+
+@api_router.get("/auth/salonpro-token")
+async def get_salonpro_autologin_token(current_user: dict = Depends(get_current_user)):
+    """
+    Generate a short-lived token for automatic login to SalonPro.
+    This token is valid for 5 minutes and is intended for seamless redirection.
+    """
+    if current_user['user_type'] != 'entreprise':
+        raise HTTPException(status_code=403, detail="Accès réservé aux entreprises")
+    
+    # Get enterprise info
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']}, {"_id": 0})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Profil entreprise non trouvé")
+    
+    # Create a short-lived token (5 minutes) with essential info for SalonPro
+    salonpro_payload = {
+        "user_id": current_user['id'],
+        "enterprise_id": enterprise.get('id'),
+        "email": current_user.get('email'),
+        "business_name": enterprise.get('business_name'),
+        "purpose": "salonpro_autologin",
+        "iat": datetime.now(timezone.utc),
+        "exp": datetime.now(timezone.utc) + timedelta(minutes=5)
+    }
+    
+    salonpro_token = jwt.encode(salonpro_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    
+    # Get SalonPro URL from environment or use default
+    salonpro_url = os.environ.get('SALONPRO_URL', 'https://salonpro.titelli.com')
+    
+    return {
+        "token": salonpro_token,
+        "redirect_url": f"{salonpro_url}/dashboard?autologin_token={salonpro_token}",
+        "salonpro_url": salonpro_url,
+        "expires_in": 300  # 5 minutes in seconds
+    }
+
+
 # ============ ENTERPRISE ROUTES ============
 
 @api_router.post("/enterprises")
