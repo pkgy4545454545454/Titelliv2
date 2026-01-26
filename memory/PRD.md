@@ -7,7 +7,44 @@ Marketplace premium pour Lausanne connectant entreprises, clients et influenceur
 
 ---
 
-## ✅ Fonctionnalités Complétées (25 Jan 2026)
+## ✅ Fonctionnalités Complétées (26 Jan 2026)
+
+### Phase 38 : Intégration SalonPro Complète - Auto-Login & Synchronisation (TERMINÉ)
+
+**Nouvelles fonctionnalités implémentées :**
+
+1. **Endpoint Auto-Login SalonPro (NOUVEAU)**
+   - ✅ `GET /api/auth/salonpro-token` - Génère un token JWT pour connexion automatique à SalonPro
+   - ✅ Token valide 5 minutes avec `purpose: salonpro_autologin`
+   - ✅ Inclut : user_id, enterprise_id, email, business_name
+   - ✅ Retourne redirect_url complète
+
+2. **Bouton "Voir Planning" (NOUVEAU)**
+   - ✅ Ajouté dans la section Communication du menu entreprise
+   - ✅ Style vert (`text-green-400`) avec icône flèche
+   - ✅ `data-testid="menu-item-salonpro_planning"`
+   - ✅ Click handler `handleSalonProRedirect()` : appelle API → ouvre SalonPro dans un nouvel onglet
+
+3. **Synchronisation Commandes vers SalonPro (NOUVEAU)**
+   - ✅ `sync_order_to_salonpro()` - Envoie les données de commande via webhook
+   - ✅ `sync_order_status_to_salonpro()` - Sync les mises à jour de statut
+   - ✅ Appel automatique lors de `create_order()`
+   - ✅ Données envoyées : order_id, client info, items, totaux, notes
+
+4. **Agenda Client avec Réservations (AMÉLIORÉ)**
+   - ✅ `/api/client/agenda` modifié pour inclure les événements personnels ET les bookings
+   - ✅ Les réservations sont enrichies avec : `source='booking'`, `enterprise_name`, `event_type='appointment'`
+   - ✅ Badge "RDV" affiché dans l'UI pour distinguer des événements personnels
+
+**APIs créées/modifiées :**
+```
+GET /api/auth/salonpro-token          # Génère token auto-login pour SalonPro (entreprise only)
+GET /api/client/agenda                # Maintenant retourne événements + bookings combinés
+```
+
+**Tests: 100% réussis (iteration_36.json) - Backend 8/8, Frontend 100%**
+
+---
 
 ### Phase 37 : Intégration Titelli ↔ SalonPro - Système Webhooks (TERMINÉ)
 
