@@ -18,9 +18,11 @@ import {
   agendaAPI, teamAPI, permanentOrdersAPI, documentsAPI, financesAPI, advertisingAPI,
   uploadAPI, enterpriseApplicationsAPI, enterpriseContactsAPI, messagesAPI
 } from '../services/api';
+import api from '../services/api';
 import { toast } from 'sonner';
 // Composants extraits pour réduire la taille du fichier
 import { IAClientsSection, InfluencersSection, InvitationsSection, SubscriptionsSection } from '../components/dashboard';
+
 
 const EnterpriseDashboard = () => {
   const { user, isEnterprise } = useAuth();
