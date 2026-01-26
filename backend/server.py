@@ -4548,10 +4548,18 @@ async def get_enterprise_agenda(
     start_date: Optional[str] = None,
     end_date: Optional[str] = None
 ):
+    """
+    Récupère l'agenda de l'entreprise incluant:
+    - Les événements créés par l'entreprise (collection agenda)
+    - Les RDV pris par les clients (collection bookings)
+    
+    Utilisé par Titelli ET SalonPro pour afficher le planning complet.
+    """
     enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
     if not enterprise:
-        return []
+        return {"events": [], "bookings": []}
     
+    # Query de base
     query = {"enterprise_id": enterprise['id']}
     if start_date:
         query["start_datetime"] = {"$gte": start_date}
@@ -4561,8 +4569,45 @@ async def get_enterprise_agenda(
         else:
             query["start_datetime"] = {"$lte": end_date}
     
-    events = await db.agenda.find(query, {"_id": 0}).sort("start_datetime", 1).to_list(500)
-    return events
+    # 1. Récupérer les événements agenda de l'entreprise
+    agenda_events = await db.agenda.find(query, {"_id": 0}).sort("start_datetime", 1).to_list(500)
+    for event in agenda_events:
+        event['source'] = 'agenda'
+    
+    # 2. Récupérer les RDV pris par les clients (bookings)
+    bookings_query = {"enterprise_id": enterprise['id']}
+    if start_date:
+        bookings_query["start_datetime"] = {"$gte": start_date}
+    if end_date:
+        if "start_datetime" in bookings_query:
+            bookings_query["start_datetime"]["$lte"] = end_date
+        else:
+            bookings_query["start_datetime"] = {"$lte": end_date}
+    
+    client_bookings = await db.bookings.find(bookings_query, {"_id": 0}).sort("start_datetime", 1).to_list(500)
+    
+    # Enrichir les bookings avec les infos client
+    for booking in client_bookings:
+        booking['source'] = 'client_booking'
+        booking['event_type'] = 'appointment'
+        # Récupérer le nom du client
+        client = await db.users.find_one({"id": booking.get('client_id')}, {"_id": 0, "first_name": 1, "last_name": 1, "email": 1, "phone": 1})
+        if client:
+            booking['client_name'] = f"{client.get('first_name', '')} {client.get('last_name', '')}"
+            booking['client_email'] = client.get('email')
+            booking['client_phone'] = client.get('phone')
+    
+    # 3. Combiner et trier par date
+    all_events = agenda_events + client_bookings
+    all_events.sort(key=lambda x: x.get('start_datetime', ''))
+    
+    return {
+        "events": all_events,
+        "total_agenda": len(agenda_events),
+        "total_bookings": len(client_bookings),
+        "enterprise_id": enterprise['id'],
+        "enterprise_name": enterprise.get('business_name')
+    }
 
 @api_router.post("/enterprise/agenda")
 async def create_agenda_event(event: AgendaEventCreate, current_user: dict = Depends(get_current_user)):
