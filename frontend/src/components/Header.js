@@ -149,7 +149,6 @@ const Header = () => {
   };
 
   const navLinks = [
-    { path: '/', label: 'Accueil' },
     { path: '/services', label: 'Services' },
     { path: '/products', label: 'Produits' },
     { path: '/entreprises', label: 'Entreprises' },
