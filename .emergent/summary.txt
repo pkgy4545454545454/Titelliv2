@@ -1,87 +1,102 @@
 <analysis>**original_problem_statement:**
-The user's initial goal was a comprehensive refactoring of the monolithic  and  files. However, priorities shifted to deploying the application on Render.com, fixing deployment-related bugs, and adding significant new features.
+The user initially requested a major refactoring of the  and  files. However, this was deprioritized in favor of numerous feature additions, bug fixes, and a full system audit.
 
-The most recent requests focused on:
-1.  **Fixing a bug** where a client's updated cover image wasn't visible on their public profile.
-2.  **Fixing another bug** where notification counts in the dashboard sidebars were not reactive.
-3.  **Verifying and fixing Stripe subscription payments** for enterprise accounts.
-4.  **Implementing a full-featured cart section** in the client dashboard.
-5.  **Implementing a complete cashback withdrawal system** for clients, including IBAN storage and a manual payout process using Stripe Connect.
-6.  **Creating a new Admin Dashboard** to manage cashback withdrawal requests (view, approve, reject, export CSV).
-7.  **Creating a comprehensive Accounting section** within the Admin dashboard to provide a financial overview of the platform (revenue, commissions, cashback liability) with PDF and Excel export capabilities.
-8.  **Resolving user confusion about accessing the new Admin page.**
-9.  **Conducting a full system audit** to ensure all features (cashback rates, messaging, friend requests, etc.) are driven by real database data and are not hardcoded or mocked.
-10. **Performing a final global check** for CSS/UI issues and ensuring all subscription plans are correctly implemented before starting the postponed refactoring tasks.
+The most recent user requests are:
+1.  **Fix a bug** with PDF/Excel exports in the Admin Dashboard where the authentication token was not being sent correctly.
+2.  **Implement the Communication section** of the Enterprise Dashboard, which was previously a placeholder, with fully functional, data-driven Contacts and Messaging features.
+3.  **Integrate the application with a second site (SalonPro)**. This involves:
+    *   Using the same MongoDB database for enterprise profiles.
+    *   Creating a webhook system to automatically create a profile on SalonPro when an enterprise signs up on Titelli.
+    *   Creating a system for clients to book appointments with enterprises on Titelli, and having these appointments sync to SalonPro via webhooks.
+    *   Ensuring appointments are synchronized bidirectionally.
+    *   Modifying the Enterprise Dashboard: change the Agenda tab to Voir Planning, make it redirect to the SalonPro dashboard with automatic login.
+    *   Ensuring appointments booked by a client also appear in that client's personal agenda section in their dashboard.
+    *   Linking order information to be visible in SalonPro.
+4.  **Generate a comprehensive project report** as a ZIP file, including a full Requirements Document (CDC), technical documentation, algorithm explanations, and a consolidated test summary.
+5.  **Generate multiple videos using Sora 2** for page headers (Homepage, Services, Products) and a complex, iterative animation of the Titelli logo based on user feedback and a provided image.
 
-**User's preferred language**: French. The next agent MUST respond in French only.
+**User's preferred language**: French
 
 **what currently exists?**
-The application is a feature-rich social commerce platform deployed and functioning on Render.com. The codebase has been significantly enhanced in this session.
--   **Backend**: A 7500+ line  file powers the entire application. It now includes extensive logic for admin management, a detailed accounting system with PDF/Excel exports (, ), and a robust cashback withdrawal system that creates withdrawal requests for manual processing due to Stripe API key limitations. All private dependencies like  have been removed.
--   **Frontend**: The frontend features distinct dashboards for Clients, Enterprises, and a new, comprehensive Admin panel.
-    -   **Client Dashboard**: Includes a working cart, reactive notifications (implementation pending final user verification), and a full cashback management UI (view balance, add bank details, request withdrawal).
-    -   **Enterprise Dashboard**: Includes a working subscription management section and a new prominent button to access the Admin Panel.
-    -   **Admin Dashboard**: A new, fully functional dashboard accessible at  for users with admin privileges (). It features sections for financial accounting, withdrawal management, user management, and more.
--   **Data**: All major features, including cashback rates, subscriptions, and financial reporting, are now confirmed to be driven by real data from the MongoDB database.
+The application is a feature-rich social commerce platform with a React frontend, a monolithic FastAPI backend ( is ~9300+ lines), and a MongoDB database.
+-   **Backend**: Contains extensive logic for admin management, accounting (with PDF/Excel/CSV exports), a cashback withdrawal system, a new client-facing booking system, and a webhook system for integration with SalonPro. It also integrates with the Sora 2 video generation API via .
+-   **Frontend**:
+    -   **Admin Dashboard**: Fully functional, bug with file exports has been fixed.
+    -   **Enterprise Dashboard**: The Communication section is now complete with functional, data-driven Contacts (full CRUD) and Messages (real-time chat interface). The Agenda tab is being modified for SalonPro integration.
+    -   **Client Dashboard**: Includes a working personal agenda to display appointments.
+    -   **Public Pages**: The Homepage, Services, and Products pages now feature custom-generated video backgrounds. The public-facing enterprise page has a functional Book Appointment modal.
+-   **Project Documentation**: A  file containing a full project breakdown has been generated and is available for download.
 
 **Last working item**:
--   **Last item agent was working**: The user requested a final, global check of the entire application to ensure everything is production-ready, all subscription types are correctly included, and there are no CSS/UI overflow issues. This was to be the last step before commencing the major refactoring tasks. The agent verified all subscription plans were present in the backend code.
+-   **Last item agent was working**: Implementing the user's request to modify the Enterprise Dashboard for SalonPro integration. Specifically, changing the Agenda tab to Voir Planning (in green) and making it redirect to the SalonPro site with an automatic login for the enterprise. The agent had located the relevant code in  and was in the process of modifying the menu.
 -   **Status**: IN PROGRESS
--   **Agent Testing Done**: Y (Agent verified subscription code constants, but a full UI/functional check is still pending).
--   **Which testing method agent to use?**: both. A full frontend and backend regression test is required to satisfy the user's request for a global check. The testing agent should be used to scan for functional bugs and UI/CSS issues across all dashboards (Client, Enterprise, Admin).
+-   **Agent Testing Done**: N
+-   **Which testing method agent to use?**: both. The frontend UI change and redirection should be tested with the screenshot tool. The backend will need a new endpoint to generate an auto-login token, which should be tested via .
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: (P0) Reactive Notification Counts in Dashboard Menu**
-    -   **Description**: The agent implemented a fix by adding  to , and screenshots show some counters appearing. However, the user has not explicitly confirmed that the counts update in real-time as expected when a new notification arrives.
-    -   **Attempted fixes**: The agent added the WebSocket hook and logic to update notification counts.
+-   **Issue 1: (P0) Complete SalonPro Integration & Agenda Link**
+    -   **Description**: The user wants to finalize the integration between Titelli and SalonPro.
+        1.  Finish implementing the Voir Planning button in the Enterprise Dashboard to redirect to SalonPro with auto-login.
+        2.  Verify that appointments made by a client correctly appear in that client's personal agenda section.
+        3.  Implement the sharing of order information to SalonPro, likely via the existing webhook system.
+    -   **Attempted fixes**: The agent successfully modified the menu item text and color in . The next step is to add the redirection and auto-login logic.
     -   **Next debug checklist**:
-        1.  Verify with the user if the notification counts are now updating in real-time.
-        2.  If not, trace the WebSocket messages in the browser's developer tools to see if notifications are being received by the client.
-        3.  Check the  hook in  that processes incoming notifications to ensure it correctly updates the state that holds the notification counts.
-    -   **Why fix this issue and what will be achieved with the fix?**: Provides critical real-time feedback to users, improving engagement.
-    -   **Status**: USER VERIFICATION PENDING
+        1.  In , create a new endpoint (e.g., ) that generates a short-lived JWT for auto-login.
+        2.  In , modify the  handler for the Voir Planning button. It should call the new backend endpoint to get the token and then redirect the user to .
+        3.  In , confirm that the  hook correctly fetches and displays data from the  endpoint.
+        4.  In , find the logic for order creation/update and add a call to the  function to notify SalonPro.
+    -   **Why fix this issue and what will be achieved with the fix?**: This is a core user requirement to link the two applications and their data.
+    -   **Status**: IN PROGRESS
     -   **Is recurring issue?**: N
-    -   **Should Test frontend/backend/both after fix?**: frontend
+    -   **Should Test frontend/backend/both after fix?**: both
+    -   **Blocked on other issue**: None
+
+-   **Issue 2: (P1) Finalize Sora 2 Logo Animation**
+    -   **Description**: The user is not fully satisfied with the generated logo animation. The last generated version () has the correct final logo shape (a white 'T' in a circle), but the color animation is from an older, less dynamic version. The user wants to combine the color animation of  with the final logo of .
+    -   **Attempted fixes**: The agent made multiple attempts, iterating on the prompt based on user feedback. The last attempt to generate the perfect version failed due to insufficient Emergent LLM Key credit.
+    -   **Next debug checklist**:
+        1.  Confirm with the user that they have recharged the Emergent LLM Key balance.
+        2.  Craft a new, precise prompt for Sora 2 describing the desired animation: An orb of glass on a black background. Inside, a nebula of swirling colors—pink, magenta, purple, blue, cyan—rotates in a circle, like in . The colors converge into a bright central point, which then resolves into a clean, minimalist white T inside a thin white circle, identical to the Titelli logo.
+        3.  Run the video generation script with the new prompt.
+    -   **Why fix this issue and what will be achieved with the fix?**: To satisfy the user's specific branding and visual requirements for the logo animation.
+    -   **Status**: BLOCKED (on user credit recharge)
+    -   **Is recurring issue?**: Y
+    -   **Should Test frontend/backend/both after fix?**: frontend (by providing the video download link)
     -   **Blocked on other issue**: None
 
 **In progress Task List**:
--   **Task 1: (P0) Global CSS and Functional Production-Ready Check**
-    -   **Where to resume**: The user has asked for a comprehensive check of the entire site. The next agent should start by using the  to perform a full regression test on the frontend and backend. Pay special attention to UI/CSS overflows, responsiveness, and ensuring all interactive elements work as expected across the Client, Enterprise, and Admin dashboards.
-    -   **What will be achieved with this?**: This will fulfill the user's request for a final quality assurance pass before moving on to major architectural changes.
-    -   **Status**: NOT STARTED
+-   **Task 1: (P0) SalonPro Integration**
+    -   **Where to resume**: The agent was modifying the menu item click handler in . The next step is to implement the backend token generation and frontend redirection logic.
+    -   **What will be achieved with this?**: A seamless link between the Titelli and SalonPro applications for enterprise users.
+    -   **Status**: IN PROGRESS
     -   **Should Test frontend/backend/both after fix?**: both
     -   **Blocked on something**: None
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks:**
-    -   **P1: Refactor **: This is a critical technical debt item. The file is now over 7,500 lines and must be broken down into a modular structure (e.g., using FastAPI routers for , , , , etc.). A plan exists in .
-    -   **P2: Refactor **: This file is over 4,000 lines and needs to be decomposed into smaller, reusable React components.
-    -   **P3: Complete Placeholder Sections in Enterprise Dashboard**: The  still contains placeholder content for tabs like , , and . These need to be implemented.
+    -   **P1: Refactor **: Critical technical debt. The file is over 9,300 lines and needs to be broken into a modular structure using FastAPI routers (plan in ).
+    -   **P2: Refactor  and **: Both are monolithic components (4500+ and 3000+ lines respectively) and need to be decomposed into smaller, reusable React components.
+    -   **P3: Generate 12-second Products video**: The user requested a longer marketing video for the products page, but generation failed due to insufficient credit. This should be attempted after the user recharges their account.
 -   **Future Tasks:**
-    -   Implement **trend analysis charts** in the Accounting dashboard (e.g., monthly revenue/commission evolution).
-    -   Implement **Stripe webhooks for completed payouts** to automatically update the status of withdrawals from  to .
-    -   Create an **admin dashboard for managing subscriptions**.
+    -   Implement placeholder sections in the Enterprise Dashboard (, , ).
+    -   Implement trend analysis charts in the Accounting dashboard.
+    -   Implement Stripe webhooks for automatic payout status updates.
+    -   Create an admin dashboard for managing subscriptions.
 
 **Completed work in this session**
--   **Cashback Withdrawal System (DONE)**: Implemented a full-featured system for clients to withdraw their cashback balance. This includes UI for adding bank info (IBAN), a backend endpoint to handle requests, and a fallback to manual processing status when the live Stripe key cannot perform direct payouts.
--   **Admin Dashboard Creation (DONE)**:
-    -   Built a new, secure admin dashboard at .
-    -   Implemented a **Withdrawal Management** section where admins can view all withdrawal requests, see the full IBAN, update status (completed/failed), and export all data to a CSV file.
-    -   Implemented a complete **Accounting** section with KPIs (Total Revenue, Commissions, Cashback Liability), detailed financial breakdowns, and PDF/Excel export functionality.
-    -   Fixed admin access controls and added a prominent link to the admin panel from the Enterprise Dashboard.
--   **Bug Fixes (DONE)**:
-    -   Fixed a bug where a client's updated cover image was not saved or displayed correctly on their public profile.
-    -   Fixed Stripe subscription checkout flow for Enterprise accounts by correcting the API method name in .
-    -   The testing agent fixed incorrect plan and addon IDs in .
--   **Feature Completion (DONE)**:
-    -   Implemented a full Cart tab within the .
-    -   Completed multiple placeholder sections in the  to show real data for Users, Enterprises, Orders, and Payments.
-    -   Fixed the Découvrez mon premium button in  to navigate to the correct tab.
--   **System Audit (DONE)**: Verified that all major systems (Cashback, Subscriptions, Admin Stats, Messaging, Friends, Invitations) are driven by real data from the database, not mocked or hardcoded.
+-   **Admin Export Bug Fix (DONE)**: Fixed file exports (PDF/Excel/CSV) in the Admin Dashboard by correcting token retrieval in the frontend and adding support for token-as-query-parameter in the backend.
+-   **Enterprise Communication Section (DONE)**: Implemented fully functional, data-driven Contacts (CRUD) and Messages sections, replacing placeholders.
+-   **Titelli ↔ SalonPro Integration (Phase 1 DONE)**:
+    -   Created a webhook system for new enterprise sign-ups.
+    -   Built a client-facing booking system with a UI modal and backend API.
+    -   Enabled bidirectional appointment synchronization via webhooks.
+-   **Sora 2 Video Generation (DONE for v1)**: Generated and integrated custom video backgrounds for the Homepage, Services, and Products pages. Iteratively generated multiple versions of a complex logo animation.
+-   **Project Report Generation (DONE)**: Created a  with a full CDC, technical documentation, algorithm schemas, and a consolidated test report.
+-   **UI/UX Improvements (DONE)**: Removed the Accueil link from the header and play/mute buttons from the homepage video as requested.
 
 **Earlier issues found/mentioned but not fixed**
--   The major refactoring tasks for  and  were the original goal but have been continuously postponed to address the user's urgent feature requests and bug fixes. They are now the highest priority upcoming tasks.
+-   The major refactoring tasks for , , and  remain the most significant pieces of technical debt.
 
 **Known issue recurrence from previous fork**
 -   None.
@@ -90,52 +105,41 @@ The application is a feature-rich social commerce platform deployed and function
 
 
 **Key Technical Concepts**
--   **Admin Panel & RBAC**: Created a new section of the application restricted to admin users, with logic to check user roles ( flag in DB) before granting access to sensitive endpoints.
--   **Financial Reporting**: Built a backend aggregation pipeline to calculate platform-wide financial metrics (revenue, commissions, etc.) from different MongoDB collections (, ).
--   **File Generation (Backend)**: Used  to generate complex, multi-sheet Excel reports and  to generate formatted PDF documents from backend data.
--   **Stripe Payouts & Manual Fallback**: Implemented a system to initiate cashback withdrawals. When the direct Stripe Transfer API call fails (due to key permissions), the system gracefully falls back by creating a manual_processing request in the database for an admin to handle.
--   **Modular Frontend (Admin)**: The  was built with internal state and effects to fetch data for different tabs (accounting, withdrawals, users), making it a self-contained single-page application.
+-   **Webhook Integration**: Implemented both outgoing webhooks (using ) and an incoming webhook endpoint () to synchronize data (new enterprises, appointments) between Titelli and an external application.
+-   **AI Video Generation (Sora 2)**: Used the  library to call the Sora 2 text-to-video API. Handled API errors such as  and content moderation blocks, and iterated on prompts based on user feedback.
+-   **Dynamic File Generation & Archiving**: Generated multiple comprehensive project documents in Markdown format and created a ZIP archive () on the fly for the user to download.
+-   **Monolithic Frontend Components**: Implemented several large, self-contained features (Contacts CRUD, Messaging UI, Booking Modal) within the massive  and  files.
 
 **key DB schema**
--   **cashback_withdrawals (NEW)**: 
--   **enterprise_subscriptions (NEW)**: Used to track active subscriptions for enterprises, fixing a bug where activation status was written to the wrong collection.
--   **users**: Modified to include  and  fields. Also has an  boolean flag.
+-   ** (NEW)**: 
+-   ****: Modified to include a  (e.g., 'salonpro', 'titelli_booking'), , and  ('pending', 'confirmed', 'cancelled').
 
 **changes in tech stack**
--   **Added**:  and  to  for Excel and PDF report generation.
+-   **Added**:  and its dependencies (e.g., ) to  for AI video generation.
 
 **All files of reference**
--    (Heavily modified for all new backend logic)
--    (New file for the admin panel)
--    (Modified for cashback withdrawal UI)
--    (Modified to add admin link)
--    (Modified with all new admin API endpoints)
--    (Updated with completed work)
+-   
+-   
+-   
+-   
+-   
+-    (Generated report archive)
 
 **Areas that need refactoring**:
--   ** (CRITICAL)**: Now over 7500 lines. The new accounting and admin logic has further bloated the file. It is the user's next priority.
--   ** (CRITICAL)**: Over 4000 lines. The addition of the cashback and cart UI makes this refactor even more urgent.
--   ** (Medium)**: While new, this file is already large (~900 lines) and could be broken into components for each admin section (Accounting, Withdrawals, Users, etc.).
+-   ** (CRITICAL)**: Now over 9300 lines. The addition of webhooks, video generation, and booking APIs makes refactoring urgent.
+-   ** (CRITICAL)**: Now over 3000 lines and contains multiple large, complex sub-components (Contacts, Messages, Agenda, Team, etc.) that should be extracted into their own files.
+-   ** (CRITICAL)**: Remains over 4500 lines.
 
 **key api endpoints**
--   **Admin & Accounting (All New)**:
-    -   : Retrieves all financial KPIs.
-    -   : Downloads an Excel report.
-    -   : Downloads a PDF report.
-    -   : Gets all cashback withdrawal requests.
-    -   : Updates the status of a withdrawal.
-    -   : Exports withdrawal data to CSV.
-    -   , , , etc.
--   **Cashback Withdrawal (All New)**:
-    -   : Gets current balance and bank details.
-    -   : Saves/updates user's IBAN.
-    -   : Initiates a withdrawal request.
+-   **Enterprise Contacts (NEW)**: 
+-   **Client Booking (NEW)**: , 
+-   **Webhooks (NEW)**:  (incoming). Outgoing calls are made internally.
 
 **Critical Info for New Agent**
--   The user wants to start the **major refactoring** of  and  immediately after the global check is complete.
--   The user's admin account is  ( type, ). Access to  is granted based on the  flag in the database, which you can set for testing.
--   The **Stripe API key is LIVE but has restrictions**. It cannot create payouts directly. The current workflow (creating a  request in the DB) is the intended functionality. Do not try to fix the Stripe payout API call.
--   The user is the final authority on whether a feature is done. Always confirm with them.
+-   The user wants the SalonPro integration finished as the top priority. This involves redirection with auto-login and syncing order data. An auto-login token will need to be generated by the backend.
+-   The user is using the same MongoDB database for both applications for enterprise profiles. Data like appointments and orders are synced via webhooks. A placeholder URL for SalonPro might be needed if the user doesn't provide one.
+-   The Emergent LLM Key has a balance that can be depleted. You must handle  errors gracefully when using the Sora 2 integration and clearly instruct the user on how to recharge.
+-   The user is very particular about the visual output of the logo animation. Be prepared for iterative feedback. The last attempt failed due to a lack of funds, so confirm with the user that they have recharged before trying again.
 
 **documents and test reports created in this job**
 -   
@@ -144,41 +148,32 @@ The application is a feature-rich social commerce platform deployed and function
 -   
 -   
 -   
--    (Continuously updated)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User**: How do I access the admin page? Create a full accounting section in it with exports. (Status: **DONE**. Agent created the accounting system and explained access.)
-2.  **User**: The admin page link is wrong, it takes me to the client page. (Status: **DONE**. Agent diagnosed the login issue and added a direct button to the Enterprise dashboard for easier access.)
-3.  **User**: Verify that the system is real (database-driven) and not fake. Check subscriptions, messaging, friend requests, invitations, cashback rates. Also, the 'discover my premium' button does nothing. Finish missing sections in admin and enterprise. (Status: **DONE**. Agent performed a full audit, confirmed all systems are real, fixed the button, and filled in admin sections.)
-4.  **User**: Do the next actions (refactoring), do another global control check to ensure everything is in order for production, that the CSS is clean everywhere without overflow, and verify all subscription types I sent you are included. (Status: **PENDING**. This is the current task.)
+1.  **User**: I reloaded [the credit], go ahead. (Requesting logo animation).
+2.  **Agent**: Generated new logo animation.
+3.  **User**: Almost perfect, but the 'T' at the end needs to be exactly like the logo on the site.
+4.  **Agent**: Generated another version.
+5.  **User**: The video is quasi-perfect, but the color animation must be identical to the previous video.
+6.  **Agent**: Attempted to generate, but ran out of credit.
+7.  **User (NEW TOPIC)**: Verify client appointments appear in their agenda. Change Agenda in enterprise dashboard to Voir Planning (green) and make it redirect to SalonPro with auto-login. Also, link order data.
+8.  **Agent**: Started working on the new request.
+9.  **Agent**: Modified the menu in .
+10. **Agent**: Was about to implement the redirection logic.
 
 **Project Health Check:**
--   **Broken**: None. The application is in a stable, feature-complete state pending a final global check.
--   **Mocked**: None. All mocked data and placeholders in key features have been replaced with real database-driven logic.
+-   **Broken**: None. The application is stable.
+-   **Mocked**: None. All key features are data-driven.
 
 **3rd Party Integrations**
--   **Stripe (Payments)**: Uses the official  Python library. Used for incoming subscription payments and for validating outgoing payout requests (which are then handled manually).
--   **openpyxl**: Used for generating  accounting reports.
--   **reportlab**: Used for generating  accounting reports.
+-   **Stripe**: For subscription payments.
+-   **openpyxl, reportlab**: For backend generation of Excel and PDF reports.
+-   **Sora 2 (via )**: For text-to-video generation. Uses the Emergent LLM Key.
 
 **Testing status**
--   **Testing agent used after significant changes**: YES. The testing agent was used multiple times after major features were added (cashback system, admin panel, accounting system), and it found and fixed several bugs.
+-   **Testing agent used after significant changes**: YES,  was generated after fixing the export bug.
 -   **Troubleshoot agent used after agent stuck in loop**: NO
--   **Test files created**: Numerous test scripts were created and executed via  to test APIs, but no persistent ============================= test session starts ==============================
-platform linux -- Python 3.11.14, pytest-9.0.2, pluggy-1.6.0
-rootdir: /app
-plugins: anyio-4.12.1
-collected 641 items / 1 error
-
-==================================== ERRORS ====================================
-_____ ERROR collecting backend/tests/test_iteration33_admin_withdrawals.py _____
-backend/tests/test_iteration33_admin_withdrawals.py:22: in <module>
-    raise ValueError("REACT_APP_BACKEND_URL environment variable is required")
-E   ValueError: REACT_APP_BACKEND_URL environment variable is required
-=========================== short test summary info ============================
-ERROR backend/tests/test_iteration33_admin_withdrawals.py - ValueError: REACT...
-!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
-=============================== 1 error in 0.80s =============================== files were added.
+-   **Test files created**: No persistent test files. Agent used  and  scripts for testing.
 -   **Known regressions**: None.
 
 **Credentials to test flow:**
@@ -186,4 +181,4 @@ ERROR backend/tests/test_iteration33_admin_withdrawals.py - ValueError: REACT...
 -   **Admin / Enterprise**:  / 
 
 **What agent forgot to execute**
--   The agent successfully implemented all of the user's explicit requests during this very long and productive session. The only outstanding items are the long-term refactoring tasks, which the user has now prioritized as the very next action item after a final quality check.</analysis>
+-   The agent has not forgotten anything but was in the middle of implementing the user's latest request regarding the SalonPro integration. The full implementation of this feature (auto-login, order sync) is the immediate next step.</analysis>

@@ -45,7 +45,7 @@ POST   /api/webhook/salonpro                       # Recevoir events de SalonPro
 
 **Variables d'environnement ajoutées :**
 ```
-SALONPRO_WEBHOOK_URL=https://salonpro.preview.emergentagent.com  # URL de SalonPro
+SALONPRO_WEBHOOK_URL=https://titelli-bridge.preview.emergentagent.com  # URL de SalonPro
 SALONPRO_WEBHOOK_SECRET=titelli_salonpro_sync_secret             # Secret partagé
 ```
 
