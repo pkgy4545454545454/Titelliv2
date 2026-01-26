@@ -348,6 +348,39 @@ const EnterpriseDashboard = () => {
     }
   };
 
+  // Handle SalonPro Planning redirect with auto-login
+  const handleSalonProRedirect = async () => {
+    try {
+      toast.loading('Connexion à SalonPro en cours...', { id: 'salonpro' });
+      const token = localStorage.getItem('titelli_token');
+      const response = await api.get('/auth/salonpro-token', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data?.redirect_url) {
+        toast.success('Redirection vers SalonPro...', { id: 'salonpro' });
+        // Open in new tab for better UX
+        window.open(response.data.redirect_url, '_blank');
+      } else {
+        throw new Error('URL de redirection non disponible');
+      }
+    } catch (error) {
+      console.error('SalonPro redirect error:', error);
+      toast.error('Erreur de connexion à SalonPro', { id: 'salonpro' });
+    }
+  };
+
+  // Handle menu item click - supports both internal tabs and external redirects
+  const handleMenuItemClick = (item) => {
+    if (item.isExternal && item.id === 'salonpro_planning') {
+      handleSalonProRedirect();
+    } else {
+      setActiveTab(item.id);
+    }
+    // Close mobile menu after click
+    setMobileMenuOpen(false);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#050505] pt-24 flex items-center justify-center">
