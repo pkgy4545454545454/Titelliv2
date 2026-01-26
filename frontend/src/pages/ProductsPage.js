@@ -84,7 +84,7 @@ const ProductsPage = () => {
 
   return (
     <div className="min-h-screen bg-[#050505] pt-24" data-testid="products-page">
-      {/* Hero with Video Background */}
+      {/* Hero with Video Background - Generated with Sora 2 AI */}
       <div className="relative h-[40vh] min-h-[300px] overflow-hidden">
         {/* Video Background */}
         <div className="absolute inset-0">
@@ -96,7 +96,7 @@ const ProductsPage = () => {
             className="w-full h-full object-cover"
             poster="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920&q=80"
           >
-            <source src="https://assets.mixkit.co/videos/preview/mixkit-woman-shopping-in-a-boutique-34454-large.mp4" type="video/mp4" />
+            <source src={`${process.env.REACT_APP_BACKEND_URL}/api/uploads/video_produits.mp4`} type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/70 via-[#050505]/50 to-[#050505]" />
         </div>
