@@ -4647,6 +4647,56 @@ async def delete_agenda_event(event_id: str, current_user: dict = Depends(get_cu
     await db.agenda.delete_one({"id": event_id, "enterprise_id": enterprise['id']})
     return {"message": "Événement supprimé"}
 
+
+@api_router.get("/enterprise/bookings")
+async def get_enterprise_bookings(
+    current_user: dict = Depends(get_current_user),
+    status: Optional[str] = None
+):
+    """
+    Récupère tous les RDV pris par les clients pour cette entreprise.
+    Endpoint utilisé par SalonPro pour la section "Rendez-vous clients".
+    
+    status: pending, confirmed, completed, cancelled (optionnel)
+    """
+    enterprise = await db.enterprises.find_one({"user_id": current_user['id']})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    query = {"enterprise_id": enterprise['id']}
+    if status:
+        query["status"] = status
+    
+    bookings = await db.bookings.find(query, {"_id": 0}).sort("start_datetime", -1).to_list(500)
+    
+    # Enrichir avec les infos client
+    for booking in bookings:
+        client = await db.users.find_one(
+            {"id": booking.get('client_id')}, 
+            {"_id": 0, "first_name": 1, "last_name": 1, "email": 1, "phone": 1}
+        )
+        if client:
+            booking['client_name'] = f"{client.get('first_name', '')} {client.get('last_name', '')}"
+            booking['client_email'] = client.get('email')
+            booking['client_phone'] = client.get('phone')
+    
+    # Stats
+    all_bookings = await db.bookings.find({"enterprise_id": enterprise['id']}, {"_id": 0, "status": 1}).to_list(1000)
+    stats = {
+        "total": len(all_bookings),
+        "pending": len([b for b in all_bookings if b.get('status') == 'pending']),
+        "confirmed": len([b for b in all_bookings if b.get('status') == 'confirmed']),
+        "completed": len([b for b in all_bookings if b.get('status') == 'completed']),
+        "cancelled": len([b for b in all_bookings if b.get('status') == 'cancelled'])
+    }
+    
+    return {
+        "bookings": bookings,
+        "stats": stats,
+        "enterprise_id": enterprise['id']
+    }
+
+
 # ============ CLIENT BOOKING (PRISE DE RDV) ============
 
 class ClientBookingCreate(BaseModel):
