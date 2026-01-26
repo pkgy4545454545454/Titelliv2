@@ -479,11 +479,12 @@ const EnterpriseDashboard = () => {
                       return (
                         <button
                           key={item.id}
-                          onClick={() => setActiveTab(item.id)}
+                          onClick={() => handleMenuItemClick(item)}
+                          data-testid={`menu-item-${item.id}`}
                           className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm transition-all overflow-hidden ${
-                            activeTab === item.id
+                            activeTab === item.id && !item.isExternal
                               ? 'bg-white/20 text-white shadow-lg'
-                              : 'text-gray-300 hover:bg-white/10 hover:text-white'
+                              : item.color || 'text-gray-300 hover:bg-white/10 hover:text-white'
                           }`}
                           style={hasNotif || stockAlerts > 0 ? {
                             boxShadow: '0 0 0 2px rgba(34, 197, 94, 0.5)',
@@ -491,8 +492,11 @@ const EnterpriseDashboard = () => {
                           } : {}}
                         >
                           <div className="flex items-center gap-2 min-w-0 flex-1">
-                            <item.icon className="w-4 h-4 flex-shrink-0" />
-                            <span className="truncate text-left">{item.label}</span>
+                            <item.icon className={`w-4 h-4 flex-shrink-0 ${item.color || ''}`} />
+                            <span className={`truncate text-left ${item.color || ''}`}>{item.label}</span>
+                            {item.isExternal && (
+                              <ChevronRight className={`w-3 h-3 flex-shrink-0 ${item.color || 'text-gray-400'}`} />
+                            )}
                           </div>
                           {(hasNotif || stockAlerts > 0) && (
                             <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-green-500 text-white text-xs font-bold rounded-full animate-bounce flex-shrink-0">
