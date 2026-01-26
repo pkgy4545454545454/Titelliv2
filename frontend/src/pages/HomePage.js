@@ -231,26 +231,6 @@ const HomePage = () => {
           <div className="panoramic-overlay absolute inset-0" />
         </div>
 
-        {/* Video Controls */}
-        <div className="absolute bottom-8 right-8 flex items-center gap-3 z-20">
-          <button 
-            onClick={toggleVideoPlay}
-            className="p-3 rounded-full bg-black/50 backdrop-blur-lg border border-white/10 text-white hover:bg-black/70 transition-all"
-            data-testid="video-play-btn"
-            aria-label={isVideoPlaying ? 'Pause video' : 'Play video'}
-          >
-            {isVideoPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-          </button>
-          <button 
-            onClick={toggleVideoMute}
-            className="p-3 rounded-full bg-black/50 backdrop-blur-lg border border-white/10 text-white hover:bg-black/70 transition-all"
-            data-testid="video-mute-btn"
-            aria-label={isVideoMuted ? 'Unmute video' : 'Mute video'}
-          >
-            {isVideoMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-          </button>
-        </div>
-
         {/* Hero Content */}
         <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4 pt-20">
           <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-white mb-6 animate-fade-in" style={{ fontFamily: 'Playfair Display, serif' }}>
