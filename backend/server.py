@@ -1278,7 +1278,7 @@ async def get_salonpro_autologin_token(current_user: dict = Depends(get_current_
     
     return {
         "token": salonpro_token,
-        "redirect_url": f"{salonpro_url}/dashboard?autologin_token={salonpro_token}",
+        "redirect_url": f"{salonpro_url}?autologin_token={salonpro_token}",
         "salonpro_url": salonpro_url,
         "expires_in": 300  # 5 minutes in seconds
     }
