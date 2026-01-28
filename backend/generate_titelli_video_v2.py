@@ -2,13 +2,11 @@ import sys
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
 from emergentintegrations.llm.openai.video_generation import OpenAIVideoGeneration
 
 def generateVideo(prompt, output_path, model="sora-2", size="1280x720", duration=8):
-    """Generate video with Sora 2"""
     video_gen = OpenAIVideoGeneration(api_key=os.environ['EMERGENT_LLM_KEY'])
     
     print(f"🎬 Génération vidéo en cours...")
@@ -29,25 +27,21 @@ def generateVideo(prompt, output_path, model="sora-2", size="1280x720", duration
 
 
 def main():
-    # Prompt marketing pour Titelli avec fin logo style "final"
+    # Prompt simplifié et safe
     prompt = """
-    Cinematic luxury marketing video for premium marketplace brand.
+    Abstract art animation on black background.
     
-    Opening: Deep black background with elegant golden particles slowly floating and swirling.
+    Scene starts with golden sparkles floating gently in darkness.
     
-    Middle sequence: Smooth transitions showing abstract luxury elements - soft golden light rays, 
-    premium textures, elegant reflections. High-end sophisticated aesthetic with black and gold tones.
+    Smooth transition to colorful light ribbons - pink, purple, blue, cyan - 
+    gracefully swirling and dancing in circular motion like aurora borealis.
     
-    Climax: Golden particles start converging toward the center of the screen.
+    The colorful lights slowly spiral toward the center, getting brighter.
     
-    Finale: A mesmerizing glass orb appears on pure black background. Inside the orb, a beautiful 
-    nebula of swirling colors - vibrant pink, magenta, deep purple, electric blue, and cyan - 
-    rotates gracefully in a circular motion. The colors dance and flow like liquid light, 
-    creating hypnotic patterns. The swirling colors slowly converge toward the bright center, 
-    then elegantly dissolve to reveal a clean, minimalist white "T" letter inside a thin white 
-    circle - the final logo mark on black.
+    Final frame: The colors fade to reveal a simple white letter T inside 
+    a thin white circle, centered on black background. Clean minimalist logo.
     
-    Style: Ultra premium, sophisticated, cinematic, smooth slow-motion, black background dominant.
+    Style: Elegant, smooth motion, cinematic quality, relaxing ambient mood.
     """
     
     output_path = '/app/backend/uploads/titelli_presentation_v2.mp4'
