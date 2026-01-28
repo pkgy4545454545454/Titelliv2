@@ -1743,6 +1743,134 @@ async def update_order_status(order_id: str, status: str, current_user: dict = D
     
     return {"message": "Statut mis à jour"}
 
+
+# ============ ORDER CHECKOUT WITH STRIPE ============
+
+class OrderCheckoutRequest(BaseModel):
+    enterprise_id: str
+    items: List[OrderItem]
+    # Customer info
+    first_name: str
+    last_name: str
+    email: str
+    phone: str
+    delivery_address: str
+    city: str
+    postal_code: str
+    additional_info: Optional[str] = None
+    notes: Optional[str] = None
+
+
+@api_router.post("/orders/checkout")
+async def create_order_checkout(
+    request: Request,
+    data: OrderCheckoutRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Crée une commande et redirige vers Stripe pour le paiement.
+    Production-ready avec toutes les informations client.
+    """
+    # Calculer le total
+    subtotal = sum(item.price * item.quantity for item in data.items)
+    transaction_fee = round(subtotal * TITELLI_FEES['transaction_fee'], 2)
+    total = round(subtotal + transaction_fee, 2)
+    
+    # Créer la commande en statut "pending_payment"
+    order_id = str(uuid.uuid4())
+    order_dict = {
+        "id": order_id,
+        "user_id": current_user['id'],
+        "enterprise_id": data.enterprise_id,
+        "items": [item.model_dump() for item in data.items],
+        "subtotal": subtotal,
+        "transaction_fee": transaction_fee,
+        "total": total,
+        "status": "pending_payment",
+        "customer_info": {
+            "first_name": data.first_name,
+            "last_name": data.last_name,
+            "email": data.email,
+            "phone": data.phone,
+            "delivery_address": data.delivery_address,
+            "city": data.city,
+            "postal_code": data.postal_code,
+            "additional_info": data.additional_info
+        },
+        "delivery_address": f"{data.delivery_address}, {data.postal_code} {data.city}",
+        "notes": data.notes,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    # Sauvegarder la commande
+    await db.orders.insert_one(order_dict.copy())
+    
+    # Créer la session Stripe
+    host_url = str(request.base_url).rstrip('/')
+    webhook_url = f"{host_url}/api/webhook/stripe"
+    origin = request.headers.get('origin', os.environ.get('FRONTEND_URL', host_url))
+    
+    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
+    
+    # Construire la description des items
+    items_description = ", ".join([f"{item.name} x{item.quantity}" for item in data.items])
+    
+    checkout_request = CheckoutSessionRequest(
+        amount=float(total),
+        currency="chf",
+        success_url=f"{origin}/payment/success?session_id={{CHECKOUT_SESSION_ID}}&order_id={order_id}",
+        cancel_url=f"{origin}/panier?cancelled=true",
+        metadata={
+            "type": "order",
+            "order_id": order_id,
+            "user_id": current_user['id'],
+            "enterprise_id": data.enterprise_id,
+            "customer_email": data.email,
+            "customer_name": f"{data.first_name} {data.last_name}"
+        }
+    )
+    
+    try:
+        session = await stripe_checkout.create_checkout_session(checkout_request)
+        
+        # Mettre à jour la commande avec l'ID de session Stripe
+        await db.orders.update_one(
+            {"id": order_id},
+            {"$set": {"stripe_session_id": session.session_id}}
+        )
+        
+        return {
+            "order_id": order_id,
+            "checkout_url": session.checkout_url,
+            "session_id": session.session_id,
+            "total": total
+        }
+        
+    except Exception as e:
+        # En cas d'erreur, supprimer la commande
+        await db.orders.delete_one({"id": order_id})
+        logger.error(f"Stripe checkout error: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur lors de la création du paiement: {str(e)}")
+
+
+@api_router.get("/orders/{order_id}/payment-status")
+async def get_order_payment_status(order_id: str, current_user: dict = Depends(get_current_user)):
+    """Vérifie le statut de paiement d'une commande"""
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Commande non trouvée")
+    
+    if order.get('user_id') != current_user['id']:
+        raise HTTPException(status_code=403, detail="Accès non autorisé")
+    
+    return {
+        "order_id": order_id,
+        "status": order.get('status'),
+        "payment_status": "paid" if order.get('status') not in ['pending_payment', 'cancelled'] else "pending",
+        "total": order.get('total')
+    }
+
+
 # ============ PAYMENT ROUTES ============
 
 @api_router.post("/payments/checkout")
