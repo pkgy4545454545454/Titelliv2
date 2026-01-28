@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -7,6 +7,7 @@ import { CartProvider } from './context/CartContext';
 // Layout
 import Header from './components/Header';
 import Footer from './components/Footer';
+import SplashScreen from './components/SplashScreen';
 
 // Pages
 import HomePage from './pages/HomePage';
