@@ -1841,7 +1841,7 @@ async def create_order_checkout(
         
         return {
             "order_id": order_id,
-            "checkout_url": session.checkout_url,
+            "checkout_url": session.url,
             "session_id": session.session_id,
             "total": total
         }
