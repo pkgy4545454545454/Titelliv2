@@ -1530,6 +1530,18 @@ async def create_order(data: OrderCreate, current_user: dict = Depends(get_curre
     order_dict['transaction_fee'] = transaction_fee
     order_dict['management_fee'] = round(subtotal * TITELLI_FEES['management_fee'], 2)  # 10% for enterprise payout
     
+    # Ajouter les informations client complètes
+    order_dict['customer_info'] = {
+        "first_name": data.first_name,
+        "last_name": data.last_name,
+        "email": data.email,
+        "phone": data.phone,
+        "delivery_address": data.delivery_address,
+        "city": data.city,
+        "postal_code": data.postal_code,
+        "additional_info": data.additional_info
+    }
+    
     insert_doc = order_dict.copy()
     await db.orders.insert_one(insert_doc)
     
