@@ -160,9 +160,20 @@ const Header = () => {
     <header className="fixed top-0 left-0 right-0 z-50 glass-heavy" data-testid="main-header">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-3" data-testid="logo-link">
-            <div className="logo-circle">T</div>
+          {/* Logo avec vidéo animée */}
+          <Link to="/" className="flex items-center gap-2" data-testid="logo-link">
+            <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-[#0047AB]/30">
+              <video 
+                autoPlay 
+                loop 
+                muted 
+                playsInline
+                className="w-full h-full object-cover"
+                style={{ transform: 'scale(1.5)' }}
+              >
+                <source src={`${process.env.REACT_APP_BACKEND_URL}/api/uploads/video_logo_titelli_final.mp4`} type="video/mp4" />
+              </video>
+            </div>
             <span className="font-semibold text-lg hidden sm:block" style={{ fontFamily: 'Playfair Display, serif' }}>
               Titelli
             </span>
