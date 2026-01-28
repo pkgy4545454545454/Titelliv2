@@ -100,6 +100,12 @@ const CartPage = () => {
     try {
       const token = localStorage.getItem('titelli_token');
       
+      if (!token) {
+        toast.error('Session expirée, veuillez vous reconnecter');
+        navigate('/auth');
+        return;
+      }
+      
       // Créer une commande par entreprise
       for (const group of groupedItems) {
         const orderData = {
@@ -113,9 +119,7 @@ const CartPage = () => {
           ...checkoutForm
         };
 
-        const response = await api.post('/orders/checkout', orderData, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await api.post('/orders/checkout', orderData);
 
         if (response.data.checkout_url) {
           // Vider le panier et rediriger vers Stripe
