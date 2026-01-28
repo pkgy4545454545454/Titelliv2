@@ -295,10 +295,31 @@ const NotFoundPage = () => (
 );
 
 function App() {
+  const [showSplash, setShowSplash] = useState(true);
+  const [splashShown, setSplashShown] = useState(false);
+
+  useEffect(() => {
+    // Check if splash was already shown in this session
+    const hasSeenSplash = sessionStorage.getItem('titelli_splash_shown');
+    if (hasSeenSplash) {
+      setShowSplash(false);
+      setSplashShown(true);
+    }
+  }, []);
+
+  const handleSplashComplete = () => {
+    setShowSplash(false);
+    setSplashShown(true);
+    sessionStorage.setItem('titelli_splash_shown', 'true');
+  };
+
   return (
     <BrowserRouter>
       <AuthProvider>
         <CartProvider>
+          {showSplash && !splashShown && (
+            <SplashScreen onComplete={handleSplashComplete} />
+          )}
           <Toaster 
             position="top-right"
             toastOptions={{
