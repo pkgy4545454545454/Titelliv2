@@ -3,8 +3,10 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, CreditCard, Building2, User, Phone, MapPin, Mail, FileText, AlertCircle } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
+import axios from 'axios';
 import { toast } from 'sonner';
+
+const API_URL = process.env.REACT_APP_BACKEND_URL || 'https://titelli-bridge.preview.emergentagent.com';
 
 const CartPage = () => {
   const { items, removeItem, updateQuantity, clearCart, getTotal, getItemsByEnterprise } = useCart();
