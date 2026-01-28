@@ -1,21 +1,82 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, CreditCard, Building2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, CreditCard, Building2, User, Phone, MapPin, Mail, FileText, AlertCircle } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { orderAPI } from '../services/api';
+import api from '../services/api';
 import { toast } from 'sonner';
 
 const CartPage = () => {
   const { items, removeItem, updateQuantity, clearCart, getTotal, getItemsByEnterprise } = useCart();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
-  const [deliveryAddress, setDeliveryAddress] = useState('');
-  const [notes, setNotes] = useState('');
+  
+  // Formulaire checkout complet
+  const [checkoutForm, setCheckoutForm] = useState({
+    first_name: '',
+    last_name: '',
+    email: '',
+    phone: '',
+    delivery_address: '',
+    city: '',
+    postal_code: '',
+    additional_info: '',
+    notes: ''
+  });
+  
+  const [formErrors, setFormErrors] = useState({});
 
   const groupedItems = getItemsByEnterprise();
-  const total = getTotal();
+  const subtotal = getTotal();
+  const transactionFee = Math.round(subtotal * 0.029 * 100) / 100; // 2.9%
+  const total = Math.round((subtotal + transactionFee) * 100) / 100;
+
+  // Pré-remplir avec les infos utilisateur
+  useEffect(() => {
+    if (user) {
+      setCheckoutForm(prev => ({
+        ...prev,
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
+        email: user.email || '',
+        phone: user.phone || ''
+      }));
+    }
+  }, [user]);
+
+  // Vérifier si annulation
+  useEffect(() => {
+    if (searchParams.get('cancelled') === 'true') {
+      toast.error('Paiement annulé');
+    }
+  }, [searchParams]);
+
+  const validateForm = () => {
+    const errors = {};
+    
+    if (!checkoutForm.first_name.trim()) errors.first_name = 'Prénom requis';
+    if (!checkoutForm.last_name.trim()) errors.last_name = 'Nom requis';
+    if (!checkoutForm.email.trim()) errors.email = 'Email requis';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(checkoutForm.email)) errors.email = 'Email invalide';
+    if (!checkoutForm.phone.trim()) errors.phone = 'Téléphone requis';
+    if (!checkoutForm.delivery_address.trim()) errors.delivery_address = 'Adresse requise';
+    if (!checkoutForm.city.trim()) errors.city = 'Ville requise';
+    if (!checkoutForm.postal_code.trim()) errors.postal_code = 'Code postal requis';
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setCheckoutForm(prev => ({ ...prev, [name]: value }));
+    // Effacer l'erreur quand l'utilisateur tape
+    if (formErrors[name]) {
+      setFormErrors(prev => ({ ...prev, [name]: null }));
+    }
+  };
 
   const handleCheckout = async () => {
     if (!isAuthenticated) {
@@ -29,32 +90,48 @@ const CartPage = () => {
       return;
     }
 
+    if (!validateForm()) {
+      toast.error('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
     setLoading(true);
     
     try {
-      // Create orders for each enterprise
+      const token = localStorage.getItem('titelli_token');
+      
+      // Créer une commande par entreprise
       for (const group of groupedItems) {
         const orderData = {
           enterprise_id: group.enterprise_id,
           items: group.items.map(item => ({
-            id: item.id,
+            service_product_id: item.id,
             name: item.name,
             price: item.price,
             quantity: item.quantity
           })),
-          delivery_address: deliveryAddress || null,
-          notes: notes || null
+          ...checkoutForm
         };
 
-        await orderAPI.create(orderData);
+        const response = await api.post('/orders/checkout', orderData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (response.data.checkout_url) {
+          // Vider le panier et rediriger vers Stripe
+          clearCart();
+          window.location.href = response.data.checkout_url;
+          return;
+        }
       }
 
-      toast.success('Commande(s) créée(s) avec succès !');
+      toast.success('Commande créée avec succès !');
       clearCart();
-      navigate('/orders');
+      navigate('/dashboard/client?tab=orders');
     } catch (error) {
       console.error('Checkout error:', error);
-      toast.error('Erreur lors de la commande');
+      const errorMsg = error.response?.data?.detail || 'Erreur lors de la commande';
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -87,8 +164,8 @@ const CartPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] pt-24 px-4" data-testid="cart-page">
-      <div className="max-w-6xl mx-auto py-8">
+    <div className="min-h-screen bg-[#050505] pt-24 px-4 pb-12" data-testid="cart-page">
+      <div className="max-w-7xl mx-auto py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -97,7 +174,7 @@ const CartPage = () => {
               Continuer mes achats
             </Link>
             <h1 className="text-3xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
-              Mon Panier
+              Finaliser ma commande
             </h1>
           </div>
           <button 
@@ -110,8 +187,10 @@ const CartPage = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Cart Items */}
+          {/* Left: Cart Items + Form */}
           <div className="lg:col-span-2 space-y-6">
+            
+            {/* Cart Items */}
             {groupedItems.map((group) => (
               <div key={group.enterprise_id} className="card-service rounded-xl p-6">
                 <div className="flex items-center gap-3 mb-4 pb-4 border-b border-white/10">
@@ -127,7 +206,6 @@ const CartPage = () => {
                 <div className="space-y-4">
                   {group.items.map((item) => (
                     <div key={item.id} className="flex gap-4 p-4 bg-white/5 rounded-xl">
-                      {/* Image */}
                       <div className="w-20 h-20 rounded-lg bg-white/10 overflow-hidden flex-shrink-0">
                         {item.image ? (
                           <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
@@ -138,7 +216,6 @@ const CartPage = () => {
                         )}
                       </div>
 
-                      {/* Details */}
                       <div className="flex-1">
                         <div className="flex justify-between">
                           <div>
@@ -160,7 +237,6 @@ const CartPage = () => {
                         </div>
 
                         <div className="flex items-center justify-between mt-3">
-                          {/* Quantity */}
                           <div className="flex items-center gap-2">
                             <button 
                               onClick={() => updateQuantity(item.id, item.quantity - 1)}
@@ -177,9 +253,8 @@ const CartPage = () => {
                             </button>
                           </div>
 
-                          {/* Price */}
                           <p className="text-lg font-bold text-white">
-                            {(item.price * item.quantity).toFixed(2)} {item.currency}
+                            {(item.price * item.quantity).toFixed(2)} CHF
                           </p>
                         </div>
                       </div>
@@ -188,46 +263,234 @@ const CartPage = () => {
                 </div>
               </div>
             ))}
+
+            {/* Checkout Form */}
+            <div className="card-service rounded-xl p-6">
+              <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2" style={{ fontFamily: 'Playfair Display, serif' }}>
+                <User className="w-5 h-5 text-[#D4AF37]" />
+                Informations de livraison
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Prénom */}
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">
+                    Prénom <span className="text-red-400">*</span>
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                    <input
+                      type="text"
+                      name="first_name"
+                      value={checkoutForm.first_name}
+                      onChange={handleInputChange}
+                      placeholder="Votre prénom"
+                      className={`input-dark w-full pl-10 ${formErrors.first_name ? 'border-red-500' : ''}`}
+                      data-testid="checkout-firstname"
+                    />
+                  </div>
+                  {formErrors.first_name && (
+                    <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" /> {formErrors.first_name}
+                    </p>
+                  )}
+                </div>
+
+                {/* Nom */}
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">
+                    Nom <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="last_name"
+                    value={checkoutForm.last_name}
+                    onChange={handleInputChange}
+                    placeholder="Votre nom"
+                    className={`input-dark w-full ${formErrors.last_name ? 'border-red-500' : ''}`}
+                    data-testid="checkout-lastname"
+                  />
+                  {formErrors.last_name && (
+                    <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" /> {formErrors.last_name}
+                    </p>
+                  )}
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">
+                    Email <span className="text-red-400">*</span>
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                    <input
+                      type="email"
+                      name="email"
+                      value={checkoutForm.email}
+                      onChange={handleInputChange}
+                      placeholder="votre@email.com"
+                      className={`input-dark w-full pl-10 ${formErrors.email ? 'border-red-500' : ''}`}
+                      data-testid="checkout-email"
+                    />
+                  </div>
+                  {formErrors.email && (
+                    <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" /> {formErrors.email}
+                    </p>
+                  )}
+                </div>
+
+                {/* Téléphone */}
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">
+                    Téléphone <span className="text-red-400">*</span>
+                  </label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={checkoutForm.phone}
+                      onChange={handleInputChange}
+                      placeholder="+41 79 123 45 67"
+                      className={`input-dark w-full pl-10 ${formErrors.phone ? 'border-red-500' : ''}`}
+                      data-testid="checkout-phone"
+                    />
+                  </div>
+                  {formErrors.phone && (
+                    <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" /> {formErrors.phone}
+                    </p>
+                  )}
+                </div>
+
+                {/* Adresse */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm text-gray-400 mb-2">
+                    Adresse de livraison <span className="text-red-400">*</span>
+                  </label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                    <input
+                      type="text"
+                      name="delivery_address"
+                      value={checkoutForm.delivery_address}
+                      onChange={handleInputChange}
+                      placeholder="Rue et numéro"
+                      className={`input-dark w-full pl-10 ${formErrors.delivery_address ? 'border-red-500' : ''}`}
+                      data-testid="checkout-address"
+                    />
+                  </div>
+                  {formErrors.delivery_address && (
+                    <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" /> {formErrors.delivery_address}
+                    </p>
+                  )}
+                </div>
+
+                {/* Code postal */}
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">
+                    Code postal <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="postal_code"
+                    value={checkoutForm.postal_code}
+                    onChange={handleInputChange}
+                    placeholder="1000"
+                    className={`input-dark w-full ${formErrors.postal_code ? 'border-red-500' : ''}`}
+                    data-testid="checkout-postalcode"
+                  />
+                  {formErrors.postal_code && (
+                    <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" /> {formErrors.postal_code}
+                    </p>
+                  )}
+                </div>
+
+                {/* Ville */}
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">
+                    Ville <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="city"
+                    value={checkoutForm.city}
+                    onChange={handleInputChange}
+                    placeholder="Lausanne"
+                    className={`input-dark w-full ${formErrors.city ? 'border-red-500' : ''}`}
+                    data-testid="checkout-city"
+                  />
+                  {formErrors.city && (
+                    <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" /> {formErrors.city}
+                    </p>
+                  )}
+                </div>
+
+                {/* Infos supplémentaires */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm text-gray-400 mb-2">
+                    Informations supplémentaires
+                  </label>
+                  <textarea
+                    name="additional_info"
+                    value={checkoutForm.additional_info}
+                    onChange={handleInputChange}
+                    placeholder="Appartement, étage, code d'entrée..."
+                    className="input-dark w-full h-20 resize-none"
+                    data-testid="checkout-additional"
+                  />
+                </div>
+
+                {/* Notes */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm text-gray-400 mb-2">
+                    <FileText className="w-4 h-4 inline mr-1" />
+                    Instructions spéciales
+                  </label>
+                  <textarea
+                    name="notes"
+                    value={checkoutForm.notes}
+                    onChange={handleInputChange}
+                    placeholder="Instructions pour la livraison ou remarques..."
+                    className="input-dark w-full h-20 resize-none"
+                    data-testid="checkout-notes"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Order Summary */}
+          {/* Right: Order Summary */}
           <div className="lg:col-span-1">
             <div className="card-service rounded-xl p-6 sticky top-24">
               <h2 className="text-xl font-semibold text-white mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>
                 Récapitulatif
               </h2>
 
-              {/* Delivery Address */}
-              <div className="mb-4">
-                <label className="block text-sm text-gray-400 mb-2">Adresse de livraison (optionnel)</label>
-                <textarea
-                  value={deliveryAddress}
-                  onChange={(e) => setDeliveryAddress(e.target.value)}
-                  placeholder="Votre adresse..."
-                  className="input-dark w-full h-20 resize-none"
-                />
-              </div>
-
-              {/* Notes */}
-              <div className="mb-6">
-                <label className="block text-sm text-gray-400 mb-2">Notes (optionnel)</label>
-                <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Instructions spéciales..."
-                  className="input-dark w-full h-20 resize-none"
-                />
+              {/* Items summary */}
+              <div className="space-y-2 mb-6 pb-6 border-b border-white/10">
+                {items.map((item) => (
+                  <div key={item.id} className="flex justify-between text-sm">
+                    <span className="text-gray-400">{item.name} x{item.quantity}</span>
+                    <span className="text-white">{(item.price * item.quantity).toFixed(2)} CHF</span>
+                  </div>
+                ))}
               </div>
 
               {/* Price Breakdown */}
               <div className="space-y-3 mb-6 pb-6 border-b border-white/10">
                 <div className="flex justify-between text-gray-400">
                   <span>Sous-total</span>
-                  <span>{total.toFixed(2)} CHF</span>
+                  <span>{subtotal.toFixed(2)} CHF</span>
                 </div>
                 <div className="flex justify-between text-gray-400">
-                  <span>Frais de service</span>
-                  <span>0.00 CHF</span>
+                  <span>Frais de service (2.9%)</span>
+                  <span>{transactionFee.toFixed(2)} CHF</span>
                 </div>
               </div>
 
@@ -241,22 +504,35 @@ const CartPage = () => {
               <button
                 onClick={handleCheckout}
                 disabled={loading}
-                className="btn-primary w-full py-4 flex items-center justify-center gap-2"
+                className="btn-primary w-full py-4 flex items-center justify-center gap-2 text-lg"
                 data-testid="checkout-btn"
               >
                 {loading ? (
-                  <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                  <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
                     <CreditCard className="w-5 h-5" />
-                    Passer la commande
+                    Payer {total.toFixed(2)} CHF
                   </>
                 )}
               </button>
 
-              <p className="text-xs text-gray-500 text-center mt-4">
-                Paiement sécurisé via Stripe
-              </p>
+              {/* Security note */}
+              <div className="mt-4 p-3 bg-white/5 rounded-lg">
+                <p className="text-xs text-gray-400 text-center flex items-center justify-center gap-2">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                  </svg>
+                  Paiement sécurisé par Stripe
+                </p>
+              </div>
+
+              {/* Accepted cards */}
+              <div className="mt-3 flex items-center justify-center gap-2">
+                <img src="https://js.stripe.com/v3/fingerprinted/img/visa-729c05c240c4bdb47b03ac81d9945bfe.svg" alt="Visa" className="h-6" />
+                <img src="https://js.stripe.com/v3/fingerprinted/img/mastercard-4d8844094130711885b5e41b28c9848f.svg" alt="Mastercard" className="h-6" />
+                <img src="https://js.stripe.com/v3/fingerprinted/img/amex-a49b82f46c5cd6a96a6e418a6ca1717c.svg" alt="Amex" className="h-6" />
+              </div>
             </div>
           </div>
         </div>
