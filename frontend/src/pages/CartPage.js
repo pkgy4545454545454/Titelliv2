@@ -121,7 +121,12 @@ const CartPage = () => {
           ...checkoutForm
         };
 
-        const response = await api.post('/orders/checkout', orderData);
+        const response = await axios.post(`${API_URL}/api/orders/checkout`, orderData, {
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+          }
+        });
 
         if (response.data.checkout_url) {
           // Vider le panier et rediriger vers Stripe
