@@ -499,7 +499,17 @@ class Order(BaseModel):
 class OrderCreate(BaseModel):
     enterprise_id: str
     items: List[OrderItem]
-    delivery_address: Optional[str] = None
+    # Informations client obligatoires
+    first_name: str
+    last_name: str
+    email: str
+    phone: str
+    # Adresse de livraison
+    delivery_address: str
+    city: str
+    postal_code: str
+    # Optionnels
+    additional_info: Optional[str] = None
     notes: Optional[str] = None
 
 # Subscription Plans - Forfaits principaux
