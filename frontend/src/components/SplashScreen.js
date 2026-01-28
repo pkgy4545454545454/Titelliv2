@@ -124,6 +124,7 @@ const SplashScreen = ({ onComplete }) => {
             boxShadow: '0 0 40px rgba(0, 71, 171, 0.5), 0 0 80px rgba(212, 175, 55, 0.2)',
             position: 'relative',
             zIndex: 1,
+            background: 'linear-gradient(135deg, #0047AB 0%, #D4AF37 100%)',
           }}
         >
           <video 
@@ -131,15 +132,15 @@ const SplashScreen = ({ onComplete }) => {
             loop 
             muted 
             playsInline
+            preload="auto"
             style={{
               width: '100%',
               height: '100%',
               objectFit: 'cover',
               transform: 'scale(1.5)',
             }}
-          >
-            <source src={`${process.env.REACT_APP_BACKEND_URL}/api/uploads/video_logo_titelli_final.mp4`} type="video/mp4" />
-          </video>
+            src={`${process.env.REACT_APP_BACKEND_URL}/api/uploads/video_logo_titelli_final.mp4`}
+          />
         </div>
 
         {/* Brand name */}
