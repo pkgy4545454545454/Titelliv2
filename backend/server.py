@@ -899,8 +899,13 @@ SERVICE_CATEGORIES = [
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-def verify_password(password: str, hashed: str) -> bool:
-    return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+def verify_password(password: str, stored_password: str) -> bool:
+    # Check if password is hashed (bcrypt hashes start with $2)
+    if stored_password.startswith('$2'):
+        return bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8'))
+    else:
+        # Plain text password comparison (for dev/test accounts)
+        return password == stored_password
 
 def create_token(user_id: str, user_type: str) -> str:
     payload = {
