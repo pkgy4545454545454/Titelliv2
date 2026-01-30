@@ -41,7 +41,7 @@ export const authAPI = {
 
 // Enterprises
 export const enterpriseAPI = {
-  list: (params) => axios.get(`${API}/enterprises`, { params }),
+  list: (params) => axios.get(`${API}/enterprises`, { params: { limit: 500, ...params } }),
   get: (id) => axios.get(`${API}/enterprises/${id}`),
   getById: (id) => axios.get(`${API}/enterprises/${id}`),
   create: (data) => axios.post(`${API}/enterprises`, data, { headers: getAuthHeaders() }),
