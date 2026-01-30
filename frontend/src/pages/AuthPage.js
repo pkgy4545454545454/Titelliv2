@@ -287,12 +287,8 @@ const AuthPage = () => {
               </button>
               <button
                 type="button"
-                onClick={() => setUserType('entreprise')}
-                className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${
-                  userType === 'entreprise'
-                    ? 'bg-[#D4AF37]/20 border-[#D4AF37] text-white'
-                    : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'
-                }`}
+                onClick={() => navigate('/inscription-entreprise')}
+                className="flex flex-col items-center gap-2 p-3 rounded-xl border transition-all bg-white/5 border-white/10 text-gray-400 hover:border-[#D4AF37] hover:bg-[#D4AF37]/10 hover:text-white"
                 data-testid="type-entreprise-btn"
               >
                 <Building2 className="w-5 h-5" />
