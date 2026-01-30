@@ -34,6 +34,10 @@ const AdminDashboard = () => {
   
   // Payments state
   const [payments, setPayments] = useState([]);
+  
+  // Registration requests state
+  const [registrationRequests, setRegistrationRequests] = useState([]);
+  const [registrationLoading, setRegistrationLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
