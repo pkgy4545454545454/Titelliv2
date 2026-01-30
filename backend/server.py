@@ -9993,38 +9993,6 @@ async def reject_registration_request(
         "message": "Inscription rejetée"
     }
 
-@api_router.get("/enterprises/all")
-async def get_all_enterprises_public(
-    search: Optional[str] = None,
-    category: Optional[str] = None,
-    status: Optional[str] = None,
-    limit: int = 200
-):
-    """Get all enterprises for public display (including bientot_disponible)"""
-    query = {}
-    
-    if search:
-        query["$or"] = [
-            {"name": {"$regex": search, "$options": "i"}},
-            {"category": {"$regex": search, "$options": "i"}},
-            {"address": {"$regex": search, "$options": "i"}}
-        ]
-    
-    if category:
-        query["category"] = {"$regex": category, "$options": "i"}
-    
-    if status:
-        query["status"] = status
-    
-    enterprises = await db.enterprises.find(query, {"_id": 0}).limit(limit).to_list(limit)
-    
-    # Set default status for enterprises without one
-    for ent in enterprises:
-        if not ent.get("status"):
-            ent["status"] = "bientot_disponible" if ent.get("activation_status") != "active" else "disponible"
-    
-    return {"enterprises": enterprises, "count": len(enterprises)}
-
 
 # Include the api_router in the main app
 app.include_router(api_router)
