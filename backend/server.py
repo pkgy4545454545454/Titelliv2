@@ -9997,6 +9997,215 @@ async def reject_registration_request(
     }
 
 
+# ============ ALGORITHMS MANAGEMENT ============
+
+@api_router.get("/admin/algorithms")
+async def get_algorithms(current_user: dict = Depends(get_current_user)):
+    """Get all platform algorithms with their status"""
+    if current_user.get("user_type") != "admin":
+        raise HTTPException(status_code=403, detail="Accès réservé aux administrateurs")
+    
+    # Get or create default algorithms
+    algorithms = await db.platform_settings.find_one({"type": "algorithms"}, {"_id": 0})
+    
+    if not algorithms:
+        # Create default algorithms
+        default_algorithms = {
+            "type": "algorithms",
+            "algorithms": [
+                {
+                    "id": "recommendation_engine",
+                    "name": "Moteur de Recommandation",
+                    "description": "Analyse les préférences utilisateur, historique d'achats et comportement de navigation pour suggérer des services et produits personnalisés.",
+                    "category": "Personnalisation",
+                    "enabled": True
+                },
+                {
+                    "id": "search_ranking",
+                    "name": "Classement de Recherche",
+                    "description": "Algorithme qui classe les résultats de recherche selon la pertinence, les avis, la proximité géographique et la certification.",
+                    "category": "Recherche",
+                    "enabled": True
+                },
+                {
+                    "id": "premium_boost",
+                    "name": "Boost Premium",
+                    "description": "Les entreprises premium apparaissent en priorité dans les résultats de recherche et sur la page d'accueil.",
+                    "category": "Monétisation",
+                    "enabled": True
+                },
+                {
+                    "id": "fraud_detection",
+                    "name": "Détection de Fraude",
+                    "description": "Analyse les transactions et comportements suspects pour prévenir les fraudes et abus sur la plateforme.",
+                    "category": "Sécurité",
+                    "enabled": True
+                },
+                {
+                    "id": "review_verification",
+                    "name": "Vérification des Avis",
+                    "description": "Filtre automatique des faux avis et spam basé sur l'analyse de patterns et le machine learning.",
+                    "category": "Qualité",
+                    "enabled": True
+                },
+                {
+                    "id": "dynamic_pricing",
+                    "name": "Tarification Dynamique",
+                    "description": "Ajuste automatiquement les commissions selon la demande, la saison et les performances des entreprises.",
+                    "category": "Monétisation",
+                    "enabled": False
+                },
+                {
+                    "id": "influencer_matching",
+                    "name": "Matching Influenceurs",
+                    "description": "Associe les influenceurs aux entreprises selon leur audience, engagement et catégorie de contenu.",
+                    "category": "Marketing",
+                    "enabled": True
+                },
+                {
+                    "id": "availability_prediction",
+                    "name": "Prédiction de Disponibilité",
+                    "description": "Prédit les créneaux disponibles des entreprises pour optimiser la prise de rendez-vous.",
+                    "category": "Planification",
+                    "enabled": True
+                }
+            ],
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.platform_settings.insert_one(default_algorithms)
+        algorithms = default_algorithms
+    
+    return {"algorithms": algorithms.get("algorithms", [])}
+
+@api_router.put("/admin/algorithms/{algorithm_id}")
+async def toggle_algorithm(
+    algorithm_id: str,
+    enabled: bool,
+    current_user: dict = Depends(get_current_user)
+):
+    """Enable or disable an algorithm"""
+    if current_user.get("user_type") != "admin":
+        raise HTTPException(status_code=403, detail="Accès réservé aux administrateurs")
+    
+    result = await db.platform_settings.update_one(
+        {"type": "algorithms", "algorithms.id": algorithm_id},
+        {"$set": {
+            "algorithms.$.enabled": enabled,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Algorithme non trouvé")
+    
+    return {"success": True, "message": f"Algorithme {'activé' if enabled else 'désactivé'}"}
+
+
+# ============ SUBSCRIPTION PRICING MANAGEMENT ============
+
+@api_router.get("/admin/subscription-plans")
+async def get_subscription_plans(current_user: dict = Depends(get_current_user)):
+    """Get all subscription plans with prices"""
+    if current_user.get("user_type") != "admin":
+        raise HTTPException(status_code=403, detail="Accès réservé aux administrateurs")
+    
+    plans = await db.platform_settings.find_one({"type": "subscription_plans"}, {"_id": 0})
+    
+    if not plans:
+        # Create default subscription plans
+        default_plans = {
+            "type": "subscription_plans",
+            "plans": [
+                {
+                    "id": "basic",
+                    "name": "Basic",
+                    "description": "Accès aux fonctionnalités de base",
+                    "price_monthly": 0,
+                    "price_yearly": 0,
+                    "features": ["Profil entreprise", "Jusqu'à 5 services", "Support email"],
+                    "is_active": True
+                },
+                {
+                    "id": "premium",
+                    "name": "Premium",
+                    "description": "Visibilité accrue et fonctionnalités avancées",
+                    "price_monthly": 49.90,
+                    "price_yearly": 499.00,
+                    "features": ["Services illimités", "Badge Premium", "Priorité dans les recherches", "Analytics avancés", "Support prioritaire"],
+                    "is_active": True
+                },
+                {
+                    "id": "enterprise",
+                    "name": "Enterprise",
+                    "description": "Solution complète pour les grandes entreprises",
+                    "price_monthly": 149.90,
+                    "price_yearly": 1499.00,
+                    "features": ["Tout Premium", "Multi-établissements", "API personnalisée", "Account manager dédié", "Formation incluse"],
+                    "is_active": True
+                },
+                {
+                    "id": "influencer_basic",
+                    "name": "Influenceur Basic",
+                    "description": "Pour les micro-influenceurs",
+                    "price_monthly": 0,
+                    "price_yearly": 0,
+                    "features": ["Profil influenceur", "Commission 10%", "Analytics de base"],
+                    "is_active": True
+                },
+                {
+                    "id": "influencer_pro",
+                    "name": "Influenceur Pro",
+                    "description": "Pour les influenceurs professionnels",
+                    "price_monthly": 29.90,
+                    "price_yearly": 299.00,
+                    "features": ["Commission 15%", "Analytics avancés", "Priorité matching", "Badge vérifié"],
+                    "is_active": True
+                }
+            ],
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.platform_settings.insert_one(default_plans)
+        plans = default_plans
+    
+    return {"plans": plans.get("plans", [])}
+
+@api_router.put("/admin/subscription-plans/{plan_id}")
+async def update_subscription_plan(
+    plan_id: str,
+    data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update subscription plan details and pricing"""
+    if current_user.get("user_type") != "admin":
+        raise HTTPException(status_code=403, detail="Accès réservé aux administrateurs")
+    
+    update_fields = {}
+    if "price_monthly" in data:
+        update_fields["plans.$.price_monthly"] = float(data["price_monthly"])
+    if "price_yearly" in data:
+        update_fields["plans.$.price_yearly"] = float(data["price_yearly"])
+    if "is_active" in data:
+        update_fields["plans.$.is_active"] = bool(data["is_active"])
+    if "name" in data:
+        update_fields["plans.$.name"] = data["name"]
+    if "description" in data:
+        update_fields["plans.$.description"] = data["description"]
+    if "features" in data:
+        update_fields["plans.$.features"] = data["features"]
+    
+    update_fields["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    result = await db.platform_settings.update_one(
+        {"type": "subscription_plans", "plans.id": plan_id},
+        {"$set": update_fields}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Plan non trouvé")
+    
+    return {"success": True, "message": "Plan mis à jour"}
+
+
 # Include the api_router in the main app
 app.include_router(api_router)
 
