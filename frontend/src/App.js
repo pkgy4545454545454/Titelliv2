@@ -26,6 +26,7 @@ import OrdersPage from './pages/OrdersPage';
 import JobDetailPage from './pages/JobDetailPage';
 import JobsPage from './pages/JobsPage';
 import ClientProfilePage from './pages/ClientProfilePage';
+import EnterpriseRegistrationPage from './pages/EnterpriseRegistrationPage';
 import { PaymentSuccessPage, PaymentCancelPage } from './pages/PaymentPages';
 
 import './index.css';
