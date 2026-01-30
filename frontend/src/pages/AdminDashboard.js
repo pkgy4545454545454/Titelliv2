@@ -102,13 +102,77 @@ const AdminDashboard = () => {
   const handleRejectRegistration = async (requestId) => {
     const reason = prompt('Raison du rejet (optionnel):');
     try {
-      await api.post(`/admin/registration-requests/${requestId}/reject`, null, { params: { reason } });
+      await axios.post(`${API_URL}/admin/registration-requests/${requestId}/reject`, null, { 
+        params: { reason },
+        headers: { Authorization: `Bearer ${localStorage.getItem('titelli_token')}` }
+      });
       toast.success('Inscription rejetée');
       fetchRegistrationRequests();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Erreur lors du rejet');
     }
   };
+
+  // Fetch algorithms
+  const fetchAlgorithms = async () => {
+    try {
+      setAlgorithmsLoading(true);
+      const response = await axios.get(`${API_URL}/admin/algorithms`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('titelli_token')}` }
+      });
+      setAlgorithms(response.data.algorithms || []);
+    } catch (error) {
+      console.error('Error fetching algorithms:', error);
+    } finally {
+      setAlgorithmsLoading(false);
+    }
+  };
+
+  const handleToggleAlgorithm = async (algorithmId, enabled) => {
+    try {
+      await axios.put(`${API_URL}/admin/algorithms/${algorithmId}`, null, {
+        params: { enabled: !enabled },
+        headers: { Authorization: `Bearer ${localStorage.getItem('titelli_token')}` }
+      });
+      toast.success(`Algorithme ${!enabled ? 'activé' : 'désactivé'}`);
+      fetchAlgorithms();
+    } catch (error) {
+      toast.error('Erreur lors de la modification');
+    }
+  };
+
+  // Fetch subscription plans
+  const fetchSubscriptionPlans = async () => {
+    try {
+      setSubscriptionLoading(true);
+      const response = await axios.get(`${API_URL}/admin/subscription-plans`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('titelli_token')}` }
+      });
+      setSubscriptionPlans(response.data.plans || []);
+    } catch (error) {
+      console.error('Error fetching subscription plans:', error);
+    } finally {
+      setSubscriptionLoading(false);
+    }
+  };
+
+  const handleUpdatePlan = async (planId, data) => {
+    try {
+      await axios.put(`${API_URL}/admin/subscription-plans/${planId}`, data, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('titelli_token')}` }
+      });
+      toast.success('Plan mis à jour');
+      setEditingPlan(null);
+      fetchSubscriptionPlans();
+    } catch (error) {
+      toast.error('Erreur lors de la mise à jour');
+    }
+  };
+
+  useEffect(() => {
+    fetchAlgorithms();
+    fetchSubscriptionPlans();
+  }, []);
 
   const handleVerifyUser = async (userId, isCertified = false, isLabeled = false) => {
     try {
