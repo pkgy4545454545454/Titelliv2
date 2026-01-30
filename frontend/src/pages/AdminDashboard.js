@@ -60,6 +60,44 @@ const AdminDashboard = () => {
     fetchData();
   }, []);
 
+  // Fetch registration requests
+  const fetchRegistrationRequests = async () => {
+    try {
+      setRegistrationLoading(true);
+      const response = await api.get('/admin/registration-requests', { params: { status: 'pending' } });
+      setRegistrationRequests(response.data.requests || []);
+    } catch (error) {
+      console.error('Error fetching registration requests:', error);
+    } finally {
+      setRegistrationLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRegistrationRequests();
+  }, []);
+
+  const handleApproveRegistration = async (requestId) => {
+    try {
+      await api.post(`/admin/registration-requests/${requestId}/approve`);
+      toast.success('Inscription approuvée avec succès !');
+      fetchRegistrationRequests();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur lors de l\'approbation');
+    }
+  };
+
+  const handleRejectRegistration = async (requestId) => {
+    const reason = prompt('Raison du rejet (optionnel):');
+    try {
+      await api.post(`/admin/registration-requests/${requestId}/reject`, null, { params: { reason } });
+      toast.success('Inscription rejetée');
+      fetchRegistrationRequests();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur lors du rejet');
+    }
+  };
+
   const handleVerifyUser = async (userId, isCertified = false, isLabeled = false) => {
     try {
       await adminAPI.verifyUser(userId, isCertified, isLabeled);
