@@ -1362,6 +1362,7 @@ async def get_available_enterprises_route(
     if search:
         query["$or"] = [
             {"name": {"$regex": search, "$options": "i"}},
+            {"business_name": {"$regex": search, "$options": "i"}},
             {"category": {"$regex": search, "$options": "i"}},
             {"address": {"$regex": search, "$options": "i"}}
         ]
@@ -1371,11 +1372,13 @@ async def get_available_enterprises_route(
     
     enterprises = await db.enterprises.find(
         query, 
-        {"_id": 0, "id": 1, "name": 1, "category": 1, "categories": 1, "address": 1, "phone": 1, "website": 1, "image": 1, "status": 1}
+        {"_id": 0}
     ).limit(limit).to_list(limit)
     
-    # Add default status if missing
+    # Normalize enterprise data and add default status if missing
     for ent in enterprises:
+        if not ent.get("name") and ent.get("business_name"):
+            ent["name"] = ent["business_name"]
         if not ent.get("status"):
             ent["status"] = "bientot_disponible"
     
