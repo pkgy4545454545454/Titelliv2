@@ -106,7 +106,7 @@ const EnterpriseRegistrationPage = () => {
 
     try {
       setSubmitting(true);
-      await api.post('/auth/register-enterprise', {
+      await axios.post(`${API_URL}/auth/register-enterprise`, {
         enterprise_id: selectedEnterprise.id,
         email: formData.email,
         password: formData.password,
