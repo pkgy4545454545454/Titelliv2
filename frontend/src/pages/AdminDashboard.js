@@ -4,9 +4,10 @@ import {
   LayoutDashboard, Users, Building2, ShoppingCart, CreditCard, BarChart3,
   CheckCircle, Award, Crown, TrendingUp, DollarSign, Eye, Settings, Wallet,
   Download, Clock, XCircle, AlertCircle, FileText, FileSpreadsheet, 
-  ArrowUpRight, ArrowDownRight, Filter, RefreshCw
+  ArrowUpRight, ArrowDownRight, Filter, RefreshCw, UserPlus, Mail, Phone, MapPin
 } from 'lucide-react';
 import { adminAPI } from '../services/api';
+import api from '../services/api';
 import { toast } from 'sonner';
 
 // List of admin emails
