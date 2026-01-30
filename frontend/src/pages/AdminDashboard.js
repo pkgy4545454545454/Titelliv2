@@ -76,7 +76,10 @@ const AdminDashboard = () => {
   const fetchRegistrationRequests = async () => {
     try {
       setRegistrationLoading(true);
-      const response = await api.get('/admin/registration-requests', { params: { status: 'pending' } });
+      const response = await axios.get(`${API_URL}/admin/registration-requests`, { 
+        params: { status: 'pending' },
+        headers: { Authorization: `Bearer ${localStorage.getItem('titelli_token')}` }
+      });
       setRegistrationRequests(response.data.requests || []);
     } catch (error) {
       console.error('Error fetching registration requests:', error);
@@ -91,7 +94,9 @@ const AdminDashboard = () => {
 
   const handleApproveRegistration = async (requestId) => {
     try {
-      await api.post(`/admin/registration-requests/${requestId}/approve`);
+      await axios.post(`${API_URL}/admin/registration-requests/${requestId}/approve`, null, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('titelli_token')}` }
+      });
       toast.success('Inscription approuvée avec succès !');
       fetchRegistrationRequests();
     } catch (error) {
