@@ -548,6 +548,230 @@ const AdminDashboard = () => {
             </div>
           )}
 
+          {/* ===== ALGORITHMES TAB ===== */}
+          {activeTab === 'algorithms' && (
+            <div>
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                    Algorithmes de la Plateforme
+                  </h1>
+                  <p className="text-gray-400 text-sm mt-1">
+                    Gérez les algorithmes qui optimisent l'expérience utilisateur
+                  </p>
+                </div>
+                <button
+                  onClick={fetchAlgorithms}
+                  className="flex items-center gap-2 px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
+                >
+                  <RefreshCw className={`w-4 h-4 ${algorithmsLoading ? 'animate-spin' : ''}`} />
+                  Actualiser
+                </button>
+              </div>
+
+              {algorithmsLoading ? (
+                <div className="flex justify-center py-12">
+                  <div className="w-12 h-12 border-4 border-[#0047AB] border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {algorithms.map((algo) => {
+                    const categoryIcons = {
+                      'Personnalisation': <Sparkles className="w-5 h-5" />,
+                      'Recherche': <Search className="w-5 h-5" />,
+                      'Monétisation': <DollarSign className="w-5 h-5" />,
+                      'Sécurité': <Shield className="w-5 h-5" />,
+                      'Qualité': <Award className="w-5 h-5" />,
+                      'Marketing': <Target className="w-5 h-5" />,
+                      'Planification': <Calendar className="w-5 h-5" />
+                    };
+                    
+                    return (
+                      <div 
+                        key={algo.id} 
+                        className={`bg-white/5 border rounded-xl p-5 transition-all ${
+                          algo.enabled ? 'border-green-500/30' : 'border-white/10 opacity-60'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-lg ${algo.enabled ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-gray-400'}`}>
+                              {categoryIcons[algo.category] || <Cpu className="w-5 h-5" />}
+                            </div>
+                            <div>
+                              <h3 className="text-white font-semibold">{algo.name}</h3>
+                              <span className="text-xs text-[#D4AF37]">{algo.category}</span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleToggleAlgorithm(algo.id, algo.enabled)}
+                            className={`relative w-12 h-6 rounded-full transition-colors ${
+                              algo.enabled ? 'bg-green-500' : 'bg-gray-600'
+                            }`}
+                          >
+                            <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
+                              algo.enabled ? 'left-7' : 'left-1'
+                            }`} />
+                          </button>
+                        </div>
+                        <p className="text-gray-400 text-sm">{algo.description}</p>
+                        <div className="flex items-center gap-2 mt-3">
+                          <span className={`px-2 py-0.5 rounded-full text-xs ${
+                            algo.enabled ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'
+                          }`}>
+                            {algo.enabled ? 'Actif' : 'Inactif'}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ===== ABONNEMENTS TAB ===== */}
+          {activeTab === 'subscriptions' && (
+            <div>
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                    Plans d'Abonnement
+                  </h1>
+                  <p className="text-gray-400 text-sm mt-1">
+                    Gérez les prix et fonctionnalités des abonnements
+                  </p>
+                </div>
+                <button
+                  onClick={fetchSubscriptionPlans}
+                  className="flex items-center gap-2 px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
+                >
+                  <RefreshCw className={`w-4 h-4 ${subscriptionLoading ? 'animate-spin' : ''}`} />
+                  Actualiser
+                </button>
+              </div>
+
+              {subscriptionLoading ? (
+                <div className="flex justify-center py-12">
+                  <div className="w-12 h-12 border-4 border-[#0047AB] border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {subscriptionPlans.map((plan) => (
+                    <div 
+                      key={plan.id} 
+                      className={`bg-white/5 border rounded-xl p-6 transition-all ${
+                        plan.id === 'premium' ? 'border-[#D4AF37]/50 ring-1 ring-[#D4AF37]/20' : 
+                        plan.id === 'enterprise' ? 'border-[#0047AB]/50' : 'border-white/10'
+                      }`}
+                    >
+                      {editingPlan === plan.id ? (
+                        // Edit mode
+                        <div className="space-y-4">
+                          <input
+                            type="text"
+                            defaultValue={plan.name}
+                            className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
+                            id={`plan-name-${plan.id}`}
+                          />
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="text-xs text-gray-400">Prix mensuel (CHF)</label>
+                              <input
+                                type="number"
+                                step="0.01"
+                                defaultValue={plan.price_monthly}
+                                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
+                                id={`plan-monthly-${plan.id}`}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-xs text-gray-400">Prix annuel (CHF)</label>
+                              <input
+                                type="number"
+                                step="0.01"
+                                defaultValue={plan.price_yearly}
+                                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white"
+                                id={`plan-yearly-${plan.id}`}
+                              />
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => {
+                                const name = document.getElementById(`plan-name-${plan.id}`).value;
+                                const monthly = document.getElementById(`plan-monthly-${plan.id}`).value;
+                                const yearly = document.getElementById(`plan-yearly-${plan.id}`).value;
+                                handleUpdatePlan(plan.id, { name, price_monthly: monthly, price_yearly: yearly });
+                              }}
+                              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                            >
+                              <Save className="w-4 h-4" />
+                              Sauvegarder
+                            </button>
+                            <button
+                              onClick={() => setEditingPlan(null)}
+                              className="px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20"
+                            >
+                              Annuler
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        // View mode
+                        <>
+                          <div className="flex items-center justify-between mb-4">
+                            <div>
+                              <h3 className="text-white font-bold text-lg">{plan.name}</h3>
+                              <p className="text-gray-400 text-sm">{plan.description}</p>
+                            </div>
+                            <button
+                              onClick={() => setEditingPlan(plan.id)}
+                              className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                          
+                          <div className="mb-4">
+                            <div className="flex items-baseline gap-1">
+                              <span className="text-3xl font-bold text-white">{plan.price_monthly.toFixed(2)}</span>
+                              <span className="text-gray-400">CHF/mois</span>
+                            </div>
+                            <p className="text-gray-500 text-sm">ou {plan.price_yearly.toFixed(2)} CHF/an</p>
+                          </div>
+                          
+                          <ul className="space-y-2 mb-4">
+                            {plan.features?.map((feature, idx) => (
+                              <li key={idx} className="flex items-center gap-2 text-gray-300 text-sm">
+                                <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                                {feature}
+                              </li>
+                            ))}
+                          </ul>
+                          
+                          <div className="flex items-center justify-between pt-4 border-t border-white/10">
+                            <span className={`px-2 py-0.5 rounded-full text-xs ${
+                              plan.is_active ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                            }`}>
+                              {plan.is_active ? 'Actif' : 'Inactif'}
+                            </span>
+                            <button
+                              onClick={() => handleUpdatePlan(plan.id, { is_active: !plan.is_active })}
+                              className="text-sm text-gray-400 hover:text-white"
+                            >
+                              {plan.is_active ? 'Désactiver' : 'Activer'}
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* ===== COMPTABILITÉ TAB ===== */}
           {activeTab === 'accounting' && (
             <div>
