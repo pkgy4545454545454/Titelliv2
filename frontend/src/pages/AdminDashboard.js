@@ -74,6 +74,7 @@ const AdminDashboard = () => {
 
   const menuItems = [
     { id: 'overview', label: 'Vue d\'ensemble', icon: LayoutDashboard },
+    { id: 'registrations', label: 'Inscriptions en attente', icon: UserPlus, badge: registrationRequests.length },
     { id: 'accounting', label: 'Comptabilité', icon: BarChart3 },
     { id: 'withdrawals', label: 'Retraits', icon: Wallet },
     { id: 'users', label: 'Utilisateurs', icon: Users },
