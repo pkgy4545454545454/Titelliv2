@@ -1333,7 +1333,7 @@ async def list_enterprises(
     is_labeled: Optional[bool] = None,
     is_premium: Optional[bool] = None,
     search: Optional[str] = None,
-    limit: int = 50,
+    limit: int = 500,
     skip: int = 0
 ):
     query = {}
@@ -1348,10 +1348,27 @@ async def list_enterprises(
     if search:
         query["$or"] = [
             {"business_name": {"$regex": search, "$options": "i"}},
+            {"name": {"$regex": search, "$options": "i"}},
             {"description": {"$regex": search, "$options": "i"}}
         ]
     
     enterprises = await db.enterprises.find(query, {"_id": 0}).skip(skip).limit(limit).to_list(limit)
+    
+    # Normalize data and set status labels
+    for ent in enterprises:
+        # Normalize name field
+        if not ent.get("name") and ent.get("business_name"):
+            ent["name"] = ent["business_name"]
+        
+        # Set display status based on activation_status
+        activation = ent.get("activation_status", "inactive")
+        if activation == "active":
+            ent["display_status"] = "actif"
+        elif activation == "pending":
+            ent["display_status"] = "en_attente"
+        else:
+            ent["display_status"] = "bientot_disponible"
+    
     total = await db.enterprises.count_documents(query)
     return {"enterprises": enterprises, "total": total}
 
