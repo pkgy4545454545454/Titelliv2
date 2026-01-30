@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Building2, MapPin, Phone, Globe, ChevronRight, Upload, User, FileText, Users, CheckCircle, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
-import api from '../services/api';
+import axios from 'axios';
+
+const API_URL = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const EnterpriseRegistrationPage = () => {
   const navigate = useNavigate();
