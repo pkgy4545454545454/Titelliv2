@@ -36,7 +36,7 @@ const EnterpriseRegistrationPage = () => {
   const fetchEnterprises = async (search = '') => {
     try {
       setLoading(true);
-      const response = await api.get('/enterprises/available', { params: { search, limit: 200 } });
+      const response = await axios.get(`${API_URL}/enterprises/available`, { params: { search, limit: 200 } });
       setEnterprises(response.data.enterprises || []);
     } catch (error) {
       console.error('Error fetching enterprises:', error);
@@ -48,7 +48,7 @@ const EnterpriseRegistrationPage = () => {
 
   const fetchManagers = async () => {
     try {
-      const response = await api.get('/managers');
+      const response = await axios.get(`${API_URL}/managers`);
       setManagers(response.data.managers || []);
     } catch (error) {
       console.error('Error fetching managers:', error);
