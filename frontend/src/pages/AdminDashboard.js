@@ -4,11 +4,14 @@ import {
   LayoutDashboard, Users, Building2, ShoppingCart, CreditCard, BarChart3,
   CheckCircle, Award, Crown, TrendingUp, DollarSign, Eye, Settings, Wallet,
   Download, Clock, XCircle, AlertCircle, FileText, FileSpreadsheet, 
-  ArrowUpRight, ArrowDownRight, Filter, RefreshCw, UserPlus, Mail, Phone, MapPin
+  ArrowUpRight, ArrowDownRight, Filter, RefreshCw, UserPlus, Mail, Phone, MapPin,
+  Cpu, Zap, Shield, Search, Target, TrendingDown, Sparkles, Calendar, Edit2, Save
 } from 'lucide-react';
 import { adminAPI } from '../services/api';
-import api from '../services/api';
+import axios from 'axios';
 import { toast } from 'sonner';
+
+const API_URL = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 // List of admin emails
 const ADMIN_EMAILS = ['admin@titelli.com', 'spa.luxury@titelli.com'];
