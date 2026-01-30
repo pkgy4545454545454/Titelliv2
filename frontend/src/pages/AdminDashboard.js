@@ -42,6 +42,15 @@ const AdminDashboard = () => {
   const [registrationRequests, setRegistrationRequests] = useState([]);
   const [registrationLoading, setRegistrationLoading] = useState(false);
 
+  // Algorithms state
+  const [algorithms, setAlgorithms] = useState([]);
+  const [algorithmsLoading, setAlgorithmsLoading] = useState(false);
+
+  // Subscription plans state
+  const [subscriptionPlans, setSubscriptionPlans] = useState([]);
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false);
+  const [editingPlan, setEditingPlan] = useState(null);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
