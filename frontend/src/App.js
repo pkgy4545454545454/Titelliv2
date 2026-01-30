@@ -83,6 +83,7 @@ function AppRoutes() {
       {/* Public Routes */}
       <Route path="/" element={<MainLayout><HomePage /></MainLayout>} />
       <Route path="/auth" element={<AuthPage />} />
+      <Route path="/inscription-entreprise" element={<MainLayout showFooter={false}><EnterpriseRegistrationPage /></MainLayout>} />
       <Route path="/services" element={<MainLayout><ServicesPage /></MainLayout>} />
       <Route path="/products" element={<MainLayout><ProductsPage /></MainLayout>} />
       <Route path="/produits" element={<MainLayout><ProductsPage /></MainLayout>} />
