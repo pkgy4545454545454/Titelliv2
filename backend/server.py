@@ -9814,7 +9814,7 @@ async def register_enterprise_owner(data: EnterpriseRegistrationRequest):
     user_dict = {
         "id": user_id,
         "email": data.email,
-        "password": hash_password(data.password),
+        "password": data.password,  # Password stored as plain text for now (dev mode)
         "first_name": data.first_name,
         "last_name": data.last_name,
         "phone": data.phone,
