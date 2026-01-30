@@ -9697,6 +9697,303 @@ async def receive_salonpro_webhook(payload: SalonProWebhookPayload):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ============ ENTERPRISE REGISTRATION SYSTEM ============
+
+class EnterpriseRegistrationRequest(BaseModel):
+    enterprise_id: str
+    email: EmailStr
+    password: str
+    first_name: str
+    last_name: str
+    phone: str
+    commerce_register_id: str  # ID du registre du commerce
+    manager_id: str  # Manager who recommended
+    identity_document: Optional[str] = None  # Base64 encoded document
+
+@api_router.get("/enterprises/available")
+async def get_available_enterprises(
+    search: Optional[str] = None,
+    category: Optional[str] = None,
+    limit: int = 100
+):
+    """Get list of enterprises available for registration (bientot_disponible status)"""
+    query = {"activation_status": {"$in": ["inactive", None]}}
+    
+    if search:
+        query["$or"] = [
+            {"name": {"$regex": search, "$options": "i"}},
+            {"category": {"$regex": search, "$options": "i"}},
+            {"address": {"$regex": search, "$options": "i"}}
+        ]
+    
+    if category:
+        query["category"] = {"$regex": category, "$options": "i"}
+    
+    enterprises = await db.enterprises.find(
+        query, 
+        {"_id": 0, "id": 1, "name": 1, "category": 1, "categories": 1, "address": 1, "phone": 1, "website": 1, "image": 1, "status": 1}
+    ).limit(limit).to_list(limit)
+    
+    # Add default status if missing
+    for ent in enterprises:
+        if not ent.get("status"):
+            ent["status"] = "bientot_disponible"
+    
+    return {"enterprises": enterprises, "count": len(enterprises)}
+
+@api_router.get("/managers")
+async def get_managers():
+    """Get list of managers for enterprise registration"""
+    managers = await db.managers.find({}, {"_id": 0}).to_list(100)
+    return {"managers": managers}
+
+@api_router.post("/auth/register-enterprise")
+async def register_enterprise_owner(data: EnterpriseRegistrationRequest):
+    """Register a new enterprise owner and link to existing enterprise"""
+    
+    # Check if email already exists
+    existing_user = await db.users.find_one({"email": data.email})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Cet email est déjà utilisé")
+    
+    # Check if enterprise exists
+    enterprise = await db.enterprises.find_one({"id": data.enterprise_id}, {"_id": 0})
+    if not enterprise:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    # Check if enterprise is already claimed
+    if enterprise.get("activation_status") == "active":
+        raise HTTPException(status_code=400, detail="Cette entreprise est déjà activée")
+    
+    if enterprise.get("activation_status") == "pending":
+        raise HTTPException(status_code=400, detail="Une demande d'activation est déjà en cours pour cette entreprise")
+    
+    # Check if manager exists
+    manager = await db.managers.find_one({"_id": {"$exists": True}})
+    if data.manager_id:
+        manager = await db.managers.find_one({}, {"_id": 0})
+        # We'll validate by checking managers collection
+    
+    # Create user with pending status
+    user_id = str(uuid.uuid4())
+    user_dict = {
+        "id": user_id,
+        "email": data.email,
+        "password": hash_password(data.password),
+        "first_name": data.first_name,
+        "last_name": data.last_name,
+        "phone": data.phone,
+        "user_type": "entreprise",
+        "status": "pending",  # Pending validation
+        "enterprise_id": data.enterprise_id,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.users.insert_one(user_dict)
+    
+    # Create registration request
+    registration_request = {
+        "id": str(uuid.uuid4()),
+        "user_id": user_id,
+        "enterprise_id": data.enterprise_id,
+        "enterprise_name": enterprise.get("name"),
+        "commerce_register_id": data.commerce_register_id,
+        "manager_id": data.manager_id,
+        "identity_document": data.identity_document,
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "user_info": {
+            "email": data.email,
+            "first_name": data.first_name,
+            "last_name": data.last_name,
+            "phone": data.phone
+        }
+    }
+    
+    await db.registration_requests.insert_one(registration_request)
+    
+    # Update enterprise status to pending
+    await db.enterprises.update_one(
+        {"id": data.enterprise_id},
+        {"$set": {
+            "activation_status": "pending",
+            "pending_owner_id": user_id,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {
+        "success": True,
+        "message": "Votre demande d'inscription a été enregistrée. Vous recevrez un email lorsque votre compte sera validé.",
+        "request_id": registration_request["id"]
+    }
+
+@api_router.get("/admin/registration-requests")
+async def get_registration_requests(
+    status: Optional[str] = "pending",
+    current_user: dict = Depends(get_current_user)
+):
+    """Get pending registration requests (admin only)"""
+    if current_user.get("user_type") != "admin":
+        raise HTTPException(status_code=403, detail="Accès réservé aux administrateurs")
+    
+    query = {}
+    if status:
+        query["status"] = status
+    
+    requests = await db.registration_requests.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    # Enrich with enterprise data
+    for req in requests:
+        enterprise = await db.enterprises.find_one({"id": req.get("enterprise_id")}, {"_id": 0, "name": 1, "category": 1, "address": 1, "image": 1})
+        req["enterprise"] = enterprise
+        
+        # Get manager info
+        if req.get("manager_id"):
+            manager = await db.managers.find_one({}, {"_id": 0, "name": 1, "role": 1})
+            req["manager"] = manager
+    
+    return {"requests": requests, "count": len(requests)}
+
+@api_router.post("/admin/registration-requests/{request_id}/approve")
+async def approve_registration_request(
+    request_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Approve a registration request and activate the enterprise"""
+    if current_user.get("user_type") != "admin":
+        raise HTTPException(status_code=403, detail="Accès réservé aux administrateurs")
+    
+    # Get registration request
+    reg_request = await db.registration_requests.find_one({"id": request_id}, {"_id": 0})
+    if not reg_request:
+        raise HTTPException(status_code=404, detail="Demande non trouvée")
+    
+    if reg_request.get("status") != "pending":
+        raise HTTPException(status_code=400, detail="Cette demande a déjà été traitée")
+    
+    user_id = reg_request.get("user_id")
+    enterprise_id = reg_request.get("enterprise_id")
+    
+    # Activate user
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"status": "active", "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    # Activate enterprise and link to user
+    await db.enterprises.update_one(
+        {"id": enterprise_id},
+        {"$set": {
+            "activation_status": "active",
+            "status": "disponible",
+            "owner_id": user_id,
+            "user_id": user_id,
+            "activated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Update registration request
+    await db.registration_requests.update_one(
+        {"id": request_id},
+        {"$set": {
+            "status": "approved",
+            "approved_by": current_user.get("id"),
+            "approved_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # TODO: Send email notification to user
+    
+    return {
+        "success": True,
+        "message": "Inscription approuvée avec succès",
+        "enterprise_id": enterprise_id,
+        "user_id": user_id
+    }
+
+@api_router.post("/admin/registration-requests/{request_id}/reject")
+async def reject_registration_request(
+    request_id: str,
+    reason: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Reject a registration request"""
+    if current_user.get("user_type") != "admin":
+        raise HTTPException(status_code=403, detail="Accès réservé aux administrateurs")
+    
+    # Get registration request
+    reg_request = await db.registration_requests.find_one({"id": request_id}, {"_id": 0})
+    if not reg_request:
+        raise HTTPException(status_code=404, detail="Demande non trouvée")
+    
+    if reg_request.get("status") != "pending":
+        raise HTTPException(status_code=400, detail="Cette demande a déjà été traitée")
+    
+    enterprise_id = reg_request.get("enterprise_id")
+    
+    # Reset enterprise status
+    await db.enterprises.update_one(
+        {"id": enterprise_id},
+        {"$set": {
+            "activation_status": "inactive",
+            "pending_owner_id": None,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Update registration request
+    await db.registration_requests.update_one(
+        {"id": request_id},
+        {"$set": {
+            "status": "rejected",
+            "rejection_reason": reason,
+            "rejected_by": current_user.get("id"),
+            "rejected_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # TODO: Send email notification to user
+    
+    return {
+        "success": True,
+        "message": "Inscription rejetée"
+    }
+
+@api_router.get("/enterprises/all")
+async def get_all_enterprises_public(
+    search: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    limit: int = 200
+):
+    """Get all enterprises for public display (including bientot_disponible)"""
+    query = {}
+    
+    if search:
+        query["$or"] = [
+            {"name": {"$regex": search, "$options": "i"}},
+            {"category": {"$regex": search, "$options": "i"}},
+            {"address": {"$regex": search, "$options": "i"}}
+        ]
+    
+    if category:
+        query["category"] = {"$regex": category, "$options": "i"}
+    
+    if status:
+        query["status"] = status
+    
+    enterprises = await db.enterprises.find(query, {"_id": 0}).limit(limit).to_list(limit)
+    
+    # Set default status for enterprises without one
+    for ent in enterprises:
+        if not ent.get("status"):
+            ent["status"] = "bientot_disponible" if ent.get("activation_status") != "active" else "disponible"
+    
+    return {"enterprises": enterprises, "count": len(enterprises)}
+
+
 # Include the api_router in the main app
 app.include_router(api_router)
 
