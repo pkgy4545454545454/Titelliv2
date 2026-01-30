@@ -337,6 +337,134 @@ const AdminDashboard = () => {
             </div>
           )}
 
+          {/* ===== INSCRIPTIONS EN ATTENTE TAB ===== */}
+          {activeTab === 'registrations' && (
+            <div>
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                    Inscriptions en attente
+                  </h1>
+                  <p className="text-gray-400 text-sm mt-1">
+                    {registrationRequests.length} demande(s) en attente de validation
+                  </p>
+                </div>
+                <button
+                  onClick={fetchRegistrationRequests}
+                  className="flex items-center gap-2 px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
+                >
+                  <RefreshCw className={`w-4 h-4 ${registrationLoading ? 'animate-spin' : ''}`} />
+                  Actualiser
+                </button>
+              </div>
+
+              {registrationLoading ? (
+                <div className="flex justify-center py-12">
+                  <div className="w-12 h-12 border-4 border-[#0047AB] border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : registrationRequests.length === 0 ? (
+                <div className="text-center py-12">
+                  <UserPlus className="w-16 h-16 mx-auto mb-4 text-gray-600" />
+                  <p className="text-gray-400">Aucune demande d'inscription en attente</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {registrationRequests.map((request) => (
+                    <div key={request.id} className="bg-white/5 border border-white/10 rounded-xl p-6">
+                      <div className="flex flex-col lg:flex-row lg:items-start gap-6">
+                        {/* Enterprise Info */}
+                        <div className="flex items-start gap-4 flex-1">
+                          <img
+                            src={request.enterprise?.image || `https://ui-avatars.com/api/?name=${request.enterprise_name}&background=0047AB&color=fff`}
+                            alt={request.enterprise_name}
+                            className="w-16 h-16 rounded-lg object-cover"
+                          />
+                          <div>
+                            <h3 className="text-white font-semibold text-lg">{request.enterprise_name}</h3>
+                            <p className="text-[#D4AF37] text-sm">{request.enterprise?.category}</p>
+                            <p className="text-gray-400 text-sm flex items-center gap-1 mt-1">
+                              <MapPin className="w-4 h-4" />
+                              {request.enterprise?.address}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* User Info */}
+                        <div className="flex-1 bg-white/5 rounded-lg p-4">
+                          <h4 className="text-white font-medium mb-3">Informations du demandeur</h4>
+                          <div className="space-y-2 text-sm">
+                            <p className="text-gray-300 flex items-center gap-2">
+                              <Users className="w-4 h-4 text-gray-500" />
+                              {request.user_info?.first_name} {request.user_info?.last_name}
+                            </p>
+                            <p className="text-gray-300 flex items-center gap-2">
+                              <Mail className="w-4 h-4 text-gray-500" />
+                              {request.user_info?.email}
+                            </p>
+                            <p className="text-gray-300 flex items-center gap-2">
+                              <Phone className="w-4 h-4 text-gray-500" />
+                              {request.user_info?.phone}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Documents */}
+                        <div className="flex-1 bg-white/5 rounded-lg p-4">
+                          <h4 className="text-white font-medium mb-3">Documents fournis</h4>
+                          <div className="space-y-2 text-sm">
+                            <p className="text-gray-300">
+                              <span className="text-gray-500">Registre du commerce:</span>{' '}
+                              <span className="text-[#D4AF37] font-mono">{request.commerce_register_id}</span>
+                            </p>
+                            <p className="text-gray-300">
+                              <span className="text-gray-500">Manager référent:</span>{' '}
+                              {request.manager_id}
+                            </p>
+                            <p className="text-gray-300">
+                              <span className="text-gray-500">Pièce d'identité:</span>{' '}
+                              {request.identity_document ? (
+                                <span className="text-green-400">✓ Téléchargée</span>
+                              ) : (
+                                <span className="text-yellow-400">Non fournie</span>
+                              )}
+                            </p>
+                            <p className="text-gray-500 text-xs mt-2">
+                              Demande reçue le {new Date(request.created_at).toLocaleDateString('fr-FR', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-white/10">
+                        <button
+                          onClick={() => handleRejectRegistration(request.id)}
+                          className="flex items-center gap-2 px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
+                        >
+                          <XCircle className="w-4 h-4" />
+                          Rejeter
+                        </button>
+                        <button
+                          onClick={() => handleApproveRegistration(request.id)}
+                          className="flex items-center gap-2 px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                          Valider l'inscription
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* ===== COMPTABILITÉ TAB ===== */}
           {activeTab === 'accounting' && (
             <div>
