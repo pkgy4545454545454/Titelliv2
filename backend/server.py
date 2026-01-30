@@ -9773,37 +9773,6 @@ class EnterpriseRegistrationRequest(BaseModel):
     manager_id: str  # Manager who recommended
     identity_document: Optional[str] = None  # Base64 encoded document
 
-@api_router.get("/enterprises/available")
-async def get_available_enterprises(
-    search: Optional[str] = None,
-    category: Optional[str] = None,
-    limit: int = 100
-):
-    """Get list of enterprises available for registration (bientot_disponible status)"""
-    query = {"activation_status": {"$in": ["inactive", None]}}
-    
-    if search:
-        query["$or"] = [
-            {"name": {"$regex": search, "$options": "i"}},
-            {"category": {"$regex": search, "$options": "i"}},
-            {"address": {"$regex": search, "$options": "i"}}
-        ]
-    
-    if category:
-        query["category"] = {"$regex": category, "$options": "i"}
-    
-    enterprises = await db.enterprises.find(
-        query, 
-        {"_id": 0, "id": 1, "name": 1, "category": 1, "categories": 1, "address": 1, "phone": 1, "website": 1, "image": 1, "status": 1}
-    ).limit(limit).to_list(limit)
-    
-    # Add default status if missing
-    for ent in enterprises:
-        if not ent.get("status"):
-            ent["status"] = "bientot_disponible"
-    
-    return {"enterprises": enterprises, "count": len(enterprises)}
-
 @api_router.get("/managers")
 async def get_managers():
     """Get list of managers for enterprise registration"""
