@@ -1,208 +1,178 @@
 <analysis>**original_problem_statement:**
-The user's primary goals were to finalize the integration between the main application (Titelli) and a second site (SalonPro), fix and enhance the e-commerce functionality, and generate marketing videos.
+The user initially requested to finalize the Titelli-SalonPro integration, overhaul the e-commerce functionality, and generate marketing videos.
 
-Specific requests included:
-1.  **SalonPro Integration:** Make the Voir Planning button in the Titelli Enterprise Dashboard redirect to SalonPro with auto-login. Ensure appointments and orders are visible in SalonPro.
-2.  **E-commerce Overhaul:** The user reported that the shopping cart and payment system was not working and was not production-ready. They requested a complete checkout form requiring full customer details (name, address, phone, etc.) and a fix for any payment processing errors.
-3.  **Deployment & Bug Fixes:** The user encountered multiple deployment errors on Render.com related to frontend dependencies (npm <command>
-
-Usage:
-
-npm install        install all the dependencies in your project
-npm install <foo>  add the <foo> dependency to your project
-npm test           run this project's tests
-npm run <foo>      run the script named <foo>
-npm <command> -h   quick help on <command>
-npm -l             display usage info for all commands
-npm help <term>    search for help on <term>
-npm help npm       more involved overview
-
-All commands:
-
-    access, adduser, audit, bugs, cache, ci, completion,
-    config, dedupe, deprecate, diff, dist-tag, docs, doctor,
-    edit, exec, explain, explore, find-dupes, fund, get, help,
-    help-search, hook, init, install, install-ci-test,
-    install-test, link, ll, login, logout, ls, org, outdated,
-    owner, pack, ping, pkg, prefix, profile, prune, publish,
-    query, rebuild, repo, restart, root, run-script, sbom,
-    search, set, shrinkwrap, star, stars, start, stop, team,
-    test, token, uninstall, unpublish, unstar, update, version,
-    view, whoami
-
-Specify configs in the ini-formatted file:
-    /root/.npmrc
-or on the command line via: npm <command> --key=value
-
-More configuration info: npm help config
-Configuration fields: npm help 7 config
-
-npm@10.8.2 /usr/lib/node_modules/npm vs yarn install v1.22.22
-[1/4] Resolving packages...
-[2/4] Fetching packages...
-[3/4] Linking dependencies...
-[4/4] Building fresh packages...
-success Saved lockfile.
-Done in 0.03s.) and backend packages (). They also reported frontend errors on their SalonPro application.
-4.  **Video Generation:** The user requested a new marketing presentation video for the Titelli website, followed by a request to combine this video with a previously generated logo animation.
-5.  **Data Seeding:** The user asked for the database to be populated with realistic demo data (products, enterprises, user accounts, messages, orders) to have a full dashboard for a presentation.
+This has since evolved into a major refactoring of the user/enterprise onboarding flow and a massive data-seeding operation. The latest user requests are:
+1.  **[PRIORITY]** Find and scrape all possible databases for businesses in Lausanne and add any missing ones to the application's database.
+2.  Fix a bug where the payment process for creating a Campaign in the enterprise dashboard is not working.
+3.  Add a specific color to the 'Produit' menu item in the dashboard, similar to other sections.
+4.  Verify that when a new enterprise registration is approved, the relevant information is synced and available for the companion SalonPro site.
+5.  Add an exit animation to the splash screen logo, making it slide to the right and fade out.
 
 **User's preferred language**: French
 
 **what currently exists?**
-The application is a full-stack social commerce platform (Titelli) with a React frontend and a large monolithic FastAPI backend () connected to a MongoDB database.
--   **Backend**: Contains extensive logic for user/enterprise management, a client booking system, and a complete order/payment system integrated with Stripe. It includes various endpoints to support the SalonPro integration by sharing data from the same database.
--   **Frontend**: Features Admin, Enterprise, and Client dashboards. The cart and checkout process has been completely overhauled to include a detailed customer information form and a working Stripe payment flow.
--   **Data**: The database has been seeded with two detailed demo accounts ( & ) and a rich set of associated data (products, orders, appointments, contacts, etc.).
--   **Integrations**: The SalonPro integration is partially complete, relying on a shared MongoDB database. The redirection from Titelli to SalonPro is implemented. The app also uses Sora 2 for video generation.
--   **Documentation**: A deployment guide for Render () has been created.
+The application is a full-stack social commerce platform (Titelli) with a React frontend and a monolithic FastAPI backend () connected to MongoDB. The database has been populated with over 1,200 businesses from Lausanne, scraped from multiple sources (user-provided files and websites).
+
+A complex new enterprise registration system is in place:
+-   Businesses are pre-loaded with a Bientôt disponible (Coming Soon) status.
+-   Owners find and claim their business via a new registration page ().
+-   The registration creates a pending request in the admin dashboard.
+-   Admins can approve or reject these requests. Approval activates the user's account and links them to the enterprise profile.
+
+The Admin Dashboard () has been enhanced with new sections to manage feature toggles (termed Algorithms) and edit subscription plan pricing.
+
+UI improvements include an animated splash screen on the first visit and a looping video logo in the main header.
 
 **Last working item**:
--   **Last item agent was working**: The user wants to combine two existing videos: the newly generated marketing video () and the final logo animation (). The agent installed  to perform this merge but the initial command failed to locate the video files. The agent's last action was to install  in preparation for another attempt at merging the videos.
+-   **Last item agent was working**: The agent had just started working on a 5-point list provided by the user. It prioritized the most critical task: finding and scraping more business data for Lausanne. The agent had begun researching potential data sources and had also viewed the relevant frontend files (, ) in preparation for the other UI-related tasks.
 -   **Status**: IN PROGRESS
 -   **Agent Testing Done**: N
--   **Which testing method agent to use?**: manual testing by . The agent needs to construct the correct  command with absolute file paths and then provide a download link for the user to verify the resulting video.
+-   **Which testing method agent to use?**: A combination of methods is needed:
+    -   **Data Scraping**: Backend testing agent or a custom Python script to scrape data and  to verify database counts post-insertion.
+    -   **UI Fixes (Menu, Splash Screen)**: Frontend testing agent or the screenshot tool.
+    -   **Bug Fix (Campaign Payment)**: Both frontend and backend testing agents to trace the flow from button click to API failure.
+    -   **SalonPro Sync Verification**: Backend testing agent to inspect the database state after an enterprise is approved.
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: (P0) Combine Marketing and Logo Videos**
-    -   **Description**: The user wants to merge  with  to create a single presentation video.
-    -   **Attempted fixes**: The agent installed  but the first attempt to run the merge command failed, likely due to incorrect file paths.
+-   **Issue 1: (P0) Campaign Subscription Payment Fails**
+    -   **Description**: The user reported that in the enterprise dashboard, when trying to create a new promotional campaign, the final Payer (Pay) button is non-functional.
+    -   **Attempted fixes**: None yet. This was just reported.
     -   **Next debug checklist**:
-        1.  Locate the correct absolute paths for both videos in .
-        2.  Construct a valid  command to concatenate the two videos (e.g., using the  filter).
-        3.  Execute the command to generate the combined video.
-        4.  Create a download link for the new video file for the user to review.
-    -   **Why fix this issue and what will be achieved with the fix?**: Fulfills a direct user request for a specific marketing asset.
-    -   **Status**: IN PROGRESS
+        1.  Log in as an enterprise user (e.g., ).
+        2.  Navigate to the campaign creation section.
+        3.  Attempt to create and pay for a campaign.
+        4.  Inspect the browser's console and network tabs for frontend errors or failed API requests.
+        5.  Check the backend supervisor logs () for corresponding errors.
+        6.  Review the frontend code handling the payment submission and the backend endpoint responsible for processing it.
+    -   **Why fix this issue and what will be achieved with the fix?**: This is a core monetization feature. Fixing it is critical for the platform's business model.
+    -   **Status**: NOT STARTED
     -   **Is recurring issue?**: N
-    -   **Should Test frontend/backend/both after fix?**: backend (generating the file and providing a link).
-    -   **Blocked on other issue**: None
-
--   **Issue 2: (P1) SalonPro Frontend Errors**
-    -   **Description**: The user's external SalonPro application has frontend errors. An  error on the  and the auto-login from Titelli is not functional because the login page doesn't handle the token from the URL.
-    -   **Attempted fixes**: The agent provided complete code for a new  and a modified  to handle the auto-login token. The agent also diagnosed the  error as a likely missing or incorrectly exported component (e.g., ). The user deprioritized this and asked to simplify the redirection, which was done. The root cause on the SalonPro side remains unfixed.
-    -   **Next debug checklist**:
-        1.  Ask the user if they have had a chance to implement the code snippets provided for  and  in their SalonPro project.
-        2.  Remind the user that the  functionality requires a code change on their  or  to read the token from the URL.
-        3.  Offer to re-examine the  issue if the user shares the related files (, ).
-    -   **Why fix this issue and what will be achieved with the fix?**: The Titelli-SalonPro integration remains incomplete until the SalonPro frontend can correctly display shared data and allow auto-login.
-    -   **Status**: BLOCKED (on user action in their separate project)
-    -   **Is recurring issue?**: Y
-    -   **Should Test frontend/backend/both after fix?**: none (external project)
+    -   **Should Test frontend/backend/both after fix?**: Both
     -   **Blocked on other issue**: None
 
 **In progress Task List**:
--   **Task 1: (P0) Video Merging with FFMPEG**
-    -   **Where to resume**: The  tool is installed. The agent needs to construct and execute the correct  command using the absolute paths to the source videos.
-    -   **What will be achieved with this?**: A final, combined marketing video as requested by the user.
+-   **Task 1: (P0) Complete the 5-point User Request**
+    -   **Where to resume**: The agent was researching data sources for scraping. The next step is to write and execute a scraping script to populate the database. Following that, address the remaining four points.
+        -   **Data Scraping**: Implement a Python script to scrape a comprehensive business directory like  for Lausanne and insert new entries into the  collection.
+        -   **Campaign Payment Fix**: Follow the debug checklist for the P0 issue above.
+        -   **SalonPro Sync**: Review the  function in  to confirm that all enterprise data is correctly set upon approval, making it accessible to SalonPro via the shared database.
+        -   **Splash Screen Animation**: Modify  to add a CSS transform () and opacity transition to the logo container just before the splash screen disappears.
+        -   **Menu Color**: Add styling to  to apply the correct active color to the 'Produit' menu item when its corresponding section is active.
+    -   **What will be achieved with this?**: Fulfills all current user requests, significantly enriches the app's data, and fixes a critical payment bug.
     -   **Status**: IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?**: backend
+    -   **Should Test frontend/backend/both after fix?**: Both
     -   **Blocked on something**: None
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks:**
-    -   **P1: Refactor **: Critical technical debt. The file is over 9,300 lines and must be broken into a modular structure using FastAPI routers.
-    -   **P2: Refactor  and **: Both are monolithic components that need to be decomposed into smaller, reusable React components.
+    -   **(P1) Refactor **: This is a critical technical debt. The monolithic file is now over 10,000 lines and must be broken down into a modular structure using FastAPI Routers for stability and maintainability.
+    -   **(P2) Refactor , , and **: These are large, monolithic React components that need to be decomposed into smaller, manageable sub-components.
 -   **Future Tasks:**
-    -   Implement placeholder sections in the Enterprise Dashboard (, , ).
+    -   Implement the placeholder sections in the Enterprise Dashboard (, , ).
     -   Implement trend analysis charts in the Accounting dashboard.
-    -   Implement Stripe webhooks for automatic payout status updates.
-    -   Create an admin dashboard for managing subscriptions.
+    -   Implement Stripe webhooks for real-time payout status updates.
+    -   Build out the full subscription management interface in the admin dashboard.
 
 **Completed work in this session**
--   **Production-Ready Cart & Payment System (DONE)**:
-    -   Completely overhauled  to include a full checkout form with fields for name, address, phone, etc.
-    -   Updated the backend order creation endpoint () to accept and save the full customer information.
-    -   Integrated a working Stripe checkout session, redirecting the user to a live payment page.
-    -   Fixed an error toast during checkout by correcting the API call in the frontend.
-    -   Verified that orders are correctly saved in the  collection with all customer info and are visible to both the client and the respective enterprise.
--   **SalonPro Integration (Phase 2 DONE)**:
-    -   Verified that the shared database architecture works for syncing enterprises and appointments without needing webhooks.
-    -   Modified the Voir Planning button in Titelli to redirect to the user's SalonPro login page.
-    -   Created and tested new backend endpoints (, updated ) for SalonPro to fetch appointment data.
--   **Data Seeding (DONE)**:
-    -   Created two comprehensive demo accounts (, ) with passwords.
-    -   Populated the database with rich data including products, services, appointments, orders, contacts, and team members to create a realistic demo experience.
--   **Video Generation & Management (Partially DONE)**:
-    -   Generated a new marketing video () and a second version () after a moderation failure.
-    -   Provided the user with download links for all previously generated logo animations and the new marketing videos.
--   **Deployment Support (DONE)**:
-    -   Provided detailed deployment instructions for Render.com in .
-    -   Helped the user resolve frontend build failures on Render by providing the correct yarn install v1.22.22
-[1/4] Resolving packages...
-success Already up-to-date.
-Done in 0.02s. command and a  file.
-    -   Helped resolve backend deployment failures by providing a cleaned  file.
+-   **New Enterprise Registration System (DONE)**: Implemented a full-featured flow where business owners can find their pre-listed business, submit a registration request with documents, and wait for admin approval. This involved new backend endpoints, a new frontend page (), and a new Inscriptions en attente section in the .
+-   **Massive Database Seeding (DONE)**: Added over 1,200 businesses to the database by scraping , parsing a user-provided GeoJSON file, and extracting data from a PDF and .
+-   **Admin Dashboard Features (DONE)**: Created new UI sections with full backend integration for toggling algorithms (feature flags) and editing subscription plan prices.
+-   **UI/UX Enhancements (DONE)**:
+    -   Created a 10-second animated splash screen () that appears on the first site visit.
+    -   Replaced the static header logo with a looping animated video.
+    -   Added status labels (Actif, Bientôt disponible, En attente) to all enterprise cards.
+    -   Modified the main enterprise list to display all businesses from the database (limit increased from 40 to 500).
+-   **Critical Bug Fixes (DONE)**:
+    -   Resolved a major login issue by modifying the backend to handle both hashed and plain-text passwords.
+    -   Fixed an API routing bug in FastAPI where a specific route was being incorrectly captured by a dynamic one.
+-   **Video Production (DONE)**: Generated a new, longer marketing video using Sora 2 and merged it with a logo animation using  as per the user's request.
+
+**Earlier issues found/mentioned but not fixed**
+-   **SalonPro Frontend Errors**: The user's external SalonPro application has unresolved frontend errors () and the auto-login from Titelli is not implemented on their end. The agent has provided code and guidance, but the issue is blocked pending user action in their separate codebase.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Shared Database Architecture**: The integration between Titelli and SalonPro relies on both applications accessing the same MongoDB collections. This was a key clarification that simplified the data synchronization model.
--   **Stripe Checkout Session**: Implemented a production-like checkout flow using , passing full line items and customer details.
--   **FFMPEG**: The agent is attempting to use the  command-line tool for video file concatenation.
--   **Data Seeding**: Programmatically created a rich set of demo data using backend API calls to populate the application for a presentation.
+-   **Data Scraping & Seeding**: Extensive use of Python and analysis tools to parse various data formats (GeoJSON, PDF, HTML) and populate the MongoDB database.
+-   **Stateful Onboarding Flow**: A multi-step registration process managed via  fields (, ) in the  and  collections, arbitrated by an admin.
+-   **Backend Feature Toggling**: A system for enabling/disabling application features (algorithms) via an admin dashboard, stored in a dedicated  collection.
+-   **FastAPI Route Precedence**: Debugged and fixed a critical issue where the order of route definition in  caused incorrect request handling.
+-   **Password Hashing Management**: Intentionally modified the login endpoint to support plain-text passwords during development at the user's request, alongside existing hashed passwords.
 
 **key DB schema**
--   : The schema was updated to include a nested  object () and a .
+-   : Added  ('inactive', 'pending', 'active') to track the onboarding state.  is updated upon approval.
+-   : Added  ('pending', 'active') and  to link a user to their claimed business during registration.
+-   : New collection to store pending requests with submitted data and document paths.
+-   , : New collections to store configuration data manageable from the admin dashboard.
 
 **All files of reference**
 -   
 -   
--    (directory with all generated videos)
 -   
+-   
+-   
+-   
+-   User-uploaded artifacts in customer-assets (GeoJSON, PDF).
 
 **Areas that need refactoring**:
--   ** (CRITICAL)**: Urgently needs to be broken down into smaller, manageable modules using FastAPI Routers.
--   ** (CRITICAL)**: Remains a monolithic component.
--   ** (CRITICAL)**: Remains a monolithic component.
+-   ** (CRITICAL)**: The file's size and complexity are a major risk to future development. It urgently needs to be broken down into FastAPI Routers.
+-   ** (HIGH)**: This component has become a container for many unrelated features and should be split into smaller components for each admin section.
+-   ** &  (MEDIUM)**: These remain large, monolithic components.
 
 **key api endpoints**
--   **Order Checkout (NEW/MODIFIED)**:  (Creates an order and returns a Stripe checkout session URL).
--   **Enterprise Bookings (NEW)**:  (For SalonPro to fetch client appointments).
--   **Enterprise Agenda (MODIFIED)**:  (Now returns a combination of manual agenda events and client bookings).
--   **SalonPro Auto-Login (MODIFIED)**:  (Generates a JWT and constructs a redirect URL).
+-   **Enterprise Registration (NEW)**:
+    -   : Lists unclaimed businesses.
+    -   : Submits a new registration request.
+-   **Admin Management (NEW)**:
+    -   : Lists pending requests.
+    -   : Approves a request.
+    -   , : Manage feature flags.
+    -   , : Manage subscription prices.
+-   **General (MODIFIED)**:
+    -   : Now handles both hashed and plain-text passwords.
+    -   : Now returns up to 500 enterprises.
 
 **Critical Info for New Agent**
--   The user's SalonPro application is an external project. The agent does not have access to its codebase and can only provide advice, code snippets, and guidance for the user to implement themselves.
--   The immediate P0 task is to combine two videos using . The previous attempt failed due to incorrect file paths. The next attempt should use absolute paths to the video files located in .
--   The user has recharged their Emergent LLM Key balance, so new video generation with Sora 2 is possible if the  approach fails or is unsatisfactory.
--   The user is deploying on Render.com and may have further deployment-related questions. The shared database model is crucial for the integration to work correctly post-deployment.
+-   The user's top priority is to **scrape more data**. Begin with this task. The second priority is fixing the **broken campaign payment flow**.
+-   The user makes direct, sometimes temporary, technical requests (e.g., removing password hashing). Implement them as requested but be aware of the technical debt they may create.
+-   The  file is extremely large and fragile. Exercise extreme caution when editing it. Use precise search and replace commands and verify server restarts after every change. Refactoring this file is the most important upcoming technical task.
+-   The database is now large. Be mindful of query performance and frontend load times.
 
 **documents and test reports created in this job**
--   
--   
--   
--   
+-    (updated)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User**: I need a presentation video for the site, something cool with animations and the logo at the end. (Completed, but led to follow-ups).
-2.  **User**: Okay, now send me the logo videos you made before. (Completed).
-3.  **User**: Remake the presentation video, but use the final version of the logo at the end. (Completed, but led to next request).
-4.  **User**: No, take the *same* marketing video you just made, but the animation at the end must be the logo video. (This is the current task).
-5.  **Agent**: Attempted to combine videos with , but the command failed.
-6.  **Agent**: Installed  successfully.
-7.  **Agent's next step**: Retrying the  command with correct paths.
+1.  **User**: Give me the admin account. (Completed)
+2.  **User**: I have a new, complex idea for enterprise registration: pre-load businesses, let owners claim them via a form with ID uploads, and have an admin approval queue. (Completed)
+3.  **User**: Link the new registration system, remove password hashing for now, add algorithm and subscription pricing sections to the admin dash, and create test accounts. (Completed)
+4.  **User**: Login is broken for all accounts. Also, verify that when I approve a registration, the user account is correctly linked to the enterprise. (Completed)
+5.  **User**: The enterprise list page is missing status labels (like active or coming soon) and it only shows 40 businesses. I want to see all of them. (Completed)
+6.  **User**: Here is a geojson file with 1000+ businesses. Add them all to the database. (Completed)
+7.  **User**: Here is a PDF and another website. Scrape all the missing businesses from these sources too. (Completed)
+8.  **User**: I have a new 5-point list for you: 1. Color the 'produit' menu item. 2. Verify SalonPro sync. 3. Animate the splash screen exit. 4. [PRIORITY] Find and add even MORE Lausanne businesses. 5. The campaign payment button is broken, fix it. (In Progress)
+9.  **Agent**: Acknowledged the 5-point request and confirmed the priority.
+10. **User**: continue. (User prompt to proceed with the task.)
 
 **Project Health Check:**
--   **Broken**: None. The core Titelli application is stable. The SalonPro integration is dependent on the user fixing their external frontend.
+-   **Broken**: The enterprise campaign payment flow is non-functional.
 -   **Mocked**: None.
 
 **3rd Party Integrations**
--   **Stripe**: Used for production payment processing.
+-   **Stripe**: Used for payment processing.
 -   **Sora 2 (via )**: Used for text-to-video generation. Requires the Emergent LLM Key.
--   **openpyxl, reportlab**: For backend generation of Excel and PDF reports.
 
 **Testing status**
--   **Testing agent used after significant changes**: YES, iteration_36.json was generated to validate the initial SalonPro integration changes.
+-   **Testing agent used after significant changes**: NO. The last major changes (new registration flow, massive data import) were tested manually by the agent using  and screenshots.
 -   **Troubleshoot agent used after agent stuck in loop**: NO
 -   **Test files created**: None.
--   **Known regressions**: None.
+-   **Known regressions**: The campaign payment feature, which may have worked previously, is now broken.
 
 **Credentials to test flow:**
+-   **Admin**:  / 
 -   **Client**:  / 
 -   **Enterprise**:  / 
 
 **What agent forgot to execute**
--   Nothing was forgotten. The agent is actively in the middle of the user's latest request to merge two videos.</analysis>
+-   The agent has not forgotten anything; it is in the middle of executing the user's latest multi-point request, starting with the highest priority item.</analysis>
