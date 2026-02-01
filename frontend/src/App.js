@@ -115,6 +115,10 @@ function AppRoutes() {
       <Route path="/payment/success" element={<MainLayout><PaymentSuccessPage /></MainLayout>} />
       <Route path="/payment/cancel" element={<MainLayout><PaymentCancelPage /></MainLayout>} />
 
+      {/* RDV Titelli Routes - Social Booking */}
+      <Route path="/rdv" element={<RdvTitelliPage />} />
+      <Route path="/rdv/chat/:roomId" element={<RdvChatPage />} />
+
       {/* Protected Enterprise Routes */}
       <Route 
         path="/dashboard/entreprise/*" 
