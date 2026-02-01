@@ -437,9 +437,17 @@ code, pre {
   position: relative;
 }
 
+.nav-link.gold {
+  color: #D4AF37 !important;
+}
+
 .nav-link:hover,
 .nav-link.active {
   color: white;
+}
+
+.nav-link.gold:hover {
+  color: #E5C458 !important;
 }
 
 .nav-link::after {
