@@ -121,9 +121,8 @@ Titelli is a regional social commerce marketplace platform for services and prod
 - [x] **UI: Splash screen exit animation** - Slide right + fade out
 
 ## Pending Tasks
-- [ ] Scrape more businesses from local.ch (41,590 available)
+- [ ] Refactor server.py into modules (CRITICAL - >10,000 lines)
 - [ ] Email notifications for registration status
-- [ ] Refactor server.py into modules (CRITICAL)
 - [ ] Refactor dashboard components
 
 ## Known Issues
