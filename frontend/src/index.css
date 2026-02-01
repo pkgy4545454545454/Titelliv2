@@ -441,6 +441,11 @@ code, pre {
   color: #D4AF37 !important;
 }
 
+.nav-link.rdv {
+  color: #EC4899 !important;
+  font-weight: 600;
+}
+
 .nav-link:hover,
 .nav-link.active {
   color: white;
@@ -448,6 +453,10 @@ code, pre {
 
 .nav-link.gold:hover {
   color: #E5C458 !important;
+}
+
+.nav-link.rdv:hover {
+  color: #F472B6 !important;
 }
 
 .nav-link::after {
