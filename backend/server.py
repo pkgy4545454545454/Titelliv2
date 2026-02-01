@@ -9961,6 +9961,12 @@ async def approve_registration_request(
         }}
     )
     
+    # Sync enterprise to SalonPro after approval
+    enterprise = await db.enterprises.find_one({"id": enterprise_id}, {"_id": 0})
+    user = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
+    if enterprise:
+        asyncio.create_task(sync_enterprise_to_salonpro(enterprise, user))
+    
     # TODO: Send email notification to user
     
     return {
