@@ -150,7 +150,7 @@ const Header = () => {
 
   const navLinks = [
     { path: '/services', label: 'Services' },
-    { path: '/products', label: 'Produits', color: 'text-[#D4AF37]' },
+    { path: '/products', label: 'Produits', className: 'gold' },
     { path: '/entreprises', label: 'Entreprises' },
   ];
 
@@ -185,7 +185,7 @@ const Header = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`nav-link text-sm font-medium ${link.color || ''} ${isActive(link.path) ? 'active' : ''}`}
+                className={`nav-link text-sm font-medium ${link.className || ''} ${isActive(link.path) ? 'active' : ''}`}
                 data-testid={`nav-${link.label.toLowerCase()}`}
               >
                 {link.label}
