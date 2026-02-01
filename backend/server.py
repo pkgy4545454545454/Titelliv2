@@ -3881,7 +3881,7 @@ async def create_training(training: TrainingCreate, current_user: dict = Depends
     training_doc = {
         "id": str(uuid.uuid4()),
         "enterprise_id": enterprise['id'],
-        "enterprise_name": enterprise['business_name'],
+        "enterprise_name": enterprise.get('business_name') or enterprise.get('name', 'Entreprise'),
         "enterprise_logo": enterprise.get('logo'),
         **training.model_dump(),
         "is_active": True,
@@ -4280,7 +4280,7 @@ async def create_job(job: JobCreate, current_user: dict = Depends(get_current_us
     job_doc = {
         "id": str(uuid.uuid4()),
         "enterprise_id": enterprise['id'],
-        "enterprise_name": enterprise['business_name'],
+        "enterprise_name": enterprise.get('business_name') or enterprise.get('name', 'Entreprise'),
         "enterprise_logo": enterprise.get('logo', ''),
         "enterprise_category": enterprise.get('category', ''),
         **job.model_dump(),
@@ -4298,7 +4298,7 @@ async def create_job(job: JobCreate, current_user: dict = Depends(get_current_us
             "id": str(uuid.uuid4()),
             "user_id": client['id'],
             "title": "Nouvelle offre d'emploi",
-            "message": f"{enterprise['business_name']} recrute : {job.title}",
+            "message": f"{enterprise.get('business_name') or enterprise.get('name', 'Entreprise')} recrute : {job.title}",
             "notification_type": "job",
             "data": {"job_id": job_doc['id']},
             "link": f"/emploi/{job_doc['id']}",
@@ -4374,7 +4374,7 @@ async def get_all_jobs(job_type: Optional[str] = None, limit: int = 50):
         if enterprise:
             job['enterprise'] = {
                 "id": enterprise['id'],
-                "business_name": enterprise['business_name'],
+                "business_name": enterprise.get('business_name') or enterprise.get('name', 'Entreprise'),
                 "logo": enterprise.get('logo', ''),
                 "category": enterprise.get('category', '')
             }
@@ -4483,7 +4483,7 @@ async def create_real_estate(property_data: RealEstateCreate, current_user: dict
     property_doc = {
         "id": str(uuid.uuid4()),
         "enterprise_id": enterprise['id'],
-        "enterprise_name": enterprise['business_name'],
+        "enterprise_name": enterprise.get('business_name') or enterprise.get('name', 'Entreprise'),
         **property_data.model_dump(),
         "is_active": True,
         "views": 0,
@@ -4543,7 +4543,7 @@ async def create_investment(investment: InvestmentCreate, current_user: dict = D
     investment_doc = {
         "id": str(uuid.uuid4()),
         "enterprise_id": enterprise['id'],
-        "enterprise_name": enterprise['business_name'],
+        "enterprise_name": enterprise.get('business_name') or enterprise.get('name', 'Entreprise'),
         **investment.model_dump(),
         "is_active": True,
         "investors_count": 0,
@@ -6118,7 +6118,7 @@ async def send_suggestive_question(
             "id": str(uuid.uuid4()),
             "sender_id": current_user['id'],
             "receiver_id": customer_id,
-            "content": f"📊 Question de {enterprise['business_name']}:\n\n{question}",
+            "content": f"📊 Question de {enterprise.get('business_name') or enterprise.get('name', 'Entreprise')}:\n\n{question}",
             "message_type": "suggestive_question",
             "is_read": False,
             "created_at": datetime.now(timezone.utc).isoformat()
@@ -6129,7 +6129,7 @@ async def send_suggestive_question(
         notification = {
             "id": str(uuid.uuid4()),
             "user_id": customer_id,
-            "title": f"Question de {enterprise['business_name']}",
+            "title": f"Question de {enterprise.get('business_name') or enterprise.get('name', 'Entreprise')}",
             "message": question[:100] + ("..." if len(question) > 100 else ""),
             "notification_type": "suggestive_question",
             "data": {"enterprise_id": enterprise['id']},
@@ -7086,7 +7086,7 @@ async def get_conversations(current_user: dict = Depends(get_current_user)):
             # Check if it's an enterprise
             enterprise = await db.enterprises.find_one({"id": partner_id}, {"_id": 0})
             if enterprise:
-                partner = {"id": partner_id, "first_name": enterprise['business_name'], "last_name": "", "user_type": "entreprise"}
+                partner = {"id": partner_id, "first_name": enterprise.get('business_name') or enterprise.get('name', 'Entreprise'), "last_name": "", "user_type": "entreprise"}
         
         if partner:
             last_msg = conv['last_message']
@@ -7120,7 +7120,7 @@ async def get_messages_with_partner(partner_id: str, current_user: dict = Depend
     if not partner:
         enterprise = await db.enterprises.find_one({"id": partner_id}, {"_id": 0})
         if enterprise:
-            partner = {"id": partner_id, "first_name": enterprise['business_name'], "last_name": "", "user_type": "entreprise"}
+            partner = {"id": partner_id, "first_name": enterprise.get('business_name') or enterprise.get('name', 'Entreprise'), "last_name": "", "user_type": "entreprise"}
     
     return {"messages": list(reversed(messages)), "partner": partner}
 
