@@ -9465,6 +9465,10 @@ async def get_online_friends_api(current_user: dict = Depends(get_current_user))
 # Include the router in the main app
 app.include_router(api_router)
 
+# Include RDV Titelli router (Social Booking & Dating)
+from routers.rdv_titelli import router as rdv_router
+app.include_router(rdv_router)
+
 # Mount uploads folder for serving static images
 app.mount("/api/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
