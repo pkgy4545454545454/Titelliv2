@@ -95,7 +95,10 @@ const SplashScreen = ({ onComplete }) => {
         style={{
           position: 'relative',
           marginBottom: '60px',
-          animation: 'pulse-glow 2s ease-in-out infinite',
+          animation: fadeOut ? 'none' : 'pulse-glow 2s ease-in-out infinite',
+          transition: 'transform 0.6s ease-out, opacity 0.6s ease-out',
+          transform: fadeOut ? 'translateX(150px)' : 'translateX(0)',
+          opacity: fadeOut ? 0 : 1,
         }}
       >
         {/* Glow effect behind logo */}
