@@ -5784,7 +5784,7 @@ async def create_advertising_campaign(ad: AdvertisingCreate, current_user: dict 
     ad_doc = {
         "id": str(uuid.uuid4()),
         "enterprise_id": enterprise['id'],
-        "enterprise_name": enterprise['business_name'],
+        "enterprise_name": enterprise.get('business_name') or enterprise.get('name', 'Entreprise'),
         **ad.model_dump(),
         "is_active": False,  # Inactive until paid
         "is_paid": False,  # Must pay to activate
