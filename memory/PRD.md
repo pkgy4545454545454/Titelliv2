@@ -76,16 +76,27 @@ Titelli is a regional social commerce marketplace platform for services and prod
 }
 ```
 
-### Data Statistics (Feb 1, 2026)
-- Total enterprises: 1,389
-- Lausanne only: 1,382
+### Data Statistics (Feb 1, 2026 - UPDATED)
+- **Total enterprises: 2,899** (was 1,389)
+- **Lausanne only: 2,892** (was 1,382)
 - Sources breakdown:
+  - **local.ch: 1,510** (NEW - scraped via Playwright)
   - OpenStreetMap: 915
   - EnjoyLausanne: 166
   - ALCV: 128
   - PDF-ListeCommerces: 101
   - Google-LocalSearch: 70
   - Other: 9
+
+### Top Categories
+- Coiffeur: 146
+- Coiffure & Beauté: 128
+- Restaurant: 118
+- Mode & Vêtements: 114
+- Avocat: 73
+- Assurance: 73
+- Physiothérapie: 71
+- Horlogerie: 70
 
 ## Credentials
 - **Admin**: admin@titelli.com / Admin123!
