@@ -167,7 +167,7 @@ CORS_ORIGINS=*
 ### 3.2 Variables Frontend (.env)
 
 ```bash
-REACT_APP_BACKEND_URL=https://titelli-onboard.preview.emergentagent.com
+REACT_APP_BACKEND_URL=https://media-revamp-3.preview.emergentagent.com
 ```
 
 ### 3.3 Ports
