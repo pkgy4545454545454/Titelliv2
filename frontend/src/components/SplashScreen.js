@@ -63,8 +63,9 @@ const SplashScreen = ({ onComplete }) => {
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 9999,
-        transition: 'opacity 0.8s ease-out',
+        transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
         opacity: fadeOut ? 0 : 1,
+        transform: fadeOut ? 'translateX(100%)' : 'translateX(0)',
       }}
     >
       {/* Background particles */}
