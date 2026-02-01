@@ -254,6 +254,9 @@ async def create_shared_offer(
     
     await db.shared_offers.insert_one(offer)
     
+    # Remove _id before returning (MongoDB adds it)
+    offer.pop('_id', None)
+    
     return {"message": "Offre créée avec succès", "offer_id": offer_id, "offer": offer}
 
 
