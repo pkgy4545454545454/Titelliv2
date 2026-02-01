@@ -108,6 +108,7 @@ Titelli is a regional social commerce marketplace platform for services and prod
 - [x] OpenStreetMap data import (915 enterprises)
 - [x] EnjoyLausanne scraping (166 enterprises)
 - [x] PDF parsing for businesses (101 enterprises)
+- [x] **local.ch scraping via Playwright (1,510 enterprises) - TOTAL: 2,899**
 - [x] Enterprise registration page with form
 - [x] Manager selection system
 - [x] Admin registration validation section
