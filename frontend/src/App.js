@@ -28,6 +28,8 @@ import JobsPage from './pages/JobsPage';
 import ClientProfilePage from './pages/ClientProfilePage';
 import EnterpriseRegistrationPage from './pages/EnterpriseRegistrationPage';
 import { PaymentSuccessPage, PaymentCancelPage } from './pages/PaymentPages';
+import RdvTitelliPage from './pages/RdvTitelliPage';
+import RdvChatPage from './pages/RdvChatPage';
 
 import './index.css';
 
