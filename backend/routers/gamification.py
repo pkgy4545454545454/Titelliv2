@@ -832,21 +832,61 @@ async def apply_referral_code(
             "total_referrals": new_count
         }, referrer_id)
     
-    # Get referrer name
+    # Get referrer name and email
     referrer = await db.users.find_one({"id": referrer_id}, {"_id": 0, "name": 1, "email": 1})
     referrer_name = referrer.get("name") or referrer.get("email", "").split("@")[0] if referrer else "Votre parrain"
+    referrer_email = referrer.get("email") if referrer else None
     
-    # Notify referrer about new referral
+    # Get current user (referee) info
+    referee = await db.users.find_one({"id": user_id}, {"_id": 0, "name": 1, "email": 1})
+    referee_name = referee.get("name") or referee.get("email", "").split("@")[0] if referee else "Un nouvel utilisateur"
+    referee_email = referee.get("email") if referee else None
+    
+    # Notify referrer about new referral (WebSocket)
     await ws_manager.send_personal_message({
         "type": "new_referral",
         "message": f"Quelqu'un a utilisé votre code de parrainage ! +{REFERRAL_POINTS['referrer']} points"
     }, referrer_id)
     
+    # Send email notifications (non-blocking, in background)
+    if EMAIL_SERVICE_AVAILABLE:
+        import asyncio
+        
+        # Email to referrer
+        if referrer_email:
+            asyncio.create_task(send_referral_notification(
+                referrer_email=referrer_email,
+                referrer_name=referrer_name,
+                referee_name=referee_name,
+                points_earned=REFERRAL_POINTS["referrer"],
+                total_referrals=new_count
+            ))
+        
+        # Email to new user (referee)
+        if referee_email:
+            asyncio.create_task(send_welcome_bonus_notification(
+                user_email=referee_email,
+                user_name=referee_name,
+                referrer_name=referrer_name,
+                bonus_points=REFERRAL_POINTS["referee"]
+            ))
+        
+        # Email for bonus milestone
+        if bonus_points > 0 and referrer_email:
+            asyncio.create_task(send_bonus_milestone_notification(
+                user_email=referrer_email,
+                user_name=referrer_name,
+                milestone=new_count,
+                bonus_points=bonus_points,
+                total_referrals=new_count
+            ))
+    
     return {
         "success": True,
         "points_earned": REFERRAL_POINTS["referee"],
         "referrer_name": referrer_name,
-        "message": f"Code appliqué ! Vous avez gagné {REFERRAL_POINTS['referee']} points grâce à {referrer_name}."
+        "message": f"Code appliqué ! Vous avez gagné {REFERRAL_POINTS['referee']} points grâce à {referrer_name}.",
+        "email_sent": EMAIL_SERVICE_AVAILABLE
     }
 
 
