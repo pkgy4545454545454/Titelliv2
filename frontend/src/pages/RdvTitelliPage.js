@@ -146,6 +146,67 @@ export default function RdvTitelliPage() {
     fetchData();
   }, [user, navigate, fetchData]);
 
+  // Handle Stripe return params
+  useEffect(() => {
+    const handlePaymentReturn = async () => {
+      const subscriptionSuccess = searchParams.get('subscription_success');
+      const invitationAccepted = searchParams.get('invitation_accepted');
+      
+      if (subscriptionSuccess) {
+        // Confirm subscription payment
+        try {
+          const res = await fetch(`${API_URL}/api/rdv/subscriptions/romantic/${subscriptionSuccess}/confirm`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          if (res.ok) {
+            toast.success('Abonnement romantique activé ! 💕');
+            setOfferType('romantic');
+          } else {
+            toast.error('Erreur de confirmation du paiement');
+          }
+        } catch (error) {
+          console.error('Error confirming subscription:', error);
+        }
+        
+        // Clear params
+        setSearchParams({});
+        fetchData();
+      }
+      
+      if (invitationAccepted) {
+        // Confirm invitation payment
+        try {
+          const res = await fetch(`${API_URL}/api/rdv/invitations/${invitationAccepted}/confirm-payment`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          if (res.ok) {
+            const data = await res.json();
+            toast.success('Invitation acceptée ! 🎉');
+            if (data.chat_room_id) {
+              navigate(`/rdv/chat/${data.chat_room_id}`);
+            }
+          } else {
+            toast.error('Erreur de confirmation du paiement');
+          }
+        } catch (error) {
+          console.error('Error confirming invitation:', error);
+        }
+        
+        // Clear params
+        setSearchParams({});
+        fetchData();
+      }
+    };
+    
+    if (token) {
+      handlePaymentReturn();
+    }
+  }, [searchParams, token, setSearchParams, fetchData, navigate]);
+
   // Fetch available users when switching to romantic or looking for users
   const fetchAvailableUsers = async (type) => {
     try {
