@@ -10,7 +10,7 @@ import {
   Handshake, Info, Target, Building2, Menu, X, Camera, Edit, Trash2, Plus, Minus,
   CheckCircle, XCircle, Send, Linkedin, Eye, UserPlus, ArrowLeftRight,
   Upload, Clock, ChevronDown, DollarSign, Bookmark, Store, ThumbsUp,
-  Home, Zap, Award, Sparkles, MessageCircle, Share2, ExternalLink
+  Home, Zap, Award, Sparkles, MessageCircle, Share2, ExternalLink, Mail
 } from 'lucide-react';
 import { 
   orderAPI, cashbackAPI, featuredAPI, clientProfileAPI, friendsAPI, 
