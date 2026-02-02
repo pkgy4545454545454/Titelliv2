@@ -153,6 +153,7 @@ const Header = () => {
     { path: '/products', label: 'Produits', className: 'gold' },
     { path: '/entreprises', label: 'Entreprises' },
     { path: '/rdv', label: 'Rdv', className: 'rdv' },
+    { path: '/sports', label: 'Sports', className: 'sports' },
   ];
 
   const isActive = (path) => location.pathname === path;
