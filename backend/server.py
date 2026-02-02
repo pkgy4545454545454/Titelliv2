@@ -9482,6 +9482,10 @@ app.include_router(sports_router)
 from routers.notifications import router as notifications_router
 app.include_router(notifications_router)
 
+# Include Gamification router
+from routers.gamification import router as gamification_router
+app.include_router(gamification_router)
+
 # Mount uploads folder for serving static images
 app.mount("/api/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
