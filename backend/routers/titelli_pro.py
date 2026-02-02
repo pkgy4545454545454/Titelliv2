@@ -8,12 +8,20 @@ from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime, timezone, timedelta
+import asyncio
 import logging
 import uuid
 import os
 import stripe
 
 from .shared import db, get_current_user
+
+# Import email service
+try:
+    from services.email_service import send_payment_confirmation
+    EMAIL_SERVICE_AVAILABLE = True
+except ImportError:
+    EMAIL_SERVICE_AVAILABLE = False
 
 router = APIRouter(prefix="/api/pro", tags=["Titelli Pro++"])
 logger = logging.getLogger(__name__)
