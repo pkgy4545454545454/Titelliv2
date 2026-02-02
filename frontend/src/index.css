@@ -446,6 +446,11 @@ code, pre {
   font-weight: 600;
 }
 
+.nav-link.sports {
+  color: #10B981 !important;
+  font-weight: 600;
+}
+
 .nav-link:hover,
 .nav-link.active {
   color: white;
@@ -457,6 +462,10 @@ code, pre {
 
 .nav-link.rdv:hover {
   color: #F472B6 !important;
+}
+
+.nav-link.sports:hover {
+  color: #34D399 !important;
 }
 
 .nav-link::after {
