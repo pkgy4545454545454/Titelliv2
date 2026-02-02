@@ -608,6 +608,10 @@ async def confirm_invitation_payment(
             "chat_room_id": chat_room_id
         }, offer["creator_id"])
     
+    # Award gamification points to both users
+    await award_gamification_points(current_user["id"], "rdv_invitation_accepted")
+    await award_gamification_points(offer["creator_id"], "rdv_invitation_accepted")
+    
     return {
         "message": "Invitation acceptée ! Vous pouvez maintenant discuter",
         "chat_room_id": chat_room_id
