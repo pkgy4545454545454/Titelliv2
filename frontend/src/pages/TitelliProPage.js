@@ -69,7 +69,7 @@ export default function TitelliProPage() {
       navigate('/auth');
       return;
     }
-    if (user.user_type !== 'enterprise') {
+    if (user.user_type !== 'enterprise' && user.user_type !== 'entreprise') {
       toast.error('Titelli Pro++ est réservé aux entreprises');
       navigate('/');
       return;
@@ -241,7 +241,7 @@ export default function TitelliProPage() {
     }
   };
 
-  if (!user || user.user_type !== 'enterprise') return null;
+  if (!user || (user.user_type !== 'enterprise' && user.user_type !== 'entreprise')) return null;
 
   const features = [
     {
