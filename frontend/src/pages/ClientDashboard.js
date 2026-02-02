@@ -2904,6 +2904,16 @@ const ClientDashboard = () => {
             </div>
           )}
 
+          {/* Email Preferences Tab */}
+          {activeTab === 'email-prefs' && (
+            <div>
+              <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Préférences Email
+              </h1>
+              <EmailPreferences />
+            </div>
+          )}
+
           {/* Settings Tab */}
           {activeTab === 'settings' && (
             <div>
