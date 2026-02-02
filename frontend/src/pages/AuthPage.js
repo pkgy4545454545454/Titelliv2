@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Eye, EyeOff, Building2, User, ArrowLeft, CheckCircle, Lock, Mail, Phone, UserCircle, Shield, Sparkles, Award, Crown, Star, Instagram, Facebook, Video } from 'lucide-react';
+import { Eye, EyeOff, Building2, User, ArrowLeft, CheckCircle, Lock, Mail, Phone, UserCircle, Shield, Sparkles, Award, Crown, Star, Instagram, Facebook, Video, Gift } from 'lucide-react';
 import { toast } from 'sonner';
+
+const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const AuthPage = () => {
   const [searchParams] = useSearchParams();
   const defaultType = searchParams.get('type') || 'client';
+  const referralCode = searchParams.get('ref') || '';
   
   const [isLogin, setIsLogin] = useState(true);
   const [userType, setUserType] = useState(defaultType);
@@ -14,6 +17,7 @@ const AuthPage = () => {
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
   const [passwordStrength, setPasswordStrength] = useState(0);
+  const [referralInfo, setReferralInfo] = useState(null);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -24,6 +28,7 @@ const AuthPage = () => {
     acceptTerms: false,
     business_name: '',
     business_category: '',
+    referral_code: referralCode,
     // Influencer fields
     instagram_handle: '',
     tiktok_handle: '',
