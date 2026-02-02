@@ -9469,6 +9469,10 @@ app.include_router(api_router)
 from routers.rdv_titelli import router as rdv_router
 app.include_router(rdv_router)
 
+# Include Specialists router (AI Search, Lifestyle Passes, Pro++)
+from routers.specialists import router as specialists_router
+app.include_router(specialists_router)
+
 # Mount uploads folder for serving static images
 app.mount("/api/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
