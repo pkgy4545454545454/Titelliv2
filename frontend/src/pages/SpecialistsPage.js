@@ -147,6 +147,14 @@ export default function SpecialistsPage() {
   // Handle Stripe return
   useEffect(() => {
     const passSuccess = searchParams.get('pass_success');
+    const passCancelled = searchParams.get('pass_cancelled');
+    
+    if (passCancelled) {
+      toast.error('Paiement annulé');
+      setSearchParams({});
+      return;
+    }
+    
     if (passSuccess && token) {
       (async () => {
         try {
@@ -157,9 +165,12 @@ export default function SpecialistsPage() {
           
           if (res.ok) {
             toast.success('Pass activé avec succès ! 🎉');
+          } else {
+            toast.error('Erreur de confirmation du paiement');
           }
         } catch (error) {
           console.error('Error confirming pass:', error);
+          toast.error('Erreur de connexion');
         }
         setSearchParams({});
         fetchData();
