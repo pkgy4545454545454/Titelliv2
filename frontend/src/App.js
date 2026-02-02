@@ -30,6 +30,7 @@ import EnterpriseRegistrationPage from './pages/EnterpriseRegistrationPage';
 import { PaymentSuccessPage, PaymentCancelPage } from './pages/PaymentPages';
 import RdvTitelliPage from './pages/RdvTitelliPage';
 import RdvChatPage from './pages/RdvChatPage';
+import SpecialistsPage from './pages/SpecialistsPage';
 
 import './index.css';
 
