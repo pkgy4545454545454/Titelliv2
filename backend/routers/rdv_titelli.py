@@ -828,6 +828,9 @@ async def send_chat_message(
     
     await db.chat_messages.insert_one(message)
     
+    # Remove _id before returning
+    message.pop('_id', None)
+    
     # Update room last message time
     await db.chat_rooms.update_one(
         {"id": room_id},
@@ -856,6 +859,9 @@ async def send_chat_message(
                 "sender_name": user_info["name"],
                 "preview": message_data.content[:50] + "..." if len(message_data.content) > 50 else message_data.content
             }, participant_id)
+    
+    # Convert datetime for JSON serialization
+    message["created_at"] = message["created_at"].isoformat()
     
     return {"message": message, "sent": True}
 
