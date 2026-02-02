@@ -983,6 +983,7 @@ const ClientDashboard = () => {
       borderColor: 'border-purple-500/30',
       items: [
         { id: 'cashback', label: 'Mon cash-back', icon: Wallet, notifKey: 'cashback' },
+        { id: 'parrainage', label: 'Parrainage', icon: Gift, notifKey: 'referral' },
         { id: 'premium', label: 'Mon Premium', icon: Crown, notifKey: 'premium' },
         { id: 'invitations', label: 'Mes invitations prestataires', icon: Gift, notifKey: 'invitations' },
         { id: 'offres', label: 'Mes offres du moment', icon: Target, notifKey: 'offers' },
