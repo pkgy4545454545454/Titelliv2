@@ -131,7 +131,7 @@ export default function TitelliProPage() {
       // Confirm subscription payment
       (async () => {
         try {
-          const res = await fetch(`${API_URL}/api/pro/subscriptions/${success}/confirm`, {
+          const res = await fetch(`${API_URL}/api/pro/subscribe/${success}/confirm`, {
             method: 'POST',
             headers: { Authorization: `Bearer ${token}` }
           });
