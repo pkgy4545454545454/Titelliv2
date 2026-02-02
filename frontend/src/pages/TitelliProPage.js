@@ -127,6 +127,14 @@ export default function TitelliProPage() {
   // Handle Stripe return
   useEffect(() => {
     const success = searchParams.get('success');
+    const cancelled = searchParams.get('cancelled');
+    
+    if (cancelled) {
+      toast.error('Paiement annulé');
+      setSearchParams({});
+      return;
+    }
+    
     if (success && token) {
       // Confirm subscription payment
       (async () => {
@@ -143,6 +151,7 @@ export default function TitelliProPage() {
           }
         } catch (error) {
           console.error('Error confirming Pro++ subscription:', error);
+          toast.error('Erreur de connexion');
         }
         setSearchParams({});
         fetchData();
