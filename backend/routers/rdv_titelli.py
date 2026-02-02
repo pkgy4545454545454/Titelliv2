@@ -19,6 +19,13 @@ import stripe
 from .shared import db, get_current_user, JWT_SECRET, JWT_ALGORITHM
 from .websocket import ws_manager
 
+# Import email service
+try:
+    from services.email_service import send_payment_confirmation
+    EMAIL_SERVICE_AVAILABLE = True
+except ImportError:
+    EMAIL_SERVICE_AVAILABLE = False
+
 router = APIRouter(prefix="/api/rdv", tags=["Rdv chez Titelli"])
 logger = logging.getLogger(__name__)
 
