@@ -622,6 +622,17 @@ async def get_teams(
     return {"teams": teams, "total": total}
 
 
+@sports_router.get("/teams/my", response_model=dict)
+async def get_my_teams(current_user: dict = Depends(get_current_user)):
+    """Get teams where current user is a member"""
+    teams = await db.sports_teams.find(
+        {"members.id": current_user["id"]},
+        {"_id": 0}
+    ).to_list(100)
+    
+    return {"teams": teams, "count": len(teams)}
+
+
 @sports_router.post("/teams/{team_id}/join", response_model=dict)
 async def join_team(
     team_id: str,
