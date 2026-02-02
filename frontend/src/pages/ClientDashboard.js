@@ -23,6 +23,7 @@ import {
 import api, { getImageUrl } from '../services/api';
 import { toast } from 'sonner';
 import EnterpriseCard from '../components/EnterpriseCard';
+import ReferralSection from '../components/ReferralSection';
 import { useCart } from '../context/CartContext';
 
 const ClientDashboard = () => {
