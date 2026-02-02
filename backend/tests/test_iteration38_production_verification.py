@@ -200,9 +200,22 @@ class TestSportsCompetitions:
         
         print(f"Sports categories: {[c.get('name', c.get('id')) for c in categories]}")
     
-    def test_sports_matches_list(self):
-        """Test listing sports matches"""
+    def test_sports_matches_requires_auth(self):
+        """Test that sports matches requires authentication"""
         response = requests.get(f"{BASE_URL}/api/sports/matches")
+        assert response.status_code in [401, 403], f"Expected 401/403, got {response.status_code}"
+        print("Sports matches correctly requires authentication")
+    
+    def test_sports_matches_list_authenticated(self):
+        """Test listing sports matches with authentication"""
+        login_resp = requests.post(f"{BASE_URL}/api/auth/login", json=CLIENT_CREDS)
+        if login_resp.status_code != 200:
+            pytest.skip("Client account not available")
+        
+        token = login_resp.json().get("token") or login_resp.json().get("access_token")
+        headers = {"Authorization": f"Bearer {token}"}
+        
+        response = requests.get(f"{BASE_URL}/api/sports/matches", headers=headers)
         assert response.status_code == 200, f"Expected 200, got {response.status_code}"
         
         data = response.json()
@@ -269,14 +282,14 @@ class TestNotifications:
 class TestGamification:
     """Test Gamification system"""
     
-    def test_gamification_points_requires_auth(self):
-        """Test that gamification points requires authentication"""
-        response = requests.get(f"{BASE_URL}/api/gamification/points")
+    def test_gamification_profile_requires_auth(self):
+        """Test that gamification profile requires authentication"""
+        response = requests.get(f"{BASE_URL}/api/gamification/profile")
         assert response.status_code in [401, 403], f"Expected 401/403, got {response.status_code}"
-        print("Gamification points correctly requires authentication")
+        print("Gamification profile correctly requires authentication")
     
-    def test_gamification_points(self):
-        """Test getting gamification points for authenticated user"""
+    def test_gamification_profile(self):
+        """Test getting gamification profile for authenticated user"""
         login_resp = requests.post(f"{BASE_URL}/api/auth/login", json=CLIENT_CREDS)
         if login_resp.status_code != 200:
             pytest.skip("Client account not available")
@@ -284,21 +297,22 @@ class TestGamification:
         token = login_resp.json().get("token") or login_resp.json().get("access_token")
         headers = {"Authorization": f"Bearer {token}"}
         
-        response = requests.get(f"{BASE_URL}/api/gamification/points", headers=headers)
+        response = requests.get(f"{BASE_URL}/api/gamification/profile", headers=headers)
         assert response.status_code == 200, f"Expected 200, got {response.status_code}"
         
         data = response.json()
-        print(f"Gamification points: {data}")
+        assert "total_points" in data
+        assert "level" in data
+        print(f"Gamification profile: points={data.get('total_points')}, level={data.get('level', {}).get('name', 'N/A')}")
     
-    def test_gamification_leaderboard(self):
-        """Test gamification leaderboard"""
-        response = requests.get(f"{BASE_URL}/api/gamification/leaderboard")
-        # May or may not require auth
-        if response.status_code == 200:
-            data = response.json()
-            print(f"Leaderboard: {data}")
-        else:
-            print(f"Leaderboard status: {response.status_code}")
+    def test_gamification_levels(self):
+        """Test gamification levels endpoint"""
+        response = requests.get(f"{BASE_URL}/api/gamification/levels")
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}"
+        
+        data = response.json()
+        assert "levels" in data
+        print(f"Gamification levels: {len(data['levels'])} levels")
 
 
 class TestSpecialists:
@@ -336,18 +350,22 @@ class TestLifestylePasses:
     def test_lifestyle_passes_list(self):
         """Test listing lifestyle passes"""
         response = requests.get(f"{BASE_URL}/api/specialists/passes")
-        # May or may not require auth
-        if response.status_code == 200:
-            data = response.json()
-            assert "passes" in data
-            passes = data["passes"]
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}"
+        
+        data = response.json()
+        assert "passes" in data
+        passes = data["passes"]
+        
+        # Passes is a dict with pass types as keys
+        if isinstance(passes, dict):
             print(f"Lifestyle passes: {len(passes)} passes")
-            
-            # Verify pricing
-            for p in passes:
-                print(f"  - {p.get('name', p.get('id'))}: {p.get('price', 'N/A')} CHF")
+            for pass_id, pass_info in passes.items():
+                if isinstance(pass_info, dict):
+                    print(f"  - {pass_info.get('name', pass_id)}: {pass_info.get('price', 'N/A')} CHF")
+                else:
+                    print(f"  - {pass_id}: {pass_info}")
         else:
-            print(f"Lifestyle passes status: {response.status_code}")
+            print(f"Passes format: {type(passes)}")
     
     def test_lifestyle_pass_subscribe(self):
         """Test subscribing to a lifestyle pass"""
