@@ -130,6 +130,8 @@ function AppRoutes() {
 
       {/* Titelli Pro++ Route (Enterprise only) */}
       <Route path="/enterprise/pro" element={<TitelliProPage />} />
+      <Route path="/titelli-pro" element={<TitelliProPage />} />
+      <Route path="/pro" element={<TitelliProPage />} />
 
       {/* Protected Enterprise Routes */}
       <Route 
