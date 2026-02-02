@@ -689,6 +689,28 @@ const AuthPage = () => {
                   </p>
                 </div>
 
+                {/* Referral Code Field */}
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">
+                    <Gift className="w-4 h-4 inline mr-2" />
+                    Code de parrainage (optionnel)
+                  </label>
+                  <input
+                    type="text"
+                    name="referral_code"
+                    value={formData.referral_code}
+                    onChange={handleChange}
+                    placeholder="Ex: TIT1F9AEF6D"
+                    className={`w-full bg-zinc-900 border ${referralInfo?.valid ? 'border-green-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#0047AB] uppercase tracking-wider`}
+                  />
+                  {referralInfo?.valid && (
+                    <p className="text-sm text-green-500 mt-1 flex items-center gap-1">
+                      <CheckCircle className="w-4 h-4" />
+                      Parrainé par {referralInfo.referrer_name} • +{referralInfo.bonus_points} pts bonus
+                    </p>
+                  )}
+                </div>
+
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input
                     type="checkbox"
