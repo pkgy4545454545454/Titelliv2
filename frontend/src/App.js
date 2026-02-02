@@ -120,6 +120,9 @@ function AppRoutes() {
       <Route path="/rdv" element={<RdvTitelliPage />} />
       <Route path="/rdv/chat/:roomId" element={<RdvChatPage />} />
 
+      {/* Specialists Routes */}
+      <Route path="/specialists" element={<SpecialistsPage />} />
+
       {/* Protected Enterprise Routes */}
       <Route 
         path="/dashboard/entreprise/*" 
