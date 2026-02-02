@@ -128,9 +128,25 @@ export default function TitelliProPage() {
   useEffect(() => {
     const success = searchParams.get('success');
     if (success && token) {
-      toast.success('Titelli Pro++ activé avec succès ! 🎉');
-      setSearchParams({});
-      fetchData();
+      // Confirm subscription payment
+      (async () => {
+        try {
+          const res = await fetch(`${API_URL}/api/pro/subscriptions/${success}/confirm`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          if (res.ok) {
+            toast.success('Titelli Pro++ activé avec succès ! 🎉');
+          } else {
+            toast.error('Erreur de confirmation du paiement');
+          }
+        } catch (error) {
+          console.error('Error confirming Pro++ subscription:', error);
+        }
+        setSearchParams({});
+        fetchData();
+      })();
     }
   }, [searchParams, token, setSearchParams, fetchData]);
 
