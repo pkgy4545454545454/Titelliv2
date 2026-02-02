@@ -300,6 +300,64 @@ async def update_preferences(
     return {"message": "Préférences mises à jour", "preferences": prefs_dict}
 
 
+# ============ EMAIL PREFERENCES ============
+
+class EmailPreferencesUpdate(BaseModel):
+    """Email notification preferences"""
+    email_enabled: bool = True
+    preferences: dict = {}
+
+
+@router.get("/email-preferences", response_model=dict)
+async def get_email_preferences(current_user: dict = Depends(get_current_user)):
+    """Get email notification preferences"""
+    prefs = await db.email_preferences.find_one(
+        {"user_id": current_user["id"]},
+        {"_id": 0}
+    )
+    
+    if not prefs:
+        # Default preferences
+        prefs = {
+            "user_id": current_user["id"],
+            "email_enabled": True,
+            "preferences": {
+                "referral": True,
+                "payments": True,
+                "orders": True,
+                "rdv": True,
+                "sports": True,
+                "promotions": True,
+                "newsletter": True,
+                "community": True
+            }
+        }
+    
+    return prefs
+
+
+@router.put("/email-preferences", response_model=dict)
+async def update_email_preferences(
+    data: EmailPreferencesUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update email notification preferences"""
+    prefs_dict = {
+        "user_id": current_user["id"],
+        "email_enabled": data.email_enabled,
+        "preferences": data.preferences,
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    await db.email_preferences.update_one(
+        {"user_id": current_user["id"]},
+        {"$set": prefs_dict},
+        upsert=True
+    )
+    
+    return {"message": "Préférences email mises à jour", "preferences": prefs_dict}
+
+
 # ============ SEND TEST NOTIFICATION ============
 
 @router.post("/test")
