@@ -31,6 +31,8 @@ import { PaymentSuccessPage, PaymentCancelPage } from './pages/PaymentPages';
 import RdvTitelliPage from './pages/RdvTitelliPage';
 import RdvChatPage from './pages/RdvChatPage';
 import SpecialistsPage from './pages/SpecialistsPage';
+import TitelliProPage from './pages/TitelliProPage';
+import SportsPage from './pages/SportsPage';
 
 import './index.css';
 
