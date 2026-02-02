@@ -349,3 +349,125 @@ async def send_bonus_milestone_notification(
         subject=f"🏆 Bonus {milestone} parrainages débloqué ! +{bonus_points} points",
         html_content=html
     )
+
+
+# ============ PAYMENT CONFIRMATION TEMPLATES ============
+
+def get_payment_confirmation_template(
+    user_name: str,
+    service_name: str,
+    amount: float,
+    currency: str = "CHF",
+    subscription_type: str = None,
+    next_billing_date: str = None
+) -> str:
+    """Template for payment/subscription confirmation"""
+    is_subscription = subscription_type is not None
+    
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #18181b;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #18181b; padding: 20px;">
+            <tr>
+                <td align="center">
+                    <table width="600" cellpadding="0" cellspacing="0" style="background-color: #27272a; border-radius: 16px; overflow: hidden;">
+                        <!-- Header -->
+                        <tr>
+                            <td style="background: linear-gradient(135deg, #10b981 0%, #34d399 100%); padding: 30px; text-align: center;">
+                                <h1 style="color: white; margin: 0; font-size: 24px;">✅ Paiement Confirmé</h1>
+                            </td>
+                        </tr>
+                        
+                        <!-- Content -->
+                        <tr>
+                            <td style="padding: 30px;">
+                                <p style="color: #ffffff; font-size: 18px; margin-bottom: 20px;">
+                                    Bonjour <strong>{user_name}</strong>,
+                                </p>
+                                
+                                <p style="color: #a1a1aa; font-size: 16px; line-height: 1.6;">
+                                    Votre {'abonnement' if is_subscription else 'paiement'} a été traité avec succès !
+                                </p>
+                                
+                                <!-- Receipt Box -->
+                                <table width="100%" cellpadding="0" cellspacing="0" style="margin: 25px 0; background-color: #3f3f46; border-radius: 12px;">
+                                    <tr>
+                                        <td style="padding: 20px;">
+                                            <table width="100%" cellpadding="0" cellspacing="0">
+                                                <tr>
+                                                    <td style="color: #a1a1aa; font-size: 14px; padding: 8px 0;">Service</td>
+                                                    <td style="color: #ffffff; font-size: 14px; padding: 8px 0; text-align: right; font-weight: bold;">{service_name}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="color: #a1a1aa; font-size: 14px; padding: 8px 0;">Montant</td>
+                                                    <td style="color: #10b981; font-size: 18px; padding: 8px 0; text-align: right; font-weight: bold;">{amount:.2f} {currency}</td>
+                                                </tr>
+                                                {'<tr><td style="color: #a1a1aa; font-size: 14px; padding: 8px 0;">Type</td><td style="color: #ffffff; font-size: 14px; padding: 8px 0; text-align: right;">' + subscription_type + '</td></tr>' if is_subscription else ''}
+                                                {'<tr><td style="color: #a1a1aa; font-size: 14px; padding: 8px 0;">Prochain prélèvement</td><td style="color: #ffffff; font-size: 14px; padding: 8px 0; text-align: right;">' + next_billing_date + '</td></tr>' if next_billing_date else ''}
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+                                
+                                <p style="color: #71717a; font-size: 13px; margin-top: 20px;">
+                                    {'Votre abonnement sera automatiquement renouvelé. Vous pouvez le gérer depuis votre tableau de bord.' if is_subscription else 'Merci pour votre confiance !'}
+                                </p>
+                                
+                                <!-- CTA Button -->
+                                <table width="100%" cellpadding="0" cellspacing="0" style="margin: 25px 0;">
+                                    <tr>
+                                        <td align="center">
+                                            <a href="https://titelli-social.preview.emergentagent.com/dashboard/client" 
+                                               style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #34d399 100%); color: white; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+                                                Voir mon compte
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        
+                        <!-- Footer -->
+                        <tr>
+                            <td style="background-color: #18181b; padding: 20px; text-align: center; border-top: 1px solid #3f3f46;">
+                                <p style="color: #71717a; font-size: 12px; margin: 0;">
+                                    © 2026 Titelli - Social Commerce Suisse<br>
+                                    <a href="https://titelli-social.preview.emergentagent.com" style="color: #10b981; text-decoration: none;">titelli.ch</a>
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
+    """
+
+
+async def send_payment_confirmation(
+    user_email: str,
+    user_name: str,
+    service_name: str,
+    amount: float,
+    currency: str = "CHF",
+    subscription_type: str = None,
+    next_billing_date: str = None
+) -> dict:
+    """Send payment/subscription confirmation email"""
+    html = get_payment_confirmation_template(
+        user_name, service_name, amount, currency, subscription_type, next_billing_date
+    )
+    
+    subject = f"✅ {'Abonnement' if subscription_type else 'Paiement'} confirmé - {service_name}"
+    
+    return await send_email(
+        to_email=user_email,
+        subject=subject,
+        html_content=html
+    )
