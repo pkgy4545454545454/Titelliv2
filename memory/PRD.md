@@ -186,3 +186,67 @@ Titelli is a regional social commerce marketplace platform for services and prod
   - Logo slides to the right (translateX)
   - Fade out effect (opacity transition)
   - Smooth 0.6-0.8s transition timing
+
+## Completed Work (Feb 2, 2026) - Session 2
+
+### Titelli Pro++ (B2B)
+- [x] **Backend**: `/app/backend/routers/titelli_pro.py`
+- [x] **Frontend**: `/app/frontend/src/pages/TitelliProPage.js`
+- [x] Livraisons B2B récurrentes (quotidien/hebdo/mensuel)
+- [x] Liquidation de stock (surstock, fin saison, expiration)
+- [x] Intégration Lifestyle Pass pour entreprises
+- [x] Abonnement Pro++ (199 CHF/mois via Stripe)
+- [x] Analytics B2B (placeholder pour graphiques)
+
+### Sports & Compétitions
+- [x] **Backend**: `/app/backend/routers/titelli_pro.py` (sports_router)
+- [x] **Frontend**: `/app/frontend/src/pages/SportsPage.js`
+- [x] Création de matchs (cherche adversaire/joueurs/équipe)
+- [x] Création et gestion d'équipes
+- [x] Compétitions et tournois
+- [x] 11 catégories sportives (football, tennis, basketball, etc.)
+- [x] Système de participation aux matchs
+
+### Système de Notifications Push
+- [x] **Backend**: `/app/backend/routers/notifications.py`
+- [x] **Frontend**: `/app/frontend/src/components/NotificationsDropdown.js`
+- [x] Notifications temps réel via WebSocket
+- [x] Types: invitations RDV, messages chat, réponses spécialistes, sports
+- [x] Marquer comme lu / Supprimer
+- [x] Préférences utilisateur
+
+### Navigation Header Améliorée
+- [x] Lien "Rdv" en rose (#EC4899)
+- [x] Lien "Sports" en vert (#10B981)
+- [x] Tous les liens stylisés avec couleurs distinctives
+
+## Routes API Ajoutées
+
+### Titelli Pro++ (/api/pro)
+- GET /api/pro/status - Statut abonnement
+- POST /api/pro/subscribe - S'abonner
+- GET/POST /api/pro/deliveries - Clients B2B
+- GET/POST /api/pro/liquidations - Articles liquidation
+
+### Sports (/api/sports)
+- GET /api/sports/categories - Catégories sportives
+- GET/POST /api/sports/matches - Matchs
+- GET /api/sports/matches/my - Mes matchs
+- POST /api/sports/matches/{id}/join - Rejoindre
+- GET/POST /api/sports/teams - Équipes
+- GET/POST /api/sports/competitions - Compétitions
+
+### Notifications (/api/notifications)
+- GET /api/notifications - Liste notifications
+- GET /api/notifications/unread-count - Compteur non-lus
+- POST /api/notifications/{id}/read - Marquer lu
+- POST /api/notifications/read-all - Tout marquer lu
+- DELETE /api/notifications/{id} - Supprimer
+- GET/PUT /api/notifications/preferences - Préférences
+
+## Backlog Restant
+- [ ] Graphiques analytics détaillés
+- [ ] Webhooks Stripe temps réel
+- [ ] Interface admin médias marketing
+- [ ] Algorithmes comportementaux (activation/désactivation)
+- [ ] Refactoring server.py (>10,000 lignes)
