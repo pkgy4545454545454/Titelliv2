@@ -26,6 +26,15 @@ logger = logging.getLogger(__name__)
 stripe.api_key = os.environ.get('STRIPE_API_KEY')
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://titelli.ch')
 
+# Gamification helper
+async def award_gamification_points(user_id: str, action: str):
+    """Award gamification points for RDV actions"""
+    try:
+        from .gamification import award_points
+        await award_points(user_id, action)
+    except Exception as e:
+        logger.warning(f"Could not award points: {e}")
+
 
 # ============ PYDANTIC MODELS ============
 
