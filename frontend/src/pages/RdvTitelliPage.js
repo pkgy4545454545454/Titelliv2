@@ -150,7 +150,22 @@ export default function RdvTitelliPage() {
   useEffect(() => {
     const handlePaymentReturn = async () => {
       const subscriptionSuccess = searchParams.get('subscription_success');
+      const subscriptionCancelled = searchParams.get('subscription_cancelled');
       const invitationAccepted = searchParams.get('invitation_accepted');
+      const invitationCancelled = searchParams.get('invitation_cancelled');
+      
+      // Handle cancellations
+      if (subscriptionCancelled) {
+        toast.error('Abonnement annulé');
+        setSearchParams({});
+        return;
+      }
+      
+      if (invitationCancelled) {
+        toast.error('Paiement annulé');
+        setSearchParams({});
+        return;
+      }
       
       if (subscriptionSuccess) {
         // Confirm subscription payment
@@ -168,6 +183,7 @@ export default function RdvTitelliPage() {
           }
         } catch (error) {
           console.error('Error confirming subscription:', error);
+          toast.error('Erreur de connexion');
         }
         
         // Clear params
@@ -194,6 +210,7 @@ export default function RdvTitelliPage() {
           }
         } catch (error) {
           console.error('Error confirming invitation:', error);
+          toast.error('Erreur de connexion');
         }
         
         // Clear params
