@@ -271,6 +271,9 @@ async def create_shared_offer(
     # Remove _id before returning (MongoDB adds it)
     offer.pop('_id', None)
     
+    # Award gamification points
+    await award_gamification_points(user_id, "rdv_offer_created")
+    
     return {"message": "Offre créée avec succès", "offer_id": offer_id, "offer": offer}
 
 
