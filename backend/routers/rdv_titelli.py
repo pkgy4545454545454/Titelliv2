@@ -449,6 +449,9 @@ async def send_invitation(
         }
     }, invitation_data.invitee_id)
     
+    # Award gamification points
+    await award_gamification_points(user_id, "rdv_invitation_sent")
+    
     return {"message": "Invitation envoyée", "invitation_id": invitation_id}
 
 
