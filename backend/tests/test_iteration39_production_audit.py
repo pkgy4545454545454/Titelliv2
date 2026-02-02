@@ -514,7 +514,11 @@ class TestStripeConfiguration:
             checkout_urls.append(("Romantic", response.json()["checkout_url"]))
         
         # Test Lifestyle Pass
-        response = requests.post(f"{BASE_URL}/api/specialists/passes/healthy/subscribe", headers=headers)
+        response = requests.post(
+            f"{BASE_URL}/api/specialists/passes/subscribe", 
+            headers=headers,
+            json={"pass_type": "healthy"}
+        )
         if response.status_code == 200 and "checkout_url" in response.json():
             checkout_urls.append(("Lifestyle Pass", response.json()["checkout_url"]))
         
