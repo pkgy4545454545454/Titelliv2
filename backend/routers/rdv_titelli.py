@@ -732,7 +732,7 @@ async def remove_availability(current_user: dict = Depends(get_current_user)):
 async def subscribe_romantic(
     current_user: dict = Depends(get_current_user)
 ):
-    """Subscribe to romantic mode (200 CHF/month)"""
+    """Subscribe to romantic mode (200 CHF/month) - Creates Stripe checkout"""
     user_id = current_user["id"]
     
     # Check existing subscription
@@ -743,39 +743,111 @@ async def subscribe_romantic(
     })
     
     if existing:
+        existing.pop('_id', None)
         return {
             "message": "Vous avez déjà un abonnement actif",
-            "expires_at": existing["expires_at"],
-            "status": "active"
+            "expires_at": existing["expires_at"].isoformat() if isinstance(existing["expires_at"], datetime) else existing["expires_at"],
+            "status": "active",
+            "has_subscription": True
         }
     
-    # Create subscription (in production, integrate with Stripe)
-    subscription_id = str(uuid.uuid4())
+    # Create Stripe checkout session
+    try:
+        subscription_id = str(uuid.uuid4())
+        
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'chf',
+                    'product_data': {
+                        'name': 'Abonnement Romantique Titelli',
+                        'description': 'Accès aux fonctionnalités romantiques pendant 30 jours'
+                    },
+                    'unit_amount': int(ROMANTIC_SUBSCRIPTION_PRICE * 100),  # 20000 centimes = 200 CHF
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=f'{FRONTEND_URL}/rdv?subscription_success={subscription_id}',
+            cancel_url=f'{FRONTEND_URL}/rdv?subscription_cancelled=true',
+            metadata={
+                'type': 'rdv_romantic_subscription',
+                'subscription_id': subscription_id,
+                'user_id': user_id
+            }
+        )
+        
+        # Store pending subscription
+        subscription = {
+            "id": subscription_id,
+            "user_id": user_id,
+            "plan": "romantic_monthly",
+            "price": ROMANTIC_SUBSCRIPTION_PRICE,
+            "currency": "CHF",
+            "status": "pending",
+            "payment_status": "pending",
+            "checkout_session_id": checkout_session.id,
+            "created_at": datetime.now(timezone.utc)
+        }
+        
+        await db.romantic_subscriptions.insert_one(subscription)
+        
+        return {
+            "message": "Redirection vers le paiement",
+            "subscription_id": subscription_id,
+            "checkout_url": checkout_session.url,
+            "price": ROMANTIC_SUBSCRIPTION_PRICE,
+            "currency": "CHF"
+        }
+        
+    except stripe.error.StripeError as e:
+        logger.error(f"Stripe error: {e}")
+        raise HTTPException(status_code=500, detail="Erreur de paiement")
+
+
+@router.post("/subscriptions/romantic/{subscription_id}/confirm")
+async def confirm_romantic_subscription(
+    subscription_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Confirm romantic subscription after Stripe payment"""
+    subscription = await db.romantic_subscriptions.find_one({"id": subscription_id})
+    if not subscription:
+        raise HTTPException(status_code=404, detail="Abonnement non trouvé")
+    
+    if subscription["user_id"] != current_user["id"]:
+        raise HTTPException(status_code=403, detail="Cet abonnement ne vous appartient pas")
+    
+    # Verify Stripe payment
+    checkout_session_id = subscription.get("checkout_session_id")
+    if checkout_session_id:
+        try:
+            session = stripe.checkout.Session.retrieve(checkout_session_id)
+            if session.payment_status != "paid":
+                raise HTTPException(status_code=402, detail="Paiement non confirmé")
+        except stripe.error.StripeError:
+            raise HTTPException(status_code=402, detail="Impossible de vérifier le paiement")
+    
+    # Activate subscription
     expires_at = datetime.now(timezone.utc) + timedelta(days=30)
     
-    subscription = {
-        "id": subscription_id,
-        "user_id": user_id,
-        "plan": "romantic_monthly",
-        "price": ROMANTIC_SUBSCRIPTION_PRICE,
-        "currency": "CHF",
-        "status": "active",
-        "payment_status": "pending",  # Would be "paid" after Stripe confirmation
-        "started_at": datetime.now(timezone.utc),
-        "expires_at": expires_at,
-        "created_at": datetime.now(timezone.utc)
-    }
-    
-    await db.romantic_subscriptions.insert_one(subscription)
+    await db.romantic_subscriptions.update_one(
+        {"id": subscription_id},
+        {
+            "$set": {
+                "status": "active",
+                "payment_status": "paid",
+                "started_at": datetime.now(timezone.utc),
+                "expires_at": expires_at
+            }
+        }
+    )
     
     return {
-        "message": "Abonnement romantique créé",
-        "subscription_id": subscription_id,
-        "price": ROMANTIC_SUBSCRIPTION_PRICE,
-        "currency": "CHF",
-        "expires_at": expires_at,
-        "requires_payment": True,
-        "payment_url": f"/api/rdv/subscriptions/{subscription_id}/pay"
+        "message": "Abonnement romantique activé !",
+        "expires_at": expires_at.isoformat(),
+        "has_subscription": True
     }
 
 
