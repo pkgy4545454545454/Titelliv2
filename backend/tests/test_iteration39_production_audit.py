@@ -368,19 +368,25 @@ class TestSpecialists:
         assert response.status_code == 200
         data = response.json()
         assert "passes" in data
-        assert len(data["passes"]) == 3, f"Expected 3 passes, got {len(data['passes'])}"
+        passes = data["passes"]
+        # Passes are returned as a dictionary, not a list
+        assert len(passes) == 3, f"Expected 3 passes, got {len(passes)}"
         
-        # Verify pass prices
-        pass_prices = {p["id"]: p["price"] for p in data["passes"]}
-        assert pass_prices.get("healthy") == 99, f"Healthy pass should be 99 CHF"
-        assert pass_prices.get("better_you") == 149, f"Better You pass should be 149 CHF"
-        assert pass_prices.get("mvp") == 299, f"MVP pass should be 299 CHF"
+        # Verify pass prices (passes is a dict with keys: healthy, better_you, mvp)
+        assert passes.get("healthy", {}).get("price") == 99.0, f"Healthy pass should be 99 CHF"
+        assert passes.get("better_you", {}).get("price") == 149.0, f"Better You pass should be 149 CHF"
+        assert passes.get("mvp", {}).get("price") == 299.0, f"MVP pass should be 299 CHF"
         print(f"✅ Lifestyle Passes: Healthy (99 CHF), Better You (149 CHF), MVP (299 CHF)")
     
     def test_specialists_pass_subscribe_stripe(self, client_token):
         """Test pass subscription creates Stripe checkout"""
         headers = {"Authorization": f"Bearer {client_token}"}
-        response = requests.post(f"{BASE_URL}/api/specialists/passes/healthy/subscribe", headers=headers)
+        # Correct endpoint: POST /api/specialists/passes/subscribe with body
+        response = requests.post(
+            f"{BASE_URL}/api/specialists/passes/subscribe", 
+            headers=headers,
+            json={"pass_type": "healthy"}
+        )
         # Either 200 (checkout created) or already has subscription
         assert response.status_code in [200, 402]
         data = response.json()
