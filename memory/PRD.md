@@ -118,6 +118,38 @@ Titelli is a regional social commerce marketplace platform for services and prod
 - [x] **FIX: Campaign payment bug** - Changed `business_name` to `name` with fallback
 - [x] **FIX: SalonPro sync** - Added webhook call after registration approval
 - [x] **UI: Gold color for "Produits" menu item**
+
+## Completed Work (Feb 2, 2026) - NEW
+
+### RDV chez Titelli (Social Booking)
+- [x] **Backend router**: `/app/backend/routers/rdv_titelli.py`
+- [x] **Frontend page**: `/app/frontend/src/pages/RdvTitelliPage.js`
+- [x] **Chat temps réel**: `/app/frontend/src/pages/RdvChatPage.js` (WebSocket)
+- [x] Offres pour 2 personnes (amical ou romantique)
+- [x] Système d'invitations avec acceptation payante (2 CHF)
+- [x] Abonnement romantique (200 CHF/mois) via Stripe
+- [x] Chat temps réel entre participants
+- [x] Statistiques utilisateur
+- [x] Catégories: restaurant, sport, wellness, culture, nature, party, creative, autre
+
+### Demandes Spécialistes
+- [x] **Backend router**: `/app/backend/routers/specialists.py`
+- [x] **Frontend page**: `/app/frontend/src/pages/SpecialistsPage.js`
+- [x] Recherche IA de spécialistes
+- [x] Création de demandes urgentes/spécifiques
+- [x] Réponses des prestataires aux demandes
+- [x] Acceptation de réponses par le client
+
+### Lifestyle Passes
+- [x] **Healthy Lifestyle Pass**: 99 CHF/mois (bien-être, santé)
+- [x] **Better You Pass**: 149 CHF/mois (développement personnel)
+- [x] **Special MVP Pass**: 299 CHF/mois (accès VIP exclusif)
+- [x] Intégration Stripe pour tous les paiements
+
+### Marketing Videos V2
+- [x] Voiceover français généré
+- [x] 5 vidéos produits v2 (chocolat, montre, soins, restaurant, vin)
+- [x] Stockage: `/app/backend/uploads/media_titelli/v2/`
 - [x] **UI: Splash screen exit animation** - Slide right + fade out
 
 ## Pending Tasks
