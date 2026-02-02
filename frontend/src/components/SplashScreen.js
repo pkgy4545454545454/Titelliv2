@@ -99,15 +99,19 @@ const SplashScreen = ({ onComplete }) => {
           transition: 'transform 0.6s ease-out, opacity 0.6s ease-out',
           transform: fadeOut ? 'translateX(150px)' : 'translateX(0)',
           opacity: fadeOut ? 0 : 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
         {/* Glow effect behind logo */}
         <div 
           style={{
             position: 'absolute',
-            top: '50%',
+            top: '75px',
             left: '50%',
-            transform: 'translate(-50%, -50%)',
+            transform: 'translateX(-50%)',
             width: '200px',
             height: '200px',
             background: 'radial-gradient(circle, rgba(0,71,171,0.4) 0%, transparent 70%)',
@@ -129,6 +133,7 @@ const SplashScreen = ({ onComplete }) => {
             position: 'relative',
             zIndex: 1,
             background: 'linear-gradient(135deg, #0047AB 0%, #D4AF37 100%)',
+            flexShrink: 0,
           }}
         >
           <video 
@@ -147,17 +152,22 @@ const SplashScreen = ({ onComplete }) => {
           />
         </div>
 
-        {/* Brand name */}
+        {/* Brand name - perfectly centered */}
         <h1 
           style={{
             fontFamily: 'Playfair Display, serif',
             fontSize: '42px',
             color: '#fff',
             marginTop: '24px',
+            marginBottom: 0,
             textAlign: 'center',
             letterSpacing: '8px',
             textTransform: 'uppercase',
             animation: 'shimmer 2s ease-in-out infinite',
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
           Titelli
