@@ -40,6 +40,28 @@ const AuthPage = () => {
   const { login, register } = useAuth();
   const navigate = useNavigate();
 
+  // Validate referral code if present
+  useEffect(() => {
+    const validateReferral = async () => {
+      if (referralCode) {
+        try {
+          const res = await fetch(`${API_URL}/api/gamification/referral/validate?code=${referralCode}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.valid) {
+              setReferralInfo(data);
+              setIsLogin(false); // Switch to registration mode
+              toast.success(`Code de parrainage de ${data.referrer_name} validé ! +${data.bonus_points} points à l'inscription`);
+            }
+          }
+        } catch (error) {
+          console.error('Error validating referral:', error);
+        }
+      }
+    };
+    validateReferral();
+  }, [referralCode]);
+
   useEffect(() => {
     const password = formData.password;
     let strength = 0;
