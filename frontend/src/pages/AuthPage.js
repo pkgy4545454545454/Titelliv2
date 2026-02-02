@@ -154,6 +154,27 @@ const AuthPage = () => {
         };
         loggedUser = await register(registrationData);
         toast.success('Inscription réussie ! Bienvenue sur Titelli');
+        
+        // Apply referral code if present
+        if (formData.referral_code && loggedUser?.token) {
+          try {
+            const refRes = await fetch(`${API_URL}/api/gamification/referral/apply`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${loggedUser.token}`
+              },
+              body: JSON.stringify({ referral_code: formData.referral_code })
+            });
+            
+            if (refRes.ok) {
+              const refData = await refRes.json();
+              toast.success(`🎉 +${refData.points_earned} points grâce au parrainage de ${refData.referrer_name} !`);
+            }
+          } catch (refError) {
+            console.error('Error applying referral:', refError);
+          }
+        }
       }
       
       const redirectType = loggedUser?.user_type || userType;
