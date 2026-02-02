@@ -212,6 +212,21 @@ async def confirm_pro_subscription(
         }
     )
     
+    # Send confirmation email
+    if EMAIL_SERVICE_AVAILABLE:
+        user_name = current_user.get("name") or current_user.get("email", "").split("@")[0]
+        user_email = current_user.get("email")
+        if user_email:
+            asyncio.create_task(send_payment_confirmation(
+                user_email=user_email,
+                user_name=user_name,
+                service_name="Titelli Pro++ - Services B2B",
+                amount=TITELLI_PRO_PRICE,
+                currency="CHF",
+                subscription_type="Mensuel",
+                next_billing_date=expires_at.strftime("%d/%m/%Y")
+            ))
+    
     return {
         "message": "Titelli Pro++ activé !",
         "expires_at": expires_at.isoformat()
