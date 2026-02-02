@@ -2892,6 +2892,16 @@ const ClientDashboard = () => {
             </div>
           )}
 
+          {/* Parrainage Tab */}
+          {activeTab === 'parrainage' && (
+            <div>
+              <h1 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Parrainage
+              </h1>
+              <ReferralSection />
+            </div>
+          )}
+
           {/* Settings Tab */}
           {activeTab === 'settings' && (
             <div>
