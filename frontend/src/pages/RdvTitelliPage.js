@@ -283,7 +283,7 @@ export default function RdvTitelliPage() {
     }
   };
 
-  // Subscribe to romantic
+  // Subscribe to romantic - redirects to Stripe
   const handleSubscribeRomantic = async () => {
     try {
       const res = await fetch(`${API_URL}/api/rdv/subscriptions/romantic`, {
@@ -291,13 +291,16 @@ export default function RdvTitelliPage() {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      if (res.ok) {
-        const data = await res.json();
-        toast.success('Abonnement romantique activé !');
+      const data = await res.json();
+      
+      if (data.checkout_url) {
+        // Redirect to Stripe checkout
+        window.location.href = data.checkout_url;
+      } else if (data.has_subscription) {
+        toast.success('Abonnement déjà actif !');
         setShowSubscribeModal(false);
         fetchData();
       } else {
-        const data = await res.json();
         toast.error(data.detail || 'Erreur');
       }
     } catch (error) {
