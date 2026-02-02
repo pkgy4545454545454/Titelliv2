@@ -4,6 +4,7 @@ Gamification System for Titelli
 - Badges and achievements
 - Levels and ranks
 - Leaderboards
+- Referral system with email notifications
 """
 from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel, Field
@@ -14,6 +15,17 @@ import uuid
 
 from .shared import db, get_current_user
 from .websocket import ws_manager
+
+# Import email service
+try:
+    from services.email_service import (
+        send_referral_notification,
+        send_welcome_bonus_notification,
+        send_bonus_milestone_notification
+    )
+    EMAIL_SERVICE_AVAILABLE = True
+except ImportError:
+    EMAIL_SERVICE_AVAILABLE = False
 
 router = APIRouter(prefix="/api/gamification", tags=["Gamification"])
 logger = logging.getLogger(__name__)
