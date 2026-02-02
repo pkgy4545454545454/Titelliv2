@@ -1055,6 +1055,7 @@ const ClientDashboard = () => {
         { id: 'support', label: 'Service client', icon: HelpCircle },
         { id: 'partners', label: 'Partenaires', icon: Handshake },
         { id: 'about', label: 'À propos', icon: Info },
+        { id: 'email-prefs', label: 'Préférences email', icon: Mail },
         { id: 'settings', label: 'Paramètres', icon: Settings },
       ]
     },
