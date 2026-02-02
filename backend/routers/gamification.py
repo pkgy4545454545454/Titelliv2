@@ -579,6 +579,288 @@ async def get_points_config():
     return {"points_config": POINTS_CONFIG}
 
 
+# ============ REFERRAL/PARRAINAGE SYSTEM ============
+
+REFERRAL_POINTS = {
+    "referrer": 50,  # Points pour le parrain
+    "referee": 25,   # Points pour le filleul
+    "bonus_5_referrals": 100,  # Bonus à 5 parrainages
+    "bonus_10_referrals": 250, # Bonus à 10 parrainages
+    "bonus_25_referrals": 500, # Bonus à 25 parrainages
+}
+
+
+def generate_referral_code(user_id: str) -> str:
+    """Generate unique referral code from user_id"""
+    import hashlib
+    # Create a short hash from user_id
+    hash_obj = hashlib.sha256(user_id.encode())
+    return f"TIT{hash_obj.hexdigest()[:8].upper()}"
+
+
+class ReferralCodeCreate(BaseModel):
+    """Request to get/create referral code"""
+    pass
+
+
+class ReferralUse(BaseModel):
+    """Use a referral code during registration"""
+    referral_code: str = Field(..., min_length=6, max_length=20)
+
+
+@router.get("/referral/my-code", response_model=dict)
+async def get_my_referral_code(current_user: dict = Depends(get_current_user)):
+    """Get or create user's referral code"""
+    user_id = current_user["id"]
+    
+    # Check if user already has a referral record
+    referral_data = await db.referral_codes.find_one({"user_id": user_id}, {"_id": 0})
+    
+    if not referral_data:
+        # Create new referral code
+        code = generate_referral_code(user_id)
+        referral_data = {
+            "user_id": user_id,
+            "code": code,
+            "referrals_count": 0,
+            "total_points_earned": 0,
+            "referrals": [],
+            "created_at": datetime.now(timezone.utc)
+        }
+        await db.referral_codes.insert_one(referral_data)
+        referral_data.pop('_id', None)
+    
+    # Get user's name for sharing
+    user = await db.users.find_one({"id": user_id}, {"_id": 0, "name": 1, "email": 1})
+    referrer_name = user.get("name") or user.get("email", "").split("@")[0]
+    
+    # Generate share URL
+    share_url = f"https://titelli-social.preview.emergentagent.com/auth?ref={referral_data['code']}"
+    
+    return {
+        "code": referral_data["code"],
+        "share_url": share_url,
+        "referrals_count": referral_data.get("referrals_count", 0),
+        "total_points_earned": referral_data.get("total_points_earned", 0),
+        "referrer_name": referrer_name,
+        "share_message": f"Rejoins Titelli avec mon code {referral_data['code']} et gagne {REFERRAL_POINTS['referee']} points ! {share_url}"
+    }
+
+
+@router.get("/referral/stats", response_model=dict)
+async def get_referral_stats(current_user: dict = Depends(get_current_user)):
+    """Get detailed referral statistics"""
+    user_id = current_user["id"]
+    
+    referral_data = await db.referral_codes.find_one({"user_id": user_id}, {"_id": 0})
+    
+    if not referral_data:
+        return {
+            "code": None,
+            "referrals_count": 0,
+            "total_points_earned": 0,
+            "referrals": [],
+            "next_bonus": {"count": 5, "points": REFERRAL_POINTS["bonus_5_referrals"]}
+        }
+    
+    # Get detailed info about referrals
+    referrals = referral_data.get("referrals", [])
+    detailed_referrals = []
+    
+    for ref in referrals[-10:]:  # Last 10 referrals
+        ref_user = await db.users.find_one({"id": ref.get("user_id")}, {"_id": 0, "name": 1, "email": 1, "created_at": 1})
+        if ref_user:
+            detailed_referrals.append({
+                "name": ref_user.get("name") or ref_user.get("email", "").split("@")[0],
+                "joined_at": ref.get("joined_at"),
+                "points_earned": ref.get("points_earned", REFERRAL_POINTS["referrer"])
+            })
+    
+    # Calculate next bonus
+    count = referral_data.get("referrals_count", 0)
+    next_bonus = None
+    if count < 5:
+        next_bonus = {"count": 5, "points": REFERRAL_POINTS["bonus_5_referrals"], "remaining": 5 - count}
+    elif count < 10:
+        next_bonus = {"count": 10, "points": REFERRAL_POINTS["bonus_10_referrals"], "remaining": 10 - count}
+    elif count < 25:
+        next_bonus = {"count": 25, "points": REFERRAL_POINTS["bonus_25_referrals"], "remaining": 25 - count}
+    
+    return {
+        "code": referral_data["code"],
+        "referrals_count": referral_data.get("referrals_count", 0),
+        "total_points_earned": referral_data.get("total_points_earned", 0),
+        "referrals": detailed_referrals,
+        "next_bonus": next_bonus,
+        "bonuses_achieved": {
+            "5_referrals": count >= 5,
+            "10_referrals": count >= 10,
+            "25_referrals": count >= 25
+        }
+    }
+
+
+@router.post("/referral/validate", response_model=dict)
+async def validate_referral_code(code: str = Query(..., min_length=6)):
+    """Validate a referral code (public - for registration)"""
+    referral = await db.referral_codes.find_one({"code": code.upper()}, {"_id": 0})
+    
+    if not referral:
+        return {"valid": False, "message": "Code de parrainage invalide"}
+    
+    # Get referrer info
+    referrer = await db.users.find_one({"id": referral["user_id"]}, {"_id": 0, "name": 1, "email": 1})
+    referrer_name = referrer.get("name") or referrer.get("email", "").split("@")[0] if referrer else "Un ami"
+    
+    return {
+        "valid": True,
+        "referrer_name": referrer_name,
+        "bonus_points": REFERRAL_POINTS["referee"],
+        "message": f"Code valide ! Vous recevrez {REFERRAL_POINTS['referee']} points bonus à l'inscription."
+    }
+
+
+@router.post("/referral/apply", response_model=dict)
+async def apply_referral_code(
+    data: ReferralUse,
+    current_user: dict = Depends(get_current_user)
+):
+    """Apply a referral code for a new user (called after registration)"""
+    user_id = current_user["id"]
+    code = data.referral_code.upper()
+    
+    # Check if user already used a referral code
+    existing = await db.referral_uses.find_one({"referee_id": user_id})
+    if existing:
+        raise HTTPException(status_code=400, detail="Vous avez déjà utilisé un code de parrainage")
+    
+    # Find referral code
+    referral = await db.referral_codes.find_one({"code": code})
+    if not referral:
+        raise HTTPException(status_code=404, detail="Code de parrainage invalide")
+    
+    # Can't refer yourself
+    if referral["user_id"] == user_id:
+        raise HTTPException(status_code=400, detail="Vous ne pouvez pas utiliser votre propre code")
+    
+    referrer_id = referral["user_id"]
+    now = datetime.now(timezone.utc)
+    
+    # Record the referral use
+    await db.referral_uses.insert_one({
+        "id": str(uuid.uuid4()),
+        "referrer_id": referrer_id,
+        "referee_id": user_id,
+        "code": code,
+        "created_at": now
+    })
+    
+    # Award points to referee (new user)
+    referee_result = await award_points(user_id, "referral_success", multiplier=0.5)  # 25 points
+    
+    # Award points to referrer
+    referrer_result = await award_points(referrer_id, "referral_success")  # 50 points
+    
+    # Update referral stats for referrer
+    new_count = referral.get("referrals_count", 0) + 1
+    new_total_points = referral.get("total_points_earned", 0) + REFERRAL_POINTS["referrer"]
+    
+    await db.referral_codes.update_one(
+        {"code": code},
+        {
+            "$inc": {"referrals_count": 1, "total_points_earned": REFERRAL_POINTS["referrer"]},
+            "$push": {
+                "referrals": {
+                    "user_id": user_id,
+                    "joined_at": now.isoformat(),
+                    "points_earned": REFERRAL_POINTS["referrer"]
+                }
+            }
+        }
+    )
+    
+    # Check for bonus milestones
+    bonus_points = 0
+    bonus_message = None
+    
+    if new_count == 5:
+        bonus_points = REFERRAL_POINTS["bonus_5_referrals"]
+        bonus_message = "Félicitations ! Bonus 5 parrainages atteint !"
+    elif new_count == 10:
+        bonus_points = REFERRAL_POINTS["bonus_10_referrals"]
+        bonus_message = "Incroyable ! Bonus 10 parrainages atteint !"
+    elif new_count == 25:
+        bonus_points = REFERRAL_POINTS["bonus_25_referrals"]
+        bonus_message = "Légendaire ! Bonus 25 parrainages atteint !"
+    
+    if bonus_points > 0:
+        # Award bonus to referrer
+        stats = await get_user_stats(referrer_id)
+        new_total = stats.get("total_points", 0) + bonus_points
+        new_level = get_level_for_points(new_total)
+        
+        await db.user_gamification.update_one(
+            {"user_id": referrer_id},
+            {"$inc": {"total_points": bonus_points}}
+        )
+        
+        await db.points_history.insert_one({
+            "id": str(uuid.uuid4()),
+            "user_id": referrer_id,
+            "action": f"referral_bonus_{new_count}",
+            "points": bonus_points,
+            "created_at": now
+        })
+        
+        # Notify referrer
+        await ws_manager.send_personal_message({
+            "type": "referral_bonus",
+            "bonus_points": bonus_points,
+            "message": bonus_message,
+            "total_referrals": new_count
+        }, referrer_id)
+    
+    # Get referrer name
+    referrer = await db.users.find_one({"id": referrer_id}, {"_id": 0, "name": 1, "email": 1})
+    referrer_name = referrer.get("name") or referrer.get("email", "").split("@")[0] if referrer else "Votre parrain"
+    
+    # Notify referrer about new referral
+    await ws_manager.send_personal_message({
+        "type": "new_referral",
+        "message": f"Quelqu'un a utilisé votre code de parrainage ! +{REFERRAL_POINTS['referrer']} points"
+    }, referrer_id)
+    
+    return {
+        "success": True,
+        "points_earned": REFERRAL_POINTS["referee"],
+        "referrer_name": referrer_name,
+        "message": f"Code appliqué ! Vous avez gagné {REFERRAL_POINTS['referee']} points grâce à {referrer_name}."
+    }
+
+
+@router.get("/referral/leaderboard", response_model=dict)
+async def get_referral_leaderboard(limit: int = Query(20, ge=5, le=100)):
+    """Get top referrers leaderboard"""
+    # Get top referrers
+    top_referrers = await db.referral_codes.find(
+        {"referrals_count": {"$gt": 0}},
+        {"_id": 0}
+    ).sort("referrals_count", -1).limit(limit).to_list(limit)
+    
+    leaderboard = []
+    for i, ref in enumerate(top_referrers):
+        user = await db.users.find_one({"id": ref["user_id"]}, {"_id": 0, "name": 1, "email": 1})
+        if user:
+            leaderboard.append({
+                "rank": i + 1,
+                "name": user.get("name") or user.get("email", "").split("@")[0],
+                "referrals_count": ref.get("referrals_count", 0),
+                "total_points": ref.get("total_points_earned", 0)
+            })
+    
+    return {"leaderboard": leaderboard, "total_count": len(leaderboard)}
+
+
 # ============ INTERNAL FUNCTIONS FOR OTHER ROUTERS ============
 
 async def award_rdv_points(user_id: str, action: str):
@@ -589,3 +871,58 @@ async def award_rdv_points(user_id: str, action: str):
 async def award_sports_points(user_id: str, action: str):
     """Award points for sports actions (called from titelli_pro.py)"""
     return await award_points(user_id, action)
+
+
+async def process_referral_on_registration(user_id: str, referral_code: str) -> dict:
+    """Process referral code during user registration (called from auth.py)"""
+    if not referral_code:
+        return {"applied": False}
+    
+    try:
+        # Validate code
+        referral = await db.referral_codes.find_one({"code": referral_code.upper()})
+        if not referral or referral["user_id"] == user_id:
+            return {"applied": False, "reason": "Invalid code"}
+        
+        # Apply the referral
+        from pydantic import BaseModel
+        class TempData(BaseModel):
+            referral_code: str
+        
+        # Manually create the referral use record and award points
+        referrer_id = referral["user_id"]
+        now = datetime.now(timezone.utc)
+        code = referral_code.upper()
+        
+        await db.referral_uses.insert_one({
+            "id": str(uuid.uuid4()),
+            "referrer_id": referrer_id,
+            "referee_id": user_id,
+            "code": code,
+            "created_at": now
+        })
+        
+        # Award points to both users
+        await award_points(user_id, "referral_success", multiplier=0.5)  # 25 points for new user
+        await award_points(referrer_id, "referral_success")  # 50 points for referrer
+        
+        # Update referral stats
+        await db.referral_codes.update_one(
+            {"code": code},
+            {
+                "$inc": {"referrals_count": 1, "total_points_earned": REFERRAL_POINTS["referrer"]},
+                "$push": {
+                    "referrals": {
+                        "user_id": user_id,
+                        "joined_at": now.isoformat(),
+                        "points_earned": REFERRAL_POINTS["referrer"]
+                    }
+                }
+            }
+        )
+        
+        return {"applied": True, "points_earned": REFERRAL_POINTS["referee"]}
+        
+    except Exception as e:
+        logger.error(f"Error processing referral: {e}")
+        return {"applied": False, "reason": str(e)}
