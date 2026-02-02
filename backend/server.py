@@ -9473,6 +9473,11 @@ app.include_router(rdv_router)
 from routers.specialists import router as specialists_router
 app.include_router(specialists_router)
 
+# Include Titelli Pro++ and Sports routers
+from routers.titelli_pro import router as pro_router, sports_router
+app.include_router(pro_router)
+app.include_router(sports_router)
+
 # Mount uploads folder for serving static images
 app.mount("/api/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
