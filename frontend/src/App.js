@@ -125,6 +125,12 @@ function AppRoutes() {
       {/* Specialists Routes */}
       <Route path="/specialists" element={<SpecialistsPage />} />
 
+      {/* Sports & Competitions Routes */}
+      <Route path="/sports" element={<SportsPage />} />
+
+      {/* Titelli Pro++ Route (Enterprise only) */}
+      <Route path="/enterprise/pro" element={<TitelliProPage />} />
+
       {/* Protected Enterprise Routes */}
       <Route 
         path="/dashboard/entreprise/*" 
