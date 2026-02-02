@@ -469,10 +469,9 @@ async def get_sent_invitations(
 @router.post("/invitations/{invitation_id}/accept", response_model=dict)
 async def accept_invitation(
     invitation_id: str,
-    payment_confirmed: bool = Query(False),
     current_user: dict = Depends(get_current_user)
 ):
-    """Accept an invitation (requires 2 CHF payment)"""
+    """Accept an invitation - Creates Stripe checkout for 2 CHF fee"""
     invitation = await db.invitations.find_one({"id": invitation_id})
     if not invitation:
         raise HTTPException(status_code=404, detail="Invitation non trouvée")
@@ -483,15 +482,71 @@ async def accept_invitation(
     if invitation["status"] != "pending":
         raise HTTPException(status_code=400, detail="Cette invitation n'est plus en attente")
     
-    # For now, simulate payment confirmation
-    # In production, this would integrate with Stripe
-    if not payment_confirmed:
+    # Create Stripe checkout session for 2 CHF
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'chf',
+                    'product_data': {
+                        'name': f'Acceptation invitation - {invitation.get("offer_title", "Rdv Titelli")}',
+                        'description': 'Frais d\'acceptation d\'invitation Rdv chez Titelli'
+                    },
+                    'unit_amount': int(INVITATION_ACCEPTANCE_FEE * 100),  # 200 centimes = 2 CHF
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=f'{FRONTEND_URL}/rdv?invitation_accepted={invitation_id}',
+            cancel_url=f'{FRONTEND_URL}/rdv?invitation_cancelled={invitation_id}',
+            metadata={
+                'type': 'rdv_invitation_acceptance',
+                'invitation_id': invitation_id,
+                'user_id': current_user["id"]
+            }
+        )
+        
+        # Store checkout session ID
+        await db.invitations.update_one(
+            {"id": invitation_id},
+            {"$set": {"checkout_session_id": checkout_session.id}}
+        )
+        
         return {
             "requires_payment": True,
+            "checkout_url": checkout_session.url,
             "amount": INVITATION_ACCEPTANCE_FEE,
-            "currency": "CHF",
-            "message": f"Veuillez payer {INVITATION_ACCEPTANCE_FEE} CHF pour accepter cette invitation"
+            "currency": "CHF"
         }
+        
+    except stripe.error.StripeError as e:
+        logger.error(f"Stripe error: {e}")
+        raise HTTPException(status_code=500, detail="Erreur de paiement")
+
+
+@router.post("/invitations/{invitation_id}/confirm-payment")
+async def confirm_invitation_payment(
+    invitation_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Confirm invitation payment and complete acceptance"""
+    invitation = await db.invitations.find_one({"id": invitation_id})
+    if not invitation:
+        raise HTTPException(status_code=404, detail="Invitation non trouvée")
+    
+    if invitation["invitee_id"] != current_user["id"]:
+        raise HTTPException(status_code=403, detail="Cette invitation ne vous est pas destinée")
+    
+    # Verify Stripe payment
+    checkout_session_id = invitation.get("checkout_session_id")
+    if checkout_session_id:
+        try:
+            session = stripe.checkout.Session.retrieve(checkout_session_id)
+            if session.payment_status != "paid":
+                raise HTTPException(status_code=402, detail="Paiement non confirmé")
+        except stripe.error.StripeError:
+            raise HTTPException(status_code=402, detail="Impossible de vérifier le paiement")
     
     # Update invitation
     await db.invitations.update_one(
@@ -501,6 +556,8 @@ async def accept_invitation(
     
     # Get offer and update
     offer = await db.shared_offers.find_one({"id": invitation["offer_id"]})
+    chat_room_id = None
+    
     if offer:
         user_info = await get_user_basic_info(current_user["id"])
         
@@ -538,7 +595,7 @@ async def accept_invitation(
     
     return {
         "message": "Invitation acceptée ! Vous pouvez maintenant discuter",
-        "chat_room_id": chat_room_id if offer else None
+        "chat_room_id": chat_room_id
     }
 
 
