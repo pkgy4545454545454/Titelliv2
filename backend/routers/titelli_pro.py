@@ -24,6 +24,15 @@ FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://titelli.ch')
 
 TITELLI_PRO_PRICE = 199.00  # CHF/month
 
+# Gamification helper
+async def award_gamification_points(user_id: str, action: str):
+    """Award gamification points"""
+    try:
+        from .gamification import award_points
+        await award_points(user_id, action)
+    except Exception as e:
+        logger.warning(f"Could not award points: {e}")
+
 
 # ============ PYDANTIC MODELS ============
 
