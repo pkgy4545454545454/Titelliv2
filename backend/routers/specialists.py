@@ -188,7 +188,7 @@ async def respond_to_request(
 ):
     """Specialist responds to a request"""
     # Verify user is enterprise/specialist
-    if current_user.get("user_type") not in ["enterprise", "admin"]:
+    if current_user.get("user_type") not in ["enterprise", "entreprise", "admin"]:
         raise HTTPException(status_code=403, detail="Seuls les prestataires peuvent répondre")
     
     request = await db.specialist_requests.find_one({"id": request_id})
@@ -461,7 +461,7 @@ async def subscribe_titelli_pro(
     current_user: dict = Depends(get_current_user)
 ):
     """Subscribe to Titelli Pro++ for B2B services"""
-    if current_user.get("user_type") != "enterprise":
+    if current_user.get("user_type") not in ["enterprise", "entreprise"]:
         raise HTTPException(status_code=403, detail="Titelli Pro++ est réservé aux entreprises")
     
     # Check existing subscription
