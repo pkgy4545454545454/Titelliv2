@@ -700,7 +700,7 @@ async def get_referral_stats(current_user: dict = Depends(get_current_user)):
     }
 
 
-@router.post("/referral/validate", response_model=dict)
+@router.get("/referral/validate", response_model=dict)
 async def validate_referral_code(code: str = Query(..., min_length=6)):
     """Validate a referral code (public - for registration)"""
     referral = await db.referral_codes.find_one({"code": code.upper()}, {"_id": 0})
