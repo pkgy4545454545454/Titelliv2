@@ -141,6 +141,25 @@ Titelli est une plateforme de social commerce régionale pour les services et pr
 - Badges multiples catégories
 - Intégration avec RDV et Sports
 
+### 13. Système de Parrainage ✅ NOUVEAU
+**Routes Backend**: `/app/backend/routers/gamification.py` (section referral)
+**Component Frontend**: `/app/frontend/src/components/ReferralSection.js`
+
+**Fonctionnalités**:
+- Code de parrainage unique par utilisateur (format: TIT + 8 caractères)
+- Partage via lien ou code
+- Points pour le parrain (+50) ET le filleul (+25)
+- Bonus à paliers: 5 parrainages (+100), 10 (+250), 25 (+500)
+- Leaderboard des meilleurs parrains
+- Badge "Influenceur" à 5 parrainages
+
+**API Endpoints**:
+- `GET /api/gamification/referral/my-code` - Mon code de parrainage
+- `GET /api/gamification/referral/stats` - Statistiques détaillées
+- `GET /api/gamification/referral/validate?code=XXX` - Valider un code (public)
+- `POST /api/gamification/referral/apply` - Appliquer un code après inscription
+- `GET /api/gamification/referral/leaderboard` - Classement des parrains
+
 ---
 
 ## Technical Architecture
