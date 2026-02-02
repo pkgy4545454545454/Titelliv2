@@ -9,17 +9,22 @@ from fastapi import APIRouter, HTTPException, Depends, WebSocket, WebSocketDisco
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timezone, timedelta
-from bson import ObjectId
 import asyncio
 import logging
 import jwt
 import uuid
+import os
+import stripe
 
 from .shared import db, get_current_user, JWT_SECRET, JWT_ALGORITHM
 from .websocket import ws_manager
 
 router = APIRouter(prefix="/api/rdv", tags=["Rdv chez Titelli"])
 logger = logging.getLogger(__name__)
+
+# Stripe configuration
+stripe.api_key = os.environ.get('STRIPE_API_KEY')
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://titelli.ch')
 
 
 # ============ PYDANTIC MODELS ============
