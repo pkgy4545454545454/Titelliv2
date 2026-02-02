@@ -9478,6 +9478,10 @@ from routers.titelli_pro import router as pro_router, sports_router
 app.include_router(pro_router)
 app.include_router(sports_router)
 
+# Include Notifications router
+from routers.notifications import router as notifications_router
+app.include_router(notifications_router)
+
 # Mount uploads folder for serving static images
 app.mount("/api/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
