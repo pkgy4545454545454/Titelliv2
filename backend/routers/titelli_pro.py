@@ -67,7 +67,7 @@ class ProSubscription(BaseModel):
 @router.get("/status", response_model=dict)
 async def get_pro_status(current_user: dict = Depends(get_current_user)):
     """Get Pro++ subscription status"""
-    if current_user.get("user_type") != "enterprise":
+    if current_user.get("user_type") not in ["enterprise", "entreprise"]:
         raise HTTPException(status_code=403, detail="Réservé aux entreprises")
     
     subscription = await db.pro_subscriptions.find_one({
@@ -96,7 +96,7 @@ async def subscribe_pro(
     current_user: dict = Depends(get_current_user)
 ):
     """Subscribe to Titelli Pro++"""
-    if current_user.get("user_type") != "enterprise":
+    if current_user.get("user_type") not in ["enterprise", "entreprise"]:
         raise HTTPException(status_code=403, detail="Réservé aux entreprises")
     
     user_id = current_user["id"]
