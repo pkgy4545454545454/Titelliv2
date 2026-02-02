@@ -24,6 +24,7 @@ import api, { getImageUrl } from '../services/api';
 import { toast } from 'sonner';
 import EnterpriseCard from '../components/EnterpriseCard';
 import ReferralSection from '../components/ReferralSection';
+import EmailPreferences from '../components/EmailPreferences';
 import { useCart } from '../context/CartContext';
 
 const ClientDashboard = () => {
