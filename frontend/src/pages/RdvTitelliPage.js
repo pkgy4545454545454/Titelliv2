@@ -242,28 +242,24 @@ export default function RdvTitelliPage() {
     }
   };
 
-  // Accept invitation
+  // Accept invitation - redirects to Stripe
   const handleAcceptInvitation = async (invitationId) => {
     try {
-      const res = await fetch(`${API_URL}/api/rdv/invitations/${invitationId}/accept?payment_confirmed=true`, {
+      const res = await fetch(`${API_URL}/api/rdv/invitations/${invitationId}/accept`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      if (res.ok) {
-        const data = await res.json();
+      const data = await res.json();
+      
+      if (data.requires_payment && data.checkout_url) {
+        // Redirect to Stripe checkout
+        window.location.href = data.checkout_url;
+      } else if (data.chat_room_id) {
         toast.success('Invitation acceptée !');
-        if (data.chat_room_id) {
-          navigate(`/rdv/chat/${data.chat_room_id}`);
-        }
-        fetchData();
+        navigate(`/rdv/chat/${data.chat_room_id}`);
       } else {
-        const data = await res.json();
-        if (data.requires_payment) {
-          toast.info(`Paiement de ${data.amount} CHF requis`);
-        } else {
-          toast.error(data.detail || 'Erreur');
-        }
+        toast.error(data.detail || 'Erreur');
       }
     } catch (error) {
       toast.error('Erreur de connexion');
