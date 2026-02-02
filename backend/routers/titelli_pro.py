@@ -215,7 +215,7 @@ async def confirm_pro_subscription(
 @router.get("/deliveries", response_model=dict)
 async def get_deliveries(current_user: dict = Depends(get_current_user)):
     """Get B2B delivery clients"""
-    if current_user.get("user_type") != "enterprise":
+    if current_user.get("user_type") not in ["enterprise", "entreprise"]:
         raise HTTPException(status_code=403, detail="Réservé aux entreprises")
     
     deliveries = await db.b2b_deliveries.find(
@@ -232,7 +232,7 @@ async def create_delivery(
     current_user: dict = Depends(get_current_user)
 ):
     """Create a B2B delivery client"""
-    if current_user.get("user_type") != "enterprise":
+    if current_user.get("user_type") not in ["enterprise", "entreprise"]:
         raise HTTPException(status_code=403, detail="Réservé aux entreprises")
     
     # Check Pro++ subscription
@@ -289,7 +289,7 @@ async def delete_delivery(
 @router.get("/liquidations", response_model=dict)
 async def get_liquidations(current_user: dict = Depends(get_current_user)):
     """Get liquidation items"""
-    if current_user.get("user_type") != "enterprise":
+    if current_user.get("user_type") not in ["enterprise", "entreprise"]:
         raise HTTPException(status_code=403, detail="Réservé aux entreprises")
     
     items = await db.liquidation_items.find(
@@ -322,7 +322,7 @@ async def create_liquidation(
     current_user: dict = Depends(get_current_user)
 ):
     """Create a liquidation item"""
-    if current_user.get("user_type") != "enterprise":
+    if current_user.get("user_type") not in ["enterprise", "entreprise"]:
         raise HTTPException(status_code=403, detail="Réservé aux entreprises")
     
     # Check Pro++ subscription
