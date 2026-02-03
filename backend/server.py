@@ -9490,6 +9490,10 @@ app.include_router(gamification_router)
 from routers.webhooks import router as webhooks_router
 app.include_router(webhooks_router)
 
+# Include Admin router
+from routers.admin import router as admin_router
+app.include_router(admin_router)
+
 # Mount uploads folder for serving static images
 app.mount("/api/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
