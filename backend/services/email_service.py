@@ -471,3 +471,98 @@ async def send_payment_confirmation(
         subject=subject,
         html_content=html
     )
+
+
+
+def get_payment_failed_template(user_name: str, service_name: str) -> str:
+    """Template for payment failure notification"""
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #18181b;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #18181b; padding: 20px;">
+            <tr>
+                <td align="center">
+                    <table width="600" cellpadding="0" cellspacing="0" style="background-color: #27272a; border-radius: 16px; overflow: hidden;">
+                        <!-- Header -->
+                        <tr>
+                            <td style="background: linear-gradient(135deg, #ef4444 0%, #f87171 100%); padding: 30px; text-align: center;">
+                                <h1 style="color: white; margin: 0; font-size: 24px;">⚠️ Paiement non effectué</h1>
+                            </td>
+                        </tr>
+                        
+                        <!-- Content -->
+                        <tr>
+                            <td style="padding: 30px;">
+                                <p style="color: #ffffff; font-size: 18px; margin-bottom: 20px;">
+                                    Bonjour <strong>{user_name}</strong>,
+                                </p>
+                                
+                                <p style="color: #a1a1aa; font-size: 16px; line-height: 1.6;">
+                                    Nous n'avons pas pu traiter votre paiement pour <strong style="color: #f87171;">{service_name}</strong>.
+                                </p>
+                                
+                                <p style="color: #a1a1aa; font-size: 14px; line-height: 1.6; margin-top: 20px;">
+                                    Cela peut arriver pour plusieurs raisons :
+                                </p>
+                                
+                                <ul style="color: #a1a1aa; font-size: 14px; line-height: 1.8;">
+                                    <li>Fonds insuffisants</li>
+                                    <li>Carte expirée ou bloquée</li>
+                                    <li>Limite de transaction atteinte</li>
+                                    <li>Problème technique temporaire</li>
+                                </ul>
+                                
+                                <!-- CTA Button -->
+                                <table width="100%" cellpadding="0" cellspacing="0" style="margin: 25px 0;">
+                                    <tr>
+                                        <td align="center">
+                                            <a href="https://titelli-dashboard.preview.emergentagent.com/dashboard/client" 
+                                               style="display: inline-block; background: linear-gradient(135deg, #0047AB 0%, #D4AF37 100%); color: white; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+                                                Réessayer le paiement
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </table>
+                                
+                                <p style="color: #71717a; font-size: 13px; margin-top: 20px;">
+                                    Si vous avez des questions, contactez notre support à support@titelli.ch
+                                </p>
+                            </td>
+                        </tr>
+                        
+                        <!-- Footer -->
+                        <tr>
+                            <td style="background-color: #18181b; padding: 20px; text-align: center; border-top: 1px solid #3f3f46;">
+                                <p style="color: #71717a; font-size: 12px; margin: 0;">
+                                    © 2026 Titelli - Social Commerce Suisse<br>
+                                    <a href="https://titelli-dashboard.preview.emergentagent.com" style="color: #d4af37; text-decoration: none;">titelli.ch</a>
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
+    """
+
+
+async def send_payment_failed(
+    user_email: str,
+    user_name: str,
+    service_name: str
+) -> dict:
+    """Send payment failure notification email"""
+    html = get_payment_failed_template(user_name, service_name)
+    
+    return await send_email(
+        to_email=user_email,
+        subject=f"⚠️ Paiement non effectué - {service_name}",
+        html_content=html
+    )
