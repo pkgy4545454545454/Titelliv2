@@ -9486,6 +9486,10 @@ app.include_router(notifications_router)
 from routers.gamification import router as gamification_router
 app.include_router(gamification_router)
 
+# Include Stripe Webhooks router
+from routers.webhooks import router as webhooks_router
+app.include_router(webhooks_router)
+
 # Mount uploads folder for serving static images
 app.mount("/api/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
