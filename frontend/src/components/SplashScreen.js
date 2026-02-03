@@ -68,6 +68,7 @@ const SplashScreen = ({ onComplete }) => {
         transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
         opacity: fadeOut ? 0 : 1,
         transform: fadeOut ? 'translateX(100%)' : 'translateX(0)',
+        willChange: 'opacity, transform',
       }}
     >
       {/* Background particles - reduced from 20 to 8 for performance */}
