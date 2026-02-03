@@ -123,7 +123,7 @@ const SplashScreen = ({ onComplete }) => {
           }}
         />
         
-        {/* Video logo */}
+        {/* Video logo - optimized with lazy loading and fallback */}
         <div 
           style={{
             width: '150px',
@@ -136,19 +136,38 @@ const SplashScreen = ({ onComplete }) => {
             zIndex: 1,
             background: 'linear-gradient(135deg, #0047AB 0%, #D4AF37 100%)',
             flexShrink: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
+          {/* Fallback logo while video loads */}
+          {!videoLoaded && (
+            <span style={{
+              fontSize: '48px',
+              fontWeight: 'bold',
+              color: '#fff',
+              fontFamily: 'Playfair Display, serif',
+            }}>T</span>
+          )}
           <video 
+            ref={videoRef}
             autoPlay 
             loop 
             muted 
             playsInline
-            preload="auto"
+            preload="metadata"
+            onLoadedData={() => setVideoLoaded(true)}
             style={{
               width: '100%',
               height: '100%',
               objectFit: 'cover',
               transform: 'scale(1.5)',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              opacity: videoLoaded ? 1 : 0,
+              transition: 'opacity 0.3s ease',
             }}
             src={`${process.env.REACT_APP_BACKEND_URL}/api/uploads/video_logo_titelli_final.mp4`}
           />
