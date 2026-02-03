@@ -286,11 +286,15 @@ Collections principales:
 
 ### Fichiers Créés
 - `/app/backend/routers/webhooks.py` - Webhooks Stripe temps réel
+- `/app/backend/routers/subscriptions.py` - Plans client Premium/VIP
+- `/app/backend/uploads/titelli_presentation_30s_voiceover.mp4` - Vidéo marketing finale
+- `/app/backend/uploads/RAPPORT_JOURNALIER_03022026.pdf` - Rapport PDF
+- `/app/backend/uploads/TITELLI_VIDEOS_COMPLET.zip` - Archive vidéos (16 MB)
 
 ### Fichiers Modifiés
 - `/app/frontend/src/components/SplashScreen.js` - Optimisé (3 secondes)
 - `/app/backend/services/email_service.py` - Template échec paiement
-- `/app/backend/server.py` - Inclusion routeurs webhooks et admin
+- `/app/backend/server.py` - Inclusion routeurs webhooks, admin, subscriptions
 
 ---
 
