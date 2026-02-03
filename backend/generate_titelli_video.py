@@ -9,58 +9,86 @@ from emergentintegrations.llm.openai.video_generation import OpenAIVideoGenerati
 
 scenes = [
     {
-        "name": "scene1_reveil",
-        "prompt": """Cinematic scene of a person waking up in a luxurious modern Swiss apartment at sunrise. 
-A well-dressed butler arrives with a beautiful breakfast tray with croissants, fresh juice, and newspaper. 
-Warm golden morning light. Premium lifestyle advertisement. 4K cinematic quality."""
-    },
-    {
-        "name": "scene2_soins_travail",
-        "prompt": """Professional spa therapist giving a relaxing massage to a business person in a modern office setting. 
-The person looks peaceful and relaxed before starting work. Clean, bright, contemporary workspace. 
-Premium corporate wellness. 4K cinematic quality."""
-    },
-    {
         "name": "scene3_chauffeur",
         "prompt": """Elegant chauffeur in uniform opening the door of a luxury black Mercedes for a well-dressed professional. 
-Beautiful Swiss city street in background. Morning commute in style. 
+Beautiful Swiss city street with Alps in background. Morning commute in style. 
 Premium transportation service advertisement. 4K cinematic quality."""
     },
     {
-        "name": "scene4_livraison_panier",
-        "prompt": """A happy mother receiving a beautiful gourmet food basket delivery at her home door. 
-She pays with her phone contactless payment. Warm family atmosphere. 
-Premium delivery service. 4K cinematic quality."""
+        "name": "scene4_formation",
+        "prompt": """Young professional attending an online course on a tablet in a modern bright coworking space. 
+Engaged learning, taking notes, looking inspired. Lifelong learning concept. 
+Premium education and training services. 4K cinematic quality."""
     },
     {
-        "name": "scene5_soiree_soins",
-        "prompt": """Group of elegant women friends enjoying a home spa party with professional beauticians. 
-Candles, champagne, face masks, manicures. Luxurious living room at night. 
-Girls night out at home. Premium wellness experience. 4K cinematic quality."""
+        "name": "scene5_artisan",
+        "prompt": """Artisan craftsman carefully packaging beautiful handmade products in elegant boxes for delivery. 
+Small business owner preparing orders. Warm workshop atmosphere with natural light.
+Local artisan delivery service. 4K cinematic quality."""
     },
     {
-        "name": "scene6_shopping_minuit",
-        "prompt": """Stylish young people shopping online on tablets and phones at midnight in a cozy modern apartment. 
-Packages being delivered even at night by drone. 24/7 shopping convenience. 
-E-commerce premium lifestyle. 4K cinematic quality."""
+        "name": "scene6_livraison_panier",
+        "prompt": """Happy mother at home door receiving a beautiful gourmet food basket delivery from a friendly delivery person. 
+She pays contactless with her phone, smiling. Warm family home atmosphere.
+Premium grocery delivery service. 4K cinematic quality."""
     },
     {
-        "name": "scene7_medecin_domicile",
-        "prompt": """Professional doctor in white coat making a house call to check on an elderly patient at home. 
-Warm, caring interaction. Medical equipment, professional but friendly atmosphere. 
-Premium healthcare at home service. 4K cinematic quality."""
+        "name": "scene7_soiree_copines",
+        "prompt": """Group of elegant women friends enjoying a home spa night with professional beauticians giving manicures and facials. 
+Candles, champagne glasses, relaxed atmosphere. Luxurious living room at night.
+Premium home wellness party. 4K cinematic quality."""
     },
     {
-        "name": "scene8_chef_maison",
-        "prompt": """Professional chef cooking a gourmet meal in a beautiful modern home kitchen. 
-Family watching with excitement. Flames, fresh ingredients, artistic plating. 
-Private chef experience. Premium culinary service. 4K cinematic quality."""
+        "name": "scene8_shopping_minuit",
+        "prompt": """Young stylish people shopping online on glowing tablets and phones at midnight in cozy modern apartment. 
+Delivery drone arriving at the window with packages. 24/7 convenience lifestyle.
+E-commerce midnight shopping. 4K cinematic quality."""
+    },
+    {
+        "name": "scene9_theatre_maison",
+        "prompt": """Small private theater performance in an elegant living room. Professional actors performing for a family.
+Dramatic lighting, captivated audience on luxury sofas. Intimate cultural experience.
+Premium home entertainment service. 4K cinematic quality."""
+    },
+    {
+        "name": "scene10_medecin",
+        "prompt": """Professional doctor in white coat making a house call, examining elderly patient with care.
+Modern medical equipment, warm caring interaction. Family members watching gratefully.
+Premium home healthcare service. 4K cinematic quality."""
+    },
+    {
+        "name": "scene11_chef",
+        "prompt": """Professional chef in white uniform cooking gourmet meal in modern home kitchen.
+Family watching with excitement as flames rise. Fresh ingredients, artistic plating.
+Private chef home cooking experience. 4K cinematic quality."""
+    },
+    {
+        "name": "scene12_personnes_agees",
+        "prompt": """Kind caregiver helping elegant elderly person walk in beautiful garden.
+Wheelchair nearby, gentle support, peaceful outdoor setting with flowers.
+Premium elderly care and companionship service. 4K cinematic quality."""
+    },
+    {
+        "name": "scene13_travaux",
+        "prompt": """Professional handyman in clean uniform fixing details in beautiful modern home.
+Homeowner watching satisfied. Quality tools, attention to detail, premium service.
+Home improvement specialist service. 4K cinematic quality."""
+    },
+    {
+        "name": "scene14_finale",
+        "prompt": """Happy diverse people enjoying life in beautiful Swiss city. Morning joggers, coffee shops, families.
+Everyone well-dressed, relaxed, smiling. Golden hour sunlight. Life made easier.
+Utopian lifestyle, premium services everywhere. 4K cinematic quality."""
     }
 ]
 
-print("🎬 Début de la génération des scènes 'Le Monde Après Titelli'")
-print(f"   Total: {len(scenes)} scènes à générer")
+print("🎬 GÉNÉRATION VIDÉO 'LE MONDE APRÈS TITELLI'")
+print(f"   Total: {len(scenes)} nouvelles scènes à générer")
+print("   (Les scènes 1-2 sont déjà générées)")
 print("", flush=True)
+
+generated_count = 0
+failed_count = 0
 
 for i, scene in enumerate(scenes):
     print(f"🎬 [{i+1}/{len(scenes)}] Génération: {scene['name']}...", flush=True)
@@ -81,20 +109,17 @@ for i, scene in enumerate(scenes):
             video_gen.save_video(video_bytes, output_path)
             elapsed = time.time() - start_time
             print(f"   ✅ Terminé en {elapsed:.1f}s: {output_path}", flush=True)
+            generated_count += 1
         else:
             print(f"   ❌ Échec: {scene['name']}", flush=True)
+            failed_count += 1
     except Exception as e:
         print(f"   ❌ Erreur: {e}", flush=True)
+        failed_count += 1
     
     print("", flush=True)
 
-print("🎬 Génération terminée!", flush=True)
 print("", flush=True)
-print("=== ASSEMBLAGE FINAL ===", flush=True)
-
-# List all generated files
-import subprocess
-result = subprocess.run(['ls', '-la', '/app/backend/uploads/'], capture_output=True, text=True)
-for line in result.stdout.split('\n'):
-    if 'titelli_monde' in line:
-        print(f"   {line}", flush=True)
+print("═" * 60, flush=True)
+print(f"🎬 GÉNÉRATION TERMINÉE: {generated_count} réussies, {failed_count} échecs", flush=True)
+print("═" * 60, flush=True)
