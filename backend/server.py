@@ -9494,6 +9494,10 @@ app.include_router(webhooks_router)
 from routers.admin import router as admin_router
 app.include_router(admin_router)
 
+# Include Client Subscriptions router (Premium/VIP)
+from routers.subscriptions import router as subscriptions_router
+app.include_router(subscriptions_router)
+
 # Mount uploads folder for serving static images
 app.mount("/api/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
