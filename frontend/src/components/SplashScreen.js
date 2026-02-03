@@ -70,22 +70,22 @@ const SplashScreen = ({ onComplete }) => {
         transform: fadeOut ? 'translateX(100%)' : 'translateX(0)',
       }}
     >
-      {/* Background particles */}
+      {/* Background particles - reduced from 20 to 8 for performance */}
       <div className="particles">
-        {[...Array(20)].map((_, i) => (
+        {[...Array(8)].map((_, i) => (
           <div 
             key={i} 
             className="particle"
             style={{
               position: 'absolute',
-              width: Math.random() * 4 + 2 + 'px',
-              height: Math.random() * 4 + 2 + 'px',
+              width: '4px',
+              height: '4px',
               background: 'rgba(212, 175, 55, 0.3)',
               borderRadius: '50%',
-              left: Math.random() * 100 + '%',
-              top: Math.random() * 100 + '%',
-              animation: `float ${Math.random() * 3 + 2}s ease-in-out infinite`,
-              animationDelay: Math.random() * 2 + 's',
+              left: `${12.5 * i}%`,
+              top: `${10 + (i % 3) * 30}%`,
+              animation: `float 3s ease-in-out infinite`,
+              animationDelay: `${i * 0.2}s`,
             }}
           />
         ))}
