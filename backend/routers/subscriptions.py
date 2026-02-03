@@ -11,7 +11,7 @@ import logging
 
 from .shared import db, get_current_user, STRIPE_API_KEY
 
-router = APIRouter(prefix="/api/subscriptions", tags=["Client Premium"])
+router = APIRouter(prefix="/api/client-subscriptions", tags=["Client Premium"])
 logger = logging.getLogger(__name__)
 
 # Stripe config
