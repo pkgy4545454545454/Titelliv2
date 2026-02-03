@@ -1,23 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const SplashScreen = ({ onComplete }) => {
   const [progress, setProgress] = useState(0);
   const [currentPhrase, setCurrentPhrase] = useState(0);
   const [fadeOut, setFadeOut] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+  const videoRef = useRef(null);
 
+  // Reduced phrases for faster loading (3 seconds total)
   const phrases = [
     "Découvrez les meilleurs prestataires...",
-    "Services de qualité près de chez vous",
     "Beauté • Bien-être • Artisanat",
-    "Votre région, vos talents",
-    "Réservez en quelques clics",
-    "Des professionnels certifiés",
-    "L'excellence à portée de main",
     "Titelli - Votre marketplace locale"
   ];
 
+  // Optimized: 3 second splash screen
+  const SPLASH_DURATION = 3000;
+  const PROGRESS_INTERVAL = SPLASH_DURATION / 100;
+
   useEffect(() => {
-    // Progress bar animation (10 seconds)
+    // Progress bar animation (3 seconds)
     const progressInterval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 100) {
@@ -26,20 +28,20 @@ const SplashScreen = ({ onComplete }) => {
         }
         return prev + 1;
       });
-    }, 100);
+    }, PROGRESS_INTERVAL);
 
-    // Phrase rotation
+    // Phrase rotation (1 second each)
     const phraseInterval = setInterval(() => {
       setCurrentPhrase(prev => (prev + 1) % phrases.length);
-    }, 1250);
+    }, 1000);
 
-    // Complete after 10 seconds
+    // Complete after 3 seconds
     const completeTimeout = setTimeout(() => {
       setFadeOut(true);
       setTimeout(() => {
         onComplete();
-      }, 800);
-    }, 10000);
+      }, 500); // Reduced fade time
+    }, SPLASH_DURATION);
 
     return () => {
       clearInterval(progressInterval);
