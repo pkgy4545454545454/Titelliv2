@@ -379,4 +379,4 @@ POST /api/gamification/log_action - Logger action (interne)
 ---
 
 **Document généré le:** Février 2026
-**URL Application:** https://titelli-social.preview.emergentagent.com
+**URL Application:** https://titelli-dashboard.preview.emergentagent.com
