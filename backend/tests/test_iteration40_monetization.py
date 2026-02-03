@@ -109,18 +109,18 @@ class TestStripePaymentFlows:
         assert "checkout.stripe.com" in data["url"]
         print(f"✅ Premium checkout URL: {data['url'][:80]}...")
     
-    def test_vip_subscription_checkout(self, client_token):
-        """Test VIP subscription checkout (19.99 CHF) - uses query param"""
+    def test_premium_mvp_subscription_checkout(self, client_token):
+        """Test Premium MVP subscription checkout - uses query param"""
         headers = {"Authorization": f"Bearer {client_token}"}
         response = requests.post(
-            f"{BASE_URL}/api/subscriptions/checkout?plan_id=vip",
+            f"{BASE_URL}/api/subscriptions/checkout?plan_id=premium_mvp",
             headers=headers
         )
         assert response.status_code == 200
         data = response.json()
         assert "url" in data
         assert "checkout.stripe.com" in data["url"]
-        print(f"✅ VIP checkout URL: {data['url'][:80]}...")
+        print(f"✅ Premium MVP checkout URL: {data['url'][:80]}...")
 
 
 class TestRDVTitelliMonetization:
