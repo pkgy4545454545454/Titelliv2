@@ -71,7 +71,7 @@ for i, scene in enumerate(scenes):
         video_bytes = video_gen.text_to_video(
             prompt=scene['prompt'],
             model="sora-2",
-            size="1792x1024",
+            size="1280x720",
             duration=4,
             max_wait_time=600
         )
