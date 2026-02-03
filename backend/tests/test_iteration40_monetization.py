@@ -63,7 +63,6 @@ class TestAuthentication:
         assert "token" in data
         assert data["user"]["email"] == TEST_CREDENTIALS["admin"]["email"]
         print(f"✅ Admin login successful: {data['user']['email']}")
-        return data["token"]
     
     def test_client_login(self):
         """Test client login"""
@@ -73,7 +72,6 @@ class TestAuthentication:
         assert "token" in data
         assert data["user"]["user_type"] == "client"
         print(f"✅ Client login successful: {data['user']['email']}")
-        return data["token"]
     
     def test_enterprise_login(self):
         """Test enterprise login"""
@@ -83,7 +81,6 @@ class TestAuthentication:
         assert "token" in data
         assert data["user"]["user_type"] in ["enterprise", "entreprise"]
         print(f"✅ Enterprise login successful: {data['user']['email']}")
-        return data["token"]
 
 
 class TestStripePaymentFlows:
@@ -100,34 +97,30 @@ class TestStripePaymentFlows:
         return response.json()["token"]
     
     def test_premium_subscription_checkout(self, client_token):
-        """Test Premium subscription checkout (9.99 CHF)"""
+        """Test Premium subscription checkout (9.99 CHF) - uses query param"""
         headers = {"Authorization": f"Bearer {client_token}"}
         response = requests.post(
-            f"{BASE_URL}/api/subscriptions/checkout",
-            json={"plan_id": "premium"},
+            f"{BASE_URL}/api/subscriptions/checkout?plan_id=premium",
             headers=headers
         )
         assert response.status_code == 200
         data = response.json()
-        assert "checkout_url" in data or "url" in data
-        checkout_url = data.get("checkout_url") or data.get("url")
-        assert "checkout.stripe.com" in checkout_url
-        print(f"✅ Premium checkout URL: {checkout_url[:80]}...")
+        assert "url" in data
+        assert "checkout.stripe.com" in data["url"]
+        print(f"✅ Premium checkout URL: {data['url'][:80]}...")
     
     def test_vip_subscription_checkout(self, client_token):
-        """Test VIP subscription checkout (19.99 CHF)"""
+        """Test VIP subscription checkout (19.99 CHF) - uses query param"""
         headers = {"Authorization": f"Bearer {client_token}"}
         response = requests.post(
-            f"{BASE_URL}/api/subscriptions/checkout",
-            json={"plan_id": "vip"},
+            f"{BASE_URL}/api/subscriptions/checkout?plan_id=vip",
             headers=headers
         )
         assert response.status_code == 200
         data = response.json()
-        assert "checkout_url" in data or "url" in data
-        checkout_url = data.get("checkout_url") or data.get("url")
-        assert "checkout.stripe.com" in checkout_url
-        print(f"✅ VIP checkout URL: {checkout_url[:80]}...")
+        assert "url" in data
+        assert "checkout.stripe.com" in data["url"]
+        print(f"✅ VIP checkout URL: {data['url'][:80]}...")
 
 
 class TestRDVTitelliMonetization:
@@ -149,23 +142,22 @@ class TestRDVTitelliMonetization:
         print(f"✅ RDV Categories: {len(data['categories'])} categories")
     
     def test_romantic_subscription_checkout(self, client_token):
-        """Test romantic subscription checkout (200 CHF/month)"""
+        """Test romantic subscription checkout (200 CHF/month) - correct endpoint"""
         headers = {"Authorization": f"Bearer {client_token}"}
         response = requests.post(
-            f"{BASE_URL}/api/rdv/romantic/subscribe",
+            f"{BASE_URL}/api/rdv/subscriptions/romantic",
             headers=headers
         )
         # Should return checkout URL or already subscribed message
-        assert response.status_code in [200, 400]
+        assert response.status_code == 200
         data = response.json()
-        if response.status_code == 200:
-            if "checkout_url" in data:
-                assert "checkout.stripe.com" in data["checkout_url"]
-                print(f"✅ Romantic subscription checkout: {data['checkout_url'][:80]}...")
-            else:
-                print(f"✅ Romantic subscription response: {data}")
+        if "checkout_url" in data:
+            assert "checkout.stripe.com" in data["checkout_url"]
+            print(f"✅ Romantic subscription checkout: {data['checkout_url'][:80]}...")
+        elif "has_subscription" in data:
+            print(f"✅ Romantic subscription: Already subscribed - {data.get('message', 'active')}")
         else:
-            print(f"ℹ️ Romantic subscription: {data.get('message', data)}")
+            print(f"✅ Romantic subscription response: {data}")
 
 
 class TestLifestylePasses:
@@ -343,16 +335,17 @@ class TestAdminRoutes:
         return response.json()["token"]
     
     def test_admin_stats(self, admin_token):
-        """Test admin stats endpoint"""
+        """Test admin stats endpoint - actual response structure"""
         headers = {"Authorization": f"Bearer {admin_token}"}
         response = requests.get(f"{BASE_URL}/api/admin/stats", headers=headers)
         assert response.status_code == 200
         data = response.json()
-        assert "users" in data
-        assert "enterprises" in data
-        assert "orders" in data
-        assert "revenue" in data
-        print(f"✅ Admin stats: Users={data['users']['total']}, Enterprises={data['enterprises']['total']}")
+        # Actual response has: stats, recent_users, recent_orders
+        assert "stats" in data
+        assert "total_users" in data["stats"]
+        assert "total_enterprises" in data["stats"]
+        assert "total_orders" in data["stats"]
+        print(f"✅ Admin stats: Users={data['stats']['total_users']}, Enterprises={data['stats']['total_enterprises']}, Orders={data['stats']['total_orders']}")
     
     def test_admin_stats_forbidden_for_client(self, client_token):
         """Test that clients cannot access admin stats"""
@@ -401,14 +394,16 @@ class TestReferralSystem:
         print(f"✅ Referral code: {data['code']}")
     
     def test_referral_stats(self, client_token):
-        """Test referral stats"""
+        """Test referral stats - actual response structure"""
         headers = {"Authorization": f"Bearer {client_token}"}
         response = requests.get(f"{BASE_URL}/api/gamification/referral/stats", headers=headers)
         assert response.status_code == 200
         data = response.json()
-        assert "total_referrals" in data
-        assert "points_earned" in data
-        print(f"✅ Referral stats: {data['total_referrals']} referrals, {data['points_earned']} points")
+        # Actual response has: referrals_count, total_points_earned, code, referrals, bonuses_achieved, next_bonus
+        assert "referrals_count" in data
+        assert "total_points_earned" in data
+        assert "code" in data
+        print(f"✅ Referral stats: {data['referrals_count']} referrals, {data['total_points_earned']} points")
     
     def test_referral_leaderboard(self, client_token):
         """Test referral leaderboard"""
@@ -526,14 +521,15 @@ class TestGamificationProfile:
         return response.json()["token"]
     
     def test_gamification_profile(self, client_token):
-        """Test gamification profile endpoint"""
+        """Test gamification profile endpoint - actual response structure"""
         headers = {"Authorization": f"Bearer {client_token}"}
         response = requests.get(f"{BASE_URL}/api/gamification/profile", headers=headers)
         assert response.status_code == 200
         data = response.json()
-        assert "points" in data
+        # Actual response has: total_points, level, badges, badges_count, login_streak, etc.
+        assert "total_points" in data
         assert "level" in data
-        print(f"✅ Gamification profile: {data['points']} points, level {data['level']}")
+        print(f"✅ Gamification profile: {data['total_points']} points, level {data['level']['name']}")
     
     def test_gamification_levels(self, client_token):
         """Test gamification levels endpoint"""
@@ -544,6 +540,26 @@ class TestGamificationProfile:
         assert "levels" in data
         assert len(data["levels"]) >= 8
         print(f"✅ Gamification levels: {len(data['levels'])} levels")
+
+
+class TestProFeatures:
+    """Test Pro++ features for enterprises"""
+    
+    @pytest.fixture
+    def enterprise_token(self):
+        response = requests.post(f"{BASE_URL}/api/auth/login", json=TEST_CREDENTIALS["enterprise"])
+        return response.json()["token"]
+    
+    def test_pro_features(self, enterprise_token):
+        """Test Pro++ features endpoint"""
+        headers = {"Authorization": f"Bearer {enterprise_token}"}
+        response = requests.get(f"{BASE_URL}/api/specialists/pro/features", headers=headers)
+        assert response.status_code == 200
+        data = response.json()
+        assert "name" in data
+        assert data["price"] == 199.0
+        assert "features" in data
+        print(f"✅ Pro++ features: {data['name']} - {data['price']} CHF")
 
 
 if __name__ == "__main__":
