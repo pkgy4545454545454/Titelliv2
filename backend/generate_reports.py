@@ -52,9 +52,11 @@ class TitelliPDF(FPDF):
     def bullet_point(self, text, indent=10):
         self.set_font('Helvetica', '', 10)
         self.set_text_color(0, 0, 0)
-        self.set_x(self.get_x() + indent)
-        self.cell(5, 6, chr(149))
-        self.multi_cell(0, 6, text)
+        x = self.get_x()
+        self.set_x(x + indent)
+        self.cell(5, 6, '-')
+        self.set_x(x + indent + 5)
+        self.multi_cell(180 - indent, 6, text)
 
 def generate_daily_report():
     """Génère le rapport journalier"""
