@@ -239,7 +239,7 @@ Collections principales:
 ---
 
 ## URL Application
-**Production**: https://titelli-dashboard.preview.emergentagent.com
+**Production**: https://scraper-portal-1.preview.emergentagent.com
 
 ---
 
