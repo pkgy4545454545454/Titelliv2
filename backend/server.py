@@ -3297,17 +3297,10 @@ async def export_accounting_pdf(
         }
     )
 
-# ============ CASHBACK ROUTES ============
+# NOTE: Cashback routes moved to routers/cashback.py
 
-@api_router.get("/cashback/balance")
-async def get_cashback_balance(current_user: dict = Depends(get_current_user)):
-    # Get fresh balance from DB
-    user = await db.users.find_one({"id": current_user['id']}, {"_id": 0})
-    return {"balance": user.get('cashback_balance', 0.0) if user else 0.0}
-
-@api_router.post("/cashback/add")
-async def add_cashback(user_id: str, amount: float, current_user: dict = Depends(get_current_user)):
-    # Only admin or system can add cashback
+# ============ FEATURED/TRENDING ROUTES ============
+# NOTE: Cashback endpoints now served by cashback_router
     if current_user.get('email') != 'admin@titelli.com':
         raise HTTPException(status_code=403, detail="Non autorisé")
     
