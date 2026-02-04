@@ -3,6 +3,15 @@
 ## Overview
 Titelli est une plateforme de social commerce régionale pour les services et produits en Suisse (région de Lausanne). Elle connecte les entreprises locales avec les clients pour des services comme la beauté, le bien-être, les restaurants et le commerce de luxe.
 
+## Last Update: 4 Février 2026
+
+### Session Progress
+- ✅ **PDFs Générés**: Rapport journalier + Cahier des charges monétisation
+- ✅ **Liens vidéo fournis**: 12 scènes + vidéo complète "Le Monde Après Titelli"
+- ✅ **Refactoring server.py**: Réduction de 285 lignes (10,283 → 9,998)
+- ✅ **Nouveau router créé**: `routers/cashback.py` (routes cashback extraites)
+- 🔄 **Scraping en cours**: ~10% complété (125/1211 catégories), 8,213 entreprises
+
 ## Core Features
 
 ### 1. Multi-User System
