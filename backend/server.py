@@ -9200,8 +9200,10 @@ from routers.webhooks import router as webhooks_router
 app.include_router(webhooks_router)
 
 # Include Admin router
-from routers.admin import router as admin_router
-app.include_router(admin_router)
+# NOTE: Admin routes are currently in server.py (more complete implementation)
+# TODO: Migrate server.py admin routes to admin.py in future refactoring
+# from routers.admin import router as admin_router
+# app.include_router(admin_router)
 
 # Include Client Subscriptions router (Premium/VIP)
 from routers.subscriptions import router as subscriptions_router
