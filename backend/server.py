@@ -9498,6 +9498,10 @@ app.include_router(admin_router)
 from routers.subscriptions import router as subscriptions_router
 app.include_router(subscriptions_router)
 
+# Include Cashback router
+from routers.cashback import router as cashback_router
+app.include_router(cashback_router)
+
 # Mount uploads folder for serving static images
 app.mount("/api/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
