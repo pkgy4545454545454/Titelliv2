@@ -669,7 +669,7 @@ async def create_pub_order(
             "id": "sur_mesure",
             "name": "Création Sur Mesure",
             "category": "Sur Mesure",
-            "price": 79.90
+            "price": 149.90
         }
     else:
         template = next((t for t in TEMPLATES if t["id"] == order.template_id), None)
