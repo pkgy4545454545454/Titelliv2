@@ -3,7 +3,25 @@
 ## Overview
 Titelli est une plateforme de social commerce régionale pour les services et produits en Suisse (région de Lausanne). Elle connecte les entreprises locales avec les clients pour des services comme la beauté, le bien-être, les restaurants et le commerce de luxe.
 
-## Last Update: 5 Février 2026
+## Last Update: 6 Février 2026
+
+### Session Progress - 6 Février 2026
+
+#### ✅ Intégration Stripe Pub Média (NOUVEAU)
+- **Paiement Stripe LIVE** intégré pour les commandes "Pub Média"
+- **Endpoints backend**:
+  - `POST /api/media-pub/payment/create-session` - Créer session Stripe Checkout
+  - `GET /api/media-pub/payment/status/{session_id}` - Vérifier statut paiement
+  - `POST /api/media-pub/webhook/stripe` - Webhook Stripe
+  - `GET /api/media-pub/orders/{order_id}/download` - Télécharger image HD (après paiement)
+- **Frontend mis à jour** : Redirection vers Stripe Checkout, polling du statut, écrans de succès
+- **Collection MongoDB** : `payment_transactions` pour tracer les paiements
+- **Protection filigrane** : Image HD sans filigrane disponible uniquement après paiement confirmé
+
+#### ✅ Enrichissement Entreprises (EN COURS)
+- Script `enrich_enterprises.py` relancé pour 300 entreprises
+- Capture automatique de logos, images de couverture et descriptions
+- Progrès : ~150/300 entreprises traitées en arrière-plan
 
 ### Session Progress - 5 Février 2026
 
