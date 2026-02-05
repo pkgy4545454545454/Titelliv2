@@ -33,6 +33,7 @@ import RdvChatPage from './pages/RdvChatPage';
 import SpecialistsPage from './pages/SpecialistsPage';
 import TitelliProPage from './pages/TitelliProPage';
 import SportsPage from './pages/SportsPage';
+import MediaPubPage from './pages/MediaPubPage';
 
 import './index.css';
 
