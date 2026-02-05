@@ -234,8 +234,12 @@ const DraggableElement = ({ element, isSelected, onSelect, onUpdate, onDelete })
 
 const MediaPubPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const enterpriseId = searchParams.get('enterprise_id');
+  const sessionId = searchParams.get('session_id');
+  const orderId = searchParams.get('order_id');
+  const cancelled = searchParams.get('cancelled');
   const canvasRef = useRef(null);
   
   const [templates, setTemplates] = useState([]);
@@ -248,6 +252,8 @@ const MediaPubPage = () => {
   const [loading, setLoading] = useState(true);
   const [orderStep, setOrderStep] = useState('browse');
   const [previewZoom, setPreviewZoom] = useState(100);
+  const [paymentError, setPaymentError] = useState(null);
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
   
   const [canvasElements, setCanvasElements] = useState([]);
   const [selectedElementId, setSelectedElementId] = useState(null);
