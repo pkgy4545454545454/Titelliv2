@@ -193,74 +193,7 @@ function AppRoutes() {
   );
 }
 
-// Simple Static Pages
-const AboutPage = () => (
-  <div className="min-h-screen bg-[#050505] pt-24 px-4">
-    <div className="max-w-4xl mx-auto py-16">
-      <h1 className="text-4xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
-        À propos de Titelli
-      </h1>
-      <div className="prose prose-invert max-w-none">
-        <p className="text-gray-400 text-lg leading-relaxed mb-6">
-          Titelli est la plateforme de référence pour découvrir et connecter les meilleurs prestataires de services et produits de la région de Lausanne.
-        </p>
-        <p className="text-gray-400 text-lg leading-relaxed mb-6">
-          Notre mission est d'exposer les talents locaux et de permettre aux clients de trouver facilement des prestataires de confiance, certifiés et labellisés.
-        </p>
-        <h2 className="text-2xl font-bold text-white mt-12 mb-6">Notre vision</h2>
-        <p className="text-gray-400 text-lg leading-relaxed mb-6">
-          Nous croyons en la qualité locale et souhaitons mettre en avant les entreprises qui font la richesse de notre région. Chaque prestataire sur Titelli est sélectionné pour son expertise et son engagement envers la satisfaction client.
-        </p>
-      </div>
-    </div>
-  </div>
-);
-
-const CGVPage = () => (
-  <div className="min-h-screen bg-[#050505] pt-24 px-4">
-    <div className="max-w-4xl mx-auto py-16">
-      <h1 className="text-4xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
-        Conditions Générales de Vente
-      </h1>
-      <div className="prose prose-invert max-w-none text-gray-400">
-        <h2 className="text-xl font-bold text-white mt-8 mb-4">Article 1 - Objet</h2>
-        <p className="mb-4">Les présentes conditions générales de vente régissent l'utilisation de la plateforme Titelli...</p>
-        
-        <h2 className="text-xl font-bold text-white mt-8 mb-4">Article 2 - Tarification</h2>
-        <ul className="list-disc pl-6 space-y-2">
-          <li>Inscription annuelle: 250 CHF</li>
-          <li>Service Premium annuel: 540 CHF</li>
-          <li>Service Premium mensuel: 45 CHF</li>
-          <li>Commission sur ventes: 10-20%</li>
-        </ul>
-        
-        <h2 className="text-xl font-bold text-white mt-8 mb-4">Article 3 - Paiements</h2>
-        <p className="mb-4">Tous les paiements sont sécurisés via Stripe. Les prix sont en CHF.</p>
-      </div>
-    </div>
-  </div>
-);
-
-const MentionsLegalesPage = () => (
-  <div className="min-h-screen bg-[#050505] pt-24 px-4">
-    <div className="max-w-4xl mx-auto py-16">
-      <h1 className="text-4xl font-bold text-white mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>
-        Mentions Légales
-      </h1>
-      <div className="prose prose-invert max-w-none text-gray-400">
-        <h2 className="text-xl font-bold text-white mt-8 mb-4">Éditeur</h2>
-        <p className="mb-4">Titelli SA<br />Lausanne, Suisse</p>
-        
-        <h2 className="text-xl font-bold text-white mt-8 mb-4">Hébergement</h2>
-        <p className="mb-4">Les données sont hébergées de manière sécurisée en Suisse.</p>
-        
-        <h2 className="text-xl font-bold text-white mt-8 mb-4">Protection des données</h2>
-        <p className="mb-4">Conformément à la LPD suisse et au RGPD, vos données personnelles sont protégées.</p>
-      </div>
-    </div>
-  </div>
-);
-
+// Simple Static Pages (keep only PartenairesPage, ServiceClientPage, NotFoundPage)
 const PartenairesPage = () => (
   <div className="min-h-screen bg-[#050505] pt-24 px-4">
     <div className="max-w-4xl mx-auto py-16">
