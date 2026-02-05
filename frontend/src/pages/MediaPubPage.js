@@ -409,51 +409,60 @@ const MediaPubPage = () => {
     }
   };
 
-  // Watermark Component
+  // Watermark Component - Filigrane très visible
   const Watermark = () => (
     <div 
-      className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden"
+      className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg"
       style={{ zIndex: 1000 }}
     >
-      {/* Motif répété de filigrane */}
-      <div className="absolute inset-0" style={{
-        backgroundImage: `repeating-linear-gradient(
-          -45deg,
-          transparent,
-          transparent 100px,
-          rgba(255,255,255,0.03) 100px,
-          rgba(255,255,255,0.03) 200px
-        )`
-      }} />
+      {/* Overlay semi-transparent */}
+      <div className="absolute inset-0 bg-black/10" />
       
-      {/* Filigrane central */}
+      {/* Grille de filigranes répétés */}
+      <div className="absolute inset-0 flex flex-wrap justify-center items-center">
+        {[...Array(9)].map((_, i) => (
+          <div 
+            key={i}
+            className="text-2xl font-black transform -rotate-45 mx-8 my-4"
+            style={{
+              color: 'rgba(255,255,255,0.35)',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+              letterSpacing: '4px'
+            }}
+          >
+            TITELLI
+          </div>
+        ))}
+      </div>
+      
+      {/* Filigrane central très visible */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div 
-          className="text-6xl font-black opacity-20 transform -rotate-30"
+          className="text-5xl md:text-6xl font-black transform -rotate-12"
           style={{
-            color: '#FFFFFF',
-            textShadow: '0 0 20px rgba(0,0,0,0.5)',
-            letterSpacing: '20px'
+            color: 'rgba(255,255,255,0.5)',
+            textShadow: '3px 3px 6px rgba(0,0,0,0.7)',
+            letterSpacing: '8px',
+            WebkitTextStroke: '1px rgba(0,0,0,0.3)'
           }}
         >
           TITELLI
         </div>
       </div>
       
-      {/* Filigranes multiples */}
-      {[...Array(6)].map((_, i) => (
-        <div 
-          key={i}
-          className="absolute text-3xl font-bold opacity-10 transform -rotate-45"
-          style={{
-            color: '#FFFFFF',
-            left: `${(i % 3) * 40 - 20}%`,
-            top: `${Math.floor(i / 3) * 60 + 10}%`,
-          }}
-        >
-          TITELLI
-        </div>
-      ))}
+      {/* Bandes diagonales */}
+      <div 
+        className="absolute inset-0"
+        style={{
+          backgroundImage: `repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 30px,
+            rgba(255,255,255,0.05) 30px,
+            rgba(255,255,255,0.05) 60px
+          )`
+        }}
+      />
     </div>
   );
 
