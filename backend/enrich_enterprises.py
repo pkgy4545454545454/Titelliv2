@@ -22,7 +22,7 @@ from playwright.async_api import async_playwright
 MONGO_URL = "mongodb+srv://prankgy:Minijetaime1996@cluster0.kwjifsg.mongodb.net/secondevie?retryWrites=true&w=majority&appName=Cluster0"
 UPLOADS_DIR = "/app/backend/uploads/enterprises"
 BASE_URL = "https://scraper-portal-1.preview.emergentagent.com"
-MAX_ENTERPRISES = 50  # Limiter pour le premier run
+MAX_ENTERPRISES = 200  # Enrichir plus d'entreprises
 
 # Setup logging
 logging.basicConfig(
