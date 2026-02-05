@@ -58,7 +58,8 @@ def add_text_overlay(image_bytes: bytes, product_name: str, slogan: str, descrip
         
         # Couleurs
         primary_color = brand_colors[0] if brand_colors else "#FFFFFF"
-        secondary_color = brand_colors[1] if len(brand_colors) > 1 else "#FFFFFF"
+        # secondary_color available for future use
+        _ = brand_colors[1] if len(brand_colors) > 1 else "#FFFFFF"
         
         # Convertir hex en RGB
         def hex_to_rgb(hex_color):
