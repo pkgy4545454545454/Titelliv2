@@ -38,142 +38,464 @@ os.makedirs(UPLOADS_DIR, exist_ok=True)
 
 
 # ============ TEMPLATES CATALOGUE ============
-# Templates inspirés Canva pour différents formats pub
+# Templates style Canva avec plusieurs modèles par catégorie
 
 TEMPLATES = [
-    # RÉSEAUX SOCIAUX
+    # =============== RÉSEAUX SOCIAUX - Instagram/Facebook ===============
     {
         "id": "social_promo_1",
-        "name": "Promo Flash",
+        "name": "Promo Flash Moderne",
         "category": "Réseaux Sociaux",
+        "subcategory": "Instagram Post",
         "format": "1080x1080",
-        "description": "Template carré idéal pour Instagram et Facebook. Design moderne avec mise en avant du produit.",
-        "preview_url": "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&h=400&fit=crop",
+        "description": "Design épuré avec grande zone texte centrale. Idéal pour promotions.",
+        "preview_url": "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=500&h=500&fit=crop",
         "price": 29.90,
-        "popular": True
+        "popular": True,
+        "text_position": "center",
+        "text_style": "bold_overlay"
+    },
+    {
+        "id": "social_promo_2",
+        "name": "Vente Flash Néon",
+        "category": "Réseaux Sociaux",
+        "subcategory": "Instagram Post",
+        "format": "1080x1080",
+        "description": "Style néon vibrant avec effets lumineux. Attire l'attention.",
+        "preview_url": "https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=500&h=500&fit=crop",
+        "price": 29.90,
+        "popular": False,
+        "text_position": "center",
+        "text_style": "neon"
+    },
+    {
+        "id": "social_promo_3",
+        "name": "Minimaliste Chic",
+        "category": "Réseaux Sociaux",
+        "subcategory": "Instagram Post",
+        "format": "1080x1080",
+        "description": "Design minimaliste élégant. Parfait pour marques luxe.",
+        "preview_url": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&h=500&fit=crop",
+        "price": 29.90,
+        "popular": True,
+        "text_position": "bottom",
+        "text_style": "minimal"
+    },
+    {
+        "id": "social_promo_4",
+        "name": "Gradient Tendance",
+        "category": "Réseaux Sociaux",
+        "subcategory": "Instagram Post",
+        "format": "1080x1080",
+        "description": "Dégradés colorés modernes. Style tech et startup.",
+        "preview_url": "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=500&h=500&fit=crop",
+        "price": 29.90,
+        "popular": False,
+        "text_position": "center",
+        "text_style": "gradient"
     },
     {
         "id": "social_story_1",
         "name": "Story Élégante",
         "category": "Réseaux Sociaux",
+        "subcategory": "Instagram Story",
         "format": "1080x1920",
-        "description": "Format story vertical pour Instagram/Facebook. Style épuré et professionnel.",
+        "description": "Format story vertical. Style épuré professionnel.",
         "preview_url": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=300&h=533&fit=crop",
         "price": 24.90,
-        "popular": True
+        "popular": True,
+        "text_position": "center",
+        "text_style": "story"
+    },
+    {
+        "id": "social_story_2",
+        "name": "Story Dynamique",
+        "category": "Réseaux Sociaux",
+        "subcategory": "Instagram Story",
+        "format": "1080x1920",
+        "description": "Design énergique avec formes géométriques.",
+        "preview_url": "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=300&h=533&fit=crop",
+        "price": 24.90,
+        "popular": False,
+        "text_position": "top",
+        "text_style": "dynamic"
     },
     {
         "id": "social_carousel_1",
         "name": "Carousel Produit",
         "category": "Réseaux Sociaux",
+        "subcategory": "Carousel",
         "format": "1080x1080",
-        "description": "Design pour carousel multi-images. Présentation de plusieurs produits ou services.",
-        "preview_url": "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&h=400&fit=crop",
+        "description": "Multi-images pour présenter plusieurs produits.",
+        "preview_url": "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=500&h=500&fit=crop",
         "price": 39.90,
-        "popular": False
+        "popular": False,
+        "text_position": "bottom",
+        "text_style": "carousel"
     },
     
-    # BANNIÈRES WEB
+    # =============== BANNIÈRES WEB ===============
     {
         "id": "banner_hero_1",
-        "name": "Bannière Hero",
+        "name": "Hero Banner Corporate",
         "category": "Bannières Web",
+        "subcategory": "Hero Banner",
         "format": "1920x600",
-        "description": "Grande bannière pour page d'accueil. Impact visuel maximal.",
+        "description": "Grande bannière pour page d'accueil. Style corporate.",
         "preview_url": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=188&fit=crop",
         "price": 49.90,
-        "popular": True
+        "popular": True,
+        "text_position": "left",
+        "text_style": "hero"
+    },
+    {
+        "id": "banner_hero_2",
+        "name": "Hero Créatif",
+        "category": "Bannières Web",
+        "subcategory": "Hero Banner",
+        "format": "1920x600",
+        "description": "Design créatif avec illustrations. Style moderne.",
+        "preview_url": "https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&h=188&fit=crop",
+        "price": 49.90,
+        "popular": False,
+        "text_position": "center",
+        "text_style": "creative"
+    },
+    {
+        "id": "banner_hero_3",
+        "name": "Hero Minimaliste",
+        "category": "Bannières Web",
+        "subcategory": "Hero Banner",
+        "format": "1920x600",
+        "description": "Style épuré avec beaucoup d'espace blanc.",
+        "preview_url": "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=600&h=188&fit=crop",
+        "price": 49.90,
+        "popular": True,
+        "text_position": "left",
+        "text_style": "minimal"
     },
     {
         "id": "banner_sidebar_1",
-        "name": "Bannière Sidebar",
+        "name": "Sidebar Vertical",
         "category": "Bannières Web",
+        "subcategory": "Sidebar",
         "format": "300x600",
-        "description": "Format vertical pour barres latérales. Idéal pour campagnes display.",
+        "description": "Format vertical pour barres latérales.",
         "preview_url": "https://images.unsplash.com/photo-1553484771-371a605b060b?w=200&h=400&fit=crop",
         "price": 34.90,
-        "popular": False
+        "popular": False,
+        "text_position": "center",
+        "text_style": "vertical"
+    },
+    {
+        "id": "banner_leaderboard_1",
+        "name": "Leaderboard Classic",
+        "category": "Bannières Web",
+        "subcategory": "Leaderboard",
+        "format": "728x90",
+        "description": "Banner horizontal classique pour publicité.",
+        "preview_url": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=728&h=90&fit=crop",
+        "price": 29.90,
+        "popular": False,
+        "text_position": "center",
+        "text_style": "banner"
     },
     
-    # FLYERS & AFFICHES
+    # =============== MENUS RESTAURANT ===============
+    {
+        "id": "menu_elegant_1",
+        "name": "Menu Gastronomique",
+        "category": "Restauration",
+        "subcategory": "Menu Restaurant",
+        "format": "A4",
+        "description": "Menu élégant pour restaurant gastronomique. Police raffinée.",
+        "preview_url": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=566&fit=crop",
+        "price": 44.90,
+        "popular": True,
+        "text_position": "center",
+        "text_style": "elegant"
+    },
+    {
+        "id": "menu_bistro_1",
+        "name": "Menu Bistro Ardoise",
+        "category": "Restauration",
+        "subcategory": "Menu Restaurant",
+        "format": "A4",
+        "description": "Style ardoise de bistro français. Chaleureux et authentique.",
+        "preview_url": "https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=400&h=566&fit=crop",
+        "price": 39.90,
+        "popular": True,
+        "text_position": "center",
+        "text_style": "chalkboard"
+    },
+    {
+        "id": "menu_modern_1",
+        "name": "Menu Moderne Épuré",
+        "category": "Restauration",
+        "subcategory": "Menu Restaurant",
+        "format": "A4",
+        "description": "Design contemporain minimaliste. Idéal pour brunch et café.",
+        "preview_url": "https://images.unsplash.com/photo-1567521464027-f127ff144326?w=400&h=566&fit=crop",
+        "price": 39.90,
+        "popular": False,
+        "text_position": "left",
+        "text_style": "modern"
+    },
+    {
+        "id": "menu_italian_1",
+        "name": "Menu Italien Trattoria",
+        "category": "Restauration",
+        "subcategory": "Menu Restaurant",
+        "format": "A4",
+        "description": "Style italien traditionnel. Parfait pour pizzeria et trattoria.",
+        "preview_url": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=566&fit=crop",
+        "price": 39.90,
+        "popular": False,
+        "text_position": "center",
+        "text_style": "italian"
+    },
+    {
+        "id": "menu_sushi_1",
+        "name": "Menu Sushi Japonais",
+        "category": "Restauration",
+        "subcategory": "Menu Restaurant",
+        "format": "A4",
+        "description": "Design japonais épuré. Idéal pour restaurant sushi.",
+        "preview_url": "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=400&h=566&fit=crop",
+        "price": 44.90,
+        "popular": False,
+        "text_position": "right",
+        "text_style": "japanese"
+    },
+    {
+        "id": "menu_cafe_1",
+        "name": "Carte Café & Desserts",
+        "category": "Restauration",
+        "subcategory": "Menu Café",
+        "format": "A5",
+        "description": "Menu spécial boissons et desserts. Style cosy.",
+        "preview_url": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=566&fit=crop",
+        "price": 34.90,
+        "popular": True,
+        "text_position": "center",
+        "text_style": "cafe"
+    },
+    
+    # =============== FLYERS & AFFICHES ===============
     {
         "id": "flyer_event_1",
-        "name": "Flyer Événement",
+        "name": "Flyer Événement Moderne",
         "category": "Flyers & Affiches",
+        "subcategory": "Événement",
         "format": "A5",
-        "description": "Flyer promotionnel pour événements, ouvertures, ventes privées.",
+        "description": "Flyer dynamique pour événements et soirées.",
         "preview_url": "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=566&fit=crop",
-        "price": 44.90,
-        "popular": True
+        "price": 34.90,
+        "popular": True,
+        "text_position": "center",
+        "text_style": "event"
     },
     {
-        "id": "poster_promo_1",
-        "name": "Affiche Vitrine",
+        "id": "flyer_promo_1",
+        "name": "Flyer Promotion Vente",
         "category": "Flyers & Affiches",
-        "format": "A3",
-        "description": "Grande affiche pour vitrine ou intérieur boutique. Haute résolution impression.",
+        "subcategory": "Promotion",
+        "format": "A5",
+        "description": "Design accrocheur pour ventes et soldes.",
+        "preview_url": "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=400&h=566&fit=crop",
+        "price": 34.90,
+        "popular": True,
+        "text_position": "center",
+        "text_style": "sale"
+    },
+    {
+        "id": "flyer_opening_1",
+        "name": "Flyer Ouverture",
+        "category": "Flyers & Affiches",
+        "subcategory": "Ouverture",
+        "format": "A5",
+        "description": "Annonce d'ouverture de magasin ou restaurant.",
         "preview_url": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=566&fit=crop",
-        "price": 59.90,
-        "popular": False
+        "price": 34.90,
+        "popular": False,
+        "text_position": "bottom",
+        "text_style": "opening"
+    },
+    {
+        "id": "poster_vitrine_1",
+        "name": "Affiche Vitrine A3",
+        "category": "Flyers & Affiches",
+        "subcategory": "Affiche",
+        "format": "A3",
+        "description": "Grande affiche pour vitrine. Haute résolution.",
+        "preview_url": "https://images.unsplash.com/photo-1556742393-d75f468bfcb0?w=400&h=566&fit=crop",
+        "price": 54.90,
+        "popular": False,
+        "text_position": "center",
+        "text_style": "poster"
+    },
+    {
+        "id": "poster_concert_1",
+        "name": "Affiche Concert/Spectacle",
+        "category": "Flyers & Affiches",
+        "subcategory": "Spectacle",
+        "format": "A3",
+        "description": "Design artistique pour événements culturels.",
+        "preview_url": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&h=566&fit=crop",
+        "price": 54.90,
+        "popular": False,
+        "text_position": "bottom",
+        "text_style": "concert"
     },
     
-    # EMAILS & NEWSLETTERS
+    # =============== EMAIL MARKETING ===============
     {
         "id": "email_header_1",
-        "name": "Header Email",
+        "name": "Header Email Corporate",
         "category": "Email Marketing",
+        "subcategory": "Header",
         "format": "600x200",
-        "description": "En-tête d'email professionnel. Compatible tous clients mail.",
+        "description": "En-tête email professionnel. Compatible tous clients.",
         "preview_url": "https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=600&h=200&fit=crop",
         "price": 19.90,
-        "popular": False
+        "popular": False,
+        "text_position": "center",
+        "text_style": "email"
     },
     {
-        "id": "newsletter_1",
-        "name": "Newsletter Complète",
+        "id": "email_header_2",
+        "name": "Header Newsletter Créatif",
         "category": "Email Marketing",
+        "subcategory": "Header",
+        "format": "600x200",
+        "description": "Style créatif et coloré pour newsletters.",
+        "preview_url": "https://images.unsplash.com/photo-1516321497487-e288fb19713f?w=600&h=200&fit=crop",
+        "price": 19.90,
+        "popular": False,
+        "text_position": "left",
+        "text_style": "creative"
+    },
+    {
+        "id": "newsletter_promo_1",
+        "name": "Newsletter Promo",
+        "category": "Email Marketing",
+        "subcategory": "Newsletter",
         "format": "600x900",
-        "description": "Template newsletter complet avec zones produits et texte.",
+        "description": "Template newsletter pour promotions.",
         "preview_url": "https://images.unsplash.com/photo-1557426272-fc759fdf7a8d?w=400&h=600&fit=crop",
-        "price": 54.90,
-        "popular": True
+        "price": 49.90,
+        "popular": True,
+        "text_position": "top",
+        "text_style": "newsletter"
+    },
+    {
+        "id": "newsletter_product_1",
+        "name": "Newsletter Produit",
+        "category": "Email Marketing",
+        "subcategory": "Newsletter",
+        "format": "600x900",
+        "description": "Présentation de nouveaux produits par email.",
+        "preview_url": "https://images.unsplash.com/photo-1586880244406-556ebe35f282?w=400&h=600&fit=crop",
+        "price": 49.90,
+        "popular": False,
+        "text_position": "center",
+        "text_style": "product"
     },
     
-    # VIDÉO THUMBNAILS
+    # =============== VIDÉO ===============
     {
         "id": "youtube_thumb_1",
-        "name": "Miniature YouTube",
+        "name": "Miniature YouTube Gaming",
         "category": "Vidéo",
+        "subcategory": "YouTube",
         "format": "1280x720",
-        "description": "Miniature accrocheuse pour vidéos YouTube. Style click-worthy.",
+        "description": "Miniature accrocheuse style gaming/tech.",
         "preview_url": "https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=400&h=225&fit=crop",
         "price": 24.90,
-        "popular": True
+        "popular": True,
+        "text_position": "center",
+        "text_style": "youtube"
+    },
+    {
+        "id": "youtube_thumb_2",
+        "name": "Miniature YouTube Business",
+        "category": "Vidéo",
+        "subcategory": "YouTube",
+        "format": "1280x720",
+        "description": "Style professionnel pour vidéos business.",
+        "preview_url": "https://images.unsplash.com/photo-1553484771-047a44eee27b?w=400&h=225&fit=crop",
+        "price": 24.90,
+        "popular": False,
+        "text_position": "left",
+        "text_style": "business"
+    },
+    {
+        "id": "youtube_thumb_3",
+        "name": "Miniature Tutoriel",
+        "category": "Vidéo",
+        "subcategory": "YouTube",
+        "format": "1280x720",
+        "description": "Design clair pour vidéos tutoriels.",
+        "preview_url": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=225&fit=crop",
+        "price": 24.90,
+        "popular": False,
+        "text_position": "bottom",
+        "text_style": "tutorial"
     },
     
-    # CARTES DE VISITE
+    # =============== PRINT ===============
     {
-        "id": "business_card_1",
-        "name": "Carte de Visite Pro",
+        "id": "business_card_modern",
+        "name": "Carte de Visite Moderne",
         "category": "Print",
+        "subcategory": "Carte de Visite",
         "format": "85x55mm",
-        "description": "Design carte de visite moderne et professionnel.",
+        "description": "Design moderne et professionnel.",
         "preview_url": "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=400&h=235&fit=crop",
         "price": 34.90,
-        "popular": False
+        "popular": True,
+        "text_position": "left",
+        "text_style": "card"
     },
-    
-    # MENU RESTAURANT
     {
-        "id": "menu_restaurant_1",
-        "name": "Menu Restaurant",
-        "category": "Restauration",
-        "format": "A4",
-        "description": "Template menu élégant pour restaurants et cafés.",
-        "preview_url": "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=566&fit=crop",
-        "price": 44.90,
-        "popular": True
-    }
+        "id": "business_card_minimal",
+        "name": "Carte de Visite Minimaliste",
+        "category": "Print",
+        "subcategory": "Carte de Visite",
+        "format": "85x55mm",
+        "description": "Style épuré et élégant.",
+        "preview_url": "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=400&h=235&fit=crop",
+        "price": 34.90,
+        "popular": False,
+        "text_position": "center",
+        "text_style": "minimal"
+    },
+    {
+        "id": "business_card_creative",
+        "name": "Carte de Visite Créative",
+        "category": "Print",
+        "subcategory": "Carte de Visite",
+        "format": "85x55mm",
+        "description": "Design original et mémorable.",
+        "preview_url": "https://images.unsplash.com/photo-1572044162444-ad60f128bdea?w=400&h=235&fit=crop",
+        "price": 39.90,
+        "popular": False,
+        "text_position": "center",
+        "text_style": "creative"
+    },
+    {
+        "id": "brochure_corporate",
+        "name": "Brochure Corporate",
+        "category": "Print",
+        "subcategory": "Brochure",
+        "format": "A4 Tri-fold",
+        "description": "Brochure 3 volets professionnelle.",
+        "preview_url": "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=400&h=283&fit=crop",
+        "price": 69.90,
+        "popular": False,
+        "text_position": "left",
+        "text_style": "brochure"
+    },
 ]
 
 
