@@ -3,6 +3,7 @@ Media Pub Router - Système de commande de publicités
 - Affichage des templates (style Canva)
 - Commande de pub avec personnalisation
 - Génération IA des images
+- Post-processing avec Pillow pour texte parfait
 - Suivi des commandes
 """
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
@@ -14,9 +15,13 @@ import os
 import base64
 import logging
 import asyncio
+from io import BytesIO
 
 from dotenv import load_dotenv
 load_dotenv()
+
+# Pillow pour le post-processing du texte
+from PIL import Image, ImageDraw, ImageFont
 
 router = APIRouter(prefix="/api/media-pub", tags=["Media Pub"])
 logger = logging.getLogger(__name__)
