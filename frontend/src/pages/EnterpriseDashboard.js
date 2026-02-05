@@ -377,6 +377,9 @@ const EnterpriseDashboard = () => {
   const handleMenuItemClick = (item) => {
     if (item.isExternal && item.id === 'salonpro_planning') {
       handleSalonProRedirect();
+    } else if (item.isExternal && item.externalUrl) {
+      // Navigate to external URL (like media-pub)
+      navigate(item.externalUrl);
     } else {
       setActiveTab(item.id);
     }
