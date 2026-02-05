@@ -1504,6 +1504,74 @@ const MediaPubPage = () => {
     </div>
   );
 
+  // Payment Verification Step (when returning from Stripe)
+  const renderPaymentVerificationStep = () => (
+    <div className="max-w-md mx-auto text-center py-12">
+      <div className="w-24 h-24 mx-auto mb-6 relative">
+        <div className="absolute inset-0 border-4 border-green-500/30 rounded-full"></div>
+        <div className="absolute inset-0 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+        <CreditCard className="absolute inset-0 m-auto w-10 h-10 text-green-400" />
+      </div>
+      <h2 className="text-2xl font-bold text-white mb-2">Vérification du paiement...</h2>
+      <p className="text-gray-400 mb-6">
+        Nous confirmons votre paiement, veuillez patienter.
+      </p>
+      <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+        <Clock className="w-4 h-4" />
+        Quelques secondes...
+      </div>
+    </div>
+  );
+
+  // Payment Success Step
+  const renderPaymentSuccessStep = () => (
+    <div className="max-w-md mx-auto text-center py-12">
+      <div className="w-20 h-20 mx-auto mb-6 bg-green-500/20 rounded-full flex items-center justify-center">
+        <CheckCircle2 className="w-10 h-10 text-green-400" />
+      </div>
+      <h2 className="text-2xl font-bold text-white mb-2">Paiement réussi !</h2>
+      <p className="text-gray-400 mb-6">
+        Votre commande est confirmée. L'image HD <strong className="text-green-400">sans filigrane</strong> sera
+        disponible dans vos commandes une fois générée.
+      </p>
+      
+      {orderResult && (
+        <div className="bg-gray-800/50 rounded-xl p-4 mb-6 text-left">
+          <p className="text-sm text-gray-400">
+            <span className="text-gray-500">N° commande:</span> {orderResult.id}
+          </p>
+          <p className="text-sm text-gray-400">
+            <span className="text-gray-500">Paiement:</span> 
+            <span className="text-green-400 ml-1">Confirmé ✓</span>
+          </p>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-3">
+        <button
+          onClick={() => navigate('/dashboard/entreprise?tab=commandes-titelli')}
+          className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+          data-testid="view-orders-after-payment"
+        >
+          <Download className="w-4 h-4" />
+          Voir mes commandes
+        </button>
+        <button
+          onClick={() => {
+            setOrderStep('browse');
+            setSelectedTemplate(null);
+            setCanvasElements([]);
+            setIsPaid(false);
+            setOrderResult(null);
+          }}
+          className="w-full py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transition-colors"
+        >
+          Créer une autre publicité
+        </button>
+      </div>
+    </div>
+  );
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
