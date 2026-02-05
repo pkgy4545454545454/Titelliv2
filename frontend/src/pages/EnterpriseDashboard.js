@@ -10,7 +10,7 @@ import {
   UserPlus, ClipboardList, AlertTriangle, Box, ArrowUpDown, Upload, Image, X,
   Search, Rss, Newspaper, Truck, Activity, Phone, Heart, HelpCircle, Info,
   Handshake, UserCircle, Receipt, Send, Crown, Zap, Check, ChevronDown, Camera,
-  Menu, Shield
+  Menu, Shield, Sparkles
 } from 'lucide-react';
 import { 
   enterpriseAPI, servicesProductsAPI, orderAPI, paymentAPI, offersAPI,
@@ -22,6 +22,7 @@ import api from '../services/api';
 import { toast } from 'sonner';
 // Composants extraits pour réduire la taille du fichier
 import { IAClientsSection, InfluencersSection, InvitationsSection, SubscriptionsSection } from '../components/dashboard';
+import CommandesTitelliSection from '../components/dashboard/CommandesTitelliSection';
 
 
 const EnterpriseDashboard = () => {
