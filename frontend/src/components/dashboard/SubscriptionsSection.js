@@ -362,8 +362,46 @@ const SubscriptionsSection = () => {
       {/* A la carte */}
       {activeTab === 'alacarte' && (
         <div className="space-y-4">
+          {/* Options spéciales IA en haut */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {alacarteOptions.filter(o => o.isSpecial).map((option) => (
+              <div 
+                key={option.id} 
+                className="card-service rounded-xl p-6 relative overflow-hidden cursor-pointer hover:border-purple-500/50 transition-all group"
+                onClick={() => handleSpecialOption(option)}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-blue-600/10"></div>
+                <div className="relative">
+                  <div className="flex items-center gap-2 mb-2">
+                    {option.specialType === 'media_pub' ? (
+                      <Image className="w-6 h-6 text-purple-400" />
+                    ) : (
+                      <Video className="w-6 h-6 text-blue-400" />
+                    )}
+                    <span className="px-2 py-0.5 bg-purple-500/20 text-purple-300 text-xs rounded-full">IA</span>
+                  </div>
+                  <h4 className="text-xl font-bold text-white mb-1">{option.name}</h4>
+                  <p className="text-sm text-gray-400 mb-3">{option.description}</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-2xl font-bold text-[#D4AF37]">{option.price}</span>
+                      <span className="text-gray-500 text-sm">CHF {option.period}</span>
+                    </div>
+                    <button 
+                      className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm transition-colors group-hover:translate-x-1"
+                    >
+                      Créer <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Options standards */}
+          <h3 className="text-lg font-semibold text-white mt-6 mb-4">Autres options</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {alacarteOptions.map((option) => (
+            {alacarteOptions.filter(o => !o.isSpecial).map((option) => (
               <div key={option.id} className="card-service rounded-xl p-4 flex items-start justify-between">
                 <div className="flex-1">
                   <h4 className="text-white font-medium">{option.name}</h4>
