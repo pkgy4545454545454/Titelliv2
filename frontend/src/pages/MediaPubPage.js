@@ -1585,12 +1585,31 @@ const MediaPubPage = () => {
       {orderStep === 'browse' && <AnimatedHeader />}
       
       <div className="container mx-auto px-4 py-8">
+        {/* Payment Error Alert */}
+        {paymentError && (
+          <div className="max-w-lg mx-auto mb-6 bg-red-900/30 border border-red-700/50 rounded-xl p-4 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <h4 className="font-medium text-red-400 mb-1">Erreur de paiement</h4>
+              <p className="text-sm text-red-200/80">{paymentError}</p>
+              <button 
+                onClick={() => setPaymentError(null)}
+                className="text-sm text-red-400 hover:text-red-300 mt-2"
+              >
+                Fermer
+              </button>
+            </div>
+          </div>
+        )}
+        
         {orderStep === 'browse' && renderBrowseStep()}
         {orderStep === 'customize' && renderCustomizeStep()}
         {orderStep === 'sur_mesure' && renderSurMesureStep()}
         {orderStep === 'payment' && renderPaymentStep()}
         {orderStep === 'processing' && renderProcessingStep()}
         {orderStep === 'confirm' && renderConfirmStep()}
+        {orderStep === 'payment_verification' && renderPaymentVerificationStep()}
+        {orderStep === 'payment_success' && renderPaymentSuccessStep()}
       </div>
     </div>
   );
