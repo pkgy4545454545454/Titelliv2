@@ -67,7 +67,7 @@ def add_text_overlay(image_bytes: bytes, product_name: str, slogan: str, descrip
         
         primary_rgb = hex_to_rgb(primary_color)
         
-        # Charger les polices (utiliser des polices système)
+        # Charger les polices (utiliser des polices système) - Tailles réduites
         try:
             # Essayer différentes polices
             font_paths = [
@@ -81,9 +81,10 @@ def add_text_overlay(image_bytes: bytes, product_name: str, slogan: str, descrip
             
             for font_path in font_paths:
                 if os.path.exists(font_path):
-                    font_large = ImageFont.truetype(font_path, int(height * 0.08))
-                    font_medium = ImageFont.truetype(font_path, int(height * 0.05))
-                    font_small = ImageFont.truetype(font_path, int(height * 0.035))
+                    # Tailles optimisées pour éviter troncature
+                    font_large = ImageFont.truetype(font_path, int(height * 0.055))
+                    font_medium = ImageFont.truetype(font_path, int(height * 0.04))
+                    font_small = ImageFont.truetype(font_path, int(height * 0.028))
                     break
             
             if not font_large:
