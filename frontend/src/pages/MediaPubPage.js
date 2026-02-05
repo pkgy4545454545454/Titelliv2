@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Image, 
@@ -6,6 +6,7 @@ import {
   ShoppingCart, 
   Check, 
   ArrowRight, 
+  ArrowLeft,
   Palette,
   Type,
   FileText,
@@ -13,7 +14,13 @@ import {
   Star,
   Filter,
   Grid,
-  List
+  List,
+  Eye,
+  Download,
+  Layers,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -22,14 +29,18 @@ const MediaPubPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const enterpriseId = searchParams.get('enterprise_id');
+  const canvasRef = useRef(null);
   
   const [templates, setTemplates] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [byCategory, setByCategory] = useState({});
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedSubcategory, setSelectedSubcategory] = useState('all');
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [viewMode, setViewMode] = useState('grid');
   const [loading, setLoading] = useState(true);
   const [orderStep, setOrderStep] = useState('browse'); // browse, customize, confirm, processing
+  const [previewZoom, setPreviewZoom] = useState(100);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -53,6 +64,7 @@ const MediaPubPage = () => {
       const data = await response.json();
       setTemplates(data.templates);
       setCategories(data.categories);
+      setByCategory(data.by_category);
     } catch (error) {
       console.error('Erreur chargement templates:', error);
     } finally {
@@ -60,13 +72,31 @@ const MediaPubPage = () => {
     }
   };
 
-  const filteredTemplates = selectedCategory === 'all' 
-    ? templates 
-    : templates.filter(t => t.category === selectedCategory);
+  // Get subcategories for selected category
+  const getSubcategories = () => {
+    if (selectedCategory === 'all') return [];
+    const categoryTemplates = templates.filter(t => t.category === selectedCategory);
+    const subs = [...new Set(categoryTemplates.map(t => t.subcategory).filter(Boolean))];
+    return subs;
+  };
+
+  const filteredTemplates = templates.filter(t => {
+    if (selectedCategory !== 'all' && t.category !== selectedCategory) return false;
+    if (selectedSubcategory !== 'all' && t.subcategory !== selectedSubcategory) return false;
+    return true;
+  });
 
   const handleSelectTemplate = (template) => {
     setSelectedTemplate(template);
     setOrderStep('customize');
+    // Reset form
+    setFormData({
+      slogan: '',
+      product_name: '',
+      description: '',
+      brand_colors: ['#0066CC', '#FFFFFF'],
+      additional_notes: ''
+    });
   };
 
   const handleInputChange = (e) => {
@@ -112,6 +142,173 @@ const MediaPubPage = () => {
     }
   };
 
+  // Live Preview Component
+  const LivePreview = () => {
+    if (!selectedTemplate) return null;
+
+    const getTextPositionStyle = () => {
+      switch (selectedTemplate.text_position) {
+        case 'top':
+          return { top: '10%', left: '50%', transform: 'translateX(-50%)' };
+        case 'bottom':
+          return { bottom: '10%', left: '50%', transform: 'translateX(-50%)' };
+        case 'left':
+          return { top: '50%', left: '10%', transform: 'translateY(-50%)' };
+        case 'right':
+          return { top: '50%', right: '10%', transform: 'translateY(-50%)' };
+        default:
+          return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
+      }
+    };
+
+    return (
+      <div className="relative bg-gray-900 rounded-xl overflow-hidden">
+        {/* Zoom Controls */}
+        <div className="absolute top-3 right-3 z-20 flex items-center gap-2 bg-black/50 rounded-lg p-1">
+          <button 
+            onClick={() => setPreviewZoom(Math.max(50, previewZoom - 10))}
+            className="p-1 hover:bg-white/20 rounded"
+          >
+            <ZoomOut className="w-4 h-4" />
+          </button>
+          <span className="text-xs min-w-[40px] text-center">{previewZoom}%</span>
+          <button 
+            onClick={() => setPreviewZoom(Math.min(150, previewZoom + 10))}
+            className="p-1 hover:bg-white/20 rounded"
+          >
+            <ZoomIn className="w-4 h-4" />
+          </button>
+          <button 
+            onClick={() => setPreviewZoom(100)}
+            className="p-1 hover:bg-white/20 rounded"
+          >
+            <RotateCcw className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Preview Canvas */}
+        <div 
+          className="relative overflow-auto"
+          style={{ 
+            maxHeight: '500px',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '20px'
+          }}
+        >
+          <div 
+            ref={canvasRef}
+            className="relative shadow-2xl"
+            style={{ 
+              transform: `scale(${previewZoom / 100})`,
+              transformOrigin: 'center center',
+              transition: 'transform 0.2s ease'
+            }}
+          >
+            {/* Background Image */}
+            <img
+              src={selectedTemplate.preview_url}
+              alt={selectedTemplate.name}
+              className="max-w-full"
+              style={{ 
+                filter: formData.brand_colors[0] !== '#0066CC' ? `hue-rotate(${getHueRotation(formData.brand_colors[0])}deg)` : 'none'
+              }}
+            />
+            
+            {/* Text Overlay */}
+            <div 
+              className="absolute text-center px-4"
+              style={{
+                ...getTextPositionStyle(),
+                maxWidth: '80%'
+              }}
+            >
+              {/* Product Name */}
+              {formData.product_name && (
+                <div 
+                  className="font-bold text-shadow-lg mb-2"
+                  style={{ 
+                    fontSize: 'clamp(16px, 4vw, 32px)',
+                    color: formData.brand_colors[1],
+                    textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
+                  }}
+                >
+                  {formData.product_name}
+                </div>
+              )}
+              
+              {/* Slogan */}
+              {formData.slogan && (
+                <div 
+                  className="font-bold"
+                  style={{ 
+                    fontSize: 'clamp(20px, 5vw, 42px)',
+                    color: formData.brand_colors[0],
+                    textShadow: '2px 2px 6px rgba(0,0,0,0.9)',
+                    WebkitTextStroke: `1px ${formData.brand_colors[1]}`
+                  }}
+                >
+                  {formData.slogan}
+                </div>
+              )}
+              
+              {/* Description */}
+              {formData.description && (
+                <div 
+                  className="mt-2 opacity-90"
+                  style={{ 
+                    fontSize: 'clamp(12px, 2.5vw, 18px)',
+                    color: formData.brand_colors[1],
+                    textShadow: '1px 1px 3px rgba(0,0,0,0.7)'
+                  }}
+                >
+                  {formData.description}
+                </div>
+              )}
+            </div>
+
+            {/* Color Overlay */}
+            <div 
+              className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-20"
+              style={{ backgroundColor: formData.brand_colors[0] }}
+            />
+          </div>
+        </div>
+
+        {/* Preview Info */}
+        <div className="p-3 bg-gray-800/50 border-t border-gray-700 flex items-center justify-between">
+          <div className="text-sm text-gray-400">
+            <span className="text-gray-500">Format:</span> {selectedTemplate.format}
+          </div>
+          <div className="flex items-center gap-2">
+            <Eye className="w-4 h-4 text-gray-500" />
+            <span className="text-sm text-gray-400">Aperçu en direct</span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Helper function to calculate hue rotation
+  const getHueRotation = (hexColor) => {
+    const r = parseInt(hexColor.slice(1, 3), 16) / 255;
+    const g = parseInt(hexColor.slice(3, 5), 16) / 255;
+    const b = parseInt(hexColor.slice(5, 7), 16) / 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h = 0;
+    if (max !== min) {
+      const d = max - min;
+      switch (max) {
+        case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+        case g: h = ((b - r) / d + 2) / 6; break;
+        case b: h = ((r - g) / d + 4) / 6; break;
+      }
+    }
+    return Math.round(h * 360);
+  };
+
   // Render Browse Templates
   const renderBrowseStep = () => (
     <div className="space-y-6">
@@ -122,40 +319,72 @@ const MediaPubPage = () => {
           Créez votre Publicité
         </h1>
         <p className="text-gray-400">
-          Choisissez un modèle et personnalisez-le avec votre marque
+          Choisissez un modèle et personnalisez-le en direct comme sur Canva
         </p>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-gray-800/50 p-4 rounded-xl">
+      {/* Category Filters */}
+      <div className="bg-gray-800/50 p-4 rounded-xl space-y-3">
+        {/* Main Categories */}
         <div className="flex items-center gap-2 flex-wrap">
           <Filter className="w-5 h-5 text-gray-400" />
           <button
-            onClick={() => setSelectedCategory('all')}
+            onClick={() => { setSelectedCategory('all'); setSelectedSubcategory('all'); }}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               selectedCategory === 'all'
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
             }`}
           >
-            Tous
+            Tous ({templates.length})
           </button>
           {categories.map(cat => (
             <button
               key={cat}
-              onClick={() => setSelectedCategory(cat)}
+              onClick={() => { setSelectedCategory(cat); setSelectedSubcategory('all'); }}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 selectedCategory === cat
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
               }`}
             >
-              {cat}
+              {cat} ({templates.filter(t => t.category === cat).length})
             </button>
           ))}
         </div>
+
+        {/* Subcategories */}
+        {getSubcategories().length > 0 && (
+          <div className="flex items-center gap-2 flex-wrap pl-7 pt-2 border-t border-gray-700">
+            <Layers className="w-4 h-4 text-gray-500" />
+            <button
+              onClick={() => setSelectedSubcategory('all')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                selectedSubcategory === 'all'
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+              }`}
+            >
+              Tous les types
+            </button>
+            {getSubcategories().map(sub => (
+              <button
+                key={sub}
+                onClick={() => setSelectedSubcategory(sub)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  selectedSubcategory === sub
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+                }`}
+              >
+                {sub}
+              </button>
+            ))}
+          </div>
+        )}
         
-        <div className="flex items-center gap-2">
+        {/* View Toggle */}
+        <div className="flex items-center justify-end gap-2">
           <button
             onClick={() => setViewMode('grid')}
             className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-blue-600' : 'bg-gray-700'}`}
@@ -171,28 +400,38 @@ const MediaPubPage = () => {
         </div>
       </div>
 
+      {/* Results Count */}
+      <div className="text-sm text-gray-400">
+        {filteredTemplates.length} modèle{filteredTemplates.length > 1 ? 's' : ''} trouvé{filteredTemplates.length > 1 ? 's' : ''}
+      </div>
+
       {/* Templates Grid */}
-      <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+      <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
         {filteredTemplates.map(template => (
           <div
             key={template.id}
             className="bg-gray-800/50 rounded-xl overflow-hidden border border-gray-700 hover:border-blue-500 transition-all group cursor-pointer"
             onClick={() => handleSelectTemplate(template)}
           >
-            <div className="relative">
+            <div className="relative aspect-square">
               <img
                 src={template.preview_url}
                 alt={template.name}
-                className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
               {template.popular && (
                 <span className="absolute top-3 right-3 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
                   <Star className="w-3 h-3" /> Populaire
                 </span>
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-4">
-                <button className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2">
-                  Sélectionner <ArrowRight className="w-4 h-4" />
+              {template.subcategory && (
+                <span className="absolute top-3 left-3 bg-purple-500/80 text-white text-xs px-2 py-1 rounded">
+                  {template.subcategory}
+                </span>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-4">
+                <button className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2 shadow-lg">
+                  Personnaliser <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -200,14 +439,14 @@ const MediaPubPage = () => {
             <div className="p-4">
               <div className="flex items-start justify-between mb-2">
                 <div>
-                  <h3 className="font-semibold text-white">{template.name}</h3>
-                  <p className="text-sm text-gray-400">{template.category}</p>
+                  <h3 className="font-semibold text-white text-sm">{template.name}</h3>
+                  <p className="text-xs text-gray-500">{template.category}</p>
                 </div>
                 <span className="text-lg font-bold text-green-400">{template.price} CHF</span>
               </div>
-              <p className="text-sm text-gray-500 line-clamp-2">{template.description}</p>
-              <div className="mt-3 flex items-center gap-2">
-                <span className="text-xs bg-gray-700 px-2 py-1 rounded text-gray-300">
+              <p className="text-xs text-gray-500 line-clamp-2">{template.description}</p>
+              <div className="mt-2 flex items-center gap-2">
+                <span className="text-xs bg-gray-700 px-2 py-0.5 rounded text-gray-400">
                   {template.format}
                 </span>
               </div>
@@ -218,44 +457,58 @@ const MediaPubPage = () => {
     </div>
   );
 
-  // Render Customize Step
+  // Render Customize Step with Live Preview
   const renderCustomizeStep = () => (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       {/* Back button */}
       <button
         onClick={() => setOrderStep('browse')}
         className="text-gray-400 hover:text-white mb-6 flex items-center gap-2"
       >
-        ← Retour aux modèles
+        <ArrowLeft className="w-4 h-4" /> Retour aux modèles
       </button>
 
-      <div className="grid md:grid-cols-2 gap-8">
-        {/* Template Preview */}
-        <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
-          <h2 className="text-xl font-bold text-white mb-4">{selectedTemplate?.name}</h2>
-          <img
-            src={selectedTemplate?.preview_url}
-            alt={selectedTemplate?.name}
-            className="w-full rounded-lg mb-4"
-          />
-          <div className="space-y-2 text-sm">
-            <p className="text-gray-400">
-              <span className="text-gray-500">Catégorie:</span> {selectedTemplate?.category}
-            </p>
-            <p className="text-gray-400">
-              <span className="text-gray-500">Format:</span> {selectedTemplate?.format}
-            </p>
-            <p className="text-2xl font-bold text-green-400 mt-4">
-              {selectedTemplate?.price} CHF
-            </p>
+      <div className="grid lg:grid-cols-2 gap-8">
+        {/* Live Preview - LEFT */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <Eye className="text-blue-400" />
+              Aperçu en direct
+            </h2>
+            <span className="text-sm text-gray-400">{selectedTemplate?.name}</span>
+          </div>
+          
+          <LivePreview />
+          
+          <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
+            <h4 className="font-medium text-gray-300 mb-2">Informations</h4>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="text-gray-500">Catégorie:</span>
+                <span className="text-white ml-2">{selectedTemplate?.category}</span>
+              </div>
+              <div>
+                <span className="text-gray-500">Format:</span>
+                <span className="text-white ml-2">{selectedTemplate?.format}</span>
+              </div>
+              <div>
+                <span className="text-gray-500">Type:</span>
+                <span className="text-white ml-2">{selectedTemplate?.subcategory || 'Standard'}</span>
+              </div>
+              <div>
+                <span className="text-gray-500">Prix:</span>
+                <span className="text-green-400 ml-2 font-bold">{selectedTemplate?.price} CHF</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Customization Form */}
-        <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+        {/* Customization Form - RIGHT */}
+        <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700 h-fit">
           <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-            <Palette className="text-blue-400" />
-            Personnalisez votre publicité
+            <Palette className="text-purple-400" />
+            Personnalisation
           </h2>
 
           <div className="space-y-5">
@@ -272,8 +525,9 @@ const MediaPubPage = () => {
                 onChange={handleInputChange}
                 placeholder="Ex: Qualité suisse, prix imbattable"
                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
+                maxLength={50}
               />
+              <p className="text-xs text-gray-500 mt-1">{formData.slogan.length}/50 caractères</p>
             </div>
 
             {/* Product Name */}
@@ -289,8 +543,9 @@ const MediaPubPage = () => {
                 onChange={handleInputChange}
                 placeholder="Ex: Collection Printemps 2026"
                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
+                maxLength={40}
               />
+              <p className="text-xs text-gray-500 mt-1">{formData.product_name.length}/40 caractères</p>
             </div>
 
             {/* Description */}
@@ -302,43 +557,69 @@ const MediaPubPage = () => {
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}
-                placeholder="Détails supplémentaires à inclure..."
-                rows={3}
+                placeholder="Détails supplémentaires..."
+                rows={2}
                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                maxLength={100}
               />
+              <p className="text-xs text-gray-500 mt-1">{formData.description.length}/100 caractères</p>
             </div>
 
             {/* Brand Colors */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-3">
                 <Palette className="inline w-4 h-4 mr-1" />
                 Couleurs de marque
               </label>
-              <div className="flex gap-4">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={formData.brand_colors[0]}
-                    onChange={(e) => handleColorChange(0, e.target.value)}
-                    className="w-12 h-12 rounded-lg cursor-pointer border-2 border-gray-600"
-                  />
-                  <span className="text-sm text-gray-400">Principale</span>
+              <div className="flex gap-6">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="color"
+                      value={formData.brand_colors[0]}
+                      onChange={(e) => handleColorChange(0, e.target.value)}
+                      className="w-14 h-14 rounded-xl cursor-pointer border-2 border-gray-600"
+                    />
+                    <div>
+                      <p className="text-sm text-white">Principale</p>
+                      <p className="text-xs text-gray-500">{formData.brand_colors[0]}</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={formData.brand_colors[1]}
-                    onChange={(e) => handleColorChange(1, e.target.value)}
-                    className="w-12 h-12 rounded-lg cursor-pointer border-2 border-gray-600"
-                  />
-                  <span className="text-sm text-gray-400">Secondaire</span>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="color"
+                      value={formData.brand_colors[1]}
+                      onChange={(e) => handleColorChange(1, e.target.value)}
+                      className="w-14 h-14 rounded-xl cursor-pointer border-2 border-gray-600"
+                    />
+                    <div>
+                      <p className="text-sm text-white">Secondaire</p>
+                      <p className="text-xs text-gray-500">{formData.brand_colors[1]}</p>
+                    </div>
+                  </div>
                 </div>
+              </div>
+              
+              {/* Quick Colors */}
+              <div className="mt-3 flex items-center gap-2">
+                <span className="text-xs text-gray-500">Rapide:</span>
+                {['#E74C3C', '#3498DB', '#2ECC71', '#F39C12', '#9B59B6', '#1ABC9C', '#34495E'].map(color => (
+                  <button
+                    key={color}
+                    onClick={() => handleColorChange(0, color)}
+                    className="w-6 h-6 rounded-full border-2 border-gray-600 hover:scale-110 transition-transform"
+                    style={{ backgroundColor: color }}
+                    title={color}
+                  />
+                ))}
               </div>
             </div>
 
             {/* Important Notes */}
             <div className="bg-yellow-900/30 border border-yellow-700 rounded-lg p-4">
-              <h4 className="font-medium text-yellow-400 mb-2">⚠️ À noter</h4>
+              <h4 className="font-medium text-yellow-400 mb-2">⚠️ Règles importantes</h4>
               <ul className="text-sm text-yellow-200/80 space-y-1">
                 <li>• Ne pas mettre de prix sur l'image</li>
                 <li>• Ne pas inclure de dates</li>
@@ -350,7 +631,7 @@ const MediaPubPage = () => {
             <button
               onClick={handleSubmitOrder}
               disabled={submitting || !formData.slogan || !formData.product_name}
-              className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
             >
               <ShoppingCart className="w-5 h-5" />
               Commander - {selectedTemplate?.price} CHF
