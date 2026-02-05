@@ -281,6 +281,66 @@ const MediaPubPage = () => {
     fetchTemplates();
   }, []);
 
+  // Check payment status when returning from Stripe
+  useEffect(() => {
+    if (sessionId && orderId) {
+      setOrderStep('payment_verification');
+      pollPaymentStatus(sessionId, orderId);
+    } else if (cancelled && orderId) {
+      setPaymentError('Paiement annulé. Vous pouvez réessayer.');
+      setOrderStep('browse');
+    }
+  }, [sessionId, orderId, cancelled]);
+
+  // Poll payment status function
+  const pollPaymentStatus = async (checkoutSessionId, orderIdParam, attempts = 0) => {
+    const maxAttempts = 10;
+    const pollInterval = 2000;
+
+    if (attempts >= maxAttempts) {
+      setPaymentError('Vérification du paiement expirée. Veuillez vérifier vos commandes.');
+      setOrderStep('browse');
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${API_URL}/api/media-pub/payment/status/${checkoutSessionId}?order_id=${orderIdParam}`
+      );
+      
+      if (!response.ok) {
+        throw new Error('Erreur vérification paiement');
+      }
+
+      const data = await response.json();
+
+      if (data.status === 'paid') {
+        setIsPaid(true);
+        setOrderResult({ id: orderIdParam, status: 'paid' });
+        setOrderStep('payment_success');
+        // Clean URL
+        window.history.replaceState({}, '', '/media-pub');
+        return;
+      } else if (data.status === 'expired') {
+        setPaymentError('Session de paiement expirée. Veuillez réessayer.');
+        setOrderStep('browse');
+        window.history.replaceState({}, '', '/media-pub');
+        return;
+      }
+
+      // Continue polling
+      setTimeout(() => pollPaymentStatus(checkoutSessionId, orderIdParam, attempts + 1), pollInterval);
+    } catch (error) {
+      console.error('Payment status check error:', error);
+      if (attempts < maxAttempts - 1) {
+        setTimeout(() => pollPaymentStatus(checkoutSessionId, orderIdParam, attempts + 1), pollInterval);
+      } else {
+        setPaymentError('Erreur lors de la vérification. Vérifiez vos commandes.');
+        setOrderStep('browse');
+      }
+    }
+  };
+
   const fetchTemplates = async () => {
     try {
       const response = await fetch(`${API_URL}/api/media-pub/templates`);
