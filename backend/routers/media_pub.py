@@ -279,7 +279,7 @@ STYLE: Premium advertising quality, Swiss/European professional standards, elega
                 "type": "pub_order_ready",
                 "title": "Votre publicité est prête !",
                 "message": f"Votre commande '{template['name']}' est disponible dans vos commandes Titelli.",
-                "link": "/dashboard/enterprise?tab=commandes-titelli",
+                "link": "/dashboard/entreprise?tab=commandes-titelli",
                 "is_read": False,
                 "created_at": datetime.now(timezone.utc).isoformat()
             })
