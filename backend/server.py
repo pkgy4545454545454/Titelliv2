@@ -3664,8 +3664,8 @@ async def purchase_training(training_id: str, current_user: dict = Depends(get_c
         checkout_request = CheckoutSessionRequest(
             amount=training['price'],  # Amount in CHF (not cents)
             currency="chf",
-            success_url=f"{os.environ.get('FRONTEND_URL', 'https://scraper-portal-1.preview.emergentagent.com')}/payment/success?session_id={{CHECKOUT_SESSION_ID}}&type=training&training_id={training_id}",
-            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://scraper-portal-1.preview.emergentagent.com')}/payment/cancel",
+            success_url=f"{os.environ.get('FRONTEND_URL', 'https://live-template-editor.preview.emergentagent.com')}/payment/success?session_id={{CHECKOUT_SESSION_ID}}&type=training&training_id={training_id}",
+            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://live-template-editor.preview.emergentagent.com')}/payment/cancel",
             metadata={"type": "training", "training_id": training_id, "user_id": current_user['id'], "product_name": f"Formation: {training['title']}"}
         )
         response = await stripe_checkout.create_checkout_session(checkout_request)
@@ -8623,8 +8623,8 @@ async def create_premium_checkout(plan: str, current_user: dict = Depends(get_cu
             amount=plan_info['price'],  # Amount in CHF
             currency="chf",
             quantity=1,
-            success_url=f"{os.environ.get('FRONTEND_URL', 'https://scraper-portal-1.preview.emergentagent.com')}/dashboard/client?tab=premium&success=true&plan={plan}",
-            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://scraper-portal-1.preview.emergentagent.com')}/dashboard/client?tab=premium&cancelled=true",
+            success_url=f"{os.environ.get('FRONTEND_URL', 'https://live-template-editor.preview.emergentagent.com')}/dashboard/client?tab=premium&success=true&plan={plan}",
+            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://live-template-editor.preview.emergentagent.com')}/dashboard/client?tab=premium&cancelled=true",
             metadata={
                 "plan": plan,
                 "user_id": current_user['id'],
@@ -8884,8 +8884,8 @@ async def apply_for_certification(
             amount=cert_info['price'],
             currency="chf",
             quantity=1,
-            success_url=f"{os.environ.get('FRONTEND_URL', 'https://scraper-portal-1.preview.emergentagent.com')}/enterprise-dashboard?tab=certifications&success=true",
-            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://scraper-portal-1.preview.emergentagent.com')}/enterprise-dashboard?tab=certifications&cancelled=true",
+            success_url=f"{os.environ.get('FRONTEND_URL', 'https://live-template-editor.preview.emergentagent.com')}/enterprise-dashboard?tab=certifications&success=true",
+            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://live-template-editor.preview.emergentagent.com')}/enterprise-dashboard?tab=certifications&cancelled=true",
             metadata={
                 "type": "certification",
                 "certification_type": request.certification_type,
@@ -8974,8 +8974,8 @@ async def book_expert_service(
             amount=service['price'],
             currency="chf",
             quantity=1,
-            success_url=f"{os.environ.get('FRONTEND_URL', 'https://scraper-portal-1.preview.emergentagent.com')}/dashboard?success=expert",
-            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://scraper-portal-1.preview.emergentagent.com')}/dashboard",
+            success_url=f"{os.environ.get('FRONTEND_URL', 'https://live-template-editor.preview.emergentagent.com')}/dashboard?success=expert",
+            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://live-template-editor.preview.emergentagent.com')}/dashboard",
             metadata={
                 "type": "expert_service",
                 "service_type": service_type,

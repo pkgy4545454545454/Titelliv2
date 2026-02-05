@@ -248,7 +248,7 @@ Collections principales:
 ---
 
 ## URL Application
-**Production**: https://scraper-portal-1.preview.emergentagent.com
+**Production**: https://live-template-editor.preview.emergentagent.com
 
 ---
 

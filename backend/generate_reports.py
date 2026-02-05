@@ -11,7 +11,7 @@ import os
 
 # Configuration
 UPLOADS_DIR = "/app/backend/uploads"
-BASE_URL = "https://scraper-portal-1.preview.emergentagent.com"
+BASE_URL = "https://live-template-editor.preview.emergentagent.com"
 
 class TitelliPDF(FPDF):
     def __init__(self):
