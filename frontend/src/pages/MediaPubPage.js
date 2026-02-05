@@ -21,9 +21,6 @@ import {
   ZoomIn,
   ZoomOut,
   RotateCcw,
-  Move,
-  Trash2,
-  Plus,
   Lock,
   Unlock,
   Bold,
@@ -35,13 +32,120 @@ import {
   Wand2,
   Settings,
   Copy,
-  MousePointer
+  MousePointer,
+  Trash2,
+  Plus,
+  Play,
+  ChevronRight
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
+// Images de pubs pour le header animé
+const SAMPLE_ADS = [
+  "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=300&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=300&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=300&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=300&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=300&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=300&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=300&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=300&h=400&fit=crop",
+];
+
+// Header animé avec défilement de pubs
+const AnimatedHeader = () => {
+  return (
+    <div className="relative overflow-hidden bg-gradient-to-b from-gray-900 via-gray-800 to-transparent py-12 mb-8">
+      {/* Overlay gradient */}
+      <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-transparent to-gray-900 z-10" />
+      
+      {/* Animated ads row 1 - scrolling left */}
+      <div className="flex gap-4 mb-4 animate-scroll-left">
+        {[...SAMPLE_ADS, ...SAMPLE_ADS, ...SAMPLE_ADS].map((src, i) => (
+          <div 
+            key={`row1-${i}`}
+            className="flex-shrink-0 w-48 h-64 rounded-xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform"
+            style={{ 
+              transform: `rotate(${(i % 5 - 2) * 3}deg)`,
+              opacity: 0.8 
+            }}
+          >
+            <img src={src} alt="" className="w-full h-full object-cover" />
+          </div>
+        ))}
+      </div>
+      
+      {/* Animated ads row 2 - scrolling right */}
+      <div className="flex gap-4 animate-scroll-right">
+        {[...SAMPLE_ADS.reverse(), ...SAMPLE_ADS, ...SAMPLE_ADS].map((src, i) => (
+          <div 
+            key={`row2-${i}`}
+            className="flex-shrink-0 w-48 h-64 rounded-xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform"
+            style={{ 
+              transform: `rotate(${(i % 5 - 2) * -3}deg)`,
+              opacity: 0.7 
+            }}
+          >
+            <img src={src} alt="" className="w-full h-full object-cover" />
+          </div>
+        ))}
+      </div>
+      
+      {/* Title overlay */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
+        <div className="bg-black/60 backdrop-blur-sm px-12 py-8 rounded-2xl text-center">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-white" />
+            </div>
+            <h1 className="text-4xl font-bold text-white">
+              Commande Pub Média
+            </h1>
+          </div>
+          <p className="text-gray-300 text-lg max-w-xl">
+            Créez vos publicités professionnelles avec l'intelligence artificielle Titelli
+          </p>
+          <div className="flex items-center justify-center gap-6 mt-6 text-sm text-gray-400">
+            <span className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-green-400" />
+              Génération IA
+            </span>
+            <span className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-green-400" />
+              Haute qualité
+            </span>
+            <span className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-green-400" />
+              Livraison rapide
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* CSS for animation */}
+      <style>{`
+        @keyframes scroll-left {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        @keyframes scroll-right {
+          0% { transform: translateX(-50%); }
+          100% { transform: translateX(0); }
+        }
+        .animate-scroll-left {
+          animation: scroll-left 40s linear infinite;
+        }
+        .animate-scroll-right {
+          animation: scroll-right 45s linear infinite;
+        }
+      `}</style>
+    </div>
+  );
+};
+
 // Élément draggable sur le canvas
-const DraggableElement = ({ element, isSelected, onSelect, onUpdate, onDelete, showWatermark }) => {
+const DraggableElement = ({ element, isSelected, onSelect, onUpdate, onDelete }) => {
   const elementRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -89,10 +193,10 @@ const DraggableElement = ({ element, isSelected, onSelect, onUpdate, onDelete, s
     cursor: element.locked ? 'not-allowed' : (isDragging ? 'grabbing' : 'grab'),
     userSelect: 'none',
     zIndex: isSelected ? 100 : element.zIndex || 1,
-    border: isSelected ? '2px dashed #3B82F6' : 'none',
+    border: isSelected ? '2px dashed #F59E0B' : 'none',
     padding: '4px',
     borderRadius: '4px',
-    backgroundColor: isSelected ? 'rgba(59, 130, 246, 0.1)' : 'transparent'
+    backgroundColor: isSelected ? 'rgba(245, 158, 11, 0.1)' : 'transparent'
   };
 
   const textStyle = {
@@ -139,14 +243,12 @@ const MediaPubPage = () => {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [viewMode, setViewMode] = useState('grid');
   const [loading, setLoading] = useState(true);
-  const [orderStep, setOrderStep] = useState('browse'); // browse, customize, sur_mesure, payment, processing, confirm
+  const [orderStep, setOrderStep] = useState('browse');
   const [previewZoom, setPreviewZoom] = useState(100);
   
-  // Canvas elements (éditable style Canva)
   const [canvasElements, setCanvasElements] = useState([]);
   const [selectedElementId, setSelectedElementId] = useState(null);
   
-  // Form state pour Sur Mesure
   const [surMesureData, setSurMesureData] = useState({
     customRequest: '',
     wantedColors: '',
@@ -154,12 +256,11 @@ const MediaPubPage = () => {
     additionalInfo: ''
   });
   
-  // Form state standard
   const [formData, setFormData] = useState({
     slogan: '',
     product_name: '',
     description: '',
-    brand_colors: ['#0066CC', '#FFFFFF'],
+    brand_colors: ['#F59E0B', '#FFFFFF'],
     additional_notes: ''
   });
   
@@ -176,7 +277,7 @@ const MediaPubPage = () => {
       const response = await fetch(`${API_URL}/api/media-pub/templates`);
       const data = await response.json();
       setTemplates(data.templates);
-      setCategories(['Sur Mesure', ...data.categories]); // Ajouter Sur Mesure en premier
+      setCategories(['Sur Mesure', ...data.categories]);
       setByCategory(data.by_category);
     } catch (error) {
       console.error('Erreur chargement templates:', error);
@@ -185,7 +286,6 @@ const MediaPubPage = () => {
     }
   };
 
-  // Initialiser les éléments du canvas quand un template est sélectionné
   const initializeCanvasElements = (template) => {
     const baseElements = [
       {
@@ -229,7 +329,6 @@ const MediaPubPage = () => {
     setSelectedElementId(null);
   };
 
-  // Get subcategories for selected category
   const getSubcategories = () => {
     if (selectedCategory === 'all' || selectedCategory === 'Sur Mesure') return [];
     const categoryTemplates = templates.filter(t => t.category === selectedCategory);
@@ -238,7 +337,7 @@ const MediaPubPage = () => {
   };
 
   const filteredTemplates = templates.filter(t => {
-    if (selectedCategory === 'Sur Mesure') return false; // Sur Mesure n'a pas de templates
+    if (selectedCategory === 'Sur Mesure') return false;
     if (selectedCategory !== 'all' && t.category !== selectedCategory) return false;
     if (selectedSubcategory !== 'all' && t.subcategory !== selectedSubcategory) return false;
     return true;
@@ -248,12 +347,11 @@ const MediaPubPage = () => {
     setSelectedTemplate(template);
     setOrderStep('customize');
     initializeCanvasElements(template);
-    // Reset form
     setFormData({
       slogan: '',
       product_name: '',
       description: '',
-      brand_colors: ['#0066CC', '#FFFFFF'],
+      brand_colors: ['#F59E0B', '#FFFFFF'],
       additional_notes: ''
     });
     setIsPaid(false);
@@ -266,8 +364,8 @@ const MediaPubPage = () => {
       name: 'Création Sur Mesure',
       category: 'Sur Mesure',
       format: 'Selon vos besoins',
-      price: 79.90,
-      description: 'Création personnalisée selon vos instructions'
+      price: 149.90,
+      description: 'Création personnalisée par nos experts IA'
     });
   };
 
@@ -275,7 +373,6 @@ const MediaPubPage = () => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     
-    // Mettre à jour l'élément correspondant sur le canvas
     if (name === 'slogan') {
       updateElement('slogan', { text: value || 'Votre slogan ici' });
     } else if (name === 'product_name') {
@@ -290,13 +387,11 @@ const MediaPubPage = () => {
     newColors[index] = color;
     setFormData(prev => ({ ...prev, brand_colors: newColors }));
     
-    // Mettre à jour la couleur du slogan
     if (index === 0) {
       updateElement('slogan', { color: color });
     }
   };
 
-  // Canvas element management
   const updateElement = (id, updates) => {
     setCanvasElements(prev => prev.map(el => 
       el.id === id ? { ...el, ...updates } : el
@@ -354,16 +449,10 @@ const MediaPubPage = () => {
   };
 
   const handlePayment = async () => {
-    // Simuler le paiement (à intégrer avec Stripe)
     setSubmitting(true);
-    
-    // Simulation d'un délai de paiement
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
     setIsPaid(true);
     setSubmitting(false);
-    
-    // Lancer la commande
     handleSubmitOrder();
   };
 
@@ -388,7 +477,7 @@ const MediaPubPage = () => {
         description: formData.description,
         brand_colors: formData.brand_colors,
         additional_notes: formData.additional_notes,
-        canvas_elements: canvasElements // Envoyer les positions des éléments
+        canvas_elements: canvasElements
       };
 
       const response = await fetch(`${API_URL}/api/media-pub/orders`, {
@@ -409,16 +498,13 @@ const MediaPubPage = () => {
     }
   };
 
-  // Watermark Component - Filigrane très visible
+  // Watermark Component
   const Watermark = () => (
     <div 
       className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg"
       style={{ zIndex: 1000 }}
     >
-      {/* Overlay semi-transparent */}
       <div className="absolute inset-0 bg-black/10" />
-      
-      {/* Grille de filigranes répétés */}
       <div className="absolute inset-0 flex flex-wrap justify-center items-center">
         {[...Array(9)].map((_, i) => (
           <div 
@@ -434,8 +520,6 @@ const MediaPubPage = () => {
           </div>
         ))}
       </div>
-      
-      {/* Filigrane central très visible */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div 
           className="text-5xl md:text-6xl font-black transform -rotate-12"
@@ -449,8 +533,6 @@ const MediaPubPage = () => {
           TITELLI
         </div>
       </div>
-      
-      {/* Bandes diagonales */}
       <div 
         className="absolute inset-0"
         style={{
@@ -466,12 +548,12 @@ const MediaPubPage = () => {
     </div>
   );
 
-  // Live Preview Component avec Canvas interactif
+  // Live Preview Component
   const LivePreview = () => {
     if (!selectedTemplate) return null;
 
     return (
-      <div className="relative bg-gray-900 rounded-xl overflow-hidden" data-testid="live-preview">
+      <div className="relative bg-gray-900 rounded-xl overflow-hidden border border-gray-700" data-testid="live-preview">
         {/* Zoom Controls */}
         <div className="absolute top-3 right-3 z-20 flex items-center gap-2 bg-black/50 rounded-lg p-1">
           <button 
@@ -495,15 +577,13 @@ const MediaPubPage = () => {
           </button>
         </div>
 
-        {/* Info badge - Filigrane */}
         {!isPaid && (
-          <div className="absolute top-3 left-3 z-20 bg-yellow-500/90 text-black text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-2">
+          <div className="absolute top-3 left-3 z-20 bg-yellow-500 text-black text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-2">
             <Lock className="w-3 h-3" />
             Filigrane - Payez pour télécharger sans
           </div>
         )}
 
-        {/* Preview Canvas */}
         <div 
           className="relative overflow-auto"
           style={{ 
@@ -527,7 +607,6 @@ const MediaPubPage = () => {
             onClick={() => setSelectedElementId(null)}
             data-testid="canvas-container"
           >
-            {/* Background Image */}
             <img
               src={selectedTemplate.preview_url}
               alt={selectedTemplate.name}
@@ -535,7 +614,6 @@ const MediaPubPage = () => {
               draggable={false}
             />
             
-            {/* Draggable Elements */}
             {canvasElements.map(element => (
               <DraggableElement
                 key={element.id}
@@ -544,34 +622,30 @@ const MediaPubPage = () => {
                 onSelect={setSelectedElementId}
                 onUpdate={updateElement}
                 onDelete={deleteElement}
-                showWatermark={!isPaid}
               />
             ))}
 
-            {/* Color Overlay */}
             <div 
               className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-20 rounded-lg"
               style={{ backgroundColor: formData.brand_colors[0] }}
             />
 
-            {/* FILIGRANE TITELLI - Visible uniquement si non payé */}
             {!isPaid && <Watermark />}
           </div>
         </div>
 
-        {/* Preview Info */}
         <div className="p-3 bg-gray-800/50 border-t border-gray-700 flex items-center justify-between">
           <div className="text-sm text-gray-400">
             <span className="text-gray-500">Format:</span> {selectedTemplate.format}
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <MousePointer className="w-4 h-4 text-blue-400" />
-              <span className="text-sm text-gray-400">Cliquez et déplacez les éléments</span>
+              <MousePointer className="w-4 h-4 text-yellow-400" />
+              <span className="text-sm text-gray-400">Cliquez et déplacez</span>
             </div>
             <div className="flex items-center gap-2">
               <Eye className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-400">Aperçu en direct</span>
+              <span className="text-sm text-gray-400">Aperçu</span>
             </div>
           </div>
         </div>
@@ -582,45 +656,41 @@ const MediaPubPage = () => {
   // Element Editor Panel
   const ElementEditor = () => {
     if (!selectedElement) return (
-      <div className="bg-gray-800/30 rounded-lg p-4 text-center text-gray-500">
+      <div className="bg-gray-800/30 rounded-lg p-4 text-center text-gray-500 border border-dashed border-gray-700">
         <MousePointer className="w-8 h-8 mx-auto mb-2 opacity-50" />
-        <p className="text-sm">Sélectionnez un élément sur le canvas pour le modifier</p>
+        <p className="text-sm">Sélectionnez un élément pour le modifier</p>
       </div>
     );
 
     return (
-      <div className="bg-gray-800/50 rounded-lg p-4 space-y-4" data-testid="element-editor">
+      <div className="bg-gray-800/50 rounded-lg p-4 space-y-4 border border-gray-700" data-testid="element-editor">
         <div className="flex items-center justify-between">
           <h4 className="font-medium text-white flex items-center gap-2">
-            <Settings className="w-4 h-4 text-blue-400" />
+            <Settings className="w-4 h-4 text-yellow-400" />
             Modifier l'élément
           </h4>
           <div className="flex gap-1">
             <button
               onClick={() => toggleElementLock(selectedElement.id)}
               className={`p-1.5 rounded ${selectedElement.locked ? 'bg-yellow-500/20 text-yellow-400' : 'bg-gray-700 text-gray-400 hover:text-white'}`}
-              title={selectedElement.locked ? 'Déverrouiller' : 'Verrouiller'}
             >
               {selectedElement.locked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
             </button>
             <button
               onClick={() => duplicateElement(selectedElement.id)}
               className="p-1.5 rounded bg-gray-700 text-gray-400 hover:text-white"
-              title="Dupliquer"
             >
               <Copy className="w-4 h-4" />
             </button>
             <button
               onClick={() => deleteElement(selectedElement.id)}
               className="p-1.5 rounded bg-red-500/20 text-red-400 hover:bg-red-500/30"
-              title="Supprimer"
             >
               <Trash2 className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Texte */}
         <div>
           <label className="block text-xs text-gray-400 mb-1">Texte</label>
           <input
@@ -632,7 +702,6 @@ const MediaPubPage = () => {
           />
         </div>
 
-        {/* Taille police */}
         <div>
           <label className="block text-xs text-gray-400 mb-1">Taille ({selectedElement.fontSize}px)</label>
           <input
@@ -641,55 +710,52 @@ const MediaPubPage = () => {
             max="72"
             value={selectedElement.fontSize}
             onChange={(e) => updateElement(selectedElement.id, { fontSize: parseInt(e.target.value) })}
-            className="w-full"
+            className="w-full accent-yellow-500"
             disabled={selectedElement.locked}
           />
         </div>
 
-        {/* Style texte */}
         <div className="flex gap-2">
           <button
             onClick={() => updateElement(selectedElement.id, { fontWeight: selectedElement.fontWeight === 'bold' ? 'normal' : 'bold' })}
-            className={`flex-1 p-2 rounded ${selectedElement.fontWeight === 'bold' ? 'bg-blue-600' : 'bg-gray-700'}`}
+            className={`flex-1 p-2 rounded ${selectedElement.fontWeight === 'bold' ? 'bg-yellow-500 text-black' : 'bg-gray-700'}`}
             disabled={selectedElement.locked}
           >
             <Bold className="w-4 h-4 mx-auto" />
           </button>
           <button
             onClick={() => updateElement(selectedElement.id, { fontStyle: selectedElement.fontStyle === 'italic' ? 'normal' : 'italic' })}
-            className={`flex-1 p-2 rounded ${selectedElement.fontStyle === 'italic' ? 'bg-blue-600' : 'bg-gray-700'}`}
+            className={`flex-1 p-2 rounded ${selectedElement.fontStyle === 'italic' ? 'bg-yellow-500 text-black' : 'bg-gray-700'}`}
             disabled={selectedElement.locked}
           >
             <Italic className="w-4 h-4 mx-auto" />
           </button>
         </div>
 
-        {/* Alignement */}
         <div className="flex gap-2">
           <button
             onClick={() => updateElement(selectedElement.id, { textAlign: 'left' })}
-            className={`flex-1 p-2 rounded ${selectedElement.textAlign === 'left' ? 'bg-blue-600' : 'bg-gray-700'}`}
+            className={`flex-1 p-2 rounded ${selectedElement.textAlign === 'left' ? 'bg-yellow-500 text-black' : 'bg-gray-700'}`}
             disabled={selectedElement.locked}
           >
             <AlignLeft className="w-4 h-4 mx-auto" />
           </button>
           <button
             onClick={() => updateElement(selectedElement.id, { textAlign: 'center' })}
-            className={`flex-1 p-2 rounded ${(!selectedElement.textAlign || selectedElement.textAlign === 'center') ? 'bg-blue-600' : 'bg-gray-700'}`}
+            className={`flex-1 p-2 rounded ${(!selectedElement.textAlign || selectedElement.textAlign === 'center') ? 'bg-yellow-500 text-black' : 'bg-gray-700'}`}
             disabled={selectedElement.locked}
           >
             <AlignCenter className="w-4 h-4 mx-auto" />
           </button>
           <button
             onClick={() => updateElement(selectedElement.id, { textAlign: 'right' })}
-            className={`flex-1 p-2 rounded ${selectedElement.textAlign === 'right' ? 'bg-blue-600' : 'bg-gray-700'}`}
+            className={`flex-1 p-2 rounded ${selectedElement.textAlign === 'right' ? 'bg-yellow-500 text-black' : 'bg-gray-700'}`}
             disabled={selectedElement.locked}
           >
             <AlignRight className="w-4 h-4 mx-auto" />
           </button>
         </div>
 
-        {/* Couleur */}
         <div>
           <label className="block text-xs text-gray-400 mb-1">Couleur</label>
           <div className="flex items-center gap-2">
@@ -713,43 +779,30 @@ const MediaPubPage = () => {
     );
   };
 
-  // Render Browse Templates
+  // Browse Templates
   const renderBrowseStep = () => (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">
-          <Sparkles className="inline-block mr-2 text-yellow-400" />
-          Créez votre Publicité
-        </h1>
-        <p className="text-gray-400">
-          Choisissez un modèle et personnalisez-le en direct comme sur Canva
-        </p>
-      </div>
-
       {/* Category Filters */}
-      <div className="bg-gray-800/50 p-4 rounded-xl space-y-3">
-        {/* Main Categories */}
+      <div className="bg-gray-800/50 p-4 rounded-xl space-y-3 border border-gray-700">
         <div className="flex items-center gap-2 flex-wrap">
-          <Filter className="w-5 h-5 text-gray-400" />
+          <Filter className="w-5 h-5 text-yellow-400" />
           <button
             onClick={() => { setSelectedCategory('all'); setSelectedSubcategory('all'); }}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               selectedCategory === 'all'
-                ? 'bg-blue-600 text-white'
+                ? 'bg-yellow-500 text-black'
                 : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
             }`}
           >
             Tous ({templates.length})
           </button>
           
-          {/* Sur Mesure - Option spéciale */}
           <button
             onClick={() => { setSelectedCategory('Sur Mesure'); setSelectedSubcategory('all'); }}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
               selectedCategory === 'Sur Mesure'
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
-                : 'bg-gradient-to-r from-purple-600/30 to-pink-600/30 text-purple-300 hover:from-purple-600/50 hover:to-pink-600/50'
+                ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-black'
+                : 'bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-400 hover:from-yellow-500/30 hover:to-orange-500/30 border border-yellow-500/30'
             }`}
           >
             <Wand2 className="w-4 h-4" />
@@ -762,7 +815,7 @@ const MediaPubPage = () => {
               onClick={() => { setSelectedCategory(cat); setSelectedSubcategory('all'); }}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 selectedCategory === cat
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-yellow-500 text-black'
                   : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
               }`}
             >
@@ -771,7 +824,6 @@ const MediaPubPage = () => {
           ))}
         </div>
 
-        {/* Subcategories */}
         {getSubcategories().length > 0 && (
           <div className="flex items-center gap-2 flex-wrap pl-7 pt-2 border-t border-gray-700">
             <Layers className="w-4 h-4 text-gray-500" />
@@ -779,7 +831,7 @@ const MediaPubPage = () => {
               onClick={() => setSelectedSubcategory('all')}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 selectedSubcategory === 'all'
-                  ? 'bg-purple-600 text-white'
+                  ? 'bg-orange-500 text-black'
                   : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
               }`}
             >
@@ -791,7 +843,7 @@ const MediaPubPage = () => {
                 onClick={() => setSelectedSubcategory(sub)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                   selectedSubcategory === sub
-                    ? 'bg-purple-600 text-white'
+                    ? 'bg-orange-500 text-black'
                     : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
                 }`}
               >
@@ -801,17 +853,16 @@ const MediaPubPage = () => {
           </div>
         )}
         
-        {/* View Toggle */}
         <div className="flex items-center justify-end gap-2">
           <button
             onClick={() => setViewMode('grid')}
-            className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-blue-600' : 'bg-gray-700'}`}
+            className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-yellow-500 text-black' : 'bg-gray-700'}`}
           >
             <Grid className="w-5 h-5" />
           </button>
           <button
             onClick={() => setViewMode('list')}
-            className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-blue-600' : 'bg-gray-700'}`}
+            className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-yellow-500 text-black' : 'bg-gray-700'}`}
           >
             <List className="w-5 h-5" />
           </button>
@@ -820,9 +871,9 @@ const MediaPubPage = () => {
 
       {/* Sur Mesure Section */}
       {selectedCategory === 'Sur Mesure' && (
-        <div className="bg-gradient-to-br from-purple-900/50 to-pink-900/50 rounded-2xl p-8 border border-purple-500/30">
+        <div className="bg-gradient-to-br from-yellow-900/30 to-orange-900/30 rounded-2xl p-8 border border-yellow-500/30">
           <div className="text-center max-w-2xl mx-auto">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center">
               <Wand2 className="w-10 h-10 text-white" />
             </div>
             <h2 className="text-2xl font-bold text-white mb-3">Création Sur Mesure</h2>
@@ -831,39 +882,37 @@ const MediaPubPage = () => {
               Couleurs, style, slogan, tout est personnalisable selon vos envies.
             </p>
             <div className="bg-black/30 rounded-xl p-4 mb-6 text-left">
-              <h4 className="font-medium text-purple-300 mb-2">Ce que vous pouvez demander :</h4>
+              <h4 className="font-medium text-yellow-400 mb-2">Ce que vous pouvez demander :</h4>
               <ul className="text-sm text-gray-400 space-y-1">
-                <li>• Modifier les couleurs, polices et style du modèle de base</li>
-                <li>• Ajouter votre slogan et description personnalisés</li>
-                <li>• Choisir le positionnement des éléments</li>
-                <li>• Demander un style spécifique (minimaliste, luxe, moderne, etc.)</li>
+                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400" /> Modifier les couleurs, polices et style</li>
+                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400" /> Ajouter votre slogan et description</li>
+                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400" /> Choisir le positionnement des éléments</li>
+                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400" /> Demander un style spécifique</li>
               </ul>
             </div>
             <button
               onClick={handleSurMesure}
-              className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold rounded-xl flex items-center gap-2 mx-auto shadow-lg shadow-purple-500/30 transition-all"
+              className="px-8 py-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black font-bold rounded-xl flex items-center gap-2 mx-auto shadow-lg shadow-yellow-500/30 transition-all"
               data-testid="sur-mesure-button"
             >
               <Sparkles className="w-5 h-5" />
-              Commencer ma création - 79.90 CHF
+              Commencer ma création - 149.90 CHF
             </button>
           </div>
         </div>
       )}
 
-      {/* Results Count */}
       {selectedCategory !== 'Sur Mesure' && (
         <>
           <div className="text-sm text-gray-400">
             {filteredTemplates.length} modèle{filteredTemplates.length > 1 ? 's' : ''} trouvé{filteredTemplates.length > 1 ? 's' : ''}
           </div>
 
-          {/* Templates Grid */}
           <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
             {filteredTemplates.map(template => (
               <div
                 key={template.id}
-                className="bg-gray-800/50 rounded-xl overflow-hidden border border-gray-700 hover:border-blue-500 transition-all group cursor-pointer"
+                className="bg-gray-800/50 rounded-xl overflow-hidden border border-gray-700 hover:border-yellow-500/50 transition-all group cursor-pointer"
                 onClick={() => handleSelectTemplate(template)}
                 data-testid={`template-${template.id}`}
               >
@@ -879,12 +928,12 @@ const MediaPubPage = () => {
                     </span>
                   )}
                   {template.subcategory && (
-                    <span className="absolute top-3 left-3 bg-purple-500/80 text-white text-xs px-2 py-1 rounded">
+                    <span className="absolute top-3 left-3 bg-orange-500/80 text-white text-xs px-2 py-1 rounded">
                       {template.subcategory}
                     </span>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-4">
-                    <button className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2 shadow-lg">
+                    <button className="bg-yellow-500 text-black px-6 py-2 rounded-lg font-medium flex items-center gap-2 shadow-lg">
                       Personnaliser <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
@@ -896,7 +945,7 @@ const MediaPubPage = () => {
                       <h3 className="font-semibold text-white text-sm">{template.name}</h3>
                       <p className="text-xs text-gray-500">{template.category}</p>
                     </div>
-                    <span className="text-lg font-bold text-green-400">{template.price} CHF</span>
+                    <span className="text-lg font-bold text-yellow-400">{template.price} CHF</span>
                   </div>
                   <p className="text-xs text-gray-500 line-clamp-2">{template.description}</p>
                   <div className="mt-2 flex items-center gap-2">
@@ -913,10 +962,9 @@ const MediaPubPage = () => {
     </div>
   );
 
-  // Render Sur Mesure Step
+  // Sur Mesure Step
   const renderSurMesureStep = () => (
     <div className="max-w-4xl mx-auto">
-      {/* Back button */}
       <button
         onClick={() => setOrderStep('browse')}
         className="text-gray-400 hover:text-white mb-6 flex items-center gap-2"
@@ -924,9 +972,9 @@ const MediaPubPage = () => {
         <ArrowLeft className="w-4 h-4" /> Retour aux modèles
       </button>
 
-      <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 rounded-2xl p-8 border border-purple-500/20">
+      <div className="bg-gradient-to-br from-yellow-900/30 to-orange-900/30 rounded-2xl p-8 border border-yellow-500/20">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center">
             <Wand2 className="w-8 h-8 text-white" />
           </div>
           <h2 className="text-2xl font-bold text-white mb-2">Création Sur Mesure</h2>
@@ -934,7 +982,6 @@ const MediaPubPage = () => {
         </div>
 
         <div className="space-y-6">
-          {/* Description principale */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               <FileText className="inline w-4 h-4 mr-1" />
@@ -943,14 +990,12 @@ const MediaPubPage = () => {
             <textarea
               value={surMesureData.customRequest}
               onChange={(e) => setSurMesureData(prev => ({ ...prev, customRequest: e.target.value }))}
-              placeholder="Ex: Je veux une publicité pour mon restaurant italien avec une ambiance chaleureuse, montrant des plats de pâtes fraîches. Le slogan serait 'La vraie cuisine italienne à Lausanne'. Style élégant mais accessible..."
+              placeholder="Ex: Je veux une publicité pour mon restaurant italien avec une ambiance chaleureuse..."
               rows={5}
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none"
             />
-            <p className="text-xs text-gray-500 mt-1">Soyez aussi précis que possible</p>
           </div>
 
-          {/* Couleurs souhaitées */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               <Palette className="inline w-4 h-4 mr-1" />
@@ -961,11 +1006,10 @@ const MediaPubPage = () => {
               value={surMesureData.wantedColors}
               onChange={(e) => setSurMesureData(prev => ({ ...prev, wantedColors: e.target.value }))}
               placeholder="Ex: Rouge bordeaux, doré, noir élégant..."
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
             />
           </div>
 
-          {/* Style souhaité */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               <Sparkles className="inline w-4 h-4 mr-1" />
@@ -975,12 +1019,11 @@ const MediaPubPage = () => {
               type="text"
               value={surMesureData.wantedStyle}
               onChange={(e) => setSurMesureData(prev => ({ ...prev, wantedStyle: e.target.value }))}
-              placeholder="Ex: Moderne et minimaliste, Luxueux, Chaleureux et familial..."
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              placeholder="Ex: Moderne et minimaliste, Luxueux, Chaleureux..."
+              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
             />
           </div>
 
-          {/* Informations supplémentaires */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Informations supplémentaires
@@ -988,42 +1031,39 @@ const MediaPubPage = () => {
             <textarea
               value={surMesureData.additionalInfo}
               onChange={(e) => setSurMesureData(prev => ({ ...prev, additionalInfo: e.target.value }))}
-              placeholder="Tout autre détail important (format préféré, éléments à éviter, etc.)"
+              placeholder="Tout autre détail important..."
               rows={3}
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none"
             />
           </div>
 
-          {/* Note importante */}
           <div className="bg-yellow-900/30 border border-yellow-700/50 rounded-xl p-4">
             <h4 className="font-medium text-yellow-400 mb-2 flex items-center gap-2">
               <Lock className="w-4 h-4" />
               Protection anti-screenshot
             </h4>
             <p className="text-sm text-yellow-200/80">
-              Un filigrane "TITELLI" sera présent sur l'aperçu. Après paiement, vous recevrez l'image finale sans filigrane en haute qualité.
+              Un filigrane "TITELLI" sera présent sur l'aperçu. Après paiement, vous recevrez l'image finale sans filigrane.
             </p>
           </div>
 
-          {/* Bouton Commander */}
           <button
             onClick={() => setOrderStep('payment')}
             disabled={!surMesureData.customRequest}
-            className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-purple-500/30"
+            className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-yellow-500/30"
             data-testid="sur-mesure-submit"
           >
             <CreditCard className="w-5 h-5" />
-            Procéder au paiement - 79.90 CHF
+            Procéder au paiement - 149.90 CHF
           </button>
         </div>
       </div>
     </div>
   );
 
-  // Render Customize Step with Live Preview
+  // Customize Step
   const renderCustomizeStep = () => (
     <div className="max-w-7xl mx-auto">
-      {/* Back button */}
       <button
         onClick={() => setOrderStep('browse')}
         className="text-gray-400 hover:text-white mb-6 flex items-center gap-2"
@@ -1032,22 +1072,18 @@ const MediaPubPage = () => {
       </button>
 
       <div className="grid lg:grid-cols-5 gap-6">
-        {/* Live Preview - LEFT (3 cols) */}
         <div className="lg:col-span-3 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <Eye className="text-blue-400" />
+              <Eye className="text-yellow-400" />
               Aperçu en direct
             </h2>
             <span className="text-sm text-gray-400">{selectedTemplate?.name}</span>
           </div>
           
           <LivePreview />
-          
-          {/* Element Editor */}
           <ElementEditor />
           
-          {/* Add Element Button */}
           <button
             onClick={addNewElement}
             className="w-full py-3 bg-gray-800 hover:bg-gray-700 border-2 border-dashed border-gray-600 rounded-xl text-gray-400 hover:text-white flex items-center justify-center gap-2 transition-colors"
@@ -1057,16 +1093,14 @@ const MediaPubPage = () => {
           </button>
         </div>
 
-        {/* Customization Form - RIGHT (2 cols) */}
         <div className="lg:col-span-2 space-y-4">
           <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
             <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-              <Palette className="text-purple-400" />
-              Personnalisation rapide
+              <Palette className="text-yellow-400" />
+              Personnalisation
             </h2>
 
             <div className="space-y-5">
-              {/* Slogan */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   <Type className="inline w-4 h-4 mr-1" />
@@ -1078,13 +1112,12 @@ const MediaPubPage = () => {
                   value={formData.slogan}
                   onChange={handleInputChange}
                   placeholder="Ex: Qualité suisse, prix imbattable"
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                   maxLength={50}
                 />
-                <p className="text-xs text-gray-500 mt-1">{formData.slogan.length}/50 caractères</p>
+                <p className="text-xs text-gray-500 mt-1">{formData.slogan.length}/50</p>
               </div>
 
-              {/* Product Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   <FileText className="inline w-4 h-4 mr-1" />
@@ -1096,13 +1129,12 @@ const MediaPubPage = () => {
                   value={formData.product_name}
                   onChange={handleInputChange}
                   placeholder="Ex: Collection Printemps 2026"
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                   maxLength={40}
                 />
-                <p className="text-xs text-gray-500 mt-1">{formData.product_name.length}/40 caractères</p>
+                <p className="text-xs text-gray-500 mt-1">{formData.product_name.length}/40</p>
               </div>
 
-              {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Description (optionnel)
@@ -1113,59 +1145,51 @@ const MediaPubPage = () => {
                   onChange={handleInputChange}
                   placeholder="Détails supplémentaires..."
                   rows={2}
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none"
                   maxLength={100}
                 />
-                <p className="text-xs text-gray-500 mt-1">{formData.description.length}/100 caractères</p>
               </div>
 
-              {/* Brand Colors */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-3">
                   <Palette className="inline w-4 h-4 mr-1" />
                   Couleurs de marque
                 </label>
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={formData.brand_colors[0]}
-                        onChange={(e) => handleColorChange(0, e.target.value)}
-                        className="w-12 h-12 rounded-lg cursor-pointer border-2 border-gray-600"
-                      />
-                      <div>
-                        <p className="text-sm text-white">Principale</p>
-                        <p className="text-xs text-gray-500">{formData.brand_colors[0]}</p>
-                      </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={formData.brand_colors[0]}
+                      onChange={(e) => handleColorChange(0, e.target.value)}
+                      className="w-12 h-12 rounded-lg cursor-pointer border-2 border-gray-600"
+                    />
+                    <div>
+                      <p className="text-sm text-white">Principale</p>
+                      <p className="text-xs text-gray-500">{formData.brand_colors[0]}</p>
                     </div>
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={formData.brand_colors[1]}
-                        onChange={(e) => handleColorChange(1, e.target.value)}
-                        className="w-12 h-12 rounded-lg cursor-pointer border-2 border-gray-600"
-                      />
-                      <div>
-                        <p className="text-sm text-white">Secondaire</p>
-                        <p className="text-xs text-gray-500">{formData.brand_colors[1]}</p>
-                      </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={formData.brand_colors[1]}
+                      onChange={(e) => handleColorChange(1, e.target.value)}
+                      className="w-12 h-12 rounded-lg cursor-pointer border-2 border-gray-600"
+                    />
+                    <div>
+                      <p className="text-sm text-white">Secondaire</p>
+                      <p className="text-xs text-gray-500">{formData.brand_colors[1]}</p>
                     </div>
                   </div>
                 </div>
                 
-                {/* Quick Colors */}
                 <div className="mt-3 flex items-center gap-2 flex-wrap">
                   <span className="text-xs text-gray-500">Rapide:</span>
-                  {['#E74C3C', '#3498DB', '#2ECC71', '#F39C12', '#9B59B6', '#1ABC9C', '#34495E'].map(color => (
+                  {['#F59E0B', '#EF4444', '#3B82F6', '#10B981', '#8B5CF6', '#EC4899', '#1F2937'].map(color => (
                     <button
                       key={color}
                       onClick={() => handleColorChange(0, color)}
                       className="w-6 h-6 rounded-full border-2 border-gray-600 hover:scale-110 transition-transform"
                       style={{ backgroundColor: color }}
-                      title={color}
                     />
                   ))}
                 </div>
@@ -1173,20 +1197,17 @@ const MediaPubPage = () => {
             </div>
           </div>
 
-          {/* Important Notes */}
           <div className="bg-yellow-900/30 border border-yellow-700 rounded-xl p-4">
             <h4 className="font-medium text-yellow-400 mb-2 flex items-center gap-2">
               <Lock className="w-4 h-4" />
-              Protection anti-screenshot
+              Protection
             </h4>
             <ul className="text-sm text-yellow-200/80 space-y-1">
               <li>• Filigrane visible jusqu'au paiement</li>
               <li>• Image HD sans filigrane après achat</li>
-              <li>• Pas de prix ni dates sur l'image</li>
             </ul>
           </div>
 
-          {/* Template Info */}
           <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
@@ -1197,52 +1218,42 @@ const MediaPubPage = () => {
                 <span className="text-gray-500">Format:</span>
                 <span className="text-white ml-2">{selectedTemplate?.format}</span>
               </div>
-              <div>
-                <span className="text-gray-500">Type:</span>
-                <span className="text-white ml-2">{selectedTemplate?.subcategory || 'Standard'}</span>
-              </div>
-              <div>
-                <span className="text-gray-500">Prix:</span>
-                <span className="text-green-400 ml-2 font-bold">{selectedTemplate?.price} CHF</span>
-              </div>
             </div>
           </div>
 
-          {/* Submit Button */}
           <button
             onClick={handleProceedToPayment}
             disabled={submitting || !formData.slogan || !formData.product_name}
-            className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
+            className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
             data-testid="proceed-to-payment"
           >
             <CreditCard className="w-5 h-5" />
-            Procéder au paiement - {selectedTemplate?.price} CHF
+            Commander - {selectedTemplate?.price} CHF
           </button>
         </div>
       </div>
     </div>
   );
 
-  // Render Payment Step
+  // Payment Step
   const renderPaymentStep = () => (
     <div className="max-w-lg mx-auto">
       <button
         onClick={() => setOrderStep(selectedTemplate?.id === 'sur_mesure' ? 'sur_mesure' : 'customize')}
         className="text-gray-400 hover:text-white mb-6 flex items-center gap-2"
       >
-        <ArrowLeft className="w-4 h-4" /> Retour à la personnalisation
+        <ArrowLeft className="w-4 h-4" /> Retour
       </button>
 
       <div className="bg-gray-800/50 rounded-2xl p-8 border border-gray-700">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-500/20 flex items-center justify-center">
-            <CreditCard className="w-8 h-8 text-blue-400" />
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-yellow-500/20 flex items-center justify-center">
+            <CreditCard className="w-8 h-8 text-yellow-400" />
           </div>
           <h2 className="text-2xl font-bold text-white mb-2">Paiement</h2>
           <p className="text-gray-400">Finalisez votre commande</p>
         </div>
 
-        {/* Récapitulatif */}
         <div className="bg-gray-900/50 rounded-xl p-4 mb-6">
           <h4 className="font-medium text-white mb-3">Récapitulatif</h4>
           <div className="space-y-2 text-sm">
@@ -1250,50 +1261,35 @@ const MediaPubPage = () => {
               <span className="text-gray-400">Template:</span>
               <span className="text-white">{selectedTemplate?.name}</span>
             </div>
-            {selectedTemplate?.id !== 'sur_mesure' && (
-              <>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Slogan:</span>
-                  <span className="text-white">{formData.slogan || '-'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Produit:</span>
-                  <span className="text-white">{formData.product_name || '-'}</span>
-                </div>
-              </>
-            )}
             <div className="border-t border-gray-700 pt-2 mt-2 flex justify-between">
               <span className="text-gray-300 font-medium">Total:</span>
-              <span className="text-green-400 font-bold text-lg">{selectedTemplate?.price} CHF</span>
+              <span className="text-yellow-400 font-bold text-lg">{selectedTemplate?.price} CHF</span>
             </div>
           </div>
         </div>
 
-        {/* Info Filigrane */}
         <div className="bg-green-900/30 border border-green-700/50 rounded-xl p-4 mb-6">
           <div className="flex items-start gap-3">
             <Unlock className="w-5 h-5 text-green-400 mt-0.5" />
             <div>
               <h4 className="font-medium text-green-400 mb-1">Après paiement</h4>
               <p className="text-sm text-green-200/80">
-                Vous recevrez votre image en haute qualité <strong>sans le filigrane Titelli</strong>. 
-                Le fichier sera disponible dans votre espace "Commandes Titelli".
+                Image HD <strong>sans filigrane</strong> disponible dans "Commandes Titelli"
               </p>
             </div>
           </div>
         </div>
 
-        {/* Bouton Paiement */}
         <button
           onClick={handlePayment}
           disabled={submitting}
-          className="w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-green-500/30"
+          className="w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 transition-all shadow-lg"
           data-testid="confirm-payment"
         >
           {submitting ? (
             <>
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              Traitement en cours...
+              Traitement...
             </>
           ) : (
             <>
@@ -1302,21 +1298,17 @@ const MediaPubPage = () => {
             </>
           )}
         </button>
-
-        <p className="text-xs text-gray-500 text-center mt-4">
-          Paiement sécurisé par Stripe. Vos données sont protégées.
-        </p>
       </div>
     </div>
   );
 
-  // Render Processing Step
+  // Processing Step
   const renderProcessingStep = () => (
     <div className="max-w-md mx-auto text-center py-12">
       <div className="w-24 h-24 mx-auto mb-6 relative">
-        <div className="absolute inset-0 border-4 border-blue-500/30 rounded-full"></div>
-        <div className="absolute inset-0 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-        <Sparkles className="absolute inset-0 m-auto w-10 h-10 text-blue-400" />
+        <div className="absolute inset-0 border-4 border-yellow-500/30 rounded-full"></div>
+        <div className="absolute inset-0 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
+        <Sparkles className="absolute inset-0 m-auto w-10 h-10 text-yellow-400" />
       </div>
       <h2 className="text-2xl font-bold text-white mb-2">Création en cours...</h2>
       <p className="text-gray-400 mb-6">
@@ -1329,7 +1321,7 @@ const MediaPubPage = () => {
     </div>
   );
 
-  // Render Confirm Step
+  // Confirm Step
   const renderConfirmStep = () => (
     <div className="max-w-md mx-auto text-center py-12">
       <div className="w-20 h-20 mx-auto mb-6 bg-green-500/20 rounded-full flex items-center justify-center">
@@ -1337,8 +1329,8 @@ const MediaPubPage = () => {
       </div>
       <h2 className="text-2xl font-bold text-white mb-2">Commande confirmée !</h2>
       <p className="text-gray-400 mb-6">
-        Votre publicité <strong>sans filigrane</strong> sera disponible dans quelques minutes dans la section 
-        <span className="text-blue-400 font-medium"> "Commandes Titelli"</span> de votre tableau de bord.
+        Votre publicité <strong>sans filigrane</strong> sera disponible dans
+        <span className="text-yellow-400 font-medium"> "Commandes Titelli"</span>
       </p>
       
       {orderResult && (
@@ -1350,16 +1342,13 @@ const MediaPubPage = () => {
             <span className="text-gray-500">Statut:</span> 
             <span className="text-yellow-400 ml-1">En cours de création</span>
           </p>
-          <p className="text-sm text-gray-400">
-            <span className="text-gray-500">Délai:</span> {orderResult.estimated_time}
-          </p>
         </div>
       )}
 
       <div className="flex flex-col gap-3">
         <button
           onClick={() => navigate('/dashboard/entreprise?tab=commandes-titelli')}
-          className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+          className="w-full py-3 bg-yellow-500 hover:bg-yellow-600 text-black font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
         >
           <Download className="w-4 h-4" />
           Voir mes commandes
@@ -1370,19 +1359,6 @@ const MediaPubPage = () => {
             setSelectedTemplate(null);
             setCanvasElements([]);
             setIsPaid(false);
-            setFormData({
-              slogan: '',
-              product_name: '',
-              description: '',
-              brand_colors: ['#0066CC', '#FFFFFF'],
-              additional_notes: ''
-            });
-            setSurMesureData({
-              customRequest: '',
-              wantedColors: '',
-              wantedStyle: '',
-              additionalInfo: ''
-            });
           }}
           className="w-full py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transition-colors"
         >
@@ -1395,13 +1371,15 @@ const MediaPubPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+        <div className="animate-spin w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full"></div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white">
+      {orderStep === 'browse' && <AnimatedHeader />}
+      
       <div className="container mx-auto px-4 py-8">
         {orderStep === 'browse' && renderBrowseStep()}
         {orderStep === 'customize' && renderCustomizeStep()}
