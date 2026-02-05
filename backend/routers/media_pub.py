@@ -961,3 +961,267 @@ async def cancel_order(order_id: str):
     )
     
     return {"message": "Commande annulée"}
+
+
+# ============ STRIPE PAYMENT INTEGRATION ============
+
+from emergentintegrations.payments.stripe.checkout import (
+    StripeCheckout, 
+    CheckoutSessionResponse, 
+    CheckoutStatusResponse, 
+    CheckoutSessionRequest
+)
+from fastapi import Request
+
+STRIPE_API_KEY = os.getenv("STRIPE_API_KEY")
+
+
+class PaymentRequest(BaseModel):
+    """Request for creating payment session"""
+    order_id: str
+    origin_url: str  # Frontend origin for redirect URLs
+
+
+class PaymentStatusRequest(BaseModel):
+    """Request for checking payment status"""
+    session_id: str
+    order_id: str
+
+
+@router.post("/payment/create-session")
+async def create_payment_session(payment_request: PaymentRequest, request: Request):
+    """Create Stripe checkout session for a pub order"""
+    
+    # Get the order
+    order = await db.pub_orders.find_one({"id": payment_request.order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Commande non trouvée")
+    
+    if order.get("payment_status") == "paid":
+        raise HTTPException(status_code=400, detail="Cette commande a déjà été payée")
+    
+    # Get price from server-side (NEVER trust frontend amount)
+    price = float(order.get("price", 29.90))
+    
+    # Initialize Stripe checkout
+    host_url = str(request.base_url).rstrip('/')
+    webhook_url = f"{host_url}api/media-pub/webhook/stripe"
+    
+    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
+    
+    # Build URLs from frontend origin
+    origin_url = payment_request.origin_url.rstrip('/')
+    success_url = f"{origin_url}/media-pub/success?session_id={{CHECKOUT_SESSION_ID}}&order_id={payment_request.order_id}"
+    cancel_url = f"{origin_url}/media-pub?cancelled=true&order_id={payment_request.order_id}"
+    
+    # Create checkout session
+    checkout_request = CheckoutSessionRequest(
+        amount=price,
+        currency="chf",
+        success_url=success_url,
+        cancel_url=cancel_url,
+        metadata={
+            "order_id": payment_request.order_id,
+            "enterprise_id": order.get("enterprise_id", ""),
+            "template_name": order.get("template_name", ""),
+            "type": "pub_media_order"
+        }
+    )
+    
+    try:
+        session: CheckoutSessionResponse = await stripe_checkout.create_checkout_session(checkout_request)
+        
+        # Create payment transaction record
+        await db.payment_transactions.insert_one({
+            "id": str(uuid.uuid4()),
+            "session_id": session.session_id,
+            "order_id": payment_request.order_id,
+            "amount": price,
+            "currency": "CHF",
+            "type": "pub_media",
+            "payment_status": "pending",
+            "enterprise_id": order.get("enterprise_id"),
+            "user_id": order.get("user_id"),
+            "created_at": datetime.now(timezone.utc).isoformat()
+        })
+        
+        # Update order with session_id
+        await db.pub_orders.update_one(
+            {"id": payment_request.order_id},
+            {"$set": {
+                "stripe_session_id": session.session_id,
+                "payment_status": "pending"
+            }}
+        )
+        
+        return {
+            "checkout_url": session.url,
+            "session_id": session.session_id
+        }
+        
+    except Exception as e:
+        logger.error(f"Stripe session creation error: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur création session Stripe: {str(e)}")
+
+
+@router.get("/payment/status/{session_id}")
+async def check_payment_status(session_id: str, order_id: str):
+    """Check payment status and update order if paid"""
+    
+    if not STRIPE_API_KEY:
+        raise HTTPException(status_code=500, detail="Stripe not configured")
+    
+    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url="")
+    
+    try:
+        status: CheckoutStatusResponse = await stripe_checkout.get_checkout_status(session_id)
+        
+        # Find the transaction
+        transaction = await db.payment_transactions.find_one({"session_id": session_id})
+        
+        if status.payment_status == "paid":
+            # Check if already processed (prevent double processing)
+            if transaction and transaction.get("payment_status") == "paid":
+                return {
+                    "status": "paid",
+                    "message": "Paiement déjà traité",
+                    "order_id": order_id
+                }
+            
+            # Update transaction
+            await db.payment_transactions.update_one(
+                {"session_id": session_id},
+                {"$set": {
+                    "payment_status": "paid",
+                    "paid_at": datetime.now(timezone.utc).isoformat()
+                }}
+            )
+            
+            # Update order payment status
+            await db.pub_orders.update_one(
+                {"id": order_id},
+                {"$set": {
+                    "payment_status": "paid",
+                    "paid_at": datetime.now(timezone.utc).isoformat()
+                }}
+            )
+            
+            # Create success notification
+            order = await db.pub_orders.find_one({"id": order_id})
+            if order:
+                await db.notifications.insert_one({
+                    "id": str(uuid.uuid4()),
+                    "user_id": order.get("user_id"),
+                    "type": "payment_success",
+                    "title": "Paiement confirmé !",
+                    "message": f"Votre commande Pub Média #{order_id} a été payée. L'image HD sans filigrane est disponible.",
+                    "link": "/dashboard/entreprise?tab=commandes-titelli",
+                    "is_read": False,
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                })
+            
+            logger.info(f"✅ Payment confirmed for order {order_id}")
+            
+            return {
+                "status": "paid",
+                "message": "Paiement confirmé ! Image HD disponible.",
+                "order_id": order_id
+            }
+            
+        elif status.status == "expired":
+            await db.payment_transactions.update_one(
+                {"session_id": session_id},
+                {"$set": {"payment_status": "expired"}}
+            )
+            return {
+                "status": "expired",
+                "message": "Session de paiement expirée",
+                "order_id": order_id
+            }
+        else:
+            return {
+                "status": status.payment_status,
+                "message": "Paiement en attente",
+                "order_id": order_id
+            }
+            
+    except Exception as e:
+        logger.error(f"Payment status check error: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur vérification: {str(e)}")
+
+
+@router.post("/webhook/stripe")
+async def handle_stripe_webhook(request: Request):
+    """Handle Stripe webhook events for payment confirmation"""
+    
+    if not STRIPE_API_KEY:
+        raise HTTPException(status_code=500, detail="Stripe not configured")
+    
+    body = await request.body()
+    signature = request.headers.get("Stripe-Signature")
+    
+    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url="")
+    
+    try:
+        webhook_response = await stripe_checkout.handle_webhook(body, signature)
+        
+        if webhook_response.payment_status == "paid":
+            order_id = webhook_response.metadata.get("order_id")
+            
+            if order_id:
+                # Update transaction
+                await db.payment_transactions.update_one(
+                    {"session_id": webhook_response.session_id},
+                    {"$set": {
+                        "payment_status": "paid",
+                        "paid_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+                
+                # Update order
+                await db.pub_orders.update_one(
+                    {"id": order_id},
+                    {"$set": {
+                        "payment_status": "paid",
+                        "paid_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+                
+                logger.info(f"✅ Webhook: Payment confirmed for order {order_id}")
+        
+        return {"status": "received"}
+        
+    except Exception as e:
+        logger.error(f"Webhook error: {e}")
+        return {"status": "error", "message": str(e)}
+
+
+@router.get("/orders/{order_id}/download")
+async def download_order_image(order_id: str):
+    """Download the final image (only if paid)"""
+    
+    order = await db.pub_orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Commande non trouvée")
+    
+    if order.get("payment_status") != "paid":
+        raise HTTPException(
+            status_code=403, 
+            detail="Paiement requis pour télécharger l'image HD sans filigrane"
+        )
+    
+    if order.get("status") != "completed":
+        raise HTTPException(
+            status_code=400, 
+            detail="L'image n'est pas encore prête"
+        )
+    
+    image_url = order.get("image_url")
+    if not image_url:
+        raise HTTPException(status_code=404, detail="Image non disponible")
+    
+    return {
+        "download_url": image_url,
+        "order_id": order_id,
+        "message": "Image HD sans filigrane"
+    }
