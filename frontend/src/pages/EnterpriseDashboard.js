@@ -173,6 +173,8 @@ const EnterpriseDashboard = () => {
         { id: 'ia_clients', label: 'IA Ciblage clients', icon: Target },
         { id: 'influencers', label: 'Influenceurs', icon: Users },
         { id: 'invitations', label: 'Invitations clients', icon: Send },
+        { id: 'media_pub', label: 'Créer une Pub', icon: Sparkles, isExternal: true, externalUrl: '/media-pub', color: 'text-purple-400' },
+        { id: 'commandes-titelli', label: 'Commandes Titelli', icon: Package, notifKey: 'pub_orders' },
       ]
     },
     {
