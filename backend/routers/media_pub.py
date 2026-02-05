@@ -99,9 +99,31 @@ def add_text_overlay(image_bytes: bytes, product_name: str, slogan: str, descrip
             font_medium = font_large
             font_small = font_large
         
+        # Fonction pour tronquer le texte si trop long
+        def truncate_text(text, font, max_width):
+            """Tronque le texte avec ... si trop long"""
+            if not text:
+                return text
+            bbox = draw.textbbox((0, 0), text, font=font)
+            text_width = bbox[2] - bbox[0]
+            if text_width <= max_width:
+                return text
+            # Tronquer progressivement
+            while text_width > max_width and len(text) > 3:
+                text = text[:-4] + "..."
+                bbox = draw.textbbox((0, 0), text, font=font)
+                text_width = bbox[2] - bbox[0]
+            return text
+        
         # Créer un fond semi-transparent pour le texte en bas
-        overlay_height = int(height * 0.25)
-        overlay = Image.new('RGBA', (width, overlay_height), (0, 0, 0, 180))
+        overlay_height = int(height * 0.28)  # Un peu plus haut pour plus d'espace
+        overlay = Image.new('RGBA', (width, overlay_height), (0, 0, 0, 200))  # Plus opaque
+        
+        # Ajouter un dégradé sur l'overlay
+        for y in range(overlay_height):
+            alpha = int(200 * (y / overlay_height))  # Dégradé de transparent à opaque
+            for x in range(width):
+                overlay.putpixel((x, y), (0, 0, 0, alpha))
         
         # Coller l'overlay en bas de l'image
         if img.mode != 'RGBA':
@@ -111,32 +133,36 @@ def add_text_overlay(image_bytes: bytes, product_name: str, slogan: str, descrip
         # Nouveau draw après le paste
         draw = ImageDraw.Draw(img)
         
-        # Position de départ pour le texte
-        text_y = height - overlay_height + int(overlay_height * 0.15)
-        padding = int(width * 0.05)
+        # Position de départ pour le texte - avec plus de padding
+        text_y = height - overlay_height + int(overlay_height * 0.20)
+        padding = int(width * 0.04)  # Padding réduit pour plus d'espace texte
+        max_text_width = width - (padding * 2)  # Largeur max pour le texte
         
         # Dessiner le nom du produit (grand)
         if product_name:
+            truncated_name = truncate_text(product_name, font_large, max_text_width)
             # Ombre
-            draw.text((padding + 2, text_y + 2), product_name, font=font_large, fill=(0, 0, 0, 200))
+            draw.text((padding + 2, text_y + 2), truncated_name, font=font_large, fill=(0, 0, 0, 255))
             # Texte principal
-            draw.text((padding, text_y), product_name, font=font_large, fill=primary_rgb)
-            text_y += int(height * 0.09)
+            draw.text((padding, text_y), truncated_name, font=font_large, fill=primary_rgb)
+            text_y += int(height * 0.065)
         
         # Dessiner le slogan (moyen)
         if slogan:
+            truncated_slogan = truncate_text(slogan, font_medium, max_text_width)
             # Ombre
-            draw.text((padding + 1, text_y + 1), slogan, font=font_medium, fill=(0, 0, 0, 200))
+            draw.text((padding + 1, text_y + 1), truncated_slogan, font=font_medium, fill=(0, 0, 0, 255))
             # Texte principal - blanc pour contraste
-            draw.text((padding, text_y), slogan, font=font_medium, fill=(255, 255, 255))
-            text_y += int(height * 0.06)
+            draw.text((padding, text_y), truncated_slogan, font=font_medium, fill=(255, 255, 255))
+            text_y += int(height * 0.05)
         
         # Dessiner la description (petit)
-        if description and len(description) < 80:
+        if description:
+            truncated_desc = truncate_text(description, font_small, max_text_width)
             # Ombre
-            draw.text((padding + 1, text_y + 1), description, font=font_small, fill=(0, 0, 0, 200))
+            draw.text((padding + 1, text_y + 1), truncated_desc, font=font_small, fill=(0, 0, 0, 255))
             # Texte principal
-            draw.text((padding, text_y), description, font=font_small, fill=(200, 200, 200))
+            draw.text((padding, text_y), truncated_desc, font=font_small, fill=(200, 200, 200))
         
         # Convertir en bytes
         output = BytesIO()
