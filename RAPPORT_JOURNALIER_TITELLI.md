@@ -379,4 +379,4 @@ POST /api/gamification/log_action - Logger action (interne)
 ---
 
 **Document généré le:** Février 2026
-**URL Application:** https://live-template-editor.preview.emergentagent.com
+**URL Application:** https://enterprise-media.preview.emergentagent.com

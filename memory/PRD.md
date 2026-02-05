@@ -260,7 +260,7 @@ Collections principales:
 ---
 
 ## URL Application
-**Production**: https://live-template-editor.preview.emergentagent.com
+**Production**: https://enterprise-media.preview.emergentagent.com
 
 ---
 
