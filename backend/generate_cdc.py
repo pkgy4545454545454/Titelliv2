@@ -75,9 +75,7 @@ class TitelliPDF(FPDF):
     def bullet_point(self, text, indent=10):
         self.set_font('Helvetica', '', 10)
         self.set_text_color(80, 80, 80)
-        current_x = self.get_x()
-        self.set_x(current_x + indent)
-        bullet_text = chr(149) + "  " + text
+        bullet_text = "  " + chr(149) + "  " + text
         self.multi_cell(0, 6, bullet_text)
         
     def highlight_box(self, title, text, color=(245, 158, 11)):
