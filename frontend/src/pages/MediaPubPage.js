@@ -409,7 +409,7 @@ const MediaPubPage = () => {
 
       <div className="flex flex-col gap-3">
         <button
-          onClick={() => navigate('/dashboard/enterprise?tab=commandes-titelli')}
+          onClick={() => navigate('/dashboard/entreprise?tab=commandes-titelli')}
           className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
         >
           Voir mes commandes
