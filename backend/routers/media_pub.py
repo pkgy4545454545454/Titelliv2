@@ -647,7 +647,7 @@ async def get_current_user(authorization: str = None):
 
 
 async def generate_pub_image(order_id: str, order_data: dict):
-    """Génère l'image publicitaire avec IA en arrière-plan"""
+    """Génère l'image publicitaire avec IA en arrière-plan + post-processing texte"""
     try:
         from emergentintegrations.llm.openai.image_generation import OpenAIImageGeneration
         
@@ -655,32 +655,42 @@ async def generate_pub_image(order_id: str, order_data: dict):
         
         template = next((t for t in TEMPLATES if t["id"] == order_data["template_id"]), None)
         if not template:
-            raise ValueError("Template non trouvé")
+            # Template sur mesure
+            template = {
+                "id": "sur_mesure",
+                "name": "Création Sur Mesure",
+                "category": "Personnalisé",
+                "format": "1080x1080"
+            }
         
-        # Construire le prompt pour l'IA
+        # Construire le prompt pour l'IA - SANS TEXTE (le texte sera ajouté en post-processing)
         colors_str = ", ".join(order_data.get("brand_colors", ["#0066CC", "#FFFFFF"])) if order_data.get("brand_colors") else "blue and white professional colors"
         
-        prompt = f"""Create a professional marketing advertisement image for a business.
+        # Prompt optimisé pour image de fond SANS TEXTE
+        prompt = f"""Create a professional marketing advertisement background image.
 
-TEMPLATE STYLE: {template['name']} - {template['category']}
-FORMAT: {template['format']}
+STYLE: {template['name']} - {template['category']}
+FORMAT: Square {template['format']}
 
-CONTENT TO INCLUDE:
-- Business/Product Name: {order_data['product_name']}
-- Slogan/Tagline: {order_data['slogan']}
-- Description: {order_data.get('description', 'Professional quality service')}
+VISUAL THEME BASED ON:
+- Business type: {order_data['product_name']}
+- Mood/Style: {order_data.get('description', 'Professional and modern')}
 
-DESIGN REQUIREMENTS:
-- Use these brand colors: {colors_str}
-- Modern, professional, clean design
-- High contrast for readability
-- DO NOT include any prices or dates
+CRITICAL DESIGN REQUIREMENTS:
+- DO NOT include ANY text, words, letters or typography in the image
+- DO NOT add any watermarks or logos
+- DO NOT include any prices, dates, or numbers
+- Leave the bottom 25% of the image clean/darker for text overlay
+- Use these brand colors as accents: {colors_str}
+- Modern, professional, clean aesthetic
+- High quality photographic or illustrated style
 - DO NOT crop any faces if people are shown
-- Make text clearly readable
-- Professional marketing aesthetic
-- Suitable for {template['category']}
+- Professional marketing aesthetic suitable for {template['category']}
 
-STYLE: Premium advertising quality, Swiss/European professional standards, elegant typography."""
+The image should be a beautiful visual background that will have text overlaid on it later.
+Focus on stunning visuals, NOT text.
+
+STYLE: Premium advertising quality, Swiss/European professional standards, elegant and sophisticated."""
 
         # Générer l'image
         image_gen = OpenAIImageGeneration(api_key=EMERGENT_LLM_KEY)
@@ -692,12 +702,23 @@ STYLE: Premium advertising quality, Swiss/European professional standards, elega
         )
         
         if images and len(images) > 0:
-            # Sauvegarder l'image
+            # POST-PROCESSING: Ajouter le texte parfait avec Pillow
+            logger.info(f"📝 Post-processing: ajout du texte sur l'image")
+            
+            final_image = add_text_overlay(
+                image_bytes=images[0],
+                product_name=order_data.get('product_name', ''),
+                slogan=order_data.get('slogan', ''),
+                description=order_data.get('description', ''),
+                brand_colors=order_data.get('brand_colors', ['#FFFFFF', '#FFFFFF'])
+            )
+            
+            # Sauvegarder l'image finale
             filename = f"pub_{order_id}.png"
             filepath = f"{UPLOADS_DIR}/{filename}"
             
             with open(filepath, "wb") as f:
-                f.write(images[0])
+                f.write(final_image)
             
             image_url = f"{BASE_URL}/api/uploads/pub_orders/{filename}"
             
