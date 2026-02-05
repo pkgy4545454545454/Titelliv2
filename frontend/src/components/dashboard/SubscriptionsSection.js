@@ -153,6 +153,8 @@ const SubscriptionsSection = () => {
   ];
 
   const alacarteOptions = [
+    { id: 'media_pub', name: '🎨 Pub Média IA', price: 'Dès 19.90', period: '/création', description: 'Créez vos publicités avec notre IA', isSpecial: true, specialType: 'media_pub' },
+    { id: 'video_pub', name: '🎬 Vidéo Pub IA', price: 'Dès 49.90', period: '/création', description: 'Vidéos publicitaires générées par IA', isSpecial: true, specialType: 'video_pub' },
     { id: 'pub_extra', name: 'Publicités extra', price: 200, period: '/mois', description: '+2 publicités + 1 vidéo par mois' },
     { id: 'investors_access', name: 'Accès Investisseurs', price: 300, period: '/mois', description: 'Visibilité auprès des investisseurs' },
     { id: 'delivery_24', name: 'Livraison 24/24', price: 300, period: '/mois', description: 'Service de livraison permanent' },
@@ -168,6 +170,14 @@ const SubscriptionsSection = () => {
     { id: 'prestation_20h', name: '20h Prestations', price: 1000, period: 'ponctuel', description: '20 heures de prestations' },
     { id: 'dejeuner_equipe', name: '20 déjeuners équipe', price: 2000, period: 'ponctuel', description: "Déjeuners d'équipe" },
   ];
+
+  const handleSpecialOption = (option) => {
+    if (option.specialType === 'media_pub') {
+      navigate('/media-pub');
+    } else if (option.specialType === 'video_pub') {
+      toast.info('Vidéo Pub IA - Bientôt disponible !');
+    }
+  };
 
   if (loading) {
     return (
