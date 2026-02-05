@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Crown, Check, Zap, ChevronDown, Star, Building2, TrendingUp, Shield, Users, Target, Briefcase, Package, Gift, Clock, CreditCard, FileText, Phone, MessageSquare, Calendar, Newspaper } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Crown, Check, Zap, ChevronDown, Star, Building2, TrendingUp, Shield, Users, Target, Briefcase, Package, Gift, Clock, CreditCard, FileText, Phone, MessageSquare, Calendar, Newspaper, Sparkles, Image, Video, ArrowRight } from 'lucide-react';
 import { subscriptionsAPI, paymentAPI } from '../../services/api';
 import { toast } from 'sonner';
 
 const SubscriptionsSection = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('base');
   const [plans, setPlans] = useState([]);
   const [currentPlan, setCurrentPlan] = useState(null);
