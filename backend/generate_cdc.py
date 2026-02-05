@@ -10,6 +10,11 @@ OUTPUT_DIR = "/app/backend/uploads/documents"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 class TitelliPDF(FPDF):
+    def __init__(self):
+        super().__init__()
+        self.set_margins(15, 15, 15)  # Marges plus petites
+        self.set_auto_page_break(auto=True, margin=15)
+    
     def header(self):
         self.set_font('Helvetica', 'B', 12)
         self.set_text_color(245, 158, 11)
