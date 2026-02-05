@@ -135,7 +135,7 @@ def add_text_overlay(image_bytes: bytes, product_name: str, slogan: str, descrip
         
         # Position de départ pour le texte - avec plus de padding
         text_y = height - overlay_height + int(overlay_height * 0.20)
-        padding = int(width * 0.04)  # Padding réduit pour plus d'espace texte
+        padding = int(width * 0.03)  # Padding très réduit
         max_text_width = width - (padding * 2)  # Largeur max pour le texte
         
         # Dessiner le nom du produit (grand)
