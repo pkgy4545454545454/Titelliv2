@@ -9213,6 +9213,11 @@ app.include_router(subscriptions_router)
 from routers.cashback import router as cashback_router
 app.include_router(cashback_router)
 
+# Include Media Pub router
+from routers.media_pub import router as media_pub_router, set_db as set_media_pub_db
+set_media_pub_db(db)
+app.include_router(media_pub_router)
+
 # Mount uploads folder for serving static images
 app.mount("/api/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
