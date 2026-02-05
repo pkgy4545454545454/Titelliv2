@@ -34,6 +34,9 @@ import SpecialistsPage from './pages/SpecialistsPage';
 import TitelliProPage from './pages/TitelliProPage';
 import SportsPage from './pages/SportsPage';
 import MediaPubPage from './pages/MediaPubPage';
+import AboutPage from './pages/AboutPage';
+import CGVPage from './pages/CGVPage';
+import MentionsLegalesPage from './pages/MentionsLegalesPage';
 
 import './index.css';
 
