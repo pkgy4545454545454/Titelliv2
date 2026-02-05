@@ -129,6 +129,9 @@ function AppRoutes() {
       {/* Sports & Competitions Routes */}
       <Route path="/sports" element={<SportsPage />} />
 
+      {/* Media Pub - Création de publicités */}
+      <Route path="/media-pub" element={<MainLayout><MediaPubPage /></MainLayout>} />
+
       {/* Titelli Pro++ Route (Enterprise only) */}
       <Route path="/enterprise/pro" element={<TitelliProPage />} />
       <Route path="/titelli-pro" element={<TitelliProPage />} />
