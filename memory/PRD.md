@@ -6,15 +6,23 @@ Titelli est une plateforme de social commerce régionale pour les services et pr
 ## Last Update: 5 Février 2026
 
 ### Session Progress - 5 Février 2026
-- ✅ **Pub Média (Canva-style editor)**: Fonctionnalité complète de création de publicités
-  - 34 templates dans 7 catégories
-  - Éditeur avec aperçu en direct et éléments draggables
-  - Filigrane "TITELLI" anti-screenshot (retiré après paiement)
-  - Section "Sur Mesure" pour création personnalisée (79.90 CHF)
-  - Génération d'image IA via OpenAI DALL-E
-  - Tests: 100% backend (17/17) + 100% frontend vérifié
-- ✅ **Backend media_pub.py**: Router complet avec CRUD commandes
-- ✅ **Frontend MediaPubPage.js**: 1000+ lignes, style Canva
+
+#### ✅ Pub Média avec Post-Processing (COMPLET)
+- **Éditeur style Canva** : 34 templates dans 7 catégories
+- **Filigrane "TITELLI"** : Protection anti-screenshot (retiré après paiement)
+- **Génération IA DALL-E** : Images de fond sans texte
+- **Post-processing Pillow** : Texte parfait ajouté en overlay (CORRIGÉ)
+- **Section "Sur Mesure"** : 149.90 CHF création personnalisée
+- Tests: 100% backend (17/17) + frontend vérifié
+
+#### ✅ Pages Contenu Site (AJOUTÉES)
+- **AboutPage.js** : Vision, Mission, Avantages, Vidéos promo lifestyle
+- **CGVPage.js** : Procédé facturation 20%, Tarification, Renouvellement
+- **MentionsLegalesPage.js** : Protection données, Cookies, Droits
+
+#### ✅ Cahiers des Charges PDF (GÉNÉRÉS)
+- **CDC_MONETISATION_TITELLI.pdf** : Facturation, Cash-Back, Tarifs, Labellisation
+- **CDC_FONCTIONNALITES_TITELLI.pdf** : Toutes fonctionnalités Client/Entreprise/Admin
 
 ## Core Features
 
