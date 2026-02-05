@@ -519,10 +519,77 @@ const MediaPubPage = () => {
 
   const handlePayment = async () => {
     setSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsPaid(true);
-    setSubmitting(false);
-    handleSubmitOrder();
+    setPaymentError(null);
+    
+    try {
+      // First create the order if not already created
+      let currentOrderId = orderResult?.id;
+      
+      if (!currentOrderId) {
+        // Create order first
+        const orderData = orderStep === 'sur_mesure' || selectedTemplate?.id === 'sur_mesure' ? {
+          template_id: 'sur_mesure',
+          enterprise_id: enterpriseId || 'demo-enterprise',
+          slogan: surMesureData.customRequest,
+          product_name: 'Création Sur Mesure',
+          description: `Couleurs: ${surMesureData.wantedColors}\nStyle: ${surMesureData.wantedStyle}\nInfos: ${surMesureData.additionalInfo}`,
+          brand_colors: formData.brand_colors,
+          additional_notes: surMesureData.additionalInfo
+        } : {
+          template_id: selectedTemplate.id,
+          enterprise_id: enterpriseId || 'demo-enterprise',
+          slogan: formData.slogan,
+          product_name: formData.product_name,
+          description: formData.description,
+          brand_colors: formData.brand_colors,
+          additional_notes: formData.additional_notes,
+          canvas_elements: canvasElements
+        };
+
+        const orderResponse = await fetch(`${API_URL}/api/media-pub/orders`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderData)
+        });
+
+        if (!orderResponse.ok) {
+          throw new Error('Erreur création commande');
+        }
+
+        const orderResult = await orderResponse.json();
+        currentOrderId = orderResult.id;
+        setOrderResult(orderResult);
+      }
+
+      // Create Stripe checkout session
+      const paymentResponse = await fetch(`${API_URL}/api/media-pub/payment/create-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order_id: currentOrderId,
+          origin_url: window.location.origin
+        })
+      });
+
+      if (!paymentResponse.ok) {
+        const errorData = await paymentResponse.json();
+        throw new Error(errorData.detail || 'Erreur création session de paiement');
+      }
+
+      const paymentData = await paymentResponse.json();
+      
+      // Redirect to Stripe Checkout
+      if (paymentData.checkout_url) {
+        window.location.href = paymentData.checkout_url;
+      } else {
+        throw new Error('URL de paiement non reçue');
+      }
+
+    } catch (error) {
+      console.error('Payment error:', error);
+      setPaymentError(error.message || 'Erreur lors du paiement');
+      setSubmitting(false);
+    }
   };
 
   const handleSubmitOrder = async () => {
