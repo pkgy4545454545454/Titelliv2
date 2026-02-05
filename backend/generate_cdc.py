@@ -63,8 +63,7 @@ class TitelliPDF(FPDF):
     def add_bullet(self, text):
         self.set_font('Helvetica', '', 10)
         self.set_text_color(80, 80, 80)
-        self.cell(10, 6, chr(149))
-        self.multi_cell(0, 6, text)
+        self.multi_cell(0, 6, f"  {chr(149)}  {text}")
 
     def add_highlight(self, title, text):
         self.set_fill_color(245, 158, 11)
