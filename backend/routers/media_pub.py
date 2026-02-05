@@ -731,7 +731,7 @@ STYLE: Premium advertising quality, Swiss/European professional standards, elega
         
         if images and len(images) > 0:
             # POST-PROCESSING: Ajouter le texte parfait avec Pillow
-            logger.info(f"📝 Post-processing: ajout du texte sur l'image")
+            logger.info("📝 Post-processing: ajout du texte sur l'image")
             
             final_image = add_text_overlay(
                 image_bytes=images[0],
