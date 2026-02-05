@@ -1321,6 +1321,11 @@ const EnterpriseDashboard = () => {
           {activeTab === 'subscriptions' && (
             <SubscriptionsSection />
           )}
+
+          {/* Commandes Titelli Tab */}
+          {activeTab === 'commandes-titelli' && (
+            <CommandesTitelliSection enterpriseId={enterprise?.id} />
+          )}
         </main>
       </div>
 
