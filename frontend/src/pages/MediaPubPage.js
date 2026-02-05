@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { 
   Image, 
   Sparkles, 
@@ -36,7 +36,10 @@ import {
   Trash2,
   Plus,
   Play,
-  ChevronRight
+  ChevronRight,
+  ExternalLink,
+  AlertCircle,
+  CheckCircle2
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
