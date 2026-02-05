@@ -42,6 +42,120 @@ BASE_URL = os.getenv("REACT_APP_BACKEND_URL", "https://live-template-editor.prev
 os.makedirs(UPLOADS_DIR, exist_ok=True)
 
 
+# ============ POST-PROCESSING TEXTE ============
+# Fonction pour ajouter du texte parfait sur les images générées
+
+def add_text_overlay(image_bytes: bytes, product_name: str, slogan: str, description: str, brand_colors: list) -> bytes:
+    """
+    Ajoute du texte propre et lisible sur l'image générée par l'IA.
+    Le texte est ajouté en post-processing pour éviter les erreurs de DALL-E.
+    """
+    try:
+        # Ouvrir l'image
+        img = Image.open(BytesIO(image_bytes))
+        draw = ImageDraw.Draw(img)
+        width, height = img.size
+        
+        # Couleurs
+        primary_color = brand_colors[0] if brand_colors else "#FFFFFF"
+        secondary_color = brand_colors[1] if len(brand_colors) > 1 else "#FFFFFF"
+        
+        # Convertir hex en RGB
+        def hex_to_rgb(hex_color):
+            hex_color = hex_color.lstrip('#')
+            return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+        
+        primary_rgb = hex_to_rgb(primary_color)
+        
+        # Charger les polices (utiliser des polices système)
+        try:
+            # Essayer différentes polices
+            font_paths = [
+                "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+                "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+                "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf",
+            ]
+            font_large = None
+            font_medium = None
+            font_small = None
+            
+            for font_path in font_paths:
+                if os.path.exists(font_path):
+                    font_large = ImageFont.truetype(font_path, int(height * 0.08))
+                    font_medium = ImageFont.truetype(font_path, int(height * 0.05))
+                    font_small = ImageFont.truetype(font_path, int(height * 0.035))
+                    break
+            
+            if not font_large:
+                # Fallback to default
+                font_large = ImageFont.load_default()
+                font_medium = font_large
+                font_small = font_large
+                
+        except Exception as e:
+            logger.warning(f"Font loading error: {e}, using default")
+            font_large = ImageFont.load_default()
+            font_medium = font_large
+            font_small = font_large
+        
+        # Créer un fond semi-transparent pour le texte en bas
+        overlay_height = int(height * 0.25)
+        overlay = Image.new('RGBA', (width, overlay_height), (0, 0, 0, 180))
+        
+        # Coller l'overlay en bas de l'image
+        if img.mode != 'RGBA':
+            img = img.convert('RGBA')
+        img.paste(overlay, (0, height - overlay_height), overlay)
+        
+        # Nouveau draw après le paste
+        draw = ImageDraw.Draw(img)
+        
+        # Position de départ pour le texte
+        text_y = height - overlay_height + int(overlay_height * 0.15)
+        padding = int(width * 0.05)
+        
+        # Dessiner le nom du produit (grand)
+        if product_name:
+            # Ombre
+            draw.text((padding + 2, text_y + 2), product_name, font=font_large, fill=(0, 0, 0, 200))
+            # Texte principal
+            draw.text((padding, text_y), product_name, font=font_large, fill=primary_rgb)
+            text_y += int(height * 0.09)
+        
+        # Dessiner le slogan (moyen)
+        if slogan:
+            # Ombre
+            draw.text((padding + 1, text_y + 1), slogan, font=font_medium, fill=(0, 0, 0, 200))
+            # Texte principal - blanc pour contraste
+            draw.text((padding, text_y), slogan, font=font_medium, fill=(255, 255, 255))
+            text_y += int(height * 0.06)
+        
+        # Dessiner la description (petit)
+        if description and len(description) < 80:
+            # Ombre
+            draw.text((padding + 1, text_y + 1), description, font=font_small, fill=(0, 0, 0, 200))
+            # Texte principal
+            draw.text((padding, text_y), description, font=font_small, fill=(200, 200, 200))
+        
+        # Convertir en bytes
+        output = BytesIO()
+        # Convertir en RGB pour sauvegarder en PNG sans alpha
+        if img.mode == 'RGBA':
+            # Créer un fond blanc
+            background = Image.new('RGB', img.size, (0, 0, 0))
+            background.paste(img, mask=img.split()[3])
+            img = background
+        img.save(output, format='PNG', quality=95)
+        output.seek(0)
+        
+        return output.getvalue()
+        
+    except Exception as e:
+        logger.error(f"Error in text overlay: {e}")
+        # Retourner l'image originale en cas d'erreur
+        return image_bytes
+
+
 # ============ TEMPLATES CATALOGUE ============
 # Templates style Canva avec plusieurs modèles par catégorie
 
