@@ -1416,6 +1416,22 @@ const MediaPubPage = () => {
           </div>
         </div>
 
+        {/* Stripe Badge */}
+        <div className="flex items-center justify-center gap-2 mb-4 text-gray-500 text-sm">
+          <Lock className="w-4 h-4" />
+          <span>Paiement sécurisé par</span>
+          <span className="font-bold text-white">Stripe</span>
+        </div>
+
+        {paymentError && (
+          <div className="bg-red-900/30 border border-red-700/50 rounded-xl p-3 mb-4">
+            <p className="text-sm text-red-400 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4" />
+              {paymentError}
+            </p>
+          </div>
+        )}
+
         <button
           onClick={handlePayment}
           disabled={submitting}
@@ -1425,12 +1441,12 @@ const MediaPubPage = () => {
           {submitting ? (
             <>
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              Traitement...
+              Redirection vers Stripe...
             </>
           ) : (
             <>
-              <CreditCard className="w-5 h-5" />
-              Payer {selectedTemplate?.price} CHF
+              <ExternalLink className="w-5 h-5" />
+              Payer {selectedTemplate?.price} CHF via Stripe
             </>
           )}
         </button>
