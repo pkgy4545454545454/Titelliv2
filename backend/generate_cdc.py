@@ -54,21 +54,23 @@ class TitelliPDF(FPDF):
         self.ln(10)
 
     def add_section(self, title):
+        self.set_x(self.l_margin)  # Reset X position
         self.set_font('Helvetica', 'B', 11)
         self.set_text_color(60, 60, 60)
-        self.cell(0, 8, title)
-        self.ln(8)
+        self.multi_cell(0, 8, title)
 
     def add_text(self, text):
+        self.set_x(self.l_margin)  # Reset X position
         self.set_font('Helvetica', '', 10)
         self.set_text_color(80, 80, 80)
         self.multi_cell(0, 6, text)
         self.ln(3)
 
     def add_bullet(self, text):
+        self.set_x(self.l_margin)  # Reset X position
         self.set_font('Helvetica', '', 10)
         self.set_text_color(80, 80, 80)
-        self.multi_cell(0, 6, f"  {chr(149)}  {text}")
+        self.multi_cell(0, 6, f"   - {text}")
 
     def add_highlight(self, title, text):
         self.set_fill_color(245, 158, 11)
