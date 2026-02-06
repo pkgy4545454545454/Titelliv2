@@ -9218,6 +9218,11 @@ from routers.media_pub import router as media_pub_router, set_db as set_media_pu
 set_media_pub_db(db)
 app.include_router(media_pub_router)
 
+# Include Video Pub router
+from routers.video_pub import router as video_pub_router, set_db as set_video_pub_db
+set_video_pub_db(db)
+app.include_router(video_pub_router)
+
 # Mount uploads folder for serving static images
 app.mount("/api/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
