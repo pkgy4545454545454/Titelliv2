@@ -142,7 +142,7 @@ const CommandesTitelliSection = ({ enterpriseId }) => {
             Commandes Titelli
           </h2>
           <p className="text-gray-400 text-sm mt-1">
-            Vos publicités et créations personnalisées
+            Vos publicités images et vidéos personnalisées
           </p>
         </div>
         <button
@@ -155,48 +155,94 @@ const CommandesTitelliSection = ({ enterpriseId }) => {
         </button>
       </div>
 
+      {/* Tabs */}
+      <div className="flex gap-2">
+        <button
+          onClick={() => setActiveTab('all')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            activeTab === 'all' 
+              ? 'bg-blue-600 text-white' 
+              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+          }`}
+        >
+          Toutes ({allOrders.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('media')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+            activeTab === 'media' 
+              ? 'bg-amber-500 text-black' 
+              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+          }`}
+        >
+          <Image className="w-4 h-4" />
+          Images ({mediaOrders.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('video')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+            activeTab === 'video' 
+              ? 'bg-purple-500 text-white' 
+              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+          }`}
+        >
+          <Video className="w-4 h-4" />
+          Vidéos ({videoOrders.length})
+        </button>
+      </div>
+
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
           <p className="text-gray-400 text-sm">Total commandes</p>
-          <p className="text-2xl font-bold text-white">{orders.length}</p>
+          <p className="text-2xl font-bold text-white">{filteredOrders.length}</p>
         </div>
         <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
           <p className="text-gray-400 text-sm">En cours</p>
           <p className="text-2xl font-bold text-yellow-400">
-            {orders.filter(o => o.status === 'processing').length}
+            {filteredOrders.filter(o => ['processing', 'generating'].includes(o.status)).length}
           </p>
         </div>
         <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
           <p className="text-gray-400 text-sm">Terminées</p>
           <p className="text-2xl font-bold text-green-400">
-            {orders.filter(o => o.status === 'completed').length}
+            {filteredOrders.filter(o => o.status === 'completed').length}
           </p>
         </div>
         <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
           <p className="text-gray-400 text-sm">Total dépensé</p>
           <p className="text-2xl font-bold text-blue-400">
-            {orders.filter(o => o.status === 'completed').reduce((sum, o) => sum + (o.price || 0), 0).toFixed(2)} CHF
+            {filteredOrders.filter(o => o.payment_status === 'paid').reduce((sum, o) => sum + (o.price || 0), 0).toFixed(2)} CHF
           </p>
         </div>
       </div>
 
       {/* Orders List */}
-      {orders.length === 0 ? (
+      {filteredOrders.length === 0 ? (
         <div className="text-center py-12 bg-gray-800/30 rounded-xl border border-gray-700">
-          <Image className="w-16 h-16 mx-auto text-gray-600 mb-4" />
+          <Package className="w-16 h-16 mx-auto text-gray-600 mb-4" />
           <h3 className="text-xl font-medium text-gray-400 mb-2">Aucune commande</h3>
           <p className="text-gray-500 mb-4">Créez votre première publicité personnalisée</p>
-          <a
-            href="/media-pub"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
-          >
-            Créer une publicité
-          </a>
+          <div className="flex gap-4 justify-center">
+            <a
+              href="/media-pub"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-black font-medium rounded-lg transition-colors"
+            >
+              <Image className="w-4 h-4" />
+              Créer une image
+            </a>
+            <a
+              href="/video-pub"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
+            >
+              <Video className="w-4 h-4" />
+              Créer une vidéo
+            </a>
+          </div>
         </div>
       ) : (
         <div className="space-y-4">
-          {orders.map(order => (
+          {filteredOrders.map(order => (
             <div
               key={order.id}
               className="bg-gray-800/50 rounded-xl border border-gray-700 overflow-hidden hover:border-gray-600 transition-colors"
