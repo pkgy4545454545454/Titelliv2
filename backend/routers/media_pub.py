@@ -1124,6 +1124,25 @@ async def check_payment_status(session_id: str, order_id: str):
                     "is_read": False,
                     "created_at": datetime.now(timezone.utc).isoformat()
                 })
+                
+                # Send confirmation email
+                try:
+                    user_id = order.get("user_id")
+                    if user_id:
+                        user = await db.users.find_one({"id": user_id})
+                        if user and user.get("email"):
+                            await send_pub_media_confirmation(
+                                user_email=user.get("email"),
+                                user_name=user.get("name", user.get("email", "Client")),
+                                order_id=order_id,
+                                template_name=order.get("template_name", "Création Sur Mesure"),
+                                amount=float(order.get("price", 0)),
+                                slogan=order.get("slogan", ""),
+                                product_name=order.get("product_name", "")
+                            )
+                            logger.info(f"📧 Email confirmation sent for order {order_id}")
+                except Exception as email_error:
+                    logger.warning(f"Email send failed for order {order_id}: {email_error}")
             
             logger.info(f"✅ Payment confirmed for order {order_id}")
             
