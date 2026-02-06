@@ -52,6 +52,12 @@ const AdminDashboard = () => {
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
   const [editingPlan, setEditingPlan] = useState(null);
 
+  // Pub Media orders state
+  const [pubMediaOrders, setPubMediaOrders] = useState([]);
+  const [pubMediaStats, setPubMediaStats] = useState({});
+  const [pubMediaLoading, setPubMediaLoading] = useState(false);
+  const [pubMediaFilter, setPubMediaFilter] = useState('all');
+
   useEffect(() => {
     const fetchData = async () => {
       try {
