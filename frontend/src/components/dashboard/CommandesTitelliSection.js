@@ -71,13 +71,15 @@ const CommandesTitelliSection = ({ enterpriseId }) => {
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await fetchOrders();
+    await fetchAllOrders();
     setRefreshing(false);
   };
 
   const getStatusBadge = (status) => {
     const statusConfig = {
+      pending_payment: { color: 'bg-orange-500/20 text-orange-400 border-orange-500/50', icon: Clock, label: 'Attente paiement' },
       processing: { color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50', icon: Clock, label: 'En cours' },
+      generating: { color: 'bg-blue-500/20 text-blue-400 border-blue-500/50', icon: Clock, label: 'Génération' },
       completed: { color: 'bg-green-500/20 text-green-400 border-green-500/50', icon: CheckCircle, label: 'Terminée' },
       failed: { color: 'bg-red-500/20 text-red-400 border-red-500/50', icon: XCircle, label: 'Échec' },
       cancelled: { color: 'bg-gray-500/20 text-gray-400 border-gray-500/50', icon: XCircle, label: 'Annulée' }
@@ -90,6 +92,23 @@ const CommandesTitelliSection = ({ enterpriseId }) => {
       <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${config.color}`}>
         <Icon className="w-3 h-3" />
         {config.label}
+      </span>
+    );
+  };
+
+  const getTypeBadge = (type) => {
+    if (type === 'video') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-400 border border-purple-500/50">
+          <Film className="w-3 h-3" />
+          Vidéo
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-amber-500/20 text-amber-400 border border-amber-500/50">
+        <Image className="w-3 h-3" />
+        Image
       </span>
     );
   };
