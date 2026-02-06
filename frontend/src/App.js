@@ -136,6 +136,10 @@ function AppRoutes() {
       {/* Media Pub - Création de publicités */}
       <Route path="/media-pub" element={<MainLayout><MediaPubPage /></MainLayout>} />
       <Route path="/media-pub/success" element={<MainLayout><MediaPubPage /></MainLayout>} />
+      
+      {/* Video Pub - Création de vidéos publicitaires IA */}
+      <Route path="/video-pub" element={<MainLayout><VideoPubPage /></MainLayout>} />
+      <Route path="/video-pub/success" element={<MainLayout><VideoPubPage /></MainLayout>} />
 
       {/* Titelli Pro++ Route (Enterprise only) */}
       <Route path="/enterprise/pro" element={<TitelliProPage />} />
