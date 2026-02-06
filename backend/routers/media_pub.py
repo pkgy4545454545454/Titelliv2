@@ -950,6 +950,18 @@ async def admin_get_all_orders(
     }
 
 
+@router.get("/orders/enterprise/{enterprise_id}")
+async def get_enterprise_orders(enterprise_id: str, limit: int = 50):
+    """Récupérer toutes les commandes pub d'une entreprise"""
+    cursor = db.pub_orders.find(
+        {"enterprise_id": enterprise_id},
+        {"_id": 0}
+    ).sort("created_at", -1).limit(limit)
+    
+    orders = await cursor.to_list(limit)
+    return {"orders": orders, "total": len(orders)}
+
+
 @router.delete("/orders/{order_id}")
 async def cancel_order(order_id: str):
     """Annuler une commande (si pas encore traitée)"""
