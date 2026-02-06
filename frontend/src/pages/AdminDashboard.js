@@ -602,6 +602,168 @@ const AdminDashboard = () => {
             </div>
           )}
 
+          {/* ===== PUB MÉDIA IA TAB ===== */}
+          {activeTab === 'pub-media' && (
+            <div data-testid="admin-pub-media">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                    Commandes Pub Média IA
+                  </h1>
+                  <p className="text-gray-400 text-sm mt-1">
+                    Gérez toutes les commandes de publicités générées par IA
+                  </p>
+                </div>
+                <button
+                  onClick={fetchPubMediaOrders}
+                  className="flex items-center gap-2 px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
+                >
+                  <RefreshCw className={`w-4 h-4 ${pubMediaLoading ? 'animate-spin' : ''}`} />
+                  Actualiser
+                </button>
+              </div>
+
+              {/* Stats Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                      <Palette className="w-5 h-5 text-amber-400" />
+                    </div>
+                    <span className="text-gray-400 text-sm">Total</span>
+                  </div>
+                  <p className="text-2xl font-bold text-white">{pubMediaStats.total || 0}</p>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
+                      <CheckCircle className="w-5 h-5 text-green-400" />
+                    </div>
+                    <span className="text-gray-400 text-sm">Complétées</span>
+                  </div>
+                  <p className="text-2xl font-bold text-white">{pubMediaStats.completed || 0}</p>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                      <DollarSign className="w-5 h-5 text-emerald-400" />
+                    </div>
+                    <span className="text-gray-400 text-sm">Revenus</span>
+                  </div>
+                  <p className="text-2xl font-bold text-white">{(pubMediaStats.total_revenue || 0).toFixed(2)} <span className="text-sm text-gray-400">CHF</span></p>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center">
+                      <XCircle className="w-5 h-5 text-red-400" />
+                    </div>
+                    <span className="text-gray-400 text-sm">Échouées</span>
+                  </div>
+                  <p className="text-2xl font-bold text-white">{pubMediaStats.failed || 0}</p>
+                </div>
+              </div>
+
+              {/* Filters */}
+              <div className="flex gap-2 mb-6 flex-wrap">
+                {['all', 'pending', 'processing', 'completed', 'failed'].map(status => (
+                  <button
+                    key={status}
+                    onClick={() => setPubMediaFilter(status)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      pubMediaFilter === status 
+                        ? 'bg-amber-500 text-black' 
+                        : 'bg-white/10 text-gray-400 hover:bg-white/20'
+                    }`}
+                  >
+                    {status === 'all' ? 'Toutes' : status.charAt(0).toUpperCase() + status.slice(1)}
+                  </button>
+                ))}
+              </div>
+
+              {/* Orders Table */}
+              {pubMediaLoading ? (
+                <div className="flex justify-center py-12">
+                  <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : pubMediaOrders.length === 0 ? (
+                <div className="text-center py-12 bg-white/5 rounded-xl">
+                  <ImageIcon className="w-16 h-16 mx-auto mb-4 text-gray-600" />
+                  <p className="text-gray-400">Aucune commande Pub Média</p>
+                </div>
+              ) : (
+                <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-white/5">
+                        <tr>
+                          <th className="text-left p-4 text-gray-400 font-medium text-sm">ID</th>
+                          <th className="text-left p-4 text-gray-400 font-medium text-sm">Template</th>
+                          <th className="text-left p-4 text-gray-400 font-medium text-sm">Entreprise</th>
+                          <th className="text-left p-4 text-gray-400 font-medium text-sm">Prix</th>
+                          <th className="text-left p-4 text-gray-400 font-medium text-sm">Statut</th>
+                          <th className="text-left p-4 text-gray-400 font-medium text-sm">Paiement</th>
+                          <th className="text-left p-4 text-gray-400 font-medium text-sm">Date</th>
+                          <th className="text-left p-4 text-gray-400 font-medium text-sm">Image</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        {pubMediaOrders.map(order => (
+                          <tr key={order.id} className="hover:bg-white/5 transition-colors">
+                            <td className="p-4">
+                              <span className="font-mono text-sm text-white">#{order.id?.slice(0, 8)}</span>
+                            </td>
+                            <td className="p-4">
+                              <span className="text-white text-sm">{order.template_name || 'Sur Mesure'}</span>
+                              {order.template_id === 'sur_mesure' && (
+                                <span className="ml-2 px-2 py-0.5 bg-purple-500/20 text-purple-400 text-xs rounded">Custom</span>
+                              )}
+                            </td>
+                            <td className="p-4">
+                              <span className="text-gray-300 text-sm">{order.enterprise_id?.slice(0, 8) || 'N/A'}</span>
+                            </td>
+                            <td className="p-4">
+                              <span className="text-amber-400 font-medium">{order.price?.toFixed(2)} CHF</span>
+                            </td>
+                            <td className="p-4">
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                                {order.status}
+                              </span>
+                            </td>
+                            <td className="p-4">
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPaymentStatusColor(order.payment_status)}`}>
+                                {order.payment_status || 'pending'}
+                              </span>
+                            </td>
+                            <td className="p-4">
+                              <span className="text-gray-400 text-sm">
+                                {order.created_at ? new Date(order.created_at).toLocaleDateString('fr-CH') : 'N/A'}
+                              </span>
+                            </td>
+                            <td className="p-4">
+                              {order.image_url ? (
+                                <a 
+                                  href={order.image_url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-1 text-amber-400 hover:text-amber-300 text-sm"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                  Voir
+                                </a>
+                              ) : (
+                                <span className="text-gray-500 text-sm">-</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* ===== ALGORITHMES TAB ===== */}
           {activeTab === 'algorithms' && (
             <div>
