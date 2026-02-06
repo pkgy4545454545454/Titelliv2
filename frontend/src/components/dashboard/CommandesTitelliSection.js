@@ -249,23 +249,39 @@ const CommandesTitelliSection = ({ enterpriseId }) => {
             >
               <div className="p-4 md:p-6">
                 <div className="flex flex-col md:flex-row md:items-center gap-4">
-                  {/* Image Preview */}
-                  <div className="w-full md:w-32 h-32 bg-gray-700 rounded-lg overflow-hidden flex-shrink-0">
-                    {order.status === 'completed' && order.image_url ? (
-                      <img
-                        src={order.image_url}
-                        alt={order.template_name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : order.status === 'processing' ? (
+                  {/* Preview */}
+                  <div className="w-full md:w-32 h-32 bg-gray-700 rounded-lg overflow-hidden flex-shrink-0 relative">
+                    {order.status === 'completed' && (order.image_url || order.video_url) ? (
+                      order.type === 'video' ? (
+                        <video
+                          src={order.video_url}
+                          className="w-full h-full object-cover"
+                          muted
+                        />
+                      ) : (
+                        <img
+                          src={order.image_url}
+                          alt={order.template_name}
+                          className="w-full h-full object-cover"
+                        />
+                      )
+                    ) : ['processing', 'generating'].includes(order.status) ? (
                       <div className="w-full h-full flex items-center justify-center">
                         <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
                       </div>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <Image className="w-8 h-8 text-gray-500" />
+                        {order.type === 'video' ? (
+                          <Video className="w-8 h-8 text-gray-500" />
+                        ) : (
+                          <Image className="w-8 h-8 text-gray-500" />
+                        )}
                       </div>
                     )}
+                    {/* Type badge on preview */}
+                    <div className="absolute top-2 left-2">
+                      {getTypeBadge(order.type)}
+                    </div>
                   </div>
 
                   {/* Order Details */}
@@ -273,21 +289,30 @@ const CommandesTitelliSection = ({ enterpriseId }) => {
                     <div className="flex items-start justify-between">
                       <div>
                         <h3 className="font-semibold text-white">{order.template_name}</h3>
-                        <p className="text-sm text-gray-400">{order.template_category}</p>
+                        <p className="text-sm text-gray-400">{order.template_category || order.style}</p>
                       </div>
-                      {getStatusBadge(order.status)}
+                      <div className="flex items-center gap-2">
+                        {getStatusBadge(order.status)}
+                      </div>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <p className="text-gray-500">Slogan</p>
-                        <p className="text-gray-300 truncate">{order.slogan}</p>
+                        <p className="text-gray-500">Produit</p>
+                        <p className="text-gray-300 truncate">{order.product_name || '-'}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500">Produit</p>
-                        <p className="text-gray-300 truncate">{order.product_name}</p>
+                        <p className="text-gray-500">Slogan</p>
+                        <p className="text-gray-300 truncate">{order.slogan || '-'}</p>
                       </div>
                     </div>
+
+                    {order.description && (
+                      <div className="text-sm">
+                        <p className="text-gray-500">Description</p>
+                        <p className="text-gray-300 truncate">{order.description}</p>
+                      </div>
+                    )}
 
                     <div className="flex items-center gap-4 text-sm text-gray-400">
                       <span className="flex items-center gap-1">
@@ -298,13 +323,16 @@ const CommandesTitelliSection = ({ enterpriseId }) => {
                         <DollarSign className="w-4 h-4" />
                         {order.price} CHF
                       </span>
+                      {order.type === 'video' && order.duration && (
+                        <span className="text-purple-400">{order.duration}s</span>
+                      )}
                       <span className="text-gray-500">#{order.id}</span>
                     </div>
                   </div>
 
                   {/* Actions */}
                   <div className="flex md:flex-col gap-2">
-                    {order.status === 'completed' && order.image_url && (
+                    {order.status === 'completed' && (order.image_url || order.video_url) && (
                       <>
                         <button
                           onClick={() => setSelectedOrder(order)}
@@ -314,20 +342,24 @@ const CommandesTitelliSection = ({ enterpriseId }) => {
                           Voir
                         </button>
                         <a
-                          href={order.image_url}
+                          href={order.type === 'video' ? order.video_url : order.image_url}
                           download
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm transition-colors"
+                          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${
+                            order.type === 'video' 
+                              ? 'bg-purple-600 hover:bg-purple-700' 
+                              : 'bg-blue-600 hover:bg-blue-700'
+                          }`}
                         >
                           <Download className="w-4 h-4" />
                           Télécharger
                         </a>
                       </>
                     )}
-                    {order.status === 'processing' && (
+                    {['processing', 'generating'].includes(order.status) && (
                       <span className="text-xs text-yellow-400 animate-pulse">
-                        Génération en cours...
+                        {order.type === 'video' ? 'Génération vidéo (~1h)...' : 'Génération en cours...'}
                       </span>
                     )}
                   </div>
