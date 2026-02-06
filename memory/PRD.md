@@ -7,45 +7,45 @@ Titelli est une plateforme de social commerce régionale pour les services et pr
 
 ### Session Progress - 6 Février 2026 (Complète)
 
-#### ✅ Vidéo Pub IA (NOUVEAU - COMPLET)
-- **13 templates vidéo** dans 6 catégories (Réseaux Sociaux, Publicités, Restauration, Corporate, Événements, Sur Mesure)
-- **Prix** : 129.90 - 399.90 CHF (Sur Mesure)
-- **Durée** : 8-15 secondes
-- **Génération** : Sora 2 via Emergent Integrations
-- **Temps estimé** : ~1 heure
-- **Paiement Stripe** intégré (même flow que Media Pub)
-- **Routes** :
-  - `/video-pub` - Page principale
-  - `/api/video-pub/templates` - Liste templates
-  - `/api/video-pub/orders` - Créer commande
-  - `/api/video-pub/payment/create-session` - Session Stripe
+#### ✅ Navigation "Pub IA" avec Dropdown (NOUVEAU)
+- **Menu "✨ Pub IA"** ajouté dans la navigation principale
+- **Dropdown** avec 2 options :
+  - "Images IA" (icône ambre) → `/media-pub`
+  - "Vidéos IA" (icône violet) → `/video-pub`
+- Styles CSS personnalisés (couleur dorée, hover)
 
-#### ✅ Email Confirmation Paiement
-- Template email professionnel pour confirmation Pub Média
-- Envoi automatique après paiement Stripe confirmé
+#### ✅ Vidéo Pub IA (COMPLET)
+- **13 templates vidéo** dans 6 catégories
+- Prix : 129.90 - 399.90 CHF
+- Génération Sora 2 (~1h)
+- Paiement Stripe intégré
+- Page `/video-pub` avec UI violet
 
-#### ✅ Dashboard Admin "Pub Média IA"
-- Tab dans AdminDashboard.js
-- Cards statistiques: Total, Complétées, Revenus, Échouées
-- Filtres et tableau détaillé
+#### ✅ Commandes Titelli - Images + Vidéos
+- **Tabs** : Toutes / Images / Vidéos
+- **Affichage complet** : produit, slogan, description, prix, durée
+- **Badges type** : violet=Vidéo, ambre=Image
+- **Endpoint ajouté** : `GET /api/media-pub/orders/enterprise/{id}`
 
-#### ✅ PDFs Cahier des Charges V2 Détaillés
-- `CDC_MONETISATION_TITELLI_V2.pdf` (15KB) avec algorithmes Python
-- `CDC_FONCTIONNALITES_TITELLI_V2.pdf` (17KB) avec APIs et architecture
-
-#### ✅ Vidéo Marketing V2 Assemblée
-- `PUB_TITELLI_V2_COMPLETE.mp4` (7.3MB, ~36s)
-- 10 scènes combinées avec ffmpeg
+#### ✅ Bug Images Corrigé
+- Anciennes URLs (`digital-bazaar`) nettoyées de la DB
+- Toutes les images du site fonctionnent
 
 #### ✅ Enrichissement Entreprises (TERMINÉ)
-- **335 entreprises enrichies** avec logos, covers et descriptions
-- 33 erreurs (sites inaccessibles)
+- **343 entreprises** enrichies avec logos et covers
 - Images dans `/app/backend/uploads/enterprises/`
 
-#### ✅ Intégration Stripe Pub Média (COMPLET)
-- Paiement LIVE pour Media Pub et Video Pub
-- Webhooks configurés
-- Protection filigrane jusqu'au paiement
+#### ✅ Autres accomplissements session
+- Email confirmation après paiement Pub Média
+- Dashboard Admin "Pub Média IA"
+- PDFs CDC V2 détaillés
+- Vidéo Marketing V2 assemblée (7.3MB)
+
+### Refactoring server.py - Plan documenté
+Le fichier `server.py` fait 10,008 lignes. Routers modulaires existent dans `/routers/` mais ne sont pas tous utilisés :
+- **Actifs** : rdv_titelli, specialists, titelli_pro, sports, notifications, gamification, webhooks, subscriptions, cashback, media_pub, video_pub
+- **Inactifs** : auth.py, admin.py (code dupliqué dans server.py)
+- **À migrer** : auth routes, enterprise routes, orders routes, payments routes
 
 ### Session Progress - 5 Février 2026
 
