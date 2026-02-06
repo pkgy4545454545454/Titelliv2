@@ -468,6 +468,14 @@ code, pre {
   color: #34D399 !important;
 }
 
+.nav-link.media-pub {
+  color: #F59E0B;
+}
+
+.nav-link.media-pub:hover {
+  color: #FBBF24 !important;
+}
+
 .nav-link::after {
   content: '';
   position: absolute;
