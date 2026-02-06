@@ -196,16 +196,18 @@ class TitelliUltraDetailedPDF(FPDF):
         self.ln(6)
         self.set_font('Helvetica', '', 9)
         self.set_text_color(100, 100, 100)
-        self.multi_cell(0, 5, f"  {description}")
+        self.multi_cell(190, 5, f"  {description}")
         
         if params:
             self.set_font('Helvetica', 'I', 8)
             self.set_text_color(80, 80, 80)
-            self.multi_cell(0, 4, f"  Params: {params}")
+            params_text = str(params)[:150] if len(str(params)) > 150 else str(params)
+            self.multi_cell(190, 4, f"  Params: {params_text}")
         if response:
             self.set_font('Helvetica', 'I', 8)
             self.set_text_color(80, 80, 80)
-            self.multi_cell(0, 4, f"  Response: {response}")
+            response_text = str(response)[:150] if len(str(response)) > 150 else str(response)
+            self.multi_cell(190, 4, f"  Response: {response_text}")
         self.ln(3)
 
 
