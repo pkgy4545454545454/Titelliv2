@@ -5,7 +5,8 @@ import {
   CheckCircle, Award, Crown, TrendingUp, DollarSign, Eye, Settings, Wallet,
   Download, Clock, XCircle, AlertCircle, FileText, FileSpreadsheet, 
   ArrowUpRight, ArrowDownRight, Filter, RefreshCw, UserPlus, Mail, Phone, MapPin,
-  Cpu, Zap, Shield, Search, Target, TrendingDown, Sparkles, Calendar, Edit2, Save
+  Cpu, Zap, Shield, Search, Target, TrendingDown, Sparkles, Calendar, Edit2, Save,
+  Image as ImageIcon, Palette
 } from 'lucide-react';
 import { adminAPI } from '../services/api';
 import axios from 'axios';
