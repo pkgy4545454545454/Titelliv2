@@ -113,7 +113,9 @@ class TitelliUltraDetailedPDF(FPDF):
         for i, item in enumerate(items, 1):
             self.set_font('Helvetica', '', 10)
             self.set_text_color(60, 60, 60)
-            self.multi_cell(0, 5, f"  {i}. {item}")
+            # Truncate long items to prevent rendering issues
+            item_text = str(item)[:200] if len(str(item)) > 200 else str(item)
+            self.multi_cell(190, 5, f"  {i}. {item_text}")
         self.ln(2)
 
     def add_code(self, code, title=""):
