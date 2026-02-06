@@ -5,47 +5,47 @@ Titelli est une plateforme de social commerce régionale pour les services et pr
 
 ## Last Update: 6 Février 2026
 
-### Session Progress - 6 Février 2026 (Suite)
+### Session Progress - 6 Février 2026 (Complète)
 
-#### ✅ Email Confirmation Paiement (NOUVEAU)
-- **Template email** professionnel pour confirmation Pub Média
+#### ✅ Vidéo Pub IA (NOUVEAU - COMPLET)
+- **13 templates vidéo** dans 6 catégories (Réseaux Sociaux, Publicités, Restauration, Corporate, Événements, Sur Mesure)
+- **Prix** : 129.90 - 399.90 CHF (Sur Mesure)
+- **Durée** : 8-15 secondes
+- **Génération** : Sora 2 via Emergent Integrations
+- **Temps estimé** : ~1 heure
+- **Paiement Stripe** intégré (même flow que Media Pub)
+- **Routes** :
+  - `/video-pub` - Page principale
+  - `/api/video-pub/templates` - Liste templates
+  - `/api/video-pub/orders` - Créer commande
+  - `/api/video-pub/payment/create-session` - Session Stripe
+
+#### ✅ Email Confirmation Paiement
+- Template email professionnel pour confirmation Pub Média
 - Envoi automatique après paiement Stripe confirmé
-- Inclut: N° commande, template, slogan, montant, lien dashboard
 
-#### ✅ Dashboard Admin Pub Média (NOUVEAU)
-- **Tab "Pub Média IA"** dans AdminDashboard.js
+#### ✅ Dashboard Admin "Pub Média IA"
+- Tab dans AdminDashboard.js
 - Cards statistiques: Total, Complétées, Revenus, Échouées
-- Filtres: Toutes, Pending, Processing, Completed, Failed
-- Tableau détaillé avec ID, Template, Entreprise, Prix, Statut, Paiement, Date, Lien image
+- Filtres et tableau détaillé
 
-#### ✅ PDFs Cahier des Charges V2 (DÉTAILLÉS)
-- **CDC_MONETISATION_TITELLI_V2.pdf** (15KB): Algorithmes, projections, code Python
-- **CDC_FONCTIONNALITES_TITELLI_V2.pdf** (17KB): Architecture, APIs, features en italique
-- Inclut: Structure fichiers, endpoints API, algorithmes de scoring
+#### ✅ PDFs Cahier des Charges V2 Détaillés
+- `CDC_MONETISATION_TITELLI_V2.pdf` (15KB) avec algorithmes Python
+- `CDC_FONCTIONNALITES_TITELLI_V2.pdf` (17KB) avec APIs et architecture
 
-#### ✅ Vidéo Marketing V2 Assemblée (NOUVEAU)
-- **PUB_TITELLI_V2_COMPLETE.mp4** (7.3MB, ~36s)
-- 10 scènes assemblées avec ffmpeg
-- Disponible: `/app/backend/uploads/PUB_TITELLI_V2_COMPLETE.mp4`
+#### ✅ Vidéo Marketing V2 Assemblée
+- `PUB_TITELLI_V2_COMPLETE.mp4` (7.3MB, ~36s)
+- 10 scènes combinées avec ffmpeg
 
-#### ✅ Enrichissement Entreprises (EN COURS)
-- Script `enrich_enterprises.py` avec filtre intelligent
-- **Première passe**: 270/300 succès, 30 erreurs
-- **Deuxième passe**: En cours (74+/368 restantes)
-- Capture automatique: logos, covers, descriptions
-
-### Session Progress - 6 Février 2026 (Début)
+#### ✅ Enrichissement Entreprises (TERMINÉ)
+- **335 entreprises enrichies** avec logos, covers et descriptions
+- 33 erreurs (sites inaccessibles)
+- Images dans `/app/backend/uploads/enterprises/`
 
 #### ✅ Intégration Stripe Pub Média (COMPLET)
-- **Paiement Stripe LIVE** intégré pour les commandes "Pub Média"
-- **Endpoints backend**:
-  - `POST /api/media-pub/payment/create-session` - Créer session Stripe Checkout
-  - `GET /api/media-pub/payment/status/{session_id}` - Vérifier statut paiement
-  - `POST /api/media-pub/webhook/stripe` - Webhook Stripe
-  - `GET /api/media-pub/orders/{order_id}/download` - Télécharger image HD (après paiement)
-- **Frontend mis à jour** : Redirection vers Stripe Checkout, polling du statut, écrans de succès
-- **Collection MongoDB** : `payment_transactions` pour tracer les paiements
-- **Protection filigrane** : Image HD sans filigrane disponible uniquement après paiement confirmé
+- Paiement LIVE pour Media Pub et Video Pub
+- Webhooks configurés
+- Protection filigrane jusqu'au paiement
 
 ### Session Progress - 5 Février 2026
 
