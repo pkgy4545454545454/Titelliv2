@@ -293,6 +293,52 @@ const AdminDashboard = () => {
     window.open(`${url}&token=${token}`, '_blank');
   };
 
+  // Fetch Pub Media orders when tab changes
+  useEffect(() => {
+    if (activeTab === 'pub-media') {
+      fetchPubMediaOrders();
+    }
+  }, [activeTab, pubMediaFilter]);
+
+  const fetchPubMediaOrders = async () => {
+    setPubMediaLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (pubMediaFilter && pubMediaFilter !== 'all') {
+        params.append('status', pubMediaFilter);
+      }
+      params.append('limit', '100');
+      
+      const response = await axios.get(`${API_URL}/media-pub/admin/orders?${params.toString()}`);
+      setPubMediaOrders(response.data.orders || []);
+      setPubMediaStats(response.data.stats || {});
+    } catch (error) {
+      console.error('Error fetching pub media orders:', error);
+      toast.error('Erreur chargement commandes Pub Média');
+    } finally {
+      setPubMediaLoading(false);
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'completed': return 'bg-green-500/20 text-green-400';
+      case 'pending': return 'bg-yellow-500/20 text-yellow-400';
+      case 'processing': return 'bg-blue-500/20 text-blue-400';
+      case 'failed': return 'bg-red-500/20 text-red-400';
+      case 'cancelled': return 'bg-gray-500/20 text-gray-400';
+      default: return 'bg-gray-500/20 text-gray-400';
+    }
+  };
+
+  const getPaymentStatusColor = (status) => {
+    switch (status) {
+      case 'paid': return 'bg-emerald-500/20 text-emerald-400';
+      case 'pending': return 'bg-orange-500/20 text-orange-400';
+      default: return 'bg-gray-500/20 text-gray-400';
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#050505] pt-24 flex items-center justify-center">
