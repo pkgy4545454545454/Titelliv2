@@ -8,38 +8,60 @@ import {
   Eye,
   RefreshCw,
   Image,
+  Video,
   Calendar,
-  DollarSign
+  DollarSign,
+  Film
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const CommandesTitelliSection = ({ enterpriseId }) => {
-  const [orders, setOrders] = useState([]);
+  const [mediaOrders, setMediaOrders] = useState([]);
+  const [videoOrders, setVideoOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState('all'); // 'all', 'media', 'video'
+
+  // Combine all orders
+  const allOrders = [
+    ...mediaOrders.map(o => ({ ...o, type: 'media' })),
+    ...videoOrders.map(o => ({ ...o, type: 'video' }))
+  ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+  const filteredOrders = activeTab === 'all' 
+    ? allOrders 
+    : allOrders.filter(o => o.type === activeTab);
 
   useEffect(() => {
     if (enterpriseId) {
-      fetchOrders();
+      fetchAllOrders();
     }
   }, [enterpriseId]);
 
   // Auto-refresh pour les commandes en cours
   useEffect(() => {
-    const hasProcessing = orders.some(o => o.status === 'processing');
+    const hasProcessing = allOrders.some(o => o.status === 'processing' || o.status === 'generating');
     if (hasProcessing) {
-      const interval = setInterval(fetchOrders, 10000); // Refresh toutes les 10s
+      const interval = setInterval(fetchAllOrders, 10000);
       return () => clearInterval(interval);
     }
-  }, [orders]);
+  }, [allOrders]);
 
-  const fetchOrders = async () => {
+  const fetchAllOrders = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/media-pub/orders?enterprise_id=${enterpriseId}`);
-      const data = await response.json();
-      setOrders(data.orders || []);
+      // Fetch both media and video orders in parallel
+      const [mediaRes, videoRes] = await Promise.all([
+        fetch(`${API_URL}/api/media-pub/orders/enterprise/${enterpriseId}`),
+        fetch(`${API_URL}/api/video-pub/orders/enterprise/${enterpriseId}`)
+      ]);
+      
+      const mediaData = await mediaRes.json();
+      const videoData = await videoRes.json();
+      
+      setMediaOrders(mediaData.orders || []);
+      setVideoOrders(videoData.orders || []);
     } catch (error) {
       console.error('Erreur chargement commandes:', error);
     } finally {
