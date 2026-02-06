@@ -149,14 +149,25 @@ async def main():
     client = AsyncIOMotorClient(MONGO_URL)
     db = client.secondevie
     
-    # Récupérer les entreprises avec site web
+    # Récupérer les entreprises avec site web qui n'ont PAS encore été enrichies
+    # (pas de cover_image ou logo_url vide)
     cursor = db.enterprises.find(
-        {"website": {"$ne": None, "$ne": "", "$regex": "^http"}},
+        {
+            "website": {"$ne": None, "$ne": "", "$regex": "^http"},
+            "$or": [
+                {"cover_image": {"$exists": False}},
+                {"cover_image": None},
+                {"cover_image": ""},
+                {"logo_url": {"$exists": False}},
+                {"logo_url": None},
+                {"logo_url": ""}
+            ]
+        },
         {"_id": 0, "id": 1, "business_name": 1, "name": 1, "website": 1, "category": 1}
     ).limit(MAX_ENTERPRISES)
     
     enterprises = await cursor.to_list(MAX_ENTERPRISES)
-    logger.info(f"Entreprises à traiter: {len(enterprises)}")
+    logger.info(f"Entreprises à traiter (non enrichies): {len(enterprises)}")
     
     # Lancer Playwright
     async with async_playwright() as p:
