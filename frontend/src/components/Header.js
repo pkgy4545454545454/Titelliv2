@@ -198,6 +198,37 @@ const Header = () => {
                 {link.label}
               </Link>
             ))}
+            
+            {/* Pub IA Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="nav-link media-pub text-sm font-medium flex items-center gap-1 outline-none">
+                <Sparkles className="w-4 h-4" />
+                Pub IA
+                <ChevronDown className="w-3 h-3" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-gray-900 border border-white/10 rounded-xl p-2 min-w-[200px]">
+                {pubIALinks.map((link) => (
+                  <DropdownMenuItem key={link.path} asChild>
+                    <Link
+                      to={link.path}
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+                    >
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                        link.path === '/video-pub' ? 'bg-purple-500/20' : 'bg-amber-500/20'
+                      }`}>
+                        <link.icon className={`w-4 h-4 ${
+                          link.path === '/video-pub' ? 'text-purple-400' : 'text-amber-400'
+                        }`} />
+                      </div>
+                      <div>
+                        <p className="text-white text-sm font-medium">{link.label}</p>
+                        <p className="text-gray-400 text-xs">{link.description}</p>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
 
           {/* Search Bar */}
