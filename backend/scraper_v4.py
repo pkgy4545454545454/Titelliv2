@@ -1,347 +1,335 @@
 #!/usr/bin/env python3
 """
-Comprehensive scraper for local.ch - Lausanne businesses
-Version 4: Continue from category 200+
+SCRAPER V4 - RECHERCHE GOOGLE POUR SITES WEB
 """
 
 import asyncio
-import re
 import os
-from datetime import datetime, timezone
-from motor.motor_asyncio import AsyncIOMotorClient
-from urllib.parse import quote
 import logging
+import uuid
+import re
+from datetime import datetime, timezone
+from urllib.parse import quote_plus, urljoin
+from motor.motor_asyncio import AsyncIOMotorClient
+from playwright.async_api import async_playwright
+import httpx
 
-# Setup logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('/app/backend/scraper_v4.log'),
-        logging.StreamHandler()
-    ]
-)
+MONGO_URL = os.environ.get('MONGO_URL')
+UPLOADS_DIR = "/app/backend/uploads/enterprises"
+BASE_URL = "https://video-platform-730.preview.emergentagent.com"
+MAX_ENTERPRISES = 50
+MAX_IMAGES = 20
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger(__name__)
-
-# MongoDB connection
-MONGO_URL = "mongodb+srv://prankgy:Minijetaime1996@cluster0.kwjifsg.mongodb.net/secondevie?retryWrites=true&w=majority&appName=Cluster0"
-DB_NAME = "secondevie"
+os.makedirs(UPLOADS_DIR, exist_ok=True)
 
 
-async def get_existing_keys(db):
-    """Get set of existing business keys"""
-    existing = set()
-    cursor = db.enterprises.find({}, {"name": 1, "business_name": 1, "address": 1})
-    async for doc in cursor:
-        name = doc.get("name") or doc.get("business_name", "")
-        address = doc.get("address", "")
-        if name:
-            key = f"{name.lower().strip()[:50]}|{address.lower().strip()[:30]}"
-            existing.add(key)
-    logger.info(f"Found {len(existing)} existing businesses")
-    return existing
+async def download_image(url: str, filepath: str, min_size: int = 5000) -> bool:
+    try:
+        async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
+            resp = await client.get(url, headers={"User-Agent": "Mozilla/5.0"})
+            if resp.status_code == 200 and 'image' in resp.headers.get('content-type', ''):
+                if len(resp.content) > min_size:
+                    with open(filepath, 'wb') as f:
+                        f.write(resp.content)
+                    return True
+    except:
+        pass
+    return False
 
 
-def normalize_key(name, address):
-    """Create normalized key for duplicate detection"""
-    name_clean = name.lower().strip()[:50] if name else ""
-    addr_clean = address.lower().strip()[:30] if address else ""
-    return f"{name_clean}|{addr_clean}"
-
-
-async def scrape_search(page, search_term, location, existing_keys, max_pages=30):
-    """Scrape search results for a term in a location"""
-    from playwright.async_api import TimeoutError as PlaywrightTimeout
-    
-    businesses = []
-    
-    for page_num in range(1, max_pages + 1):
-        url = f"https://www.local.ch/fr/s/{quote(search_term)}/{quote(location)}?page={page_num}"
+async def find_website_google(page, name: str, city: str) -> str:
+    """Trouve le site officiel via Google"""
+    try:
+        search_query = f"{name} {city} site officiel"
+        search_url = f"https://www.google.com/search?q={quote_plus(search_query)}"
         
-        try:
-            await page.goto(url, wait_until='domcontentloaded', timeout=20000)
-            await page.wait_for_timeout(1500)
-            
-            try:
-                await page.wait_for_selector('a[href*="/fr/d/"]', timeout=5000)
-            except:
-                pass
-            
-            listings = await page.query_selector_all('a[href*="/fr/d/"]')
-            
-            if not listings:
-                break
-            
-            page_businesses = []
-            seen_on_page = set()
-            
-            for listing in listings:
-                try:
-                    href = await listing.get_attribute('href')
-                    if not href or '/fr/d/' not in href:
-                        continue
-                    
-                    if href in seen_on_page:
-                        continue
-                    seen_on_page.add(href)
-                    
-                    text = await listing.inner_text()
-                    lines = [l.strip() for l in text.split('\n') if l.strip()]
-                    
-                    if not lines:
-                        continue
-                    
-                    name = lines[0][:100]
-                    
-                    if len(name) < 3 or name.lower() in ['voir plus', 'plus', 'suivant', 'précédent']:
-                        continue
-                    
-                    business = {
-                        'name': name,
-                        'city': 'Lausanne',
-                        'canton': 'Vaud',
-                        'country': 'Suisse',
-                        'source': 'local.ch',
-                        'activation_status': 'inactive',
-                        'status': 'bientot_disponible',
-                        'is_verified': False,
-                        'is_certified': False,
-                        'is_premium': False,
-                        'category': search_term.replace('-', ' ').title(),
-                        'search_location': location,
-                    }
-                    
-                    for line in lines[1:5]:
-                        if re.search(r'\d{4}', line):
-                            business['address'] = line[:200]
-                            postal_match = re.search(r'(\d{4})', line)
-                            if postal_match:
-                                business['postal_code'] = postal_match.group(1)
-                            break
-                    
-                    for line in lines:
-                        phone_match = re.search(r'(\+41[\s.-]?\d{2}[\s.-]?\d{3}[\s.-]?\d{2}[\s.-]?\d{2}|0\d{2}[\s.-]?\d{3}[\s.-]?\d{2}[\s.-]?\d{2})', line)
-                        if phone_match:
-                            business['phone'] = phone_match.group(1).replace(' ', '').replace('.', '').replace('-', '')
-                            break
-                    
-                    key = normalize_key(name, business.get('address', ''))
-                    if key not in existing_keys:
-                        page_businesses.append(business)
-                        existing_keys.add(key)
+        await page.goto(search_url, wait_until="domcontentloaded", timeout=15000)
+        await page.wait_for_timeout(2000)
+        
+        # Chercher les liens dans les resultats
+        links = await page.query_selector_all('a[href^="http"]')
+        
+        exclude_domains = ['google.', 'facebook.', 'instagram.', 'linkedin.', 'youtube.', 
+                          'twitter.', 'local.ch', 'search.ch', 'maps.', 'yelp.', 'tripadvisor.']
+        
+        for link in links[:20]:
+            href = await link.get_attribute('href')
+            if href:
+                # Filtrer les domaines non pertinents
+                if not any(d in href.lower() for d in exclude_domains):
+                    # Verifier que c'est bien un site d'entreprise
+                    if '.ch' in href or '.com' in href or '.net' in href:
+                        return href
                         
-                except Exception as e:
-                    continue
-            
-            if page_businesses:
-                businesses.extend(page_businesses)
-                logger.info(f"{search_term}/{location} p{page_num}: +{len(page_businesses)} new")
-            
-            if len(page_businesses) < 3:
-                break
-                
-            await page.wait_for_timeout(800)
-            
-        except PlaywrightTimeout:
-            logger.warning(f"{search_term}/{location} p{page_num}: Timeout, moving on")
-            break
-        except Exception as e:
-            logger.error(f"{search_term}/{location} p{page_num}: Error - {str(e)[:50]}")
-            break
+    except Exception as e:
+        logger.debug(f"Erreur recherche Google: {e}")
     
-    return businesses
+    return None
 
 
-async def insert_businesses(db, businesses):
-    """Insert businesses into MongoDB"""
-    if not businesses:
-        return 0
-    
-    now = datetime.now(timezone.utc).isoformat()
-    
-    for biz in businesses:
-        biz['id'] = f"lch_{abs(hash(biz['name'] + biz.get('address', '') + biz.get('phone', ''))) % 10000000000}"
-        biz['created_at'] = now
-        biz['updated_at'] = now
-        
-        if not biz.get('image'):
-            name_encoded = quote(biz['name'][:20])
-            biz['image'] = f"https://ui-avatars.com/api/?name={name_encoded}&background=0047AB&color=fff&size=400"
+async def scrape_all_images(page, url: str, enterprise_id: str) -> dict:
+    """Scrape toutes les images et donnees d'un site"""
+    result = {"images": [], "products": [], "description": None, "logo": None}
     
     try:
-        result = await db.enterprises.insert_many(businesses, ordered=False)
-        return len(result.inserted_ids)
-    except Exception as e:
-        inserted = 0
-        for biz in businesses:
+        logger.info(f"      Visite: {url[:50]}...")
+        await page.goto(url, wait_until="networkidle", timeout=25000)
+        await page.wait_for_timeout(3000)
+        
+        # Cover screenshot
+        cover_file = f"{enterprise_id}_cover.jpg"
+        await page.screenshot(path=f"{UPLOADS_DIR}/{cover_file}", quality=85)
+        result["images"].append(f"{BASE_URL}/api/uploads/enterprises/{cover_file}")
+        
+        # Logo
+        for sel in ['img[alt*="logo" i]', 'img[src*="logo" i]', 'header img', '.logo img']:
             try:
-                await db.enterprises.insert_one(biz)
-                inserted += 1
+                logo = await page.query_selector(sel)
+                if logo:
+                    box = await logo.bounding_box()
+                    if box and box['width'] > 40:
+                        logo_file = f"{enterprise_id}_logo.png"
+                        await logo.screenshot(path=f"{UPLOADS_DIR}/{logo_file}")
+                        result["logo"] = f"{BASE_URL}/api/uploads/enterprises/{logo_file}"
+                        logger.info(f"      Logo extrait!")
+                        break
             except:
-                pass
-        return inserted
+                continue
+        
+        # Description
+        for sel in ['meta[name="description"]', 'meta[property="og:description"]', '.about p', 'main p']:
+            try:
+                elem = await page.query_selector(sel)
+                if elem:
+                    text = await elem.get_attribute('content') if 'meta' in sel else await elem.text_content()
+                    if text and len(text.strip()) > 50:
+                        result["description"] = text.strip()[:800]
+                        break
+            except:
+                continue
+        
+        # Toutes les images
+        all_imgs = await page.query_selector_all('img')
+        img_idx = 0
+        
+        for img in all_imgs:
+            if img_idx >= MAX_IMAGES:
+                break
+            try:
+                src = await img.get_attribute('src') or await img.get_attribute('data-src')
+                if src:
+                    if not src.startswith('http'):
+                        src = urljoin(url, src)
+                    
+                    # Filtrer icones
+                    if any(x in src.lower() for x in ['icon', 'logo', 'pixel', '1x1', 'spacer']):
+                        continue
+                    
+                    box = await img.bounding_box()
+                    if box and box['width'] > 120 and box['height'] > 80:
+                        filename = f"{enterprise_id}_img_{img_idx}.jpg"
+                        filepath = f"{UPLOADS_DIR}/{filename}"
+                        
+                        if await download_image(src, filepath, min_size=8000):
+                            result["images"].append(f"{BASE_URL}/api/uploads/enterprises/{filename}")
+                            img_idx += 1
+            except:
+                continue
+        
+        logger.info(f"      {len(result['images'])} images extraites")
+        
+        # Produits
+        for sel in ['[class*="product"]', '[class*="item"]', '.card']:
+            try:
+                prods = await page.query_selector_all(sel)
+                for p in prods[:30]:
+                    product = {}
+                    
+                    # Nom
+                    name_el = await p.query_selector('h2, h3, h4, .title, [class*="name"]')
+                    if name_el:
+                        name = await name_el.text_content()
+                        if name and 2 < len(name.strip()) < 100:
+                            product["name"] = name.strip()
+                    
+                    # Prix
+                    price_el = await p.query_selector('.price, [class*="price"]')
+                    if price_el:
+                        price_text = await price_el.text_content()
+                        match = re.search(r'[\d.,]+', price_text.replace("'", ""))
+                        if match:
+                            try:
+                                product["price"] = float(match.group().replace(',', '.'))
+                            except:
+                                pass
+                    
+                    # Image
+                    img_el = await p.query_selector('img')
+                    if img_el:
+                        product["image"] = await img_el.get_attribute('src')
+                    
+                    if product.get("name"):
+                        result["products"].append(product)
+                
+                if result["products"]:
+                    logger.info(f"      {len(result['products'])} produits detectes!")
+                    break
+            except:
+                continue
+        
+        # Full page screenshot
+        try:
+            full_file = f"{enterprise_id}_full.jpg"
+            await page.screenshot(path=f"{UPLOADS_DIR}/{full_file}", quality=70, full_page=True)
+            result["images"].append(f"{BASE_URL}/api/uploads/enterprises/{full_file}")
+        except:
+            pass
+            
+    except Exception as e:
+        logger.warning(f"      Erreur: {e}")
+    
+    return result
+
+
+async def generate_logo(name: str, ent_id: str) -> str:
+    initials = ''.join([w[0] for w in name.split()[:2]]).upper()
+    colors = ['F59E0B', '10B981', '3B82F6', 'EF4444', '8B5CF6', 'EC4899']
+    color = colors[hash(name) % len(colors)]
+    
+    url = f"https://ui-avatars.com/api/?name={quote_plus(initials)}&background={color}&color=fff&size=400&bold=true"
+    filepath = f"{UPLOADS_DIR}/{ent_id}_logo.png"
+    
+    if await download_image(url, filepath, 1000):
+        return f"{BASE_URL}/api/uploads/enterprises/{ent_id}_logo.png"
+    return None
+
+
+def gen_description(name: str, category: str, city: str) -> str:
+    templates = {
+        "Beauté & Bien-être": f"Bienvenue chez {name}, votre salon de beaute a {city}. Notre equipe de professionnels vous accueille pour sublimer votre beaute.",
+        "Restaurant": f"{name} vous accueille a {city} pour une experience culinaire unique. Decouvrez notre cuisine savoureuse.",
+        "Commerce": f"{name}, votre commerce de proximite a {city}. Qualite et service personnalise.",
+    }
+    return templates.get(category, f"{name} est une entreprise locale a {city}. Contactez-nous!")
 
 
 async def main():
-    """Main scraping function - Continue from category 200"""
-    from playwright.async_api import async_playwright
-    
     logger.info("=" * 60)
-    logger.info("LOCAL.CH SCRAPER V4 - CONTINUING FROM CAT 200")
+    logger.info("   SCRAPER V4 - GOOGLE SEARCH")
     logger.info("=" * 60)
     
-    mongo_client = AsyncIOMotorClient(MONGO_URL)
-    db = mongo_client[DB_NAME]
+    client = AsyncIOMotorClient(MONGO_URL)
+    db = client.titelli
     
-    existing_keys = await get_existing_keys(db)
-    initial_count = await db.enterprises.count_documents({})
+    # Entreprises non enrichies V4
+    query = {
+        "$or": [
+            {"enrichment_version": {"$ne": "v4"}},
+            {"photos": {"$exists": False}},
+            {"photos": []}
+        ]
+    }
     
-    # Categories starting from ~200 (skipping already done)
-    search_terms = [
-        # Continuing from where we left off - retail, services, etc.
-        "mobile", "tablette", "tv", "hifi", "electromenager", "cuisine", 
-        "menager", "robot", "aspirateur", "meuble", "mobilier", "canape", 
-        "lit", "matelas", "armoire", "bureau", "chaise", "decoration", 
-        "luminaire", "tapis", "rideau", "linge-maison", "vaisselle",
-        "bricolage", "quincaillerie", "outillage", "peinture", "papier-peint", 
-        "parquet", "carrelage", "sanitaire", "robinetterie", "chauffage", 
-        "climatisation", "jardinage", "jardinerie", "plantes", "fleurs", 
-        "fleuriste", "pepiniere", "animalerie", "animaux", "chien", "chat", 
-        "aquarium", "oiseau", "librairie", "livre", "papeterie", "fourniture", 
-        "scolaire", "jouet", "jeux", "loisirs", "musique", "instrument", 
-        "disque", "cd", "vinyle", "art", "galerie", "tableau", "cadre", 
-        "encadrement", "antiquaire", "brocante", "occasion", "depot-vente", 
-        "friperie", "vintage", "seconde-main",
-        
-        # Automotive
-        "garage", "mecanique", "carrosserie", "peinture-auto", "pneu", 
-        "pneumatique", "auto", "voiture", "vehicule", "concessionnaire", 
-        "location-voiture", "moto", "scooter", "velo", "velo-electrique", 
-        "trottinette", "parking", "lavage-auto", "station-service", "essence", 
-        "remorquage", "depannage", "auto-ecole", "permis", "conduite", "taxi", 
-        "vtc", "chauffeur", "limousine",
-        
-        # Construction & Home Services
-        "construction", "entreprise-generale", "maconnerie", "beton", "charpente",
-        "couverture", "toiture", "facade", "isolation", "etancheite", "demolition",
-        "terrassement", "excavation", "fondation", "gros-oeuvre", "second-oeuvre",
-        "menuiserie", "ebenisterie", "parqueteur", "poseur", "installateur",
-        "plombier", "plomberie", "chauffagiste", "climaticien", "ventilation",
-        "electricien", "electricite", "domotique", "alarme", "videosurveillance",
-        "peintre", "decoration", "tapissier", "platrerie", "plafonnier",
-        "carreleur", "faience", "mosaique", "sol", "revetement",
-        "serrurier", "serrurerie", "cle", "coffre-fort", "blindage", "vitrier",
-        "verrier", "miroiterie", "store", "volet", "pergola", "veranda",
-        "cuisiniste", "cuisine-equipee", "salle-bain", "amenagement", "renovation",
-        "demenagement", "garde-meuble", "stockage", "nettoyage", "menage", "entretien",
-        "desinsectisation", "desinfection", "ramonage", "debouchage", "assainissement",
-        
-        # Hotels & Tourism (more)
-        "motel", "auberge", "pension", "chambre-hote", "gite", "apparthotel",
-        "residence", "apart-hotel", "hostel", "refuge", "chalet",
-        "tourisme", "guide", "excursion", "visite", "croisiere", "voyage",
-        
-        # Education & Culture (more)
-        "college", "lycee", "universite", "cours", "soutien",
-        "garderie", "jardin-enfants", "parascolaire", "camp", "colonie",
-        "ecole-langue", "theatre",
-        "musee", "exposition", "cinema", "spectacle", "concert", "festival",
-        "bibliotheque", "mediatheque", "ludotheque", "centre-culturel", "association",
-        
-        # Technology & Digital (more)
-        "depannage-informatique", "reparation-ordinateur", "data",
-        "developpement", "web", "application", "logiciel", "software", "hardware",
-        "reseau", "securite-informatique", "cloud", "hebergement", "serveur",
-        "telecoms", "telephonie", "fibre", "internet", "operateur",
-        
-        # Industry & B2B
-        "industrie", "usine", "manufacture", "production", "fabrication", "atelier",
-        "mecanique-precision", "usinage", "soudure", "metallurgie", "fonderie",
-        "plastique", "caoutchouc", "composite", "textile", "confection", "broderie",
-        "edition", "packaging", "emballage", "conditionnement",
-        "logistique", "transport", "livraison", "coursier", "messagerie", "fret",
-        "import-export", "negoce", "grossiste", "distributeur", "representant",
-        
-        # Misc Services
-        "pressing", "teinturerie", "laverie", "blanchisserie", "couture", "retouche",
-        "cordonnerie", "reparation", "cle-minute", "gravure", "tampon", "cachet",
-        "photocopie", "scan", "reliure", "plastification", "destruction-documents",
-        "pompes-funebres", "funeraire", "crematorium", "cimetiere", "fleurs-deuil",
-        "garde", "securite", "surveillance", "gardiennage", "agent-securite",
-        "detective", "enqueteur", "recouvrement", "mediation",
-        
-        # Additional categories
-        "agence", "bureau", "cabinet", "centre", "espace", "institut",
-        "maison", "service", "societe", "entreprise", "compagnie",
-        "boutique", "magasin", "shop", "store", "commerce",
-        "studio", "salle", "local", "atelier", "showroom",
-    ]
-    
-    locations = [
-        "lausanne", "lausanne-1000", "lausanne-1003", "lausanne-1004", "lausanne-1005",
-        "lausanne-1006", "lausanne-1007", "lausanne-1010", "lausanne-1012",
-        "lausanne-1018", "lausanne-flon", "lausanne-gare", "lausanne-ouchy",
-        "pully", "prilly", "renens", "ecublens", "chavannes", "epalinges",
-        "le-mont-sur-lausanne", "crissier", "bussigny", "morges",
-    ]
-    
-    total_new = 0
-    categories_done = 0
+    enterprises = await db.enterprises.find(query).limit(MAX_ENTERPRISES).to_list(length=MAX_ENTERPRISES)
+    logger.info(f"Entreprises: {len(enterprises)}\n")
     
     async with async_playwright() as p:
-        browser = await p.chromium.launch(
-            headless=True,
-            args=['--no-sandbox', '--disable-dev-shm-usage']
-        )
-        context = await browser.new_context(
-            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
-            locale='fr-CH',
-            viewport={'width': 1920, 'height': 1080}
-        )
-        page = await context.new_page()
+        browser = await p.chromium.launch(headless=True)
+        ctx = await browser.new_context(viewport={"width": 1920, "height": 1080})
+        page = await ctx.new_page()
         
-        for search_term in search_terms:
-            for location in locations:
-                try:
-                    businesses = await scrape_search(page, search_term, location, existing_keys, max_pages=25)
-                    
-                    if businesses:
-                        inserted = await insert_businesses(db, businesses)
-                        total_new += inserted
-                        if inserted > 0:
-                            logger.info(f"✓ {search_term}/{location}: +{inserted} (Total new: {total_new})")
-                    
-                    await asyncio.sleep(0.5)
-                    
-                except Exception as e:
-                    logger.error(f"✗ {search_term}/{location}: {str(e)[:50]}")
-                    continue
+        stats = {"ok": 0, "err": 0, "img": 0, "prod": 0}
+        
+        for i, ent in enumerate(enterprises):
+            ent_id = ent.get('id')
+            name = ent.get('name', 'Unknown')
+            city = ent.get('city', 'Lausanne')
+            category = ent.get('category', 'Services')
+            
+            logger.info(f"[{i+1}/{len(enterprises)}] {name}")
+            
+            try:
+                # Chercher le site web
+                website = await find_website_google(page, name, city)
                 
-                if location == "lausanne" and not businesses:
-                    break
-            
-            categories_done += 1
-            
-            if categories_done % 20 == 0:
-                current = await db.enterprises.count_documents({})
-                logger.info(f"\n{'='*60}")
-                logger.info(f"PROGRESS: {categories_done}/{len(search_terms)} categories")
-                logger.info(f"Total enterprises: {current} (+{total_new} new)")
-                logger.info(f"{'='*60}\n")
+                data = {"images": [], "products": []}
+                
+                if website:
+                    logger.info(f"   Site: {website[:50]}...")
+                    data = await scrape_all_images(page, website, ent_id)
+                else:
+                    # Screenshot Google comme fallback
+                    cover_file = f"{ent_id}_cover.jpg"
+                    search_url = f"https://www.google.com/search?q={quote_plus(name + ' ' + city)}&tbm=isch"
+                    await page.goto(search_url, timeout=10000)
+                    await page.wait_for_timeout(2000)
+                    await page.screenshot(path=f"{UPLOADS_DIR}/{cover_file}", quality=85)
+                    data["images"] = [f"{BASE_URL}/api/uploads/enterprises/{cover_file}"]
+                
+                # Update DB
+                update = {
+                    "enriched_at": datetime.now(timezone.utc).isoformat(),
+                    "enrichment_version": "v4"
+                }
+                
+                if data["images"]:
+                    update["photos"] = data["images"]
+                    update["gallery"] = data["images"]
+                    update["cover_url"] = data["images"][0]
+                
+                if data.get("logo"):
+                    update["logo_url"] = data["logo"]
+                    update["logo"] = data["logo"]
+                else:
+                    logo = await generate_logo(name, ent_id)
+                    if logo:
+                        update["logo_url"] = logo
+                        update["logo"] = logo
+                
+                if data.get("description"):
+                    update["description"] = data["description"]
+                else:
+                    update["description"] = gen_description(name, category, city)
+                
+                if website:
+                    update["website"] = website
+                
+                await db.enterprises.update_one({"id": ent_id}, {"$set": update})
+                
+                # Ajouter produits
+                for prod in data.get("products", []):
+                    if prod.get("name"):
+                        exists = await db.products.find_one({"enterprise_id": ent_id, "name": prod["name"]})
+                        if not exists:
+                            await db.products.insert_one({
+                                "id": str(uuid.uuid4()),
+                                "enterprise_id": ent_id,
+                                "name": prod["name"],
+                                "price": prod.get("price", 0),
+                                "images": [prod.get("image")] if prod.get("image") else [],
+                                "is_active": True,
+                                "created_at": datetime.now(timezone.utc).isoformat(),
+                                "source": "scraping_v4"
+                            })
+                            stats["prod"] += 1
+                
+                stats["ok"] += 1
+                stats["img"] += len(data.get("images", []))
+                logger.info(f"   => OK: {len(data.get('images', []))} images\n")
+                
+                await asyncio.sleep(3)
+                
+            except Exception as e:
+                logger.error(f"   => ERREUR: {e}\n")
+                stats["err"] += 1
         
         await browser.close()
     
-    final_count = await db.enterprises.count_documents({})
-    lausanne_count = await db.enterprises.count_documents({'city': 'Lausanne'})
-    localch_count = await db.enterprises.count_documents({'source': 'local.ch'})
-    
     logger.info("=" * 60)
-    logger.info("SCRAPING V4 COMPLETED")
-    logger.info(f"Initial: {initial_count}")
-    logger.info(f"Final: {final_count}")
-    logger.info(f"New added: {total_new}")
-    logger.info(f"Total from local.ch: {localch_count}")
-    logger.info(f"Lausanne: {lausanne_count}")
+    logger.info(f"   TERMINE: {stats['ok']} OK, {stats['err']} erreurs")
+    logger.info(f"   Images: {stats['img']}, Produits: {stats['prod']}")
     logger.info("=" * 60)
 
 
