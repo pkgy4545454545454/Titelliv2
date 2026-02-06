@@ -5,9 +5,38 @@ Titelli est une plateforme de social commerce régionale pour les services et pr
 
 ## Last Update: 6 Février 2026
 
-### Session Progress - 6 Février 2026
+### Session Progress - 6 Février 2026 (Suite)
 
-#### ✅ Intégration Stripe Pub Média (NOUVEAU)
+#### ✅ Email Confirmation Paiement (NOUVEAU)
+- **Template email** professionnel pour confirmation Pub Média
+- Envoi automatique après paiement Stripe confirmé
+- Inclut: N° commande, template, slogan, montant, lien dashboard
+
+#### ✅ Dashboard Admin Pub Média (NOUVEAU)
+- **Tab "Pub Média IA"** dans AdminDashboard.js
+- Cards statistiques: Total, Complétées, Revenus, Échouées
+- Filtres: Toutes, Pending, Processing, Completed, Failed
+- Tableau détaillé avec ID, Template, Entreprise, Prix, Statut, Paiement, Date, Lien image
+
+#### ✅ PDFs Cahier des Charges V2 (DÉTAILLÉS)
+- **CDC_MONETISATION_TITELLI_V2.pdf** (15KB): Algorithmes, projections, code Python
+- **CDC_FONCTIONNALITES_TITELLI_V2.pdf** (17KB): Architecture, APIs, features en italique
+- Inclut: Structure fichiers, endpoints API, algorithmes de scoring
+
+#### ✅ Vidéo Marketing V2 Assemblée (NOUVEAU)
+- **PUB_TITELLI_V2_COMPLETE.mp4** (7.3MB, ~36s)
+- 10 scènes assemblées avec ffmpeg
+- Disponible: `/app/backend/uploads/PUB_TITELLI_V2_COMPLETE.mp4`
+
+#### ✅ Enrichissement Entreprises (EN COURS)
+- Script `enrich_enterprises.py` avec filtre intelligent
+- **Première passe**: 270/300 succès, 30 erreurs
+- **Deuxième passe**: En cours (74+/368 restantes)
+- Capture automatique: logos, covers, descriptions
+
+### Session Progress - 6 Février 2026 (Début)
+
+#### ✅ Intégration Stripe Pub Média (COMPLET)
 - **Paiement Stripe LIVE** intégré pour les commandes "Pub Média"
 - **Endpoints backend**:
   - `POST /api/media-pub/payment/create-session` - Créer session Stripe Checkout
@@ -17,11 +46,6 @@ Titelli est une plateforme de social commerce régionale pour les services et pr
 - **Frontend mis à jour** : Redirection vers Stripe Checkout, polling du statut, écrans de succès
 - **Collection MongoDB** : `payment_transactions` pour tracer les paiements
 - **Protection filigrane** : Image HD sans filigrane disponible uniquement après paiement confirmé
-
-#### ✅ Enrichissement Entreprises (EN COURS)
-- Script `enrich_enterprises.py` relancé pour 300 entreprises
-- Capture automatique de logos, images de couverture et descriptions
-- Progrès : ~150/300 entreprises traitées en arrière-plan
 
 ### Session Progress - 5 Février 2026
 
@@ -51,7 +75,7 @@ Titelli est une plateforme de social commerce régionale pour les services et pr
 - **Admins**: Gestion de la plateforme, validation, analytics
 
 ### 2. Enterprise Registration System
-- Base de données pré-chargée avec 6,482+ entreprises de Lausanne
+- Base de données pré-chargée avec 8,249 entreprises de Lausanne
 - Inscription en deux étapes : Sélectionner entreprise → Remplir formulaire
 - Documents requis : ID registre du commerce, document d'identité
 - Sélection du manager référent
