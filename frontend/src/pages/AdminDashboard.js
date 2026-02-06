@@ -201,6 +201,7 @@ const AdminDashboard = () => {
   const menuItems = [
     { id: 'overview', label: 'Vue d\'ensemble', icon: LayoutDashboard },
     { id: 'registrations', label: 'Inscriptions en attente', icon: UserPlus, badge: registrationRequests.length },
+    { id: 'pub-media', label: 'Pub Média IA', icon: Palette },
     { id: 'algorithms', label: 'Algorithmes', icon: Cpu },
     { id: 'subscriptions', label: 'Abonnements', icon: CreditCard },
     { id: 'accounting', label: 'Comptabilité', icon: BarChart3 },
