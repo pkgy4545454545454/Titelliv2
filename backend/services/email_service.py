@@ -566,3 +566,150 @@ async def send_payment_failed(
         subject=f"⚠️ Paiement non effectué - {service_name}",
         html_content=html
     )
+
+
+# ============ PUB MÉDIA CONFIRMATION ============
+
+def get_pub_media_confirmation_template(
+    user_name: str,
+    order_id: str,
+    template_name: str,
+    amount: float,
+    slogan: str,
+    product_name: str
+) -> str:
+    """Template for Pub Média order confirmation after payment"""
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #18181b;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #18181b; padding: 20px;">
+            <tr>
+                <td align="center">
+                    <table width="600" cellpadding="0" cellspacing="0" style="background-color: #27272a; border-radius: 16px; overflow: hidden;">
+                        <!-- Header -->
+                        <tr>
+                            <td style="background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); padding: 30px; text-align: center;">
+                                <h1 style="color: white; margin: 0; font-size: 24px;">🎨 Commande Pub Média Confirmée !</h1>
+                            </td>
+                        </tr>
+                        
+                        <!-- Content -->
+                        <tr>
+                            <td style="padding: 30px;">
+                                <p style="color: #ffffff; font-size: 18px; margin-bottom: 20px;">
+                                    Bonjour <strong>{user_name}</strong>,
+                                </p>
+                                
+                                <p style="color: #a1a1aa; font-size: 16px; line-height: 1.6;">
+                                    Merci pour votre commande ! Votre publicité personnalisée est en cours de création.
+                                </p>
+                                
+                                <!-- Order Details Box -->
+                                <table width="100%" cellpadding="0" cellspacing="0" style="margin: 25px 0; background-color: #3f3f46; border-radius: 12px;">
+                                    <tr>
+                                        <td style="padding: 20px;">
+                                            <p style="color: #f59e0b; font-size: 12px; text-transform: uppercase; margin: 0 0 15px 0; letter-spacing: 1px;">
+                                                Détails de la commande
+                                            </p>
+                                            <table width="100%" cellpadding="0" cellspacing="0">
+                                                <tr>
+                                                    <td style="color: #a1a1aa; font-size: 14px; padding: 8px 0;">N° Commande</td>
+                                                    <td style="color: #ffffff; font-size: 14px; padding: 8px 0; text-align: right; font-weight: bold;">#{order_id}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="color: #a1a1aa; font-size: 14px; padding: 8px 0;">Template</td>
+                                                    <td style="color: #ffffff; font-size: 14px; padding: 8px 0; text-align: right;">{template_name}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="color: #a1a1aa; font-size: 14px; padding: 8px 0;">Produit</td>
+                                                    <td style="color: #ffffff; font-size: 14px; padding: 8px 0; text-align: right;">{product_name}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="color: #a1a1aa; font-size: 14px; padding: 8px 0;">Slogan</td>
+                                                    <td style="color: #f59e0b; font-size: 14px; padding: 8px 0; text-align: right; font-style: italic;">"{slogan}"</td>
+                                                </tr>
+                                                <tr style="border-top: 1px solid #52525b;">
+                                                    <td style="color: #a1a1aa; font-size: 14px; padding: 12px 0 0 0;">Montant payé</td>
+                                                    <td style="color: #10b981; font-size: 18px; padding: 12px 0 0 0; text-align: right; font-weight: bold;">{amount:.2f} CHF</td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+                                
+                                <!-- Status Info -->
+                                <table width="100%" cellpadding="0" cellspacing="0" style="margin: 20px 0; background-color: #1e3a2f; border: 1px solid #10b981; border-radius: 8px;">
+                                    <tr>
+                                        <td style="padding: 15px;">
+                                            <p style="color: #10b981; font-size: 14px; margin: 0;">
+                                                ✅ <strong>Image HD sans filigrane</strong> disponible après génération (~2-5 minutes)
+                                            </p>
+                                        </td>
+                                    </tr>
+                                </table>
+                                
+                                <!-- CTA Button -->
+                                <table width="100%" cellpadding="0" cellspacing="0" style="margin: 25px 0;">
+                                    <tr>
+                                        <td align="center">
+                                            <a href="https://enterprise-media.preview.emergentagent.com/dashboard/entreprise?tab=commandes-titelli" 
+                                               style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); color: white; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+                                                📥 Voir mes commandes
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </table>
+                                
+                                <p style="color: #71717a; font-size: 13px; margin-top: 20px; text-align: center;">
+                                    Une notification vous sera envoyée dès que votre publicité sera prête à télécharger.
+                                </p>
+                            </td>
+                        </tr>
+                        
+                        <!-- Footer -->
+                        <tr>
+                            <td style="background-color: #18181b; padding: 20px; text-align: center; border-top: 1px solid #3f3f46;">
+                                <p style="color: #71717a; font-size: 12px; margin: 0;">
+                                    © 2026 Titelli - Pub Média IA<br>
+                                    <a href="https://enterprise-media.preview.emergentagent.com/media-pub" style="color: #f59e0b; text-decoration: none;">Créer une autre publicité</a>
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
+    """
+
+
+async def send_pub_media_confirmation(
+    user_email: str,
+    user_name: str,
+    order_id: str,
+    template_name: str,
+    amount: float,
+    slogan: str,
+    product_name: str
+) -> dict:
+    """Send Pub Média order confirmation email after payment"""
+    html = get_pub_media_confirmation_template(
+        user_name=user_name,
+        order_id=order_id,
+        template_name=template_name,
+        amount=amount,
+        slogan=slogan,
+        product_name=product_name
+    )
+    
+    return await send_email(
+        to_email=user_email,
+        subject=f"🎨 Commande Pub Média #{order_id} confirmée - Titelli",
+        html_content=html
+    )
