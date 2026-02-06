@@ -167,7 +167,7 @@ CORS_ORIGINS=*
 ### 3.2 Variables Frontend (.env)
 
 ```bash
-REACT_APP_BACKEND_URL=https://enterprise-media.preview.emergentagent.com
+REACT_APP_BACKEND_URL=https://video-platform-730.preview.emergentagent.com
 ```
 
 ### 3.3 Ports

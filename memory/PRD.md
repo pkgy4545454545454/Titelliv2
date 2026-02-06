@@ -302,7 +302,7 @@ Collections principales:
 ---
 
 ## URL Application
-**Production**: https://enterprise-media.preview.emergentagent.com
+**Production**: https://video-platform-730.preview.emergentagent.com
 
 ---
 

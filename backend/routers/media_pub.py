@@ -40,7 +40,7 @@ def set_db(database):
 # Configuration
 EMERGENT_LLM_KEY = os.getenv("EMERGENT_LLM_KEY")
 UPLOADS_DIR = "/app/backend/uploads/pub_orders"
-BASE_URL = os.getenv("REACT_APP_BACKEND_URL", "https://enterprise-media.preview.emergentagent.com")
+BASE_URL = os.getenv("REACT_APP_BACKEND_URL", "https://video-platform-730.preview.emergentagent.com")
 
 # Créer le dossier si nécessaire
 os.makedirs(UPLOADS_DIR, exist_ok=True)
