@@ -517,37 +517,37 @@ def generate_fonctionnalites_v2():
     
     pdf.add_code_block("""
 /app/
-├── backend/
-│   ├── server.py              # Point d'entree (~10,000 lignes)
-│   ├── routers/
-│   │   ├── rdv_titelli.py     # RDV social booking (1,135 lignes)
-│   │   ├── titelli_pro.py     # B2B services (720 lignes)
-│   │   ├── media_pub.py       # Pub Media IA (1,200 lignes)
-│   │   ├── gamification.py    # Points et badges (591 lignes)
-│   │   ├── specialists.py     # Demandes (585 lignes)
-│   │   ├── notifications.py   # Push notifications (316 lignes)
-│   │   └── webhooks.py        # Stripe webhooks
-│   ├── services/
-│   │   └── email_service.py   # Templates emails
-│   └── uploads/
-│       ├── pub_orders/        # Images generees
-│       ├── enterprises/       # Logos scraped
-│       └── documents/         # PDFs generes
-│
-├── frontend/
-│   └── src/
-│       ├── pages/
-│       │   ├── MediaPubPage.js        # Editeur pub IA
-│       │   ├── RdvTitelliPage.js      # Social booking
-│       │   ├── SpecialistsPage.js     # Specialistes
-│       │   ├── SportsPage.js          # Sports
-│       │   ├── TitelliProPage.js      # B2B
-│       │   └── EnterpriseDashboard.js # Dashboard
-│       └── components/
-│           └── ui/                    # Shadcn components
-│
-└── memory/
-    └── PRD.md                         # Documentation projet
+|-- backend/
+|   |-- server.py              # Point d'entree (~10,000 lignes)
+|   |-- routers/
+|   |   |-- rdv_titelli.py     # RDV social booking (1,135 lignes)
+|   |   |-- titelli_pro.py     # B2B services (720 lignes)
+|   |   |-- media_pub.py       # Pub Media IA (1,200 lignes)
+|   |   |-- gamification.py    # Points et badges (591 lignes)
+|   |   |-- specialists.py     # Demandes (585 lignes)
+|   |   |-- notifications.py   # Push notifications (316 lignes)
+|   |   +-- webhooks.py        # Stripe webhooks
+|   |-- services/
+|   |   +-- email_service.py   # Templates emails
+|   +-- uploads/
+|       |-- pub_orders/        # Images generees
+|       |-- enterprises/       # Logos scraped
+|       +-- documents/         # PDFs generes
+|
+|-- frontend/
+|   +-- src/
+|       |-- pages/
+|       |   |-- MediaPubPage.js        # Editeur pub IA
+|       |   |-- RdvTitelliPage.js      # Social booking
+|       |   |-- SpecialistsPage.js     # Specialistes
+|       |   |-- SportsPage.js          # Sports
+|       |   |-- TitelliProPage.js      # B2B
+|       |   +-- EnterpriseDashboard.js # Dashboard
+|       +-- components/
+|           +-- ui/                    # Shadcn components
+|
++-- memory/
+    +-- PRD.md                         # Documentation projet
     """, "Structure des fichiers")
     
     pdf.add_page()
