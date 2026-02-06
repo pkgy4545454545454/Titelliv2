@@ -16,7 +16,7 @@ import httpx
 MONGO_URL = os.environ.get('MONGO_URL')
 UPLOADS_DIR = "/app/backend/uploads/enterprises"
 BASE_URL = "https://video-platform-730.preview.emergentagent.com"
-MAX_ENTERPRISES = 30
+MAX_ENTERPRISES = 200
 MAX_IMAGES = 8
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
