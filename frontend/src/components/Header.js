@@ -154,6 +154,7 @@ const Header = () => {
     { path: '/entreprises', label: 'Entreprises' },
     { path: '/rdv', label: 'Rdv', className: 'rdv' },
     { path: '/sports', label: 'Sports', className: 'sports' },
+    { path: '/media-pub', label: 'Pub IA', className: 'media-pub' },
   ];
 
   const isActive = (path) => location.pathname === path;
