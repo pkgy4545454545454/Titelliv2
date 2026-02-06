@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { notificationsAPI } from '../services/api';
-import { Search, Menu, X, ShoppingCart, Heart, Bell, ChevronDown, Check, CheckCheck, Trash2, Wifi, WifiOff } from 'lucide-react';
+import { Search, Menu, X, ShoppingCart, Heart, Bell, ChevronDown, Check, CheckCheck, Trash2, Wifi, WifiOff, Image, Video, Sparkles } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
