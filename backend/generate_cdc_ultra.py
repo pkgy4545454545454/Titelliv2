@@ -100,14 +100,14 @@ class TitelliUltraDetailedPDF(FPDF):
     def add_text(self, text):
         self.set_font('Helvetica', '', 10)
         self.set_text_color(60, 60, 60)
-        self.multi_cell(0, 6, text)
+        self.multi_cell(190, 6, text)
         self.ln(2)
 
     def add_bullet(self, text, indent=0):
         self.set_font('Helvetica', '', 10)
         self.set_text_color(60, 60, 60)
         prefix = "  " * indent + "* "
-        self.multi_cell(0, 5, f"{prefix}{text}")
+        self.multi_cell(190, 5, f"{prefix}{text}")
 
     def add_numbered_list(self, items):
         for i, item in enumerate(items, 1):
