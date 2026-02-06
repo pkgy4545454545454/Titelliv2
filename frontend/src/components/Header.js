@@ -154,7 +154,11 @@ const Header = () => {
     { path: '/entreprises', label: 'Entreprises' },
     { path: '/rdv', label: 'Rdv', className: 'rdv' },
     { path: '/sports', label: 'Sports', className: 'sports' },
-    { path: '/media-pub', label: 'Pub IA', className: 'media-pub' },
+  ];
+
+  const pubIALinks = [
+    { path: '/media-pub', label: 'Images IA', icon: Image, description: 'Créer des publicités images' },
+    { path: '/video-pub', label: 'Vidéos IA', icon: Video, description: 'Créer des vidéos publicitaires' },
   ];
 
   const isActive = (path) => location.pathname === path;
