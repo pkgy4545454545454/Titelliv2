@@ -132,7 +132,10 @@ class TitelliUltraDetailedPDF(FPDF):
         for line in lines:
             # Escape special characters for PDF
             line = line.replace('\t', '    ')
-            self.multi_cell(0, 4, line, fill=True)
+            # Truncate lines that are too long
+            if len(line) > 120:
+                line = line[:117] + "..."
+            self.multi_cell(190, 4, line, fill=True)
         self.ln(3)
         self.set_text_color(60, 60, 60)
 
