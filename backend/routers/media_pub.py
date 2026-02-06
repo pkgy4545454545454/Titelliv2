@@ -5,6 +5,7 @@ Media Pub Router - Système de commande de publicités
 - Génération IA des images
 - Post-processing avec Pillow pour texte parfait
 - Suivi des commandes
+- Paiement Stripe et confirmation email
 """
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
 from pydantic import BaseModel
@@ -22,6 +23,9 @@ load_dotenv()
 
 # Pillow pour le post-processing du texte
 from PIL import Image, ImageDraw, ImageFont
+
+# Email service for confirmations
+from services.email_service import send_pub_media_confirmation
 
 router = APIRouter(prefix="/api/media-pub", tags=["Media Pub"])
 logger = logging.getLogger(__name__)
