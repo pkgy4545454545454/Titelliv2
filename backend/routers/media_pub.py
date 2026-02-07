@@ -914,17 +914,6 @@ async def create_pub_order(
     )
 
 
-@router.get("/orders")
-async def get_enterprise_orders(enterprise_id: str):
-    """Liste les commandes d'une entreprise"""
-    orders = await db.pub_orders.find(
-        {"enterprise_id": enterprise_id},
-        {"_id": 0}
-    ).sort("created_at", -1).to_list(100)
-    
-    return {"orders": orders, "total": len(orders)}
-
-
 @router.get("/orders/{order_id}")
 async def get_order_detail(order_id: str):
     """Détail d'une commande"""
