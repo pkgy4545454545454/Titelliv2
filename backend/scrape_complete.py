@@ -389,37 +389,44 @@ async def main():
             if update:
                 await db.enterprises.update_one({'id': eid}, {'$set': update})
             
-            # Add products to products collection
+            # Add products to services_products collection (correct collection)
             for prod in data['products']:
                 if prod.get('name'):
-                    exists = await db.products.find_one({'enterprise_id': eid, 'name': prod['name']})
+                    exists = await db.services_products.find_one({'enterprise_id': eid, 'name': prod['name']})
                     if not exists:
-                        await db.products.insert_one({
+                        await db.services_products.insert_one({
                             'id': str(uuid.uuid4()),
                             'enterprise_id': eid,
                             'name': prod['name'],
-                            'price': prod.get('price', 0),
+                            'type': 'product',
+                            'category': 'Produit',
                             'description': prod.get('description', ''),
+                            'price': prod.get('price', 0),
                             'images': [prod.get('image')] if prod.get('image') else [],
-                            'is_active': True,
+                            'is_available': True,
+                            'is_premium': False,
                             'created_at': datetime.now(timezone.utc).isoformat(),
                             'source': 'scraping_v2'
                         })
                         stats['products'] += 1
             
-            # Add services to services collection
+            # Add services to services_products collection
             for svc in data['services']:
                 if svc.get('name'):
-                    exists = await db.services.find_one({'enterprise_id': eid, 'name': svc['name']})
+                    exists = await db.services_products.find_one({'enterprise_id': eid, 'name': svc['name']})
                     if not exists:
-                        await db.services.insert_one({
+                        await db.services_products.insert_one({
                             'id': str(uuid.uuid4()),
                             'enterprise_id': eid,
                             'name': svc['name'],
-                            'price': svc.get('price', 0),
+                            'type': 'service',
+                            'category': 'Service',
                             'description': svc.get('description', ''),
+                            'price': svc.get('price', 0),
                             'duration': 60,
-                            'is_active': True,
+                            'images': [],
+                            'is_available': True,
+                            'is_premium': False,
                             'created_at': datetime.now(timezone.utc).isoformat(),
                             'source': 'scraping_v2'
                         })
