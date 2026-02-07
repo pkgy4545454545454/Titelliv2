@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from dotenv import load_dotenv
+load_dotenv()
 """
 SCRAPER V4 - RECHERCHE GOOGLE POUR SITES WEB
 """
@@ -16,8 +18,8 @@ import httpx
 
 MONGO_URL = os.environ.get('MONGO_URL')
 UPLOADS_DIR = "/app/backend/uploads/enterprises"
-BASE_URL = "https://dependency-cleanup-3.preview.emergentagent.com"
-MAX_ENTERPRISES = 150
+BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://dependency-cleanup-3.preview.emergentagent.com")
+MAX_ENTERPRISES = 500
 MAX_IMAGES = 20
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
@@ -221,7 +223,7 @@ async def main():
     logger.info("=" * 60)
     
     client = AsyncIOMotorClient(MONGO_URL)
-    db = client.titelli
+    db = client[os.environ.get("DB_NAME", "secondevie")]
     
     # Entreprises non enrichies V4
     query = {
@@ -277,7 +279,7 @@ async def main():
                 if data["images"]:
                     update["photos"] = data["images"]
                     update["gallery"] = data["images"]
-                    update["cover_url"] = data["images"][0]
+                    update["cover_image"] = data["images"][0]
                 
                 if data.get("logo"):
                     update["logo_url"] = data["logo"]
