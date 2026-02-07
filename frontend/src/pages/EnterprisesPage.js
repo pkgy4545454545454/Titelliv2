@@ -177,23 +177,48 @@ const EnterprisesPage = () => {
           </div>
         </div>
 
-        {/* Enterprises Grid */}
+        {/* Enterprises Carousel */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="card-service rounded-xl h-80 animate-pulse" />
+          <div className="flex gap-6 overflow-hidden">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="flex-shrink-0 w-[400px] h-[320px] card-service rounded-xl animate-pulse" />
             ))}
           </div>
         ) : enterprises.length > 0 ? (
-          <div className={viewMode === 'grid' 
-            ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
-            : 'flex flex-col gap-4'
-          }>
-            {enterprises.map((enterprise, index) => (
-              <div key={enterprise.id} className={`animate-fade-in stagger-${(index % 6) + 1}`}>
-                <EnterpriseCard enterprise={enterprise} />
-              </div>
-            ))}
+          <div className="relative">
+            {/* Navigation Buttons */}
+            <button
+              onClick={() => scrollCarousel('left')}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/80 hover:bg-black text-white p-3 rounded-full shadow-lg border border-white/20 transition-all hover:scale-110 -ml-4"
+              data-testid="carousel-prev"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            
+            <button
+              onClick={() => scrollCarousel('right')}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/80 hover:bg-black text-white p-3 rounded-full shadow-lg border border-white/20 transition-all hover:scale-110 -mr-4"
+              data-testid="carousel-next"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+
+            {/* Carousel Container */}
+            <div 
+              ref={carouselRef}
+              className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4 px-2"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {enterprises.map((enterprise, index) => (
+                <div 
+                  key={enterprise.id} 
+                  className="flex-shrink-0 w-[400px] animate-fade-in"
+                  style={{ animationDelay: `${index * 0.05}s` }}
+                >
+                  <EnterpriseCard enterprise={enterprise} large />
+                </div>
+              ))}
+            </div>
           </div>
         ) : (
           <div className="text-center py-20">
