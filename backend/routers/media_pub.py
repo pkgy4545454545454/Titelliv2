@@ -997,12 +997,7 @@ async def cancel_order(order_id: str):
 
 # ============ STRIPE PAYMENT INTEGRATION ============
 
-from emergentintegrations.payments.stripe.checkout import (
-    StripeCheckout, 
-    CheckoutSessionResponse, 
-    CheckoutStatusResponse, 
-    CheckoutSessionRequest
-)
+import stripe
 from fastapi import Request
 
 STRIPE_API_KEY = os.getenv("STRIPE_API_KEY")
