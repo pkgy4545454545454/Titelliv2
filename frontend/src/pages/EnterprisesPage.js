@@ -16,8 +16,9 @@ const EnterprisesPage = () => {
   const [enterprises, setEnterprises] = useState([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
-  const [viewMode, setViewMode] = useState('grid');
+  const [viewMode, setViewMode] = useState('carousel');
   const [searchQuery, setSearchQuery] = useState('');
+  const carouselRef = useRef(null);
 
   const filter = searchParams.get('filter') || '';
 
