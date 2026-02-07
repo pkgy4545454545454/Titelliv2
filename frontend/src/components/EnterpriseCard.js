@@ -23,6 +23,21 @@ const EnterpriseCard = ({ enterprise }) => {
   } = enterprise;
 
   const defaultImage = 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800';
+  const defaultLogo = null;
+  
+  // State for handling broken images
+  const [coverError, setCoverError] = React.useState(false);
+  const [logoError, setLogoError] = React.useState(false);
+  
+  // Check if URL is valid (not from old broken domain)
+  const isValidUrl = (url) => {
+    if (!url) return false;
+    if (url.includes('enterprise-media.preview.emergentagent.com')) return false;
+    return true;
+  };
+  
+  const actualCover = !coverError && isValidUrl(cover_image) ? cover_image : defaultImage;
+  const actualLogo = !logoError && isValidUrl(logo) ? logo : defaultLogo;
   
   // Determine status label
   const getStatusLabel = () => {
