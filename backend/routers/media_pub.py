@@ -753,7 +753,7 @@ STYLE: Premium advertising quality, Swiss/European professional standards, elega
             logger.info("📝 Post-processing: ajout du texte sur l'image")
             
             final_image = add_text_overlay(
-                image_bytes=images[0],
+                image_bytes=image_bytes,
                 product_name=order_data.get('product_name', ''),
                 slogan=order_data.get('slogan', ''),
                 description=order_data.get('description', ''),
