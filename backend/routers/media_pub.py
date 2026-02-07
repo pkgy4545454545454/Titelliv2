@@ -41,11 +41,20 @@ def set_db(database):
 # On deployment (OnRender): Use OPENAI_API_KEY from environment
 # On Emergent preview: EMERGENT_LLM_KEY is available but requires emergentintegrations
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-UPLOADS_DIR = "/app/backend/uploads/pub_orders"
+
+# Use relative path for uploads to work on both Emergent and OnRender
+BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+UPLOADS_DIR = os.path.join(BACKEND_DIR, "uploads", "pub_orders")
 BASE_URL = os.getenv("REACT_APP_BACKEND_URL", "https://dependency-cleanup-3.preview.emergentagent.com")
 
-# Créer le dossier si nécessaire
-os.makedirs(UPLOADS_DIR, exist_ok=True)
+# Créer le dossier si nécessaire (avec gestion d'erreur pour les environnements restreints)
+try:
+    os.makedirs(UPLOADS_DIR, exist_ok=True)
+except PermissionError:
+    # Sur certains environnements comme Render, utiliser un dossier temporaire
+    import tempfile
+    UPLOADS_DIR = os.path.join(tempfile.gettempdir(), "pub_orders")
+    os.makedirs(UPLOADS_DIR, exist_ok=True)
 
 
 # ============ POST-PROCESSING TEXTE ============
