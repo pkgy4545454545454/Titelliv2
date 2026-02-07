@@ -124,3 +124,4 @@ zipp==3.23.0
 openpyxl==3.1.5
 reportlab==4.4.9
 resend==2.21.0
+fpdf2==2.8.2
