@@ -53,6 +53,18 @@ const EnterprisesPage = () => {
     setSearchParams(searchParams);
   };
 
+  // Carousel scroll functions
+  const scrollCarousel = (direction) => {
+    if (carouselRef.current) {
+      const scrollAmount = 420; // Card width + gap
+      const newScrollLeft = carouselRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
+      carouselRef.current.scrollTo({
+        left: newScrollLeft,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#050505] pt-24" data-testid="enterprises-page">
       {/* Hero with Video Background - Generated with Sora 2 AI */}
