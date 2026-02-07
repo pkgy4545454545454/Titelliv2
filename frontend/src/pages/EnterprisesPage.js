@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Grid, List, Filter } from 'lucide-react';
+import { Search, Grid, List, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import { enterpriseAPI } from '../services/api';
 import EnterpriseCard from '../components/EnterpriseCard';
 import {
