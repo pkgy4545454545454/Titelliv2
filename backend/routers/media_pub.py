@@ -1211,21 +1211,30 @@ async def handle_stripe_webhook(request: Request):
     if not STRIPE_API_KEY:
         raise HTTPException(status_code=500, detail="Stripe not configured")
     
-    body = await request.body()
-    signature = request.headers.get("Stripe-Signature")
+    payload = await request.body()
+    sig_header = request.headers.get("Stripe-Signature")
+    webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET", "")
     
-    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url="")
+    stripe.api_key = STRIPE_API_KEY
     
     try:
-        webhook_response = await stripe_checkout.handle_webhook(body, signature)
+        # If webhook secret is configured, verify signature
+        if webhook_secret:
+            event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
+        else:
+            # Without webhook secret, parse the event directly (less secure)
+            import json
+            event = stripe.Event.construct_from(json.loads(payload), stripe.api_key)
         
-        if webhook_response.payment_status == "paid":
-            order_id = webhook_response.metadata.get("order_id")
+        # Handle checkout.session.completed event
+        if event.type == "checkout.session.completed":
+            session = event.data.object
+            order_id = session.metadata.get("order_id")
             
-            if order_id:
+            if order_id and session.payment_status == "paid":
                 # Update transaction
                 await db.payment_transactions.update_one(
-                    {"session_id": webhook_response.session_id},
+                    {"session_id": session.id},
                     {"$set": {
                         "payment_status": "paid",
                         "paid_at": datetime.now(timezone.utc).isoformat()
@@ -1245,6 +1254,9 @@ async def handle_stripe_webhook(request: Request):
         
         return {"status": "received"}
         
+    except stripe.error.SignatureVerificationError as e:
+        logger.error(f"Webhook signature verification failed: {e}")
+        raise HTTPException(status_code=400, detail="Invalid signature")
     except Exception as e:
         logger.error(f"Webhook error: {e}")
         return {"status": "error", "message": str(e)}
