@@ -106,9 +106,14 @@ const EnterpriseCard = ({ enterprise }) => {
         </div>
 
         {/* Logo */}
-        {logo && (
+        {actualLogo && (
           <div className="absolute bottom-3 right-3 w-12 h-12 rounded-full bg-white p-1">
-            <img src={logo} alt="" className="w-full h-full object-cover rounded-full" />
+            <img 
+              src={actualLogo} 
+              alt="" 
+              className="w-full h-full object-cover rounded-full" 
+              onError={() => setLogoError(true)}
+            />
           </div>
         )}
       </div>
