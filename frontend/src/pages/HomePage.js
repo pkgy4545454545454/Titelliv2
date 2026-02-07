@@ -194,8 +194,8 @@ const HomePage = () => {
     }
   };
 
-  // Panoramic video URL - Couple walking in luxury setting (v2)
-  const panoramicVideoUrl = `${process.env.REACT_APP_BACKEND_URL}/api/uploads/video_accueil.mp4?v=2`;
+  // Panoramic video URL - Lausanne lakeside view with couple (to be regenerated)
+  const panoramicVideoUrl = `${process.env.REACT_APP_BACKEND_URL}/api/uploads/video_accueil.mp4?v=3`;
   const heroImage = 'https://images.unsplash.com/photo-1733950489642-bd1a7c3e69bb?w=1920&q=80';
 
   const mainCategories = [
