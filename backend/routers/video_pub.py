@@ -500,6 +500,29 @@ async def check_payment_status(session_id: str, order_id: str, background_tasks:
 
 # ============ VIDEO GENERATION ============
 
+def wait_for_video_completion(client, video_id: str, poll_interval: int = 10, timeout: int = 900):
+    """Poll for video completion status"""
+    elapsed = 0
+    while elapsed < timeout:
+        job = client.videos.retrieve(video_id)
+        status = job.status
+        progress = getattr(job, 'progress', 0)
+        logger.info(f"📹 Video {video_id}: Status={status}, Progress={progress}%")
+        
+        if status == "completed":
+            return job
+        if status == "failed":
+            error_msg = getattr(job, 'error', {})
+            if hasattr(error_msg, 'message'):
+                raise RuntimeError(f"Video generation failed: {error_msg.message}")
+            raise RuntimeError(f"Video generation failed: {error_msg}")
+        
+        time.sleep(poll_interval)
+        elapsed += poll_interval
+    
+    raise RuntimeError("Video generation timed out")
+
+
 async def generate_video_async(order_id: str):
     """Générer la vidéo en arrière-plan après paiement"""
     
@@ -520,38 +543,59 @@ async def generate_video_async(order_id: str):
             }}
         )
         
-        # Générer la vidéo avec Sora 2
-        video_gen = OpenAIVideoGeneration(api_key=EMERGENT_LLM_KEY)
+        # Initialize OpenAI client
+        client = OpenAI(api_key=OPENAI_API_KEY)
         
         prompt = order.get("final_prompt", "Professional business video")
         duration = order.get("duration", 8)
-        size = order.get("size", "1280x720")
         
-        # Map durations to Sora 2 supported values (4, 8, 12)
-        if duration <= 4:
-            sora_duration = 4
-        elif duration <= 8:
-            sora_duration = 8
+        # Map durations to Sora 2 supported values
+        if duration <= 5:
+            sora_duration = 5
         else:
-            sora_duration = 12
+            sora_duration = 10
         
-        logger.info(f"📹 Generating video: {prompt[:50]}... | {size} | {sora_duration}s")
+        logger.info(f"📹 Generating video: {prompt[:50]}... | {sora_duration}s")
         
-        video_bytes = video_gen.text_to_video(
-            prompt=prompt,
+        # Create video job with Sora 2
+        video_job = client.videos.create(
             model="sora-2",
-            size=size,
-            duration=sora_duration,
-            max_wait_time=900  # 15 minutes max
+            prompt=prompt
         )
         
-        if video_bytes:
-            # Sauvegarder la vidéo
-            filename = f"video_{order_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp4"
-            filepath = os.path.join(UPLOADS_DIR, filename)
-            video_gen.save_video(video_bytes, filepath)
+        logger.info(f"📹 Video job created: {video_job.id}")
+        
+        # Poll for completion (run in thread to avoid blocking)
+        import asyncio
+        loop = asyncio.get_event_loop()
+        completed_job = await loop.run_in_executor(
+            None, 
+            lambda: wait_for_video_completion(client, video_job.id, poll_interval=15, timeout=900)
+        )
+        
+        if completed_job and completed_job.status == "completed":
+            # Download the video
+            video_url_from_api = None
+            if hasattr(completed_job, 'result') and completed_job.result:
+                video_url_from_api = completed_job.result.url if hasattr(completed_job.result, 'url') else None
             
-            video_url = f"{BASE_URL}/api/uploads/video_orders/{filename}"
+            if video_url_from_api:
+                # Download and save locally
+                import httpx
+                async with httpx.AsyncClient() as http_client:
+                    video_response = await http_client.get(video_url_from_api)
+                    video_bytes = video_response.content
+                
+                filename = f"video_{order_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp4"
+                filepath = os.path.join(UPLOADS_DIR, filename)
+                
+                with open(filepath, 'wb') as f:
+                    f.write(video_bytes)
+                
+                video_url = f"{BASE_URL}/api/uploads/video_orders/{filename}"
+            else:
+                # Use the API URL directly if local save fails
+                video_url = video_url_from_api or f"{BASE_URL}/api/video-pub/orders/{order_id}/stream"
             
             # Mettre à jour la commande
             await db.video_orders.update_one(
