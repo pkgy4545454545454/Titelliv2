@@ -38,7 +38,7 @@ def set_db(database):
     db = database
 
 # Configuration
-EMERGENT_LLM_KEY = os.getenv("EMERGENT_LLM_KEY")
+OPENAI_API_KEY = os.getenv("EMERGENT_LLM_KEY") or os.getenv("OPENAI_API_KEY")
 UPLOADS_DIR = "/app/backend/uploads/pub_orders"
 BASE_URL = os.getenv("REACT_APP_BACKEND_URL", "https://dependency-cleanup-3.preview.emergentagent.com")
 
@@ -681,7 +681,8 @@ async def get_current_user(authorization: str = None):
 async def generate_pub_image(order_id: str, order_data: dict):
     """Génère l'image publicitaire avec IA en arrière-plan + post-processing texte"""
     try:
-        from emergentintegrations.llm.openai.image_generation import OpenAIImageGeneration
+        from openai import OpenAI
+        import base64
         
         logger.info(f"🎨 Génération image pour commande {order_id}")
         
