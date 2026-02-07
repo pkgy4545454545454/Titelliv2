@@ -116,8 +116,8 @@ async def create_premium_checkout(plan: str, current_user: dict = Depends(get_cu
             amount=plan_info['price'],
             currency="chf",
             quantity=1,
-            success_url=f"{os.environ.get('FRONTEND_URL', 'https://video-platform-730.preview.emergentagent.com')}/dashboard/client?tab=premium&success=true&plan={plan}",
-            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://video-platform-730.preview.emergentagent.com')}/dashboard/client?tab=premium&cancelled=true",
+            success_url=f"{os.environ.get('FRONTEND_URL', 'https://dependency-cleanup-3.preview.emergentagent.com')}/dashboard/client?tab=premium&success=true&plan={plan}",
+            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://dependency-cleanup-3.preview.emergentagent.com')}/dashboard/client?tab=premium&cancelled=true",
             metadata={
                 "plan": plan,
                 "user_id": current_user['id'],

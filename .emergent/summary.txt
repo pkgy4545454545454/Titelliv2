@@ -1,179 +1,262 @@
 <analysis>**original_problem_statement:**
-The user's primary goal is to build out the Titelli platform. The initial session focused on creating a Pub Média feature, adding extensive content, and generating specification documents.
+The user's initial goals were to continue building the Titelli platform by generating an ultra-detailed Cahier des Charges (CDC) PDF, refactoring the monolithic , and running a full audit of the application.
 
-This session's requests were:
-1.  **Prioritize Stripe Integration**: Instead of starting with new PDFs, the user prioritized implementing real Stripe payments for the Pub Média feature.
-2.  **Continue Enterprise Enrichment**: The user requested to continue the background script to enrich enterprise profiles with logos and descriptions, with a new goal to process all available companies.
-3.  **Add Payment Confirmation Email**: An automatic email confirmation should be sent to the user after a successful Pub Média payment.
-4.  **Create Vidéo Pub IA Feature**: A new feature similar to Pub Média but for generating videos using Sora 2, including templates, customization, and Stripe payment.
-5.  **Fix Broken Site Images**: The user reported that images on the site were not loading correctly.
-6.  **Unify Commandes Titelli Dashboard**: The enterprise dashboard section for Commandes Titelli should show both image and video orders in a unified view.
-7.  **Generate Ultra-Detailed CDC**: Create a new, extremely comprehensive Cahier des Charges (specifications) PDF, potentially over 200 pages.
-8.  **Test Video Order Flow**: Ensure the entire order process for Vidéo Pub IA works and that orders appear correctly in the enterprise dashboard.
-9.  **Provide Generated Videos**: The user requested a ZIP archive containing all the marketing videos generated.
-10. **Refactor **: A recurring technical debt item to break down the monolithic  file.
-11. **Add Navigation for New Features**: Add a Pub IA dropdown menu in the main header to navigate to both Images IA and Vidéos IA.
-12. **Run Full E2E Test**: After implementing the new features, run a full end-to-end test to validate all critical user flows.
+During the session, the user's priorities shifted several times:
+1.  **Generate Ultra-Detailed CDCs**: The user requested multiple comprehensive Cahier des Charges documents, including one for the entire application (200+ pages with test cases, revenue projections) and a specific one for monetization. The agent made several attempts, producing documents of 27, 68, and 31 pages, which did not meet the user's full expectations for detail.
+2.  **Full Application Audit**: The user requested a complete check of the production functionality, including payments and success pages. The agent performed a manual API audit using  and reported the system was healthy.
+3.  **Enhance Enterprise Scraper**: The user requested a major enhancement to the background script that enriches enterprise profiles. The goal was to scrape not just logos and descriptions, but also real photos, videos, and product listings from the companies' actual websites. The agent created several versions of the scraper, but struggled with anti-scraping measures and the lack of website URLs in the database. The script succeeded in enriching ~50% of profiles with generated logos and cover screenshots, but failed to extract real images or products.
+4.  **Fix Deployment Errors on OnRender**: The user reported two critical deployment failures.
+    - The first was a , which the agent fixed by adding it to .
+    - The second was an . The user confirmed this was a recurring issue and instructed the agent to remove the dependency, as the OnRender environment cannot access this private package. This became the final, active task.
 
 **User's preferred language**: French
 
 **what currently exists?**
-- A full-stack application with a React frontend and FastAPI backend. The application features Pub Média (Canva-like image ad creation) and the newly added **Vidéo Pub IA** (Sora 2-based video ad creation).
-- **Stripe integration is live** for the Pub Média feature, allowing users to create a checkout session and pay for their orders. An automated email confirmation is sent upon successful payment.
-- The **Admin Dashboard** now includes a dedicated section to view and manage all Pub Média IA orders, showing stats like revenue, completion status, and order details.
-- The **Enterprise Dashboard** features a unified Commandes Titelli section that displays both image and video orders with filter tabs.
-- The backend contains a robust data enrichment script () which has successfully processed hundreds of company profiles.
-- A new, highly detailed PDF generation script () has been created.
-- The main navigation bar now features a **Pub IA dropdown menu** linking to the image and video creation pages.
-- A ZIP archive with all generated marketing videos is available at .
+- The full-stack application (React/FastAPI) is functionally the same as the previous session.
+- Several new PDF specification documents have been generated and are available for download (, , ).
+- The enterprise database has been partially enriched with generated logos, cover images, and AI-generated descriptions for about half of the companies.
+- The  file has been updated to include , , and . The problematic  package has been removed from the file, but the code using it has not yet been refactored.
+- A long-running background script () was in progress to enrich enterprise data.
 
 **Last working item**:
--   **Last item agent was working**: Generating an ultra-detailed Cahier des Charges (specifications) PDF document. The user requested a comprehensive document of 200+ pages. The agent created the script  to handle this.
+-   **Last item agent was working**: Fixing a critical deployment failure on the OnRender platform caused by the  package. The user reported that this private package cannot be installed in the deployment environment. The agent successfully removed the dependency from  and began the process of refactoring the code to use standard SDKs (like usage: openai [-h] [-v] [-b API_BASE] [-k API_KEY] [-p PROXY [PROXY ...]]
+              [-o ORGANIZATION] [-t {openai,azure}]
+              [--api-version API_VERSION] [--azure-endpoint AZURE_ENDPOINT]
+              [--azure-ad-token AZURE_AD_TOKEN] [-V]
+              {api,tools,migrate,grit} ...
+
+positional arguments:
+  {api,tools,migrate,grit}
+    api                 Direct API calls
+    tools               Client side tools for convenience
+
+options:
+  -h, --help            show this help message and exit
+  -v, --verbose         Set verbosity.
+  -b API_BASE, --api-base API_BASE
+                        What API base url to use.
+  -k API_KEY, --api-key API_KEY
+                        What API key to use.
+  -p PROXY [PROXY ...], --proxy PROXY [PROXY ...]
+                        What proxy to use.
+  -o ORGANIZATION, --organization ORGANIZATION
+                        Which organization to run as (will use your default
+                        organization if not specified)
+  -t {openai,azure}, --api-type {openai,azure}
+                        The backend API to call, must be `openai` or `azure`
+  --api-version API_VERSION
+                        The Azure API version, e.g.
+                        'https://learn.microsoft.com/en-us/azure/ai-
+                        services/openai/reference#rest-api-versioning'
+  --azure-endpoint AZURE_ENDPOINT
+                        The Azure endpoint, e.g.
+                        'https://endpoint.openai.azure.com'
+  --azure-ad-token AZURE_AD_TOKEN
+                        A token from Azure Active Directory,
+                        https://www.microsoft.com/en-
+                        us/security/business/identity-access/microsoft-entra-
+                        id
+  -V, --version         show program's version number and exit and ) instead. It was analyzing  to replace the image generation and Stripe logic.
 -   **Status**: IN PROGRESS
--   **Agent Testing Done**: N/A (Document generation)
--   **Which testing method agent to use?**: manual testing by curl to execute the script  and verify the output PDF.
+-   **Agent Testing Done**: N
+-   **Which testing method agent to use?**: backend testing agent. After refactoring, the agent must test the Pub Média and Vidéo Pub IA features, specifically image generation and payment flows, to ensure they work correctly with the new SDKs.
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Refactor  Monolith (P1)**
-    -   **Description**: The main  file is over 10,000 lines long and contains duplicate logic already present in modular router files within . For example,  is inactive because its routes conflict with those hardcoded in .
-    -   **Attempted fixes**: The agent identified that many modular routers (, , etc.) exist but are not included or their logic is duplicated in . The agent planned a progressive refactor but postponed it to complete higher-priority user requests.
+-   **Issue 1: Replace  Dependency (P0 - BLOCKER)**
+    -   **Description**: The application fails to deploy on the user's OnRender platform because it cannot find the private  package. The user has instructed to remove it entirely.
+    -   **Attempted fixes**: The agent has removed the package from . It has identified that  and  are the primary files using this package for OpenAI and Stripe functionalities.
     -   **Next debug checklist**:
-        1.  Start with one module, e.g., .
-        2.  Uncomment or add  in .
-        3.  Run the application and test login/registration to ensure the modular routes work correctly.
-        4.  Carefully delete the corresponding (and now redundant) endpoint functions from .
-        5.  Retest thoroughly.
-        6.  Repeat this process for each router file (, , etc.) one by one.
-    -   **Why fix this issue and what will be achieved with the fix?**: This is critical technical debt. Fixing it will significantly improve code maintainability, reduce complexity, eliminate route conflicts, and make the backend scalable.
+        1.  Modify  to replace  calls with the official usage: openai [-h] [-v] [-b API_BASE] [-k API_KEY] [-p PROXY [PROXY ...]]
+              [-o ORGANIZATION] [-t {openai,azure}]
+              [--api-version API_VERSION] [--azure-endpoint AZURE_ENDPOINT]
+              [--azure-ad-token AZURE_AD_TOKEN] [-V]
+              {api,tools,migrate,grit} ...
+
+positional arguments:
+  {api,tools,migrate,grit}
+    api                 Direct API calls
+    tools               Client side tools for convenience
+
+options:
+  -h, --help            show this help message and exit
+  -v, --verbose         Set verbosity.
+  -b API_BASE, --api-base API_BASE
+                        What API base url to use.
+  -k API_KEY, --api-key API_KEY
+                        What API key to use.
+  -p PROXY [PROXY ...], --proxy PROXY [PROXY ...]
+                        What proxy to use.
+  -o ORGANIZATION, --organization ORGANIZATION
+                        Which organization to run as (will use your default
+                        organization if not specified)
+  -t {openai,azure}, --api-type {openai,azure}
+                        The backend API to call, must be `openai` or `azure`
+  --api-version API_VERSION
+                        The Azure API version, e.g.
+                        'https://learn.microsoft.com/en-us/azure/ai-
+                        services/openai/reference#rest-api-versioning'
+  --azure-endpoint AZURE_ENDPOINT
+                        The Azure endpoint, e.g.
+                        'https://endpoint.openai.azure.com'
+  --azure-ad-token AZURE_AD_TOKEN
+                        A token from Azure Active Directory,
+                        https://www.microsoft.com/en-
+                        us/security/business/identity-access/microsoft-entra-
+                        id
+  -V, --version         show program's version number and exit and  SDKs for image generation and payments.
+        2.  Modify  to do the same for video generation (Sora 2) and payments.
+        3.  Modify any other files that import  (e.g., ).
+        4.  Ensure all necessary environment variables for the new SDKs (e.g., , ) are being loaded correctly from the environment.
+        5.  Perform a full end-to-end test of the Pub Média and Vidéo Pub IA features.
+    -   **Why fix this issue and what will be achieved with the fix?**: This is a critical blocker preventing the application from being deployed. Fixing it will make the application portable and deployable on standard hosting platforms like OnRender.
+    -   **Status**: IN PROGRESS
+    -   **Is recurring issue?**: Y
+    -   **Should Test frontend/backend/both after fix?**: Both
+    -   **Blocked on other issue**: None.
+
+-   **Issue 2: Refactor  Monolith (P1)**
+    -   **Description**: The main  file is over 10,000 lines long, contains duplicated logic, and prevents modular routers in  from being used.
+    -   **Attempted fixes**: The agent planned to start the refactor but was repeatedly interrupted by higher-priority user requests. The plan to start with the  router was approved by the user but never executed.
+    -   **Next debug checklist**:
+        1.  In , uncomment or add .
+        2.  Carefully delete the now-redundant auth-related endpoints (register, login, token validation) from .
+        3.  Restart and thoroughly test authentication flows.
+        4.  Repeat for other routers (, , etc.).
+    -   **Why fix this issue and what will be achieved with the fix?**: Resolving this critical technical debt will improve maintainability, reduce complexity, and make the backend scalable.
     -   **Status**: NOT STARTED
     -   **Is recurring issue?**: Y
-    -   **Should Test frontend/backend/both after fix?**: Backend (extensively, using the testing agent)
-    -   **Blocked on other issue**: Blocked on user-prioritized feature work (CDC generation).
+    -   **Should Test frontend/backend/both after fix?**: Backend (extensively).
+    -   **Blocked on other issue**: Blocked on Issue 1.
 
 **In progress Task List**:
--   **Task 1: Generate Ultra-Detailed PDF Cahier des Charges (P0)**
-    -   **Where to resume**: The script  has been created. The agent needs to run it, verify the output, and ensure it meets the user's 200+ pages requirement for detail, covering all code, architecture, and features.
-    -   **What will be achieved with this?**: Fulfills a direct and high-priority user request for comprehensive project documentation.
+-   **Task 1: Complete Enterprise Data Enrichment (P2)**
+    -   **Where to resume**: The  script was running in the background to enrich enterprise profiles. However, it was only adding generated logos/covers and AI descriptions, failing to meet the user's goal of extracting *real* photos, videos, and products from company websites due to anti-scraping challenges.
+    -   **What will be achieved with this?**: Completing this would provide rich, authentic content for enterprise profiles, significantly improving the platform's value.
     -   **Status**: IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?**: N/A
-    -   **Blocked on something**: No.
+    -   **Should Test frontend/backend/both after fix?**: Frontend (to verify profiles display the new data).
+    -   **Blocked on something**: Requires a more robust scraping strategy, potentially using residential proxies or a dedicated scraping service API to bypass bot detection on Google and target websites.
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks:**
-    -   **(P1) Progressive Refactoring of **: As detailed in the Pending Issues section. The user has approved starting with the  router.
+    -   **(P1) Generate Ultra-Detailed CDC (200+ pages)**: Create the comprehensive specification document as requested by the user, including test cases, user scenarios, client/enterprise architecture diagrams, and financial projections. The previous attempts were insufficient.
 -   **Future Tasks:**
     -   Implement Full Sports Competitions Logic.
     -   Implement Behavioral Analytics Feature.
     -   Refactor large Frontend Dashboards ().
+    -   Implement PWA functionality.
+    -   Add multi-language support.
 
 **Completed work in this session**
--   **Stripe Integration for Pub Média (DONE)**: Implemented a full payment flow using Stripe Checkout in  and .
--   **Payment Confirmation Email (DONE)**: Integrated  to send an email upon successful payment confirmation in .
--   **Vidéo Pub IA Feature (DONE)**:
-    -   Created backend router  with Sora 2 integration for video generation.
-    -   Built a new frontend page  with templates and customization options.
-    -   Integrated the feature into .
--   **Admin Dashboard for Pub Média (DONE)**: Added a new tab to  to view and manage all image ad orders.
--   **Unified Commandes Titelli Dashboard (DONE)**: Refactored  to fetch and display both image and video orders from  and  endpoints.
--   **Bug Fix: Broken Site Images (DONE)**: Investigated and resolved issues with broken image URLs by cleaning up old data with incorrect preview URLs from MongoDB and ensuring the static file server was configured correctly.
--   **Bug Fix: Missing Media Pub Endpoint (DONE)**: Added the  endpoint to  so the enterprise dashboard could fetch image orders.
--   **Enterprise Data Enrichment (DONE)**: Modified and ran the  script to process all remaining companies, successfully enriching over 335 profiles.
--   **Assemble Marketing Video V2 (DONE)**: Installed  and successfully assembled all generated video clips into a final .
--   **Pub IA Navigation Menu (DONE)**: Updated  to include a dropdown menu with links to both Images IA and Vidéos IA pages.
--   **Generated Deliverables (DONE)**:
-    -   Created two detailed PDF documents (, ).
-    -   Created a ZIP archive of all generated videos: .
--   **Full End-to-End Test (DONE)**: Ran the testing agent, which successfully validated all critical flows (auth, media pub, video pub) with a 100% pass rate.
+-   **Deployment Dependencies Fixed**: Added , ,  to . Removed the blocking  package from .
+-   **Generated Multiple Specification Documents**: Created , , and .
+-   **Partial Enterprise Data Enrichment**: Enriched over 180 enterprise profiles with generated logos, cover screenshots, and AI descriptions using a series of background scraping scripts.
+-   **Provided Asset Links**: Supplied the user with downloadable links for all generated videos and PDF documents.
 
 **Earlier issues found/mentioned but not fixed**
--   The core issue of 's monolithic structure and its associated technical debt remains the only major unfixed issue.
+-   The core issue of the  monolith remains the most significant unfixed technical debt.
+-   The enterprise scraping task failed to meet the user's full requirement of extracting real product and gallery images from company websites.
 
 **Known issue recurrence from previous fork**
--   ** Refactoring**: This is a recurring high-priority technical debt task that has been postponed across multiple sessions due to user-prioritized feature requests. Status: NOT STARTED.
+-   ** Refactoring**: This is a high-priority technical debt task that has been postponed across multiple sessions.
+-   ** Deployment Failure**: The user stated this was a recurring issue, indicating a previous attempt to fix it was either incomplete or reverted.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Stripe Checkout Integration**: Server-side creation of  and redirecting the client to the Stripe-hosted payment page. Using webhooks or success/cancel URL callbacks to confirm payment status.
--   **Modular Backend Routing**: Although not fully implemented, the session highlighted the existing structure of modular routers () and the need to consolidate logic into them and away from the monolithic .
--   **Asynchronous Task Execution**: Running long-running scripts like  as background processes.
--   **Video Assembly (ffmpeg)**: Using the  command-line tool to concatenate multiple video clips into a single file.
--   **Promise.all for Parallel API Calls**: Used in the frontend () to fetch data from multiple API endpoints concurrently, improving performance.
+-   **Dependency Management**: Managing  to resolve deployment errors. Understanding the difference between public (PyPI) and private packages.
+-   **Background Process Management**: Running long-running Python scripts () using  and , and monitoring them with     PID TTY          TIME CMD
+      1 ?        00:00:00 entrypoint.sh
+     13 ?        00:00:00 e1_monitor
+     16 ?        00:00:00 entrypoint.sh
+     20 ?        00:00:01 node
+     21 ?        00:00:01 uvicorn
+     39 ?        00:00:00 supervisord
+     45 ?        00:00:00 nginx
+     46 ?        00:00:00 uvicorn
+     49 ?        00:00:00 mongod
+     61 ?        00:00:00 nginx
+     89 ?        00:00:00 python
+    133 ?        00:00:00 bash
+    135 ?        00:00:00 bash
+    137 ?        00:00:00 sudo
+    138 ?        00:00:00 tee
+    189 ?        00:00:00 python
+    220 ?        00:00:00 supervisorctl
+    222 ?        00:00:00 node
+    233 ?        00:00:00 sh
+    234 ?        00:00:00 node
+    241 ?        00:00:00 node
+    282 ?        00:00:00 ps and .
+-   **Web Scraping with Playwright**: Using an automated browser to navigate websites (Google, local.ch) to find and extract data. Encountered and attempted to mitigate anti-scraping protections.
+-   **PDF Generation (fpdf2)**: Programmatically creating complex, multi-page PDF documents with headers, footers, text, and images. Encountered text-wrapping and encoding issues.
 
 **key DB schema**
--   ****: Used for image ad orders. Fields: , , , .
--   ****: NEW collection for video ad orders. Fields are analogous to .
--   ****: Heavily modified during the enrichment task. Fields updated: , , .
+-   ****: Heavily modified by the enrichment script. Fields added or updated: , , , , . The  array was populated with generated cover images, not real scraped images.
 
 **changes in tech stack**
--   **ffmpeg**: Installed via apt 2.6.1 (arm64)
-Usage: apt-get [options] command
-       apt-get [options] install|remove pkg1 [pkg2 ...]
-       apt-get [options] source pkg1 [pkg2 ...]
+-    was added for web scraping.
+-    was added for emails.
+-    is being removed in favor of standard SDKs (usage: openai [-h] [-v] [-b API_BASE] [-k API_KEY] [-p PROXY [PROXY ...]]
+              [-o ORGANIZATION] [-t {openai,azure}]
+              [--api-version API_VERSION] [--azure-endpoint AZURE_ENDPOINT]
+              [--azure-ad-token AZURE_AD_TOKEN] [-V]
+              {api,tools,migrate,grit} ...
 
-apt-get is a command line interface for retrieval of packages
-and information about them from authenticated sources and
-for installation, upgrade and removal of packages together
-with their dependencies.
+positional arguments:
+  {api,tools,migrate,grit}
+    api                 Direct API calls
+    tools               Client side tools for convenience
 
-Most used commands:
-  update - Retrieve new lists of packages
-  upgrade - Perform an upgrade
-  install - Install new packages (pkg is libc6 not libc6.deb)
-  reinstall - Reinstall packages (pkg is libc6 not libc6.deb)
-  remove - Remove packages
-  purge - Remove packages and config files
-  autoremove - Remove automatically all unused packages
-  dist-upgrade - Distribution upgrade, see apt-get(8)
-  dselect-upgrade - Follow dselect selections
-  build-dep - Configure build-dependencies for source packages
-  satisfy - Satisfy dependency strings
-  clean - Erase downloaded archive files
-  autoclean - Erase old downloaded archive files
-  check - Verify that there are no broken dependencies
-  source - Download source archives
-  download - Download the binary package into the current directory
-  changelog - Download and display the changelog for the given package
-
-See apt-get(8) for more information about the available commands.
-Configuration options and syntax is detailed in apt.conf(5).
-Information about how to configure sources can be found in sources.list(5).
-Package and version choices can be expressed via apt_preferences(5).
-Security details are available in apt-secure(8).
-                                        This APT has Super Cow Powers. to handle video processing tasks.
+options:
+  -h, --help            show this help message and exit
+  -v, --verbose         Set verbosity.
+  -b API_BASE, --api-base API_BASE
+                        What API base url to use.
+  -k API_KEY, --api-key API_KEY
+                        What API key to use.
+  -p PROXY [PROXY ...], --proxy PROXY [PROXY ...]
+                        What proxy to use.
+  -o ORGANIZATION, --organization ORGANIZATION
+                        Which organization to run as (will use your default
+                        organization if not specified)
+  -t {openai,azure}, --api-type {openai,azure}
+                        The backend API to call, must be `openai` or `azure`
+  --api-version API_VERSION
+                        The Azure API version, e.g.
+                        'https://learn.microsoft.com/en-us/azure/ai-
+                        services/openai/reference#rest-api-versioning'
+  --azure-endpoint AZURE_ENDPOINT
+                        The Azure endpoint, e.g.
+                        'https://endpoint.openai.azure.com'
+  --azure-ad-token AZURE_AD_TOKEN
+                        A token from Azure Active Directory,
+                        https://www.microsoft.com/en-
+                        us/security/business/identity-access/microsoft-entra-
+                        id
+  -V, --version         show program's version number and exit, , etc.).
 
 **All files of reference**
--   : The monolithic file, still the main source of technical debt.
--   : Updated with Stripe payment flow and email sending.
--   : New file for the Vidéo Pub IA feature.
--   : Updated with client-side Stripe logic.
--   : New page for the video feature.
--   : Updated to include the media pub orders tab.
--   : Refactored to show both image and video orders.
--   : Updated with the new Pub IA dropdown.
--   : Script for the user's next priority task.
+-   : Key file for fixing deployment issues.
+-   : Needs refactoring to remove .
+-   : Needs refactoring to remove .
+-   : The latest version of the enterprise enrichment script.
+-   : The monolithic file that still needs refactoring.
 
 **Areas that need refactoring**:
--   ** (CRITICAL)**: Top priority. The plan is to progressively include the existing modular routers and remove the duplicated code from .
+-   ** (CRITICAL)**: Must be broken down into modular routers.
+-   ** &  (CRITICAL)**: Must be updated to remove dependency on .
+-   **Scraping logic ()**: Needs a more robust strategy to handle anti-bot measures and find real company websites.
 
 **key api endpoints**
--   : NEW endpoint to create a Stripe payment session for an image order.
--   : NEW endpoint to check the payment status after Stripe redirect.
--   : NEW endpoint to list all image orders for an enterprise.
--   : NEW endpoint to get video templates.
--   : NEW endpoint to create a video order.
--   : NEW endpoint to list all video orders for an enterprise.
+-   No new endpoints were created. The focus was on background tasks and fixing existing code.
 
 **Critical Info for New Agent**
--   **User's Next Priorities**: The user has explicitly requested three tasks to be done next:
-    1.  **Generate the ultra-detailed CDC** using the new script.
-    2.  **Provide the ZIP file** of generated videos. (This is already done at ).
-    3.  **Run a full E2E test**. (This is also already done, with results in ).
--   The highest priority active task is the generation of the ultra-detailed CDC.
--   ** Refactoring Plan**: The user has approved a progressive refactoring of , starting with the  router. This is the main technical task to be addressed after the CDC is generated.
--   **Full Test Passed**: A comprehensive E2E test has been successfully completed, validating all the new features and fixes from this session. The application is in a stable, working state.
+-   **The deployment environment is OnRender and it is a hard constraint.** It cannot access private Python packages. Any solution must use publicly available libraries from PyPI.
+-   The user's highest priority is getting the application to deploy successfully. Therefore, finishing the  replacement is the absolute P0 task.
+-   The user's workflow is highly interrupt-driven. Be prepared for priorities to change rapidly. It's crucial to confirm the next task before starting significant work.
+-   The enterprise scraping task is important to the user, but the goal of getting *real* images and products has not been met. The current implementation is a fallback (generated images). This will likely be revisited.
 
 **documents and test reports created in this job**
 -   
@@ -181,45 +264,82 @@ Security details are available in apt-secure(8).
 -   
 -   
 -   
--   
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User**: Asks to test the video order flow, ensure it appears in Commandes Titelli, and fix a bug with broken site images. (DONE)
-2.  **Agent**: Acknowledges and starts investigating the video flow and image bug. (DONE)
-3.  **User**: Approves adding a link to Vidéo Pub IA in the navigation. (DONE)
-4.  **Agent**: Confirms and starts adding the navigation link. (DONE)
-5.  **User**: Says continue while the agent is implementing the navigation dropdown. (DONE)
-6.  **Agent**: Shows the final navigation menu and proposes moving to the  refactoring. (DONE)
-7.  **User**: Asks for a full E2E test, an ultra-detailed CDC (200+ pages), and a ZIP file of all generated videos. (IN PROGRESS - CDC generation is pending)
-8.  **Agent**: Acknowledges and starts the three tasks in parallel. (IN PROGRESS)
-9.  **User**: Agrees to the suggestion of a full E2E test. (This was part of the previous user message, so this is just a confirmation).
-10. **Agent**: Reports the ZIP is created and the testing agent is running. (IN PROGRESS)
+1.  **User**: Instructs the agent to continue enriching enterprise profiles by scraping images, videos, and products. (IN PROGRESS)
+2.  **User**: Reiterates the scraping request, asking for maximum data extraction to populate the enterprise pages. (IN PROGRESS)
+3.  **User**: Says vazy (go for it) to the agent's plan to wait for the enrichment script to finish. (ACKNOWLEDGED)
+4.  **User**: Pastes a deployment error from OnRender: . (RESOLVED)
+5.  **User**: Pastes a second deployment error:  and confirms this is a recurring issue, instructing the agent to remove the package. (IN PROGRESS)
+6.  **User**: Asks for the link to the logo video. (RESOLVED)
+7.  **User**: Sends d. (CLARIFIED)
+8.  **User**: Confirms oui to start the  refactoring. (INTERRUPTED)
+9.  **User**: Interrupts the refactoring to request the enterprise enrichment. (IN PROGRESS)
+10. **User**: Provides a detailed list of requirements for the complete CDC, including test cases, revenue stats, and success probability analysis. (NOT STARTED)
 
 **Project Health Check:**
--   **Broken**: The backend routing architecture is fragile due to the massive, monolithic  file containing duplicated code and inactive modular routers. This is a major source of technical debt.
--   **Mocked**: None. The Stripe payment flow for Pub Média is now live.
+-   **Broken**:
+    -   **Deployment**: The application is currently undeployable on the target OnRender platform due to the  dependency issue.
+    -   **Backend Architecture**: The  file remains a monolithic technical debt that hinders scalability and maintainability.
+
+-   **Mocked**:
+    -   The enterprise photos and logos are currently placeholders (generated images/screenshots) rather than real data scraped from company websites, as was the user's ultimate goal.
 
 **3rd Party Integrations**
--   **Stripe**: Live mode integration is complete for the Pub Média feature.
--   **OpenAI DALL-E**: Used for image generation in Pub Média.
--   **Sora 2 (Video Generation)**: Integrated for the Vidéo Pub IA feature.
--   **Pillow (PIL)**: Used for image post-processing (text overlay).
--   **fpdf2**: Used for all PDF generation scripts.
--   **Resend**: Used for sending transactional emails (payment confirmation).
--   **Playwright**: Used for the web scraping/enrichment script.
--   **ffmpeg**: Used for video file concatenation.
+-   **Stripe**: Used for payments. Code using it via  needs refactoring to use the official  SDK.
+-   **OpenAI (DALL-E & Sora 2)**: Used for image/video generation. Code using it via  needs refactoring to use the official usage: openai [-h] [-v] [-b API_BASE] [-k API_KEY] [-p PROXY [PROXY ...]]
+              [-o ORGANIZATION] [-t {openai,azure}]
+              [--api-version API_VERSION] [--azure-endpoint AZURE_ENDPOINT]
+              [--azure-ad-token AZURE_AD_TOKEN] [-V]
+              {api,tools,migrate,grit} ...
+
+positional arguments:
+  {api,tools,migrate,grit}
+    api                 Direct API calls
+    tools               Client side tools for convenience
+
+options:
+  -h, --help            show this help message and exit
+  -v, --verbose         Set verbosity.
+  -b API_BASE, --api-base API_BASE
+                        What API base url to use.
+  -k API_KEY, --api-key API_KEY
+                        What API key to use.
+  -p PROXY [PROXY ...], --proxy PROXY [PROXY ...]
+                        What proxy to use.
+  -o ORGANIZATION, --organization ORGANIZATION
+                        Which organization to run as (will use your default
+                        organization if not specified)
+  -t {openai,azure}, --api-type {openai,azure}
+                        The backend API to call, must be `openai` or `azure`
+  --api-version API_VERSION
+                        The Azure API version, e.g.
+                        'https://learn.microsoft.com/en-us/azure/ai-
+                        services/openai/reference#rest-api-versioning'
+  --azure-endpoint AZURE_ENDPOINT
+                        The Azure endpoint, e.g.
+                        'https://endpoint.openai.azure.com'
+  --azure-ad-token AZURE_AD_TOKEN
+                        A token from Azure Active Directory,
+                        https://www.microsoft.com/en-
+                        us/security/business/identity-access/microsoft-entra-
+                        id
+  -V, --version         show program's version number and exit SDK.
+-   **Resend**: Used for emails. Dependency now correctly added to .
+-   **Playwright**: Used for web scraping. Dependency added to .
 
 **Testing status**
--   **Testing agent used after significant changes**: YES. A full end-to-end test was run at the end of the session.
+-   **Testing agent used after significant changes**: NO. The session was focused on scripting and fixing a deployment issue, not on feature changes.
 -   **Troubleshoot agent used after agent stuck in loop**: NO
 -   **Test files created**: []
--   **Known regressions**: None. All broken images were fixed.
--   **Test Report**:  (Summary: 100% pass rate across all critical flows).
+-   **Known regressions**: None.
 
 **Credentials to test flow:**
 -   **Admin**:  / 
 -   **Client**:  / 
--   **Enterprise**:  /  (Enterprise ID: )
+-   **Enterprise**:  / 
 
 **What agent forgot to execute**
--   The agent correctly identified the  refactoring task multiple times but postponed it to address higher-priority, user-facing feature requests. While not forgotten, it remains the most significant un-executed task.</analysis>
+-   The agent was repeatedly interrupted from starting the ** refactoring**, which the user had approved.
+-   The agent did not fulfill the user's request for a **200+ page ultra-detailed CDC** with statistical analysis; the generated documents were much shorter and less detailed than requested.
+-   The agent did not fully meet the goal of the **enterprise enrichment task**, as it failed to scrape real images and products, falling back to generated content.</analysis>

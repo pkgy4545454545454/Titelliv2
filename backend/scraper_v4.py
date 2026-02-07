@@ -16,7 +16,7 @@ import httpx
 
 MONGO_URL = os.environ.get('MONGO_URL')
 UPLOADS_DIR = "/app/backend/uploads/enterprises"
-BASE_URL = "https://video-platform-730.preview.emergentagent.com"
+BASE_URL = "https://dependency-cleanup-3.preview.emergentagent.com"
 MAX_ENTERPRISES = 150
 MAX_IMAGES = 20
 

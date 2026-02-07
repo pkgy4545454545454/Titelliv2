@@ -45,7 +45,7 @@ def set_db(database):
 EMERGENT_LLM_KEY = os.getenv("EMERGENT_LLM_KEY")
 STRIPE_API_KEY = os.getenv("STRIPE_API_KEY")
 UPLOADS_DIR = "/app/backend/uploads/video_orders"
-BASE_URL = os.getenv("REACT_APP_BACKEND_URL", "https://video-platform-730.preview.emergentagent.com")
+BASE_URL = os.getenv("REACT_APP_BACKEND_URL", "https://dependency-cleanup-3.preview.emergentagent.com")
 
 # Créer le dossier si nécessaire
 os.makedirs(UPLOADS_DIR, exist_ok=True)
