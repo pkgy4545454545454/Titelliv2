@@ -113,7 +113,7 @@ const EnterpriseCard = ({ enterprise, large = false }) => {
 
         {/* Logo */}
         {actualLogo && (
-          <div className="absolute bottom-3 right-3 w-12 h-12 rounded-full bg-white p-1">
+          <div className={`absolute bottom-3 right-3 ${large ? 'w-14 h-14' : 'w-12 h-12'} rounded-full bg-white p-1`}>
             <img 
               src={actualLogo} 
               alt="" 
@@ -125,9 +125,9 @@ const EnterpriseCard = ({ enterprise, large = false }) => {
       </div>
 
       {/* Content */}
-      <div className="p-5">
+      <div className={cardPadding}>
         <div className="flex items-start justify-between gap-4 mb-2">
-          <h3 className="text-lg font-semibold text-white group-hover:text-[#0047AB] transition-colors line-clamp-1">
+          <h3 className={`${titleSize} font-semibold text-white group-hover:text-[#0047AB] transition-colors line-clamp-1`}>
             {displayName}
           </h3>
           {rating > 0 && (
@@ -142,7 +142,7 @@ const EnterpriseCard = ({ enterprise, large = false }) => {
           <p className="text-sm text-[#D4AF37] mb-2 line-clamp-1">{slogan}</p>
         )}
 
-        <p className="text-sm text-gray-400 mb-4 line-clamp-2">
+        <p className={`text-sm text-gray-400 mb-4 ${descHeight}`}>
           {description}
         </p>
 
