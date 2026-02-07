@@ -488,7 +488,7 @@ async def check_payment_status(session_id: str, order_id: str, background_tasks:
             }
         
         return {
-            "status": status.payment_status,
+            "status": session.payment_status or "unpaid",
             "message": "Paiement en attente",
             "order_id": order_id
         }
