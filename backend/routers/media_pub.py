@@ -1029,39 +1029,46 @@ async def create_payment_session(payment_request: PaymentRequest, request: Reque
     
     # Get price from server-side (NEVER trust frontend amount)
     price = float(order.get("price", 29.90))
+    price_cents = int(price * 100)  # Stripe uses cents
     
-    # Initialize Stripe checkout
-    host_url = str(request.base_url).rstrip('/')
-    webhook_url = f"{host_url}api/media-pub/webhook/stripe"
-    
-    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
+    # Configure Stripe
+    stripe.api_key = STRIPE_API_KEY
     
     # Build URLs from frontend origin
     origin_url = payment_request.origin_url.rstrip('/')
     success_url = f"{origin_url}/media-pub/success?session_id={{CHECKOUT_SESSION_ID}}&order_id={payment_request.order_id}"
     cancel_url = f"{origin_url}/media-pub?cancelled=true&order_id={payment_request.order_id}"
     
-    # Create checkout session
-    checkout_request = CheckoutSessionRequest(
-        amount=price,
-        currency="chf",
-        success_url=success_url,
-        cancel_url=cancel_url,
-        metadata={
-            "order_id": payment_request.order_id,
-            "enterprise_id": order.get("enterprise_id", ""),
-            "template_name": order.get("template_name", ""),
-            "type": "pub_media_order"
-        }
-    )
-    
     try:
-        session: CheckoutSessionResponse = await stripe_checkout.create_checkout_session(checkout_request)
+        # Create Stripe checkout session
+        session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            line_items=[{
+                "price_data": {
+                    "currency": "chf",
+                    "product_data": {
+                        "name": f"Pub Média - {order.get('template_name', 'Création')}",
+                        "description": f"Image publicitaire: {order.get('product_name', '')}",
+                    },
+                    "unit_amount": price_cents,
+                },
+                "quantity": 1,
+            }],
+            mode="payment",
+            success_url=success_url,
+            cancel_url=cancel_url,
+            metadata={
+                "order_id": payment_request.order_id,
+                "enterprise_id": order.get("enterprise_id", ""),
+                "template_name": order.get("template_name", ""),
+                "type": "pub_media_order"
+            }
+        )
         
         # Create payment transaction record
         await db.payment_transactions.insert_one({
             "id": str(uuid.uuid4()),
-            "session_id": session.session_id,
+            "session_id": session.id,
             "order_id": payment_request.order_id,
             "amount": price,
             "currency": "CHF",
@@ -1076,14 +1083,14 @@ async def create_payment_session(payment_request: PaymentRequest, request: Reque
         await db.pub_orders.update_one(
             {"id": payment_request.order_id},
             {"$set": {
-                "stripe_session_id": session.session_id,
+                "stripe_session_id": session.id,
                 "payment_status": "pending"
             }}
         )
         
         return {
             "checkout_url": session.url,
-            "session_id": session.session_id
+            "session_id": session.id
         }
         
     except Exception as e:
