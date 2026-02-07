@@ -14,22 +14,19 @@ import uuid
 import os
 import logging
 import asyncio
+import time
 
 from dotenv import load_dotenv
 load_dotenv()
 
-# Sora 2 video generation
-from emergentintegrations.llm.openai.video_generation import OpenAIVideoGeneration
+# Official OpenAI SDK for Sora 2 video generation
+from openai import OpenAI
 
 # Email service
 from services.email_service import send_email
 
-# Stripe for payments
-from emergentintegrations.payments.stripe.checkout import (
-    StripeCheckout, 
-    CheckoutSessionResponse, 
-    CheckoutSessionRequest
-)
+# Official Stripe SDK for payments
+import stripe
 
 router = APIRouter(prefix="/api/video-pub", tags=["Video Pub"])
 logger = logging.getLogger(__name__)
