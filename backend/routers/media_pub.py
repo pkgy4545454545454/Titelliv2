@@ -1105,15 +1105,16 @@ async def check_payment_status(session_id: str, order_id: str):
     if not STRIPE_API_KEY:
         raise HTTPException(status_code=500, detail="Stripe not configured")
     
-    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url="")
+    stripe.api_key = STRIPE_API_KEY
     
     try:
-        status: CheckoutStatusResponse = await stripe_checkout.get_checkout_status(session_id)
+        # Retrieve session from Stripe
+        session = stripe.checkout.Session.retrieve(session_id)
         
         # Find the transaction
         transaction = await db.payment_transactions.find_one({"session_id": session_id})
         
-        if status.payment_status == "paid":
+        if session.payment_status == "paid":
             # Check if already processed (prevent double processing)
             if transaction and transaction.get("payment_status") == "paid":
                 return {
@@ -1181,7 +1182,7 @@ async def check_payment_status(session_id: str, order_id: str):
                 "order_id": order_id
             }
             
-        elif status.status == "expired":
+        elif session.status == "expired":
             await db.payment_transactions.update_one(
                 {"session_id": session_id},
                 {"$set": {"payment_status": "expired"}}
@@ -1193,7 +1194,7 @@ async def check_payment_status(session_id: str, order_id: str):
             }
         else:
             return {
-                "status": status.payment_status,
+                "status": session.payment_status,
                 "message": "Paiement en attente",
                 "order_id": order_id
             }
