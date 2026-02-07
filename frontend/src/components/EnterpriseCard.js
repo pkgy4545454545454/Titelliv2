@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Star, MapPin, Award, Crown, CheckCircle, Clock } from 'lucide-react';
 
-const EnterpriseCard = ({ enterprise }) => {
+const EnterpriseCard = ({ enterprise, large = false }) => {
   const {
     id,
     business_name,
