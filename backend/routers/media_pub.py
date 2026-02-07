@@ -38,7 +38,9 @@ def set_db(database):
     db = database
 
 # Configuration
-OPENAI_API_KEY = os.getenv("EMERGENT_LLM_KEY") or os.getenv("OPENAI_API_KEY")
+# On deployment (OnRender): Use OPENAI_API_KEY from environment
+# On Emergent preview: EMERGENT_LLM_KEY is available but requires emergentintegrations
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 UPLOADS_DIR = "/app/backend/uploads/pub_orders"
 BASE_URL = os.getenv("REACT_APP_BACKEND_URL", "https://dependency-cleanup-3.preview.emergentagent.com")
 
