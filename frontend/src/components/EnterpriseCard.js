@@ -55,14 +55,20 @@ const EnterpriseCard = ({ enterprise, large = false }) => {
   const statusLabel = getStatusLabel();
   const displayName = name || business_name;
 
+  // Sizes based on large prop
+  const imageHeight = large ? 'h-56' : 'h-48';
+  const cardPadding = large ? 'p-5' : 'p-4';
+  const titleSize = large ? 'text-xl' : 'text-lg';
+  const descHeight = large ? 'line-clamp-3' : 'line-clamp-2';
+
   return (
     <Link 
       to={`/entreprise/${id}`}
-      className="card-service group block rounded-xl overflow-hidden"
+      className="card-service group block rounded-xl overflow-hidden h-full"
       data-testid={`enterprise-card-${id}`}
     >
       {/* Image */}
-      <div className="relative h-48 overflow-hidden">
+      <div className={`relative ${imageHeight} overflow-hidden`}>
         <img
           src={actualCover}
           alt={displayName}
