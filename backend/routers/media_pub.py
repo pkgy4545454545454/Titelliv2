@@ -725,16 +725,30 @@ Focus on stunning visuals, NOT text.
 
 STYLE: Premium advertising quality, Swiss/European professional standards, elegant and sophisticated."""
 
-        # Générer l'image
-        image_gen = OpenAIImageGeneration(api_key=EMERGENT_LLM_KEY)
+        # Générer l'image avec le SDK OpenAI officiel
+        client = OpenAI(api_key=OPENAI_API_KEY)
         
-        images = await image_gen.generate_images(
-            prompt=prompt,
+        response = client.images.generate(
             model="gpt-image-1",
-            number_of_images=1
+            prompt=prompt,
+            n=1,
+            size="1024x1024"
         )
         
-        if images and len(images) > 0:
+        # Récupérer l'image (base64 ou URL)
+        image_data = response.data[0]
+        
+        if hasattr(image_data, 'b64_json') and image_data.b64_json:
+            image_bytes = base64.b64decode(image_data.b64_json)
+        elif hasattr(image_data, 'url') and image_data.url:
+            import httpx
+            async with httpx.AsyncClient() as http_client:
+                img_response = await http_client.get(image_data.url)
+                image_bytes = img_response.content
+        else:
+            raise ValueError("Aucune image retournée par l'API")
+        
+        if image_bytes:
             # POST-PROCESSING: Ajouter le texte parfait avec Pillow
             logger.info("📝 Post-processing: ajout du texte sur l'image")
             
