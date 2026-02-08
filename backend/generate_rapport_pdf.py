@@ -7,7 +7,7 @@ from fpdf import FPDF
 from datetime import datetime
 import os
 
-BASE_URL = "https://dependency-cleanup-3.preview.emergentagent.com"
+BASE_URL = "https://scrape-companies.preview.emergentagent.com"
 MEDIA_PATH = "/app/backend/uploads/media_titelli"
 
 class TitelliPDF(FPDF):

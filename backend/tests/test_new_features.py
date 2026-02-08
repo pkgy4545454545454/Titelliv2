@@ -6,7 +6,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://dependency-cleanup-3.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://scrape-companies.preview.emergentagent.com')
 
 # Test credentials
 ENTERPRISE_EMAIL = "spa.luxury@titelli.com"
