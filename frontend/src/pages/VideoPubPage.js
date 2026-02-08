@@ -44,11 +44,11 @@ const AnimatedHeader = () => (
             <span className="text-violet-200 text-sm font-medium">Vidéo Pub IA</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
-            Créez des Vidéos
+            Commandez des Vidéos
             <span className="text-violet-400 block mt-2">Professionnelles</span>
           </h1>
           <p className="text-violet-200 text-lg max-w-xl">
-            Générez des vidéos publicitaires uniques avec l&apos;intelligence artificielle Sora 2
+            Commandez des vidéos publicitaires uniques avec l&apos;intelligence artificielle Titelli
           </p>
         </div>
         
