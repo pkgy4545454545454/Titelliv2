@@ -11,7 +11,7 @@ from emergentintegrations.llm.openai.video_generation import OpenAIVideoGenerati
 
 UPLOADS_DIR = '/app/backend/uploads'
 
-def generate_video(prompt, output_path, duration=5):
+def generate_video(prompt, output_path, duration=4):
     """Génère une vidéo avec Sora 2"""
     print(f"\n🎬 Génération: {output_path}")
     print(f"📝 Prompt: {prompt[:100]}...")
