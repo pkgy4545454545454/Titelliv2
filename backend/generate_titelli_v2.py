@@ -21,7 +21,7 @@ def generate_video(prompt, output_path, duration=4):
     video_bytes = video_gen.text_to_video(
         prompt=prompt,
         model="sora-2",
-        size="1792x1024",
+        size="1280x720",
         duration=duration,
         max_wait_time=600
     )
