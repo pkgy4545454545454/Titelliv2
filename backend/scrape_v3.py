@@ -300,11 +300,15 @@ async def main():
     client = AsyncIOMotorClient(MONGO_URL)
     db = client[DB_NAME]
     
-    # Get enterprises NOT YET enriched by v3
+    # Get enterprises with websites but NOT YET properly scraped (no real cover)
     cursor = db.enterprises.find({
         'website': {'$exists': True, '$ne': None, '$ne': ''},
-        'enrichment_source': {'$ne': 'website_v3'}
-    }).limit(400)
+        '$or': [
+            {'cover_image': None},
+            {'cover_image': ''},
+            {'cover_image': {'$not': {'$regex': 'uploads/enterprises'}}}
+        ]
+    }).limit(500)
     
     enterprises = await cursor.to_list(400)
     print(f'\nFound {len(enterprises)} enterprises to scrape\n')
