@@ -48,31 +48,31 @@ def main():
         {
             "name": "v2_avant_pov_bureau",
             "prompt": f"POV first-person view of hands typing on a laptop keyboard in a messy cluttered office. Papers and invoices scattered everywhere on the desk. The laptop screen shows confusing spreadsheets with errors. Stressed atmosphere, dim lighting. Realistic office footage. The hands belong to {character}.",
-            "duration": 5
+            "duration": 4
         },
         {
             "name": "v2_avant_stress",
             "prompt": f"Medium shot of {character} sitting at a messy desk looking stressed and overwhelmed. She is rubbing her temples with her hands, papers everywhere. Old computer with error messages. Swiss office interior. Realistic documentary style.",
-            "duration": 5
+            "duration": 4
         },
         
         # TRANSITION - Découverte de Titelli
         {
             "name": "v2_transition_decouverte",
             "prompt": f"POV first-person view of hands holding a smartphone, the screen shows a modern blue and gold app interface with the letter T logo. The person is in a bright modern office. Clean professional look. The fingers scroll through a sleek dashboard. Tech commercial style.",
-            "duration": 5
+            "duration": 4
         },
         
         # APRÈS - POV organisé avec Titelli
         {
             "name": "v2_apres_pov_dashboard",
             "prompt": f"POV first-person view of hands using a laptop showing a modern dark dashboard with colorful charts and graphs. Clean organized desk with just a coffee cup and plant. Bright natural lighting. Professional business software interface. The hands belong to {character}.",
-            "duration": 5
+            "duration": 4
         },
         {
             "name": "v2_apres_sourire",
             "prompt": f"Medium shot of {character} sitting at a clean organized modern desk, smiling confidently while looking at her laptop screen. The screen shows growth charts. Bright office with plants. She looks relaxed and successful. Professional corporate style.",
-            "duration": 5
+            "duration": 4
         }
     ]
     
