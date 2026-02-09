@@ -6,7 +6,7 @@ Rapport PDF - Nouvelles Fonctionnalités Titelli (Aujourd'hui à partir de 12h)
 from fpdf import FPDF
 from datetime import datetime
 
-BASE_URL = "https://scrape-companies.preview.emergentagent.com"
+BASE_URL = "https://titelli-assets-zip.preview.emergentagent.com"
 
 class TitelliPDF(FPDF):
     def __init__(self):

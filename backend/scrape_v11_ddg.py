@@ -20,7 +20,7 @@ load_dotenv()
 MONGO_URL = os.environ.get('MONGO_URL')
 DB_NAME = os.environ.get('DB_NAME', 'secondevie')
 UPLOADS_DIR = '/app/backend/uploads/enterprises'
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://scrape-companies.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://titelli-assets-zip.preview.emergentagent.com')
 
 os.makedirs(UPLOADS_DIR, exist_ok=True)
 

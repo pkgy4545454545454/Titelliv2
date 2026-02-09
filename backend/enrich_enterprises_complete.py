@@ -25,7 +25,7 @@ import httpx
 # Configuration
 MONGO_URL = os.environ.get('MONGO_URL', "mongodb+srv://prankgy:Minijetaime1996@cluster0.kwjifsg.mongodb.net/secondevie?retryWrites=true&w=majority&appName=Cluster0")
 UPLOADS_DIR = "/app/backend/uploads/enterprises"
-BASE_URL = "https://scrape-companies.preview.emergentagent.com"
+BASE_URL = "https://titelli-assets-zip.preview.emergentagent.com"
 MAX_ENTERPRISES = 100  # Nombre d'entreprises a traiter par batch
 MAX_IMAGES_PER_SITE = 20  # Max images a recuperer par site
 MAX_PRODUCTS_PER_SITE = 30  # Max produits a detecter
