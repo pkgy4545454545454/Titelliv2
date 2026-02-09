@@ -12,7 +12,6 @@ from playwright.sync_api import sync_playwright
 load_dotenv('/app/backend/.env')
 
 from emergentintegrations.llm.openai.video_generation import OpenAIVideoGeneration
-from emergentintegrations.llm.openai import OpenAILLM
 
 UPLOADS_DIR = '/app/backend/uploads'
 V5_DIR = f'{UPLOADS_DIR}/v5'
