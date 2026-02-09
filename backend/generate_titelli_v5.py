@@ -33,11 +33,12 @@ def capture_titelli_screenshots():
         )
         page = context.new_page()
         
-        # Pages à capturer
+        # Pages à capturer - utiliser l'URL preview
+        BASE_URL = 'https://titelli-assets-zip.preview.emergentagent.com'
         pages_to_capture = [
-            ('https://titelli.com', 'home', 'Page d\'accueil'),
-            ('https://titelli.com/prestataires', 'prestataires', 'Liste prestataires'),
-            ('https://titelli.com/boutiques', 'boutiques', 'Boutiques'),
+            (f'{BASE_URL}', 'home', 'Page d\'accueil'),
+            (f'{BASE_URL}/prestataires', 'prestataires', 'Liste prestataires'),
+            (f'{BASE_URL}/boutiques', 'boutiques', 'Boutiques'),
         ]
         
         for url, name, desc in pages_to_capture:
@@ -73,12 +74,12 @@ def generate_ai_clips():
         {
             "name": "v5_human_before",
             "prompt": f"POV first-person shot looking down at hands on a cluttered desk with papers, sticky notes, receipts scattered everywhere. {person}'s reflection visible in a dark computer screen showing spreadsheets. She sighs and rubs her temples in frustration. Dim office lighting. Documentary style. 4K cinematic.",
-            "duration": 6
+            "duration": 8
         },
         {
             "name": "v5_human_after",
             "prompt": f"POV first-person shot of {person} sitting relaxed in a bright modern office with plants. She smiles contentedly while holding a coffee cup, occasionally glancing at her MacBook. Bright natural sunlight streaming through windows. She gives a satisfied thumbs up. Professional commercial style. 4K.",
-            "duration": 6
+            "duration": 8
         },
         {
             "name": "v5_transition",
