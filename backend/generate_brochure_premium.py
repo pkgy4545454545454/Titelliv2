@@ -95,7 +95,7 @@ def create_professional_styles():
     
     # Corps de texte - Lisible et aéré
     styles.add(ParagraphStyle(
-        name='BodyText',
+        name='BodyMain',
         fontSize=11,
         textColor=COLORS['dark'],
         fontName='Helvetica',
@@ -381,7 +381,7 @@ def generate_premium_brochure():
         "Titelli est une plateforme suisse innovante de mise en relation entre prestataires "
         "de services et clients. Notre mission est de simplifier la découverte et la réservation "
         "de services de qualité en Suisse.",
-        styles['BodyText']
+        styles['BodyMain']
     ))
     story.append(Spacer(1, 0.5*cm))
     
@@ -393,7 +393,7 @@ def generate_premium_brochure():
     story.append(Paragraph(
         "La page d'accueil présente les services populaires, les prestataires mis en avant "
         "et les offres du moment. C'est ici que vos futurs clients vous découvriront.",
-        styles['BodyText']
+        styles['BodyMain']
     ))
     
     create_feature_box(story, "Le menu de navigation propose :", [
@@ -413,7 +413,7 @@ def generate_premium_brochure():
     story.append(Paragraph(
         "Pour commencer à utiliser Titelli en tant que prestataire, vous devez créer un compte "
         "entreprise. Le processus est simple et rapide.",
-        styles['BodyText']
+        styles['BodyMain']
     ))
     story.append(Spacer(1, 0.3*cm))
     
@@ -450,7 +450,7 @@ def generate_premium_brochure():
     story.append(Paragraph(
         "Le Dashboard est votre centre de contrôle pour gérer toute votre activité sur Titelli. "
         "Toutes les fonctionnalités sont accessibles depuis le menu latéral.",
-        styles['BodyText']
+        styles['BodyMain']
     ))
     story.append(Spacer(1, 0.3*cm))
     
@@ -478,7 +478,7 @@ def generate_premium_brochure():
     story.append(Paragraph(
         "La section Profil vous permet de gérer toutes les informations de votre entreprise "
         "visibles par les clients : nom, description, coordonnées, horaires d'ouverture, etc.",
-        styles['BodyText']
+        styles['BodyMain']
     ))
     
     create_tip_box(story,
@@ -509,7 +509,7 @@ def generate_premium_brochure():
     story.append(Paragraph(
         "Cette partie couvre toutes les fonctionnalités liées à la vente de vos services "
         "et produits : création d'offres, gestion des commandes et stocks.",
-        styles['BodyText']
+        styles['BodyMain']
     ))
     story.append(Spacer(1, 0.3*cm))
     
@@ -522,7 +522,7 @@ def generate_premium_brochure():
     story.append(Paragraph(
         "C'est ici que vous créez et gérez tous vos services et produits en vente. "
         "Chaque élément aura sa propre fiche visible par les clients.",
-        styles['BodyText']
+        styles['BodyMain']
     ))
     
     create_tip_box(story,
@@ -558,7 +558,7 @@ def generate_premium_brochure():
     story.append(Paragraph(
         "Créez des offres spéciales pour attirer de nouveaux clients et fidéliser les existants. "
         "Les promotions apparaissent en priorité dans les résultats de recherche.",
-        styles['BodyText']
+        styles['BodyMain']
     ))
     
     create_tip_box(story,
@@ -609,7 +609,7 @@ def generate_premium_brochure():
     
     story.append(Paragraph(
         "Choisissez la formule d'abonnement adaptée à vos besoins :",
-        styles['BodyText']
+        styles['BodyMain']
     ))
     story.append(Spacer(1, 0.3*cm))
     
@@ -681,7 +681,7 @@ def generate_premium_brochure():
     story.append(Paragraph(
         "Nous espérons que cette brochure vous a permis de découvrir toutes les possibilités "
         "offertes par Titelli. Notre équipe est à votre disposition pour vous accompagner.",
-        styles['BodyText']
+        styles['BodyMain']
     ))
     
     story.append(Spacer(1, 1*cm))
@@ -689,9 +689,9 @@ def generate_premium_brochure():
     # Contact box
     contact_data = [
         [Paragraph("<b>CONTACT</b>", styles['SectionSub'])],
-        [Paragraph("🌐  www.titelli.com", styles['BodyText'])],
-        [Paragraph("📧  support@titelli.com", styles['BodyText'])],
-        [Paragraph("📞  +41 XX XXX XX XX", styles['BodyText'])],
+        [Paragraph("🌐  www.titelli.com", styles['BodyMain'])],
+        [Paragraph("📧  support@titelli.com", styles['BodyMain'])],
+        [Paragraph("📞  +41 XX XXX XX XX", styles['BodyMain'])],
     ]
     
     contact_table = Table(contact_data, colWidths=[10*cm])
