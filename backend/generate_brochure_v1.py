@@ -129,14 +129,21 @@ def create_styles():
     return styles
 
 
-def add_screenshot(story, image_path, caption, width=16*cm, styles=None):
+def add_screenshot(story, image_path, caption, width=16*cm, styles=None, max_height=18*cm):
     """Ajoute une image avec légende"""
     if os.path.exists(image_path):
         try:
             # Ouvrir et redimensionner l'image
             img = Image.open(image_path)
             aspect = img.height / img.width
-            img_flowable = RLImage(image_path, width=width, height=width*aspect)
+            height = width * aspect
+            
+            # Limiter la hauteur maximale
+            if height > max_height:
+                height = max_height
+                width = height / aspect
+            
+            img_flowable = RLImage(image_path, width=width, height=height)
             
             # Ajouter l'image
             story.append(img_flowable)
