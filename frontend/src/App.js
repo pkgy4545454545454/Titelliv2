@@ -193,6 +193,8 @@ function AppRoutes() {
       <Route path="/about" element={<MainLayout><AboutPage /></MainLayout>} />
       <Route path="/cgv" element={<MainLayout><CGVPage /></MainLayout>} />
       <Route path="/mentions-legales" element={<MainLayout><MentionsLegalesPage /></MainLayout>} />
+      <Route path="/faq" element={<MainLayout><FAQPage /></MainLayout>} />
+      <Route path="/status" element={<MainLayout><StatusPage /></MainLayout>} />
       <Route path="/partenaires" element={<MainLayout><PartenairesPage /></MainLayout>} />
       <Route path="/service-client" element={<MainLayout><ServiceClientPage /></MainLayout>} />
 
