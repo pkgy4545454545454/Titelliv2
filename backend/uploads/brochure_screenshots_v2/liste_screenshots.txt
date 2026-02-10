@@ -1,0 +1,22 @@
+accueil_hero|Page d'accueil - Vue principale|/app/backend/uploads/brochure_screenshots_v2/accueil_hero.png
+services_liste|Liste des services|/app/backend/uploads/brochure_screenshots_v2/services_liste.png
+produits_liste|Liste des produits|/app/backend/uploads/brochure_screenshots_v2/produits_liste.png
+entreprises_liste|Liste des entreprises|/app/backend/uploads/brochure_screenshots_v2/entreprises_liste.png
+connexion|Page de connexion/inscription|/app/backend/uploads/brochure_screenshots_v2/connexion.png
+emplois_liste|Liste des emplois|/app/backend/uploads/brochure_screenshots_v2/emplois_liste.png
+rdv_titelli|RDV Titelli|/app/backend/uploads/brochure_screenshots_v2/rdv_titelli.png
+sports|Page Sports|/app/backend/uploads/brochure_screenshots_v2/sports.png
+media_pub|Créer une publicité|/app/backend/uploads/brochure_screenshots_v2/media_pub.png
+video_pub|Créer une vidéo pub|/app/backend/uploads/brochure_screenshots_v2/video_pub.png
+titelli_pro|Titelli Pro++|/app/backend/uploads/brochure_screenshots_v2/titelli_pro.png
+about|À propos|/app/backend/uploads/brochure_screenshots_v2/about.png
+cgv|CGV|/app/backend/uploads/brochure_screenshots_v2/cgv.png
+mentions_legales|Mentions légales|/app/backend/uploads/brochure_screenshots_v2/mentions_legales.png
+accueil_part1_hero|Accueil - Hero|/app/backend/uploads/brochure_screenshots_v2/accueil_part1_hero.png
+accueil_part2_services|Accueil - Services|/app/backend/uploads/brochure_screenshots_v2/accueil_part2_services.png
+accueil_part3_prestataires|Accueil - Prestataires|/app/backend/uploads/brochure_screenshots_v2/accueil_part3_prestataires.png
+accueil_part4_avis|Accueil - Avis|/app/backend/uploads/brochure_screenshots_v2/accueil_part4_avis.png
+menu_pub_ia|Menu Pub IA ouvert|/app/backend/uploads/brochure_screenshots_v2/menu_pub_ia.png
+auth_formulaire|Formulaire connexion|/app/backend/uploads/brochure_screenshots_v2/auth_formulaire.png
+inscription_entreprise|Inscription entreprise|/app/backend/uploads/brochure_screenshots_v2/inscription_entreprise.png
+inscription_entreprise_2|Inscription entreprise - Suite|/app/backend/uploads/brochure_screenshots_v2/inscription_entreprise_2.png
