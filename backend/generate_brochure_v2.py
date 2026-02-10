@@ -77,7 +77,7 @@ def create_styles():
     ))
     
     styles.add(ParagraphStyle(
-        name='Bullet',
+        name='BulletItem',
         fontSize=11,
         textColor=colors.black,
         leftIndent=15,
