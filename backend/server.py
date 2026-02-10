@@ -9227,6 +9227,14 @@ app.include_router(video_pub_router)
 from routers.promo_codes import router as promo_router
 app.include_router(promo_router)
 
+# Include Invoices router
+from routers.invoices import router as invoices_router
+app.include_router(invoices_router)
+
+# Include Newsletter router
+from routers.newsletter import router as newsletter_router
+app.include_router(newsletter_router)
+
 # Mount uploads folder for serving static images
 app.mount("/api/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
