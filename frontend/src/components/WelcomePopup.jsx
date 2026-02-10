@@ -125,7 +125,7 @@ const WelcomePopup = () => {
                 <span className="text-gray-400">Chargement de votre cadeau...</span>
               </div>
             </div>
-          ) : promoCode ? (
+          ) : (
             <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 rounded-xl p-4 mb-6 border border-yellow-500/30">
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Sparkles className="w-5 h-5 text-yellow-400" />
@@ -138,7 +138,7 @@ const WelcomePopup = () => {
                 className="group relative bg-[#0a0a0f] px-6 py-3 rounded-lg border border-yellow-500/50 hover:border-yellow-400 transition-all"
               >
                 <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400">
-                  {promoCode.code}
+                  {promoCode?.code || 'BIENVENUE100'}
                 </span>
                 <div className="absolute -top-2 -right-2 bg-green-500 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   {copySuccess ? (
@@ -150,15 +150,11 @@ const WelcomePopup = () => {
               </button>
               
               <p className="text-white font-semibold mt-3">
-                {promoCode.credit_amount} CHF de crédit publicitaire offert
+                {promoCode?.credit_amount || 100} CHF de crédit publicitaire offert
               </p>
               <p className="text-gray-400 text-xs mt-1">
-                {promoCode.description}
+                {promoCode?.description || 'Code de bienvenue pour les entreprises'}
               </p>
-            </div>
-          ) : (
-            <div className="bg-white/5 rounded-xl p-4 mb-6 border border-white/10">
-              <p className="text-gray-400">Créez un compte entreprise pour profiter de votre cadeau !</p>
             </div>
           )}
           
