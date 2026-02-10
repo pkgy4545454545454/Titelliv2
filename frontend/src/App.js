@@ -38,6 +38,7 @@ import VideoPubPage from './pages/VideoPubPage';
 import AboutPage from './pages/AboutPage';
 import CGVPage from './pages/CGVPage';
 import MentionsLegalesPage from './pages/MentionsLegalesPage';
+import WelcomePopup from './components/WelcomePopup';
 
 import './index.css';
 
