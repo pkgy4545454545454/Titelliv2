@@ -299,6 +299,7 @@ function App() {
               }
             }}
           />
+          <WelcomePopup />
           <AppRoutes />
         </CartProvider>
       </AuthProvider>
