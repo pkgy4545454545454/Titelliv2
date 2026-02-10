@@ -9223,6 +9223,10 @@ from routers.video_pub import router as video_pub_router, set_db as set_video_pu
 set_video_pub_db(db)
 app.include_router(video_pub_router)
 
+# Include Promo Codes router
+from routers.promo_codes import router as promo_router
+app.include_router(promo_router)
+
 # Mount uploads folder for serving static images
 app.mount("/api/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
