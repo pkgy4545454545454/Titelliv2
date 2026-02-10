@@ -320,3 +320,7 @@ frontend/node_modules/.cache/default-development/20.pack
 *.env
 *.env.*
 backend/uploads/ALL_TITELLI_VIDEOS.zip
+-e 
+# Environment files
+*.env
+*.env.*
