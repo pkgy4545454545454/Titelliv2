@@ -259,14 +259,14 @@ def section_page(story, styles, title, image_name, description, features=None, t
     if features:
         story.append(Paragraph("Fonctionnalités disponibles :", styles['SubTitle']))
         for feat in features:
-            story.append(Paragraph(f"✓ {feat}", styles['Bullet']))
+            story.append(Paragraph(f"✓ {feat}", styles['BulletItem']))
     
     # Comment utiliser
     if how_to:
         story.append(Spacer(1, 0.3*cm))
         story.append(Paragraph("Comment utiliser cette section :", styles['SubTitle']))
         for i, step in enumerate(how_to, 1):
-            story.append(Paragraph(f"{i}. {step}", styles['Bullet']))
+            story.append(Paragraph(f"{i}. {step}", styles['BulletItem']))
     
     # Conseils
     if tips:
@@ -332,12 +332,12 @@ def generate_brochure():
               "Page d'accueil - Section Hero avec barre de recherche", width=14*cm, max_height=9*cm, styles=styles)
     
     story.append(Paragraph("Le menu de navigation propose :", styles['Body']))
-    story.append(Paragraph("• Services : Accès à tous les services disponibles", styles['Bullet']))
-    story.append(Paragraph("• Produits : Catalogue des produits en vente", styles['Bullet']))
-    story.append(Paragraph("• Entreprises : Liste des prestataires", styles['Bullet']))
-    story.append(Paragraph("• Rdv : Système de prise de rendez-vous", styles['Bullet']))
-    story.append(Paragraph("• Sports : Section dédiée aux activités sportives", styles['Bullet']))
-    story.append(Paragraph("• Pub IA : Création de publicités avec l'IA", styles['Bullet']))
+    story.append(Paragraph("• Services : Accès à tous les services disponibles", styles['BulletItem']))
+    story.append(Paragraph("• Produits : Catalogue des produits en vente", styles['BulletItem']))
+    story.append(Paragraph("• Entreprises : Liste des prestataires", styles['BulletItem']))
+    story.append(Paragraph("• Rdv : Système de prise de rendez-vous", styles['BulletItem']))
+    story.append(Paragraph("• Sports : Section dédiée aux activités sportives", styles['BulletItem']))
+    story.append(Paragraph("• Pub IA : Création de publicités avec l'IA", styles['BulletItem']))
     
     story.append(PageBreak())
     
@@ -372,14 +372,14 @@ def generate_brochure():
               "Page d'authentification - Connexion et inscription", width=12*cm, max_height=9*cm, styles=styles)
     
     story.append(Paragraph("Étapes d'inscription :", styles['SubTitle']))
-    story.append(Paragraph("1. ➜ Cliquez sur 'Connexion' en haut à droite de la page", styles['Bullet']))
-    story.append(Paragraph("2. ➜ Sélectionnez l'onglet 'Inscription'", styles['Bullet']))
-    story.append(Paragraph("3. ➜ Choisissez 'Entreprise' comme type de compte", styles['Bullet']))
-    story.append(Paragraph("4. ➜ Remplissez votre email professionnel", styles['Bullet']))
-    story.append(Paragraph("5. ➜ Créez un mot de passe sécurisé (min. 8 caractères)", styles['Bullet']))
-    story.append(Paragraph("6. ➜ Renseignez vos informations personnelles", styles['Bullet']))
-    story.append(Paragraph("7. ➜ Validez les conditions d'utilisation", styles['Bullet']))
-    story.append(Paragraph("8. ➜ Cliquez sur 'S'inscrire'", styles['Bullet']))
+    story.append(Paragraph("1. ➜ Cliquez sur 'Connexion' en haut à droite de la page", styles['BulletItem']))
+    story.append(Paragraph("2. ➜ Sélectionnez l'onglet 'Inscription'", styles['BulletItem']))
+    story.append(Paragraph("3. ➜ Choisissez 'Entreprise' comme type de compte", styles['BulletItem']))
+    story.append(Paragraph("4. ➜ Remplissez votre email professionnel", styles['BulletItem']))
+    story.append(Paragraph("5. ➜ Créez un mot de passe sécurisé (min. 8 caractères)", styles['BulletItem']))
+    story.append(Paragraph("6. ➜ Renseignez vos informations personnelles", styles['BulletItem']))
+    story.append(Paragraph("7. ➜ Validez les conditions d'utilisation", styles['BulletItem']))
+    story.append(Paragraph("8. ➜ Cliquez sur 'S'inscrire'", styles['BulletItem']))
     
     story.append(Paragraph(
         "💡 Conseil : Utilisez une adresse email professionnelle (ex: contact@votreentreprise.ch) "
@@ -395,12 +395,12 @@ def generate_brochure():
               "Formulaire d'inscription entreprise", width=13*cm, max_height=10*cm, styles=styles)
     
     story.append(Paragraph("Informations requises :", styles['Body']))
-    story.append(Paragraph("• Nom de l'entreprise : Le nom commercial visible par les clients", styles['Bullet']))
-    story.append(Paragraph("• Email : Votre adresse email de contact", styles['Bullet']))
-    story.append(Paragraph("• Téléphone : Numéro de contact professionnel", styles['Bullet']))
-    story.append(Paragraph("• Adresse : Localisation de votre établissement", styles['Bullet']))
-    story.append(Paragraph("• Catégorie : Secteur d'activité principal", styles['Bullet']))
-    story.append(Paragraph("• Description : Présentation de votre activité", styles['Bullet']))
+    story.append(Paragraph("• Nom de l'entreprise : Le nom commercial visible par les clients", styles['BulletItem']))
+    story.append(Paragraph("• Email : Votre adresse email de contact", styles['BulletItem']))
+    story.append(Paragraph("• Téléphone : Numéro de contact professionnel", styles['BulletItem']))
+    story.append(Paragraph("• Adresse : Localisation de votre établissement", styles['BulletItem']))
+    story.append(Paragraph("• Catégorie : Secteur d'activité principal", styles['BulletItem']))
+    story.append(Paragraph("• Description : Présentation de votre activité", styles['BulletItem']))
     
     story.append(PageBreak())
     
@@ -930,9 +930,9 @@ def generate_brochure():
     story.append(Spacer(1, 1*cm))
     
     story.append(Paragraph("Contact :", styles['SubTitle']))
-    story.append(Paragraph("• Site web : www.titelli.com", styles['Bullet']))
-    story.append(Paragraph("• Email : support@titelli.com", styles['Bullet']))
-    story.append(Paragraph("• Téléphone : +41 XX XXX XX XX", styles['Bullet']))
+    story.append(Paragraph("• Site web : www.titelli.com", styles['BulletItem']))
+    story.append(Paragraph("• Email : support@titelli.com", styles['BulletItem']))
+    story.append(Paragraph("• Téléphone : +41 XX XXX XX XX", styles['BulletItem']))
     
     story.append(Spacer(1, 1*cm))
     story.append(Paragraph(
