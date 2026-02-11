@@ -183,12 +183,13 @@ def generate_brochure():
         "« Ne manquez plus aucune occasion de vendre. »",
         "« Connectez-vous véritablement à vos clients. »"
     ]
-    msg_table = Table([[Paragraph(m, styles['Quote'])] for m in messages], colWidths=[PAGE_WIDTH - 2*MARGIN])
+    msg_style = ParagraphStyle('MSG', fontSize=8, textColor=GOLD_DARK, alignment=TA_CENTER, fontName='Helvetica-Oblique', leading=12)
+    msg_table = Table([[Paragraph(m, msg_style)] for m in messages], colWidths=[PAGE_WIDTH - 2*MARGIN])
     msg_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), GOLD_LIGHT),
         ('BOX', (0, 0), (-1, -1), 1, GOLD),
-        ('TOPPADDING', (0, 0), (-1, -1), 4),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
     ]))
     story.append(msg_table)
     
