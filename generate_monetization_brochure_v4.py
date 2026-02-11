@@ -628,9 +628,150 @@ def create_page4(story, styles):
     ]))
     story.append(legal_table)
     
-    story.append(Spacer(1, 0.3*cm))
+    story.append(PageBreak())
+
+
+def create_page5(story, styles):
+    """PAGE 5: Glossaire publicitaire + Commission 45%"""
+    
+    story.append(Paragraph("Glossaire Publicitaire & Monétisation", styles['SectionTitle']))
+    
     story.append(Paragraph(
-        f"© {datetime.now().year} Titelli - Tous droits réservés | www.titelli.com",
+        "Comprendre les termes publicitaires essentiels pour maximiser vos revenus sur Titelli.",
+        styles['Body']
+    ))
+    
+    story.append(Spacer(1, 0.3*cm))
+    
+    # Tableau glossaire CPM
+    glossary_data = [
+        ['TERME', 'SIGNIFICATION', 'EXPLICATION'],
+        ['CPM', 'Coût Pour Mille', 'Prix payé pour 1\'000 affichages de votre publicité. Ex: CPM de 5 CHF = 5 CHF pour 1\'000 vues.'],
+        ['CPC', 'Coût Par Clic', 'Prix payé uniquement quand un utilisateur clique sur votre publicité.'],
+        ['CPA', 'Coût Par Action', 'Prix payé quand l\'utilisateur effectue une action (achat, inscription, etc.).'],
+        ['CTR', 'Taux de Clic', 'Pourcentage de personnes qui cliquent après avoir vu la pub. (Clics/Impressions x 100)'],
+        ['ROI', 'Retour sur Invest.', 'Mesure du bénéfice généré par rapport à l\'investissement publicitaire.'],
+        ['Impression', 'Affichage', 'Chaque fois que votre publicité est affichée à un utilisateur.'],
+        ['Reach', 'Portée', 'Nombre de personnes uniques ayant vu votre publicité.'],
+    ]
+    
+    glossary_table = Table(glossary_data, colWidths=[2.5*cm, 3.2*cm, 10.8*cm])
+    glossary_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), BLUE_DARK),
+        ('TEXTCOLOR', (0, 0), (-1, 0), WHITE),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 8),
+        ('ALIGN', (0, 0), (1, -1), 'CENTER'),
+        ('ALIGN', (2, 0), (2, -1), 'LEFT'),
+        ('GRID', (0, 0), (-1, -1), 0.5, GREY_MEDIUM),
+        ('BACKGROUND', (0, 1), (-1, -1), WHITE),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('LEFTPADDING', (2, 0), (2, -1), 6),
+    ]))
+    story.append(glossary_table)
+    
+    story.append(Spacer(1, 0.5*cm))
+    
+    # Box Commission 45%
+    commission_title = ParagraphStyle('CommTitle', fontSize=11, textColor=WHITE, fontName='Helvetica-Bold', alignment=TA_CENTER)
+    commission_body = ParagraphStyle('CommBody', fontSize=9, textColor=BLACK, fontName='Helvetica', alignment=TA_JUSTIFY, leading=12)
+    
+    commission_content = [
+        [Paragraph("⚠️ COMMISSION PARTENARIAT & RÉMUNÉRATION VIDÉO", commission_title)],
+        [Paragraph(
+            "Si vous concluez un <b>partenariat sur Titelli</b> ou si vous percevez une <b>rémunération sur une vidéo "
+            "diffusée sur la plateforme Titelli</b>, <b>Titelli prélève une commission de 45%</b> sur les revenus générés.",
+            commission_body
+        )],
+        [Paragraph(
+            "Cette commission couvre les services de mise en relation, la diffusion, le ciblage algorithmique, "
+            "et l'infrastructure technique de la plateforme.",
+            commission_body
+        )],
+        [Paragraph(
+            "<b>Exemple:</b> Vous générez 1'000 CHF de revenus via un partenariat vidéo → "
+            "Vous percevez <b>550 CHF</b>, Titelli retient <b>450 CHF</b>.",
+            commission_body
+        )],
+    ]
+    
+    commission_table = Table(commission_content, colWidths=[PAGE_WIDTH - 2*MARGIN - 0.5*cm])
+    commission_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (0, 0), GOLD_DARK),
+        ('BACKGROUND', (0, 1), (0, -1), GOLD_LIGHT),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('ALIGN', (0, 0), (0, 0), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('LEFTPADDING', (0, 0), (-1, -1), 10),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+        ('BOX', (0, 0), (-1, -1), 2, GOLD_DARK),
+    ]))
+    story.append(commission_table)
+    
+    story.append(Spacer(1, 0.5*cm))
+    
+    # Comparaison CPM marché
+    story.append(Paragraph("Comparaison CPM du marché", styles['SubTitle']))
+    
+    cpm_comparison = [
+        ['PLATEFORME', 'CPM MOYEN', 'COMMISSION'],
+        ['Instagram Ads', '5-15 CHF', '~30%'],
+        ['YouTube Ads', '8-20 CHF', '~45%'],
+        ['TikTok Ads', '3-10 CHF', '~20-30%'],
+        ['Facebook Ads', '4-12 CHF', '~30%'],
+        ['TITELLI', '5-15 CHF', '45% (services complets inclus)'],
+    ]
+    
+    cpm_table = Table(cpm_comparison, colWidths=[5.5*cm, 4*cm, 7*cm])
+    cpm_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), BLUE_MEDIUM),
+        ('TEXTCOLOR', (0, 0), (-1, 0), WHITE),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 9),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('GRID', (0, 0), (-1, -1), 0.5, GREY_MEDIUM),
+        ('BACKGROUND', (0, 1), (-1, -2), WHITE),
+        ('BACKGROUND', (0, -1), (-1, -1), GOLD_LIGHT),
+        ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+    ]))
+    story.append(cpm_table)
+    
+    story.append(Spacer(1, 0.5*cm))
+    
+    # Publicité IA
+    story.append(Paragraph("Publicité IA - Média & Vidéo", styles['SubTitle']))
+    
+    story.append(Paragraph(
+        "Titelli propose des services de création publicitaire par Intelligence Artificielle:",
+        styles['Body']
+    ))
+    
+    ia_services = [
+        "<b>Images IA:</b> Instagram Post (19.90 CHF), Story (14.90 CHF), Bannière Web (24.90 CHF), Flyer (29.90 CHF)",
+        "<b>Vidéos IA:</b> TikTok Tendance (149.90 CHF), Story Animée (129.90 CHF), Instagram Reel (199.90 CHF), Pub Premium (249.90 CHF)",
+        "<b>Sur Mesure:</b> Création personnalisée selon vos besoins spécifiques"
+    ]
+    
+    for service in ia_services:
+        story.append(Paragraph(f"• {service}", styles['Feature']))
+    
+    story.append(Spacer(1, 0.4*cm))
+    
+    story.append(Paragraph(
+        '"Titelli accompagne son client tout au long de sa journée de consommation, devenez notre recommandation préférée!"',
+        styles['Quote']
+    ))
+    
+    story.append(Spacer(1, 0.5*cm))
+    story.append(Paragraph(
+        f"© {datetime.now().year} Titelli - Tous droits réservés | www.titelli.com | info@titelli.com",
         styles['Footer']
     ))
 
