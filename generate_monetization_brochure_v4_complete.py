@@ -556,7 +556,7 @@ def generate_brochure():
     ]))
     story.append(media_table)
     
-    story.append(Spacer(1, 0.2*cm))
+    story.append(Spacer(1, 0.4*cm))
     story.append(Paragraph("◆ Rentabilité Média Pub:", styles['SubSection']))
     story.append(Paragraph("<b>Coût production IA:</b> ~0.50-2.00 CHF | <b>Prix vente moyen:</b> ~25 CHF | <b>Marge:</b> 90-95%", styles['Body']))
     story.append(Paragraph("<b>Volume estimé:</b> 500-1000 créations/mois | <b>Revenu potentiel:</b> 12'500-25'000 CHF/mois", styles['Body']))
