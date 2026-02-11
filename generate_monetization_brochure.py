@@ -195,7 +195,7 @@ def create_monetization_brochure():
     story.append(Spacer(1, 0.5*cm))
     story.append(Paragraph(
         "Document détaillé présentant tous les systèmes de revenus<br/>et modèles économiques de la plateforme Titelli",
-        styles['BodyText']
+        styles['TitelliBody']
     ))
     story.append(Spacer(1, 1*cm))
     
@@ -235,7 +235,7 @@ def create_monetization_brochure():
     
     for title, description in toc_items:
         story.append(Paragraph(f"<b>{title}</b>", styles['KeyPoint']))
-        story.append(Paragraph(description, styles['BodyText']))
+        story.append(Paragraph(description, styles['TitelliBody']))
         story.append(Spacer(1, 3*mm))
     
     story.append(PageBreak())
@@ -251,7 +251,7 @@ def create_monetization_brochure():
     story.append(Paragraph("""
     Titelli adopte un modèle économique multi-sources inspiré des meilleures pratiques des géants du digital 
     (Instagram/Meta, Uber, Amazon) tout en l'adaptant au marché suisse et aux besoins locaux.
-    """, styles['BodyText']))
+    """, styles['TitelliBody']))
     
     # Revenue sources table
     revenue_data = [
@@ -287,14 +287,14 @@ def create_monetization_brochure():
     story.append(Paragraph("""
     <b>→ Côté Entreprises (B2B):</b> Abonnements mensuels, options à la carte, services premium, publicité IA.<br/>
     <b>→ Côté Clients (B2C):</b> Frais de livraison, frais de service, commissions sur achats.
-    """, styles['BodyText']))
+    """, styles['TitelliBody']))
     
     story.append(Spacer(1, 0.5*cm))
     story.append(Paragraph("""
     Ce modèle "des deux côtés" (comme Uber Eats ou Amazon) permet de maximiser les revenus tout en offrant 
     de la valeur aux deux parties. L'entreprise gagne en visibilité et en outils, le client bénéficie 
     de promotions et d'un accès facilité aux services locaux.
-    """, styles['BodyText']))
+    """, styles['TitelliBody']))
     
     story.append(PageBreak())
     
@@ -315,7 +315,7 @@ def create_monetization_brochure():
     story.append(Paragraph("Forfait STANDARD - 200 CHF/mois", styles['SubSection']))
     story.append(Paragraph("""
     Le forfait d'entrée idéal pour les entreprises souhaitant découvrir Titelli.
-    """, styles['BodyText']))
+    """, styles['TitelliBody']))
     
     standard_features = [
         "Exposition standard sur la plateforme",
@@ -333,7 +333,7 @@ def create_monetization_brochure():
     story.append(Paragraph("Forfait GUEST - 250 CHF/mois (POPULAIRE)", styles['SubSection']))
     story.append(Paragraph("""
     Le forfait recommandé pour une visibilité optimale et une croissance accélérée.
-    """, styles['BodyText']))
+    """, styles['TitelliBody']))
     
     guest_features = [
         "Profil professionnel complet et personnalisé",
@@ -409,7 +409,7 @@ def create_monetization_brochure():
     story.append(Paragraph("Forfait PREMIUM MVP - 1'000 CHF/mois", styles['SubSection']))
     story.append(Paragraph("""
     Le forfait ultime pour les entreprises ambitieuses visant l'excellence.
-    """, styles['BodyText']))
+    """, styles['TitelliBody']))
     
     mvp_features = [
         "5 publicités + 1 vidéo promotionnelle par mois",
@@ -468,7 +468,7 @@ def create_monetization_brochure():
     story.append(Paragraph("""
     Les forfaits d'optimisation sont conçus pour les entreprises en forte croissance 
     cherchant un accompagnement complet et des prestations haut de gamme.
-    """, styles['BodyText']))
+    """, styles['TitelliBody']))
     
     # Optimization packages table
     opti_data = [
@@ -503,7 +503,7 @@ def create_monetization_brochure():
     Les prestations liquidées représentent un montant en CHF que l'entreprise peut utiliser 
     pour des services Titelli ou partenaires. Par exemple, avec Opti 10K, l'entreprise reçoit 
     7'000 CHF utilisables pour:
-    """, styles['BodyText']))
+    """, styles['TitelliBody']))
     
     liquidees = [
         "Heures de conseil avec experts",
@@ -535,7 +535,7 @@ def create_monetization_brochure():
     story.append(Paragraph("""
     Les options à la carte permettent aux entreprises de personnaliser leur abonnement 
     en ajoutant des modules spécifiques selon leurs besoins.
-    """, styles['BodyText']))
+    """, styles['TitelliBody']))
     
     # A la carte options
     alacarte_data = [
@@ -589,7 +589,7 @@ def create_monetization_brochure():
     story.append(Paragraph("""
     Le système Média Pub IA permet aux entreprises de créer des publicités visuelles 
     professionnelles en quelques clics grâce à l'intelligence artificielle.
-    """, styles['BodyText']))
+    """, styles['TitelliBody']))
     
     story.append(Paragraph("Processus de création:", styles['KeyPoint']))
     media_process = [
@@ -600,7 +600,7 @@ def create_monetization_brochure():
     ]
     
     for step in media_process:
-        story.append(Paragraph(f"  {step}", styles['BodyText']))
+        story.append(Paragraph(f"  {step}", styles['TitelliBody']))
     
     story.append(Spacer(1, 0.5*cm))
     
@@ -640,7 +640,7 @@ def create_monetization_brochure():
     <b>Marge brute:</b> ~90-95%<br/>
     <b>Volume estimé:</b> 500-1000 créations/mois à terme<br/>
     <b>Revenu mensuel potentiel:</b> 12'500 - 25'000 CHF
-    """, styles['BodyText']))
+    """, styles['TitelliBody']))
     
     story.append(PageBreak())
     
@@ -662,7 +662,7 @@ def create_monetization_brochure():
     story.append(Paragraph("""
     Le service Vidéo Pub IA permet de commander des vidéos publicitaires professionnelles 
     générées par intelligence artificielle. Livraison en ~1 heure.
-    """, styles['BodyText']))
+    """, styles['TitelliBody']))
     
     story.append(Paragraph("Tarification Vidéo Pub", styles['SubSection']))
     
@@ -703,7 +703,7 @@ def create_monetization_brochure():
     <b>Marge brute:</b> ~92-97%<br/>
     <b>Volume estimé:</b> 100-300 vidéos/mois à terme<br/>
     <b>Revenu mensuel potentiel:</b> 20'000 - 60'000 CHF
-    """, styles['BodyText']))
+    """, styles['TitelliBody']))
     
     story.append(PageBreak())
     
@@ -717,7 +717,7 @@ def create_monetization_brochure():
     story.append(Paragraph("""
     Titelli applique des frais de gestion et de transaction sur les paiements effectués 
     via la plateforme, similaire aux modèles Uber Eats ou Deliveroo.
-    """, styles['BodyText']))
+    """, styles['TitelliBody']))
     
     # Commission structure
     commission_data = [
@@ -777,7 +777,7 @@ def create_monetization_brochure():
     <b>Avantage Titelli:</b> Commissions nettement inférieures à la concurrence, 
     ce qui permet aux entreprises de préserver leurs marges tout en bénéficiant 
     d'une visibilité accrue.
-    """, styles['BodyText']))
+    """, styles['TitelliBody']))
     
     story.append(PageBreak())
     
@@ -791,7 +791,7 @@ def create_monetization_brochure():
     story.append(Paragraph("""
     Le système de Cash-Back Titelli récompense les clients fidèles et incite à la 
     récurrence des achats. Chaque achat génère un pourcentage de retour en crédit Titelli.
-    """, styles['BodyText']))
+    """, styles['TitelliBody']))
     
     cashback_data = [
         ['Forfait entreprise', 'Taux Cash-Back', 'Exemple (achat 100 CHF)'],
@@ -821,7 +821,7 @@ def create_monetization_brochure():
     story.append(Paragraph("Impact sur la fidélisation", styles['SubSection']))
     story.append(Paragraph("""
     Le Cash-Back crée un cercle vertueux:
-    """, styles['BodyText']))
+    """, styles['TitelliBody']))
     
     fidelisation_points = [
         "→ Le client accumule des crédits à chaque achat",
@@ -854,7 +854,7 @@ def create_monetization_brochure():
     story.append(Paragraph("""
     Le code <b>BIENVENUE100</b> offre 100 CHF de crédit publicitaire aux nouvelles entreprises. 
     Cette stratégie vise à:
-    """, styles['BodyText']))
+    """, styles['TitelliBody']))
     
     acquisition_points = [
         "Réduire la barrière à l'entrée pour les nouvelles entreprises",
@@ -877,7 +877,7 @@ def create_monetization_brochure():
     <b>CAC effectif:</b> ~40-70 CHF par client converti<br/>
     <b>LTV moyenne d'un abonné:</b> 3'000-6'000 CHF<br/>
     <b>Ratio LTV/CAC:</b> 50-150x (excellent)
-    """, styles['BodyText']))
+    """, styles['TitelliBody']))
     
     story.append(PageBreak())
     
@@ -955,7 +955,7 @@ def create_monetization_brochure():
     par l'utilisation intensive de l'IA pour la création de contenu publicitaire, réduisant 
     drastiquement les coûts de production tout en offrant une valeur ajoutée significative 
     aux entreprises partenaires.
-    """, styles['BodyText']))
+    """, styles['TitelliBody']))
     
     story.append(Spacer(1, 1*cm))
     story.append(Paragraph("© 2026 Titelli SA - Tous droits réservés", styles['Footer']))
