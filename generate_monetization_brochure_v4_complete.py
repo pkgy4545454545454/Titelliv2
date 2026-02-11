@@ -105,8 +105,9 @@ def create_styles():
 
 
 def add_stats_footer(story, stats, styles):
-    story.append(Spacer(1, 3*mm))
+    story.append(Spacer(1, 4*mm))
     story.append(HRFlowable(width="100%", thickness=0.5, color=BLUE_MEDIUM))
+    story.append(Spacer(1, 1*mm))
     stats_table = Table([
         [Paragraph("<b>STATS:</b>", styles['Stats']), Paragraph(stats, styles['Stats'])]
     ], colWidths=[1.5*cm, 15*cm])
@@ -114,8 +115,8 @@ def add_stats_footer(story, stats, styles):
         ('BACKGROUND', (0, 0), (0, 0), BLUE_PALE),
         ('BACKGROUND', (1, 0), (1, 0), GREY_LIGHT),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('TOPPADDING', (0, 0), (-1, -1), 2),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+        ('TOPPADDING', (0, 0), (-1, -1), 3),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
         ('LEFTPADDING', (0, 0), (-1, -1), 3),
     ]))
     story.append(stats_table)
