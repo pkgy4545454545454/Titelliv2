@@ -652,10 +652,11 @@ def generate_brochure():
     ]))
     story.append(comm_table)
     
-    story.append(Spacer(1, 0.3*cm))
+    story.append(Spacer(1, 0.5*cm))
     
     # Comparaison CPM marché
     story.append(Paragraph("◆ Comparaison CPM du marché:", styles['SubSection']))
+    story.append(Spacer(1, 0.2*cm))
     cpm_comparison = [
         ['PLATEFORME', 'CPM MOYEN', 'COMMISSION'],
         ['Instagram Ads', '5-15 CHF', '~30%'],
