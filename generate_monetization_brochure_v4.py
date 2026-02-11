@@ -795,6 +795,7 @@ def generate_brochure_v4():
     create_page2(story, styles)
     create_page3(story, styles)
     create_page4(story, styles)
+    create_page5(story, styles)
     
     doc.build(story)
     print(f"Brochure V4 générée: {OUTPUT_PATH}")
