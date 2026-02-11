@@ -139,8 +139,9 @@ def add_image(story, path, caption, styles, width=13*cm, max_height=5*cm):
                 ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
             ]))
             story.append(img_table)
+            story.append(Spacer(1, 1*mm))
             story.append(Paragraph(f"<i>{caption}</i>", styles['Footer']))
-            story.append(Spacer(1, 2*mm))
+            story.append(Spacer(1, 4*mm))
         except Exception as e:
             print(f"Image error: {e}")
 
