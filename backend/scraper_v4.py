@@ -18,7 +18,7 @@ import httpx
 
 MONGO_URL = os.environ.get('MONGO_URL')
 UPLOADS_DIR = "/app/backend/uploads/enterprises"
-BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://titelli-assets-zip.preview.emergentagent.com")
+BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://marketing-assets-v5.preview.emergentagent.com")
 MAX_ENTERPRISES = 500
 MAX_IMAGES = 20
 

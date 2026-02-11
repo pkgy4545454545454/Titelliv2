@@ -23,7 +23,7 @@ import httpx
 # Configuration
 MONGO_URL = os.environ.get('MONGO_URL')
 UPLOADS_DIR = "/app/backend/uploads/enterprises"
-BASE_URL = "https://titelli-assets-zip.preview.emergentagent.com"
+BASE_URL = "https://marketing-assets-v5.preview.emergentagent.com"
 MAX_ENTERPRISES = 50  # Par batch
 MAX_IMAGES = 15
 

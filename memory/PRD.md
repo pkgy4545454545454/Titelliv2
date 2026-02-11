@@ -302,7 +302,7 @@ Collections principales:
 ---
 
 ## URL Application
-**Production**: https://titelli-assets-zip.preview.emergentagent.com
+**Production**: https://marketing-assets-v5.preview.emergentagent.com
 
 ---
 
