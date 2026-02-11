@@ -293,10 +293,14 @@ def generate_brochure():
     ]))
     
     pillars = Table([[pillar1, pillar2], [pillar3, pillar4]], colWidths=[8.25*cm, 8.25*cm])
-    pillars.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'TOP')]))
+    pillars.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('TOPPADDING', (0, 0), (-1, -1), 3),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+    ]))
     story.append(pillars)
     
-    story.append(Spacer(1, 0.3*cm))
+    story.append(Spacer(1, 0.5*cm))
     story.append(Paragraph("◆ Gestion Entreprise Complète", styles['SubSection']))
     story.append(Paragraph("N'avez-vous pas rêvé de prendre des vacances, lâcher vos comptes et dépenser sans compter !?", styles['Accroche']))
     story.append(Paragraph("Titelli s'occupe de réaliser votre rêve pendant qu'elle rentabilise votre business !", styles['Body']))
