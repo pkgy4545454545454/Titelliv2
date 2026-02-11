@@ -379,4 +379,4 @@ POST /api/gamification/log_action - Logger action (interne)
 ---
 
 **Document généré le:** Février 2026
-**URL Application:** https://marketing-assets-v5.preview.emergentagent.com
+**URL Application:** https://titelli-revenue.preview.emergentagent.com

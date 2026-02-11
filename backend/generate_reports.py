@@ -11,7 +11,7 @@ import os
 
 # Configuration
 UPLOADS_DIR = "/app/backend/uploads"
-BASE_URL = "https://marketing-assets-v5.preview.emergentagent.com"
+BASE_URL = "https://titelli-revenue.preview.emergentagent.com"
 
 class TitelliPDF(FPDF):
     def __init__(self):

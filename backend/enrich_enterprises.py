@@ -21,7 +21,7 @@ from playwright.async_api import async_playwright
 # Configuration
 MONGO_URL = "mongodb+srv://prankgy:Minijetaime1996@cluster0.kwjifsg.mongodb.net/secondevie?retryWrites=true&w=majority&appName=Cluster0"
 UPLOADS_DIR = "/app/backend/uploads/enterprises"
-BASE_URL = "https://marketing-assets-v5.preview.emergentagent.com"
+BASE_URL = "https://titelli-revenue.preview.emergentagent.com"
 MAX_ENTERPRISES = 500  # Enrichir TOUTES les entreprises avec site web valide
 
 # Setup logging

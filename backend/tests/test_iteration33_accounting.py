@@ -14,7 +14,7 @@ import requests
 import os
 from datetime import datetime
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://marketing-assets-v5.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://titelli-revenue.preview.emergentagent.com')
 
 # Admin credentials
 ADMIN_EMAIL = "spa.luxury@titelli.com"
