@@ -817,7 +817,7 @@ def generate_brochure():
     ]))
     story.append(cb_table)
     
-    story.append(Spacer(1, 0.3*cm))
+    story.append(Spacer(1, 0.5*cm))
     
     client_features_left = [
         ("Fiches d'Exigences Clients", "Les fiches regroupent leurs attentes et vous permettent de proposer une expérience client inoubliable !"),
