@@ -466,9 +466,12 @@ def generate_brochure():
     ]))
     story.append(vip_table)
     
+    story.append(Spacer(1, 0.3*cm))
     story.append(Paragraph("« Titelli s'occupe de tout, plus qu'à choisir votre nouvelle vie ! »", styles['Quote']))
+    story.append(Spacer(1, 0.2*cm))
     story.append(Paragraph("<b>Taux Cash-Back VIP:</b> À partir de 20% jusqu'à 99% avec possibilité de combiner système client + système entreprise à partir de 60% !", styles['Body']))
     
+    story.append(Spacer(1, 0.3*cm))
     story.append(Paragraph("◆ Prestations VIP incluses:", styles['SubSection']))
     vip_prestations = [
         "Premium + livraison instantanée | Recrutement personnel instantané",
