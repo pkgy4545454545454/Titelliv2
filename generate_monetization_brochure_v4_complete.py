@@ -894,8 +894,9 @@ def generate_brochure():
     ]))
     story.append(comm_data_table)
     
-    story.append(Spacer(1, 0.2*cm))
+    story.append(Spacer(1, 0.4*cm))
     story.append(Paragraph("◆ Comparaison avec le marché:", styles['SubSection']))
+    story.append(Spacer(1, 0.2*cm))
     
     comparison = [
         ['PLATEFORME', 'COMMISSION', 'FRAIS CLIENT', 'ABONNEMENT'],
