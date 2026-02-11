@@ -871,8 +871,9 @@ def generate_brochure():
     for title, desc in partner_features:
         story.append(Paragraph(f"◆ {title}", styles['SubSection']))
         story.append(Paragraph(desc, styles['BodySmall']))
+        story.append(Spacer(1, 2*mm))
     
-    story.append(Spacer(1, 0.3*cm))
+    story.append(Spacer(1, 0.4*cm))
     story.append(Paragraph("Commissions & Transactions", styles['SectionTitle']))
     
     commission_data = [
