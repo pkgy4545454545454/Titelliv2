@@ -763,13 +763,17 @@ def generate_brochure():
         right_col.append(Spacer(1, 2*mm))
     
     more_table = Table([[left_col, right_col]], colWidths=[8.25*cm, 8.25*cm])
-    more_table.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'TOP')]))
+    more_table.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+    ]))
     story.append(more_table)
     
-    story.append(Spacer(1, 0.3*cm))
+    story.append(Spacer(1, 0.5*cm))
     
     # Marketing & Visibilité
     story.append(Paragraph("Marketing & Visibilité", styles['SubSection']))
+    story.append(Spacer(1, 0.2*cm))
     marketing_features = [
         "◆ Référencement Préférentiel: Apparaître aux bons endroits au bon moment",
         "◆ Offres Illimitées: Fidéliser clientèle et attirer de nouveaux clients",
