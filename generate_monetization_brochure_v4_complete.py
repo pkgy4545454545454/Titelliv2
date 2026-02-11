@@ -844,9 +844,13 @@ def generate_brochure():
         right_client.append(Spacer(1, 2*mm))
     
     client_table = Table([[left_client, right_client]], colWidths=[8.25*cm, 8.25*cm])
-    client_table.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'TOP')]))
+    client_table.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+    ]))
     story.append(client_table)
     
+    story.append(Spacer(1, 0.3*cm))
     story.append(Paragraph("« CE QUE VOUS VOULEZ, OÙ VOUS LE VOULEZ, QUAND VOUS LE VOULEZ ET COMME VOUS LE VOULEZ ! »", styles['Quote']))
     
     add_stats_footer(story, "Programme fidélité: 1-3% | Apps concurrentes: 0-5% | Titelli: 10-20% | Rétention: +45% | Panier: +22%", styles)
