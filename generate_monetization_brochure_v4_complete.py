@@ -423,7 +423,7 @@ def generate_brochure():
     ]))
     story.append(opti_table)
     
-    story.append(Spacer(1, 0.2*cm))
+    story.append(Spacer(1, 0.4*cm))
     story.append(Paragraph("◆ Optimisation Fiscale", styles['SubSection']))
     story.append(Paragraph("Un expert comptable et juridique se chargent d'une optimisation fiscale reflétant directement sur vos bénéfices.", styles['Body']))
     
