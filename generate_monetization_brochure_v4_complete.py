@@ -967,7 +967,7 @@ def generate_brochure():
     for b in promo_benefits:
         story.append(Paragraph(b, styles['Feature']))
     
-    story.append(Spacer(1, 0.3*cm))
+    story.append(Spacer(1, 0.5*cm))
     
     cac_data = [
         ['INDICATEUR', 'VALEUR'],
