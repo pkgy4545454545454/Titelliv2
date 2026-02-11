@@ -628,7 +628,7 @@ def generate_brochure():
     ]))
     story.append(cpm_table)
     
-    story.append(Spacer(1, 0.3*cm))
+    story.append(Spacer(1, 0.5*cm))
     
     # Commission 45%
     commission_box = [
