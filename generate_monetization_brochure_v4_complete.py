@@ -721,9 +721,13 @@ def generate_brochure():
         right_content.append(Spacer(1, 2*mm))
     
     features_table = Table([[left_content, right_content]], colWidths=[8.25*cm, 8.25*cm])
-    features_table.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'TOP')]))
+    features_table.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+    ]))
     story.append(features_table)
     
+    story.append(Spacer(1, 0.4*cm))
     story.append(Paragraph("« Automatisez votre réassort ! »", styles['Quote']))
     
     add_stats_footer(story, "Logiciel gestion: 30-200 CHF/mois | ERP: 500-5'000 CHF/mois | Titelli: tout inclus | Économie: 3'000-15'000 CHF/an", styles)
