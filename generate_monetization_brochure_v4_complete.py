@@ -233,7 +233,7 @@ def generate_brochure():
     ]))
     story.append(vision_table)
     
-    story.append(Spacer(1, 0.3*cm))
+    story.append(Spacer(1, 0.4*cm))
     
     story.append(Paragraph(
         "Titelli voit et croit en le véritable potentiel de votre entreprise ainsi qu'en votre plus-value. "
