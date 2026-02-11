@@ -832,9 +832,74 @@ def generate_brochure_v3():
     <b>Volume:</b> 100-300 vidéos/mois | <b>Revenu potentiel:</b> 20'000-60'000 CHF/mois
     """, styles['Body']))
     
+    story.append(Spacer(1, 0.3*cm))
+    story.append(Paragraph("◆ Glossaire Publicitaire & Rémunération:", styles['SubSection']))
+    
+    # CPM explanation table
+    cpm_data = [
+        ['TERME', 'SIGNIFICATION', 'EXPLICATION'],
+        ['CPM', 'Coût Pour Mille', 'Prix payé pour 1\'000 affichages de votre publicité. Ex: CPM de 5 CHF = 5 CHF pour 1\'000 vues.'],
+        ['CPC', 'Coût Par Clic', 'Prix payé uniquement quand un utilisateur clique sur votre publicité.'],
+        ['CPA', 'Coût Par Action', 'Prix payé quand l\'utilisateur effectue une action (achat, inscription, etc.).'],
+        ['CTR', 'Taux de Clic', 'Pourcentage de personnes qui cliquent après avoir vu la pub. (Clics/Impressions x 100)'],
+        ['ROI', 'Retour sur Invest.', 'Mesure du bénéfice généré par rapport à l\'investissement publicitaire.'],
+        ['Impression', 'Affichage', 'Chaque fois que votre publicité est affichée à un utilisateur.'],
+        ['Reach', 'Portée', 'Nombre de personnes uniques ayant vu votre publicité.'],
+    ]
+    cpm_table = Table(cpm_data, colWidths=[2.2*cm, 3*cm, 11.3*cm])
+    cpm_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), BLUE),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 7),
+        ('ALIGN', (0, 0), (1, -1), 'CENTER'),
+        ('ALIGN', (2, 0), (2, -1), 'LEFT'),
+        ('GRID', (0, 0), (-1, -1), 0.5, GOLD),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 3),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+        ('LEFTPADDING', (2, 0), (2, -1), 5),
+    ]))
+    story.append(cpm_table)
+    
+    story.append(Spacer(1, 0.4*cm))
+    
+    # Commission Titelli 45%
+    commission_box = [
+        ['⚠️ COMMISSION PARTENARIAT & RÉMUNÉRATION VIDÉO'],
+        ['Si vous concluez un partenariat sur Titelli ou si vous percevez une rémunération sur une vidéo '
+         'diffusée sur la plateforme Titelli, <b>Titelli prélève une commission de 45%</b> sur les revenus générés. '
+         'Cette commission couvre les services de mise en relation, la diffusion, le ciblage algorithmique, '
+         'et l\'infrastructure technique de la plateforme.'],
+    ]
+    comm_box_table = Table(commission_box, colWidths=[16.5*cm])
+    comm_box_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (0, 0), DARK_GOLD),
+        ('TEXTCOLOR', (0, 0), (0, 0), colors.white),
+        ('FONTNAME', (0, 0), (0, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (0, 0), 9),
+        ('ALIGN', (0, 0), (0, 0), 'CENTER'),
+        ('BACKGROUND', (0, 1), (0, 1), LIGHT_GOLD),
+        ('TEXTCOLOR', (0, 1), (0, 1), DARK),
+        ('FONTSIZE', (0, 1), (0, 1), 8),
+        ('ALIGN', (0, 1), (0, 1), 'LEFT'),
+        ('BOX', (0, 0), (-1, -1), 2, GOLD),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('LEFTPADDING', (0, 0), (-1, -1), 8),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+    ]))
+    story.append(comm_box_table)
+    
+    story.append(Spacer(1, 0.2*cm))
+    story.append(Paragraph("""
+    <b>Exemple:</b> Vous générez 1'000 CHF de revenus via un partenariat vidéo → Vous percevez 550 CHF, Titelli retient 450 CHF.
+    """, styles['Small']))
+    
     add_stats_footer(story,
-        "Production vidéo traditionnelle: 1'500-10'000 CHF pour 15-30s | Agence vidéo: 500-2'000 CHF/jour | "
-        "Titelli IA: 130-400 CHF | Économie: 70-95% | Délai: 1h vs 1-4 semaines", styles)
+        "CPM moyen Instagram: 5-15 CHF | CPM YouTube: 8-20 CHF | CPM TikTok: 3-10 CHF | "
+        "Commission plateforme influenceurs: 20-50% | Titelli: 45% (services complets inclus)", styles)
     
     story.append(PageBreak())
     
