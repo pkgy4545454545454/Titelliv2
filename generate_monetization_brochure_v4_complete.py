@@ -163,11 +163,16 @@ def generate_brochure():
     add_image(story, f"{SCREENSHOTS_DIR}/homepage.jpeg", "Plateforme Titelli", styles, width=14*cm, max_height=6*cm)
     
     title_table = Table([
-        [Paragraph("<b>TITELLI</b>", ParagraphStyle('T', fontSize=28, textColor=GOLD_DARK, alignment=TA_CENTER, fontName='Helvetica-Bold'))],
-        [Paragraph("Guide Complet de Monétisation V4", ParagraphStyle('S', fontSize=12, textColor=BLUE_DARK, alignment=TA_CENTER, fontName='Helvetica-Bold'))],
-        [Paragraph('"Connectez-vous véritablement à vos clients"', styles['Slogan'])]
+        [Paragraph("<b>TITELLI</b>", ParagraphStyle('T', fontSize=26, textColor=GOLD_DARK, alignment=TA_CENTER, fontName='Helvetica-Bold', leading=30))],
+        [Paragraph("Guide Complet de Monétisation V4", ParagraphStyle('S', fontSize=12, textColor=BLUE_DARK, alignment=TA_CENTER, fontName='Helvetica-Bold', leading=16))],
+        [Paragraph('"Connectez-vous véritablement à vos clients"', ParagraphStyle('SL', fontSize=10, textColor=BLUE_MEDIUM, alignment=TA_CENTER, fontName='Helvetica-BoldOblique', leading=14))]
     ], colWidths=[PAGE_WIDTH - 2*MARGIN])
-    title_table.setStyle(TableStyle([('ALIGN', (0, 0), (-1, -1), 'CENTER')]))
+    title_table.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+    ]))
     story.append(title_table)
     
     story.append(Spacer(1, 0.3*cm))
