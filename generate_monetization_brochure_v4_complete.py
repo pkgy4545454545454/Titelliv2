@@ -595,7 +595,7 @@ def generate_brochure():
     ]))
     story.append(video_table)
     
-    story.append(Spacer(1, 0.2*cm))
+    story.append(Spacer(1, 0.4*cm))
     story.append(Paragraph("◆ Rentabilité Vidéo Pub:", styles['SubSection']))
     story.append(Paragraph("<b>Coût production IA:</b> ~5-15 CHF | <b>Prix vente moyen:</b> ~200 CHF | <b>Marge:</b> 92-97%", styles['Body']))
     story.append(Paragraph("<b>Volume:</b> 100-300 vidéos/mois | <b>Revenu potentiel:</b> 20'000-60'000 CHF/mois", styles['Body']))
