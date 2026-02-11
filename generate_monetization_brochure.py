@@ -69,7 +69,7 @@ def create_styles():
     ))
     
     styles.add(ParagraphStyle(
-        name='BodyText',
+        name='TitelliBody',
         parent=styles['Normal'],
         fontSize=10,
         textColor=colors.black,
