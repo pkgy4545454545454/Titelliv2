@@ -920,6 +920,7 @@ def generate_brochure():
     ]))
     story.append(comp_table)
     
+    story.append(Spacer(1, 0.3*cm))
     story.append(Paragraph("<b>Avantage Titelli:</b> Commissions nettement inférieures (5-15% vs 25-35%), permettant aux entreprises de préserver leurs marges.", styles['Body']))
     
     add_stats_footer(story, "Restaurant CA via apps: 15'000 CHF | Uber Eats (30%): 4'500 CHF | Titelli (10%): 1'750 CHF | Économie: 33'000 CHF/an", styles)
