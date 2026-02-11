@@ -345,7 +345,7 @@ def generate_brochure():
     ]))
     story.append(std_table)
     
-    story.append(Spacer(1, 0.3*cm))
+    story.append(Spacer(1, 0.5*cm))
     
     # GUEST
     story.append(Paragraph("◆ Forfait GUEST — 250 CHF/mois ⭐ POPULAIRE", styles['SubSection']))
