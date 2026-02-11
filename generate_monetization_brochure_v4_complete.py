@@ -42,48 +42,48 @@ def create_styles():
     styles = getSampleStyleSheet()
     
     styles.add(ParagraphStyle(
-        name='MainTitle', fontSize=24, textColor=GOLD_DARK, alignment=TA_CENTER,
-        fontName='Helvetica-Bold', spaceAfter=8, leading=28
+        name='MainTitle', fontSize=22, textColor=GOLD_DARK, alignment=TA_CENTER,
+        fontName='Helvetica-Bold', spaceAfter=12, spaceBefore=6, leading=26
     ))
     
     styles.add(ParagraphStyle(
-        name='SectionTitle', fontSize=14, textColor=BLUE_DARK, alignment=TA_LEFT,
-        fontName='Helvetica-Bold', spaceAfter=6, spaceBefore=10, leading=18
+        name='SectionTitle', fontSize=13, textColor=BLUE_DARK, alignment=TA_LEFT,
+        fontName='Helvetica-Bold', spaceAfter=10, spaceBefore=14, leading=16
     ))
     
     styles.add(ParagraphStyle(
-        name='SubSection', fontSize=11, textColor=GOLD_DARK, alignment=TA_LEFT,
-        fontName='Helvetica-Bold', spaceAfter=3, spaceBefore=6, leading=13
+        name='SubSection', fontSize=10, textColor=GOLD_DARK, alignment=TA_LEFT,
+        fontName='Helvetica-Bold', spaceAfter=6, spaceBefore=10, leading=12
     ))
     
     styles.add(ParagraphStyle(
         name='Body', fontSize=8, textColor=BLACK, alignment=TA_JUSTIFY,
-        fontName='Helvetica', spaceAfter=4, leading=10
+        fontName='Helvetica', spaceAfter=6, spaceBefore=2, leading=11
     ))
     
     styles.add(ParagraphStyle(
         name='BodySmall', fontSize=7, textColor=GREY_DARK, alignment=TA_JUSTIFY,
-        fontName='Helvetica', spaceAfter=3, leading=9
+        fontName='Helvetica', spaceAfter=5, spaceBefore=2, leading=10
     ))
     
     styles.add(ParagraphStyle(
         name='Slogan', fontSize=10, textColor=BLUE_MEDIUM, alignment=TA_CENTER,
-        fontName='Helvetica-BoldOblique', spaceAfter=6, spaceBefore=4, leading=12
+        fontName='Helvetica-BoldOblique', spaceAfter=10, spaceBefore=6, leading=13
     ))
     
     styles.add(ParagraphStyle(
         name='Quote', fontSize=8, textColor=GOLD_DARK, alignment=TA_CENTER,
-        fontName='Helvetica-Oblique', spaceAfter=4, spaceBefore=3, leading=10
+        fontName='Helvetica-Oblique', spaceAfter=8, spaceBefore=6, leading=11
     ))
     
     styles.add(ParagraphStyle(
         name='Feature', fontSize=7, textColor=BLACK, alignment=TA_LEFT,
-        fontName='Helvetica', leftIndent=5, spaceAfter=2, leading=9
+        fontName='Helvetica', leftIndent=5, spaceAfter=4, spaceBefore=1, leading=10
     ))
     
     styles.add(ParagraphStyle(
         name='Accroche', fontSize=7, textColor=GREY_MEDIUM, alignment=TA_LEFT,
-        fontName='Helvetica-Oblique', spaceAfter=3, leading=9
+        fontName='Helvetica-Oblique', spaceAfter=5, spaceBefore=2, leading=10
     ))
     
     styles.add(ParagraphStyle(
@@ -93,12 +93,12 @@ def create_styles():
     
     styles.add(ParagraphStyle(
         name='Footer', fontSize=6, textColor=GREY_MEDIUM, alignment=TA_CENTER,
-        fontName='Helvetica'
+        fontName='Helvetica', spaceAfter=3, spaceBefore=3
     ))
     
     styles.add(ParagraphStyle(
         name='Contact', fontSize=8, textColor=WHITE, alignment=TA_LEFT,
-        fontName='Helvetica', spaceAfter=2, leading=10
+        fontName='Helvetica', spaceAfter=3, leading=11
     ))
     
     return styles
