@@ -951,10 +951,11 @@ def generate_brochure():
     ]))
     story.append(legal_table)
     
-    story.append(Spacer(1, 0.5*cm))
+    story.append(Spacer(1, 0.6*cm))
     
     # Code promo
     story.append(Paragraph("◆ Code Promo Bienvenue", styles['SubSection']))
+    story.append(Spacer(1, 0.1*cm))
     story.append(Paragraph("Le code <b>BIENVENUE100</b> offre 100 CHF de crédit publicitaire aux nouvelles entreprises.", styles['Body']))
     
     promo_benefits = [
