@@ -180,10 +180,10 @@ def generate_manager_contract():
         "Le Manager exercera son activité selon les modalités suivantes :",
         styles['Body']
     ))
-    story.append(Paragraph("• <b>Jours de travail :</b> 5 jours sur 7 (du lundi au vendredi)", styles['Bullet']))
-    story.append(Paragraph("• <b>Horaires :</b> 8 heures par jour, de 9h00 à 18h00 ou 19h00", styles['Bullet']))
-    story.append(Paragraph("• <b>Pause :</b> Minimum 1 heure de pause obligatoire", styles['Bullet']))
-    story.append(Paragraph("• <b>Réunions :</b> Présence obligatoire aux réunions hebdomadaires", styles['Bullet']))
+    story.append(Paragraph("• <b>Jours de travail :</b> 5 jours sur 7 (du lundi au vendredi)", styles['BulletItem']))
+    story.append(Paragraph("• <b>Horaires :</b> 8 heures par jour, de 9h00 à 18h00 ou 19h00", styles['BulletItem']))
+    story.append(Paragraph("• <b>Pause :</b> Minimum 1 heure de pause obligatoire", styles['BulletItem']))
+    story.append(Paragraph("• <b>Réunions :</b> Présence obligatoire aux réunions hebdomadaires", styles['BulletItem']))
     
     # Article 4 - Rémunération
     story.append(Paragraph("ARTICLE 4 – RÉMUNÉRATION", styles['SectionTitle']))
@@ -200,9 +200,9 @@ def generate_manager_contract():
         "En sus du salaire fixe, le Manager perçoit une commission sur les ventes de son équipe :",
         styles['Body']
     ))
-    story.append(Paragraph("• <b>CHF 10.-</b> par vente réalisée par chacune de ses recrues", styles['Bullet']))
-    story.append(Paragraph("• <b>CHF 20.-</b> par vente au-delà de l'objectif de 25 ventes par commercial", styles['Bullet']))
-    story.append(Paragraph("• Le Manager peut recruter jusqu'à <b>10 commerciaux</b> maximum", styles['Bullet']))
+    story.append(Paragraph("• <b>CHF 10.-</b> par vente réalisée par chacune de ses recrues", styles['BulletItem']))
+    story.append(Paragraph("• <b>CHF 20.-</b> par vente au-delà de l'objectif de 25 ventes par commercial", styles['BulletItem']))
+    story.append(Paragraph("• Le Manager peut recruter jusqu'à <b>10 commerciaux</b> maximum", styles['BulletItem']))
     
     story.append(Paragraph("<b>4.3 Commissions personnelles (au-delà de 25 ventes)</b>", styles['SubTitle']))
     story.append(Paragraph(
@@ -272,9 +272,9 @@ def generate_manager_contract():
         "Les performances accomplies avant l'activation des commissions sont répertoriées pour :",
         styles['Body']
     ))
-    story.append(Paragraph("• <b>Promotions :</b> Évaluations tous les 3 mois", styles['Bullet']))
-    story.append(Paragraph("• <b>Distribution des bonus :</b> Tous les 6 mois", styles['Bullet']))
-    story.append(Paragraph("• <b>Bonus maximal :</b> CHF 15'000.- pour le meilleur performeur", styles['Bullet']))
+    story.append(Paragraph("• <b>Promotions :</b> Évaluations tous les 3 mois", styles['BulletItem']))
+    story.append(Paragraph("• <b>Distribution des bonus :</b> Tous les 6 mois", styles['BulletItem']))
+    story.append(Paragraph("• <b>Bonus maximal :</b> CHF 15'000.- pour le meilleur performeur", styles['BulletItem']))
     
     # Article 6 - Confidentialité
     story.append(Paragraph("ARTICLE 6 – CONFIDENTIALITÉ ET NON-CONCURRENCE", styles['SectionTitle']))
@@ -448,7 +448,7 @@ def generate_commercial_contract():
         "Fournir ses propres outils pour se déplacer et contacter les clients",
     ]
     for o in obligations:
-        story.append(Paragraph(f"• {o}", styles['Bullet']))
+        story.append(Paragraph(f"• {o}", styles['BulletItem']))
     
     # Article 3 - Horaires
     story.append(Paragraph("ARTICLE 3 – ORGANISATION DU TRAVAIL", styles['SectionTitle']))
@@ -456,10 +456,10 @@ def generate_commercial_contract():
         "Le Commercial exercera son activité selon les modalités suivantes :",
         styles['Body']
     ))
-    story.append(Paragraph("• <b>Jours de travail :</b> 5 jours sur 7 (du lundi au vendredi)", styles['Bullet']))
-    story.append(Paragraph("• <b>Horaires :</b> 8 heures par jour, de 9h00 à 18h00 ou 19h00", styles['Bullet']))
-    story.append(Paragraph("• <b>Pause :</b> Minimum 1 heure de pause obligatoire", styles['Bullet']))
-    story.append(Paragraph("• <b>Réunions :</b> Présence obligatoire 1 fois par semaine", styles['Bullet']))
+    story.append(Paragraph("• <b>Jours de travail :</b> 5 jours sur 7 (du lundi au vendredi)", styles['BulletItem']))
+    story.append(Paragraph("• <b>Horaires :</b> 8 heures par jour, de 9h00 à 18h00 ou 19h00", styles['BulletItem']))
+    story.append(Paragraph("• <b>Pause :</b> Minimum 1 heure de pause obligatoire", styles['BulletItem']))
+    story.append(Paragraph("• <b>Réunions :</b> Présence obligatoire 1 fois par semaine", styles['BulletItem']))
     
     story.append(PageBreak())
     
@@ -539,9 +539,9 @@ def generate_commercial_contract():
         "Les performances accomplies avant l'activation des commissions sont répertoriées pour :",
         styles['Body']
     ))
-    story.append(Paragraph("• <b>Promotions :</b> Évaluations tous les 3 mois", styles['Bullet']))
-    story.append(Paragraph("• <b>Distribution des bonus :</b> Tous les 6 mois", styles['Bullet']))
-    story.append(Paragraph("• <b>Bonus maximal :</b> CHF 15'000.- pour le meilleur performeur", styles['Bullet']))
+    story.append(Paragraph("• <b>Promotions :</b> Évaluations tous les 3 mois", styles['BulletItem']))
+    story.append(Paragraph("• <b>Distribution des bonus :</b> Tous les 6 mois", styles['BulletItem']))
+    story.append(Paragraph("• <b>Bonus maximal :</b> CHF 15'000.- pour le meilleur performeur", styles['BulletItem']))
     
     # Article 6 - Confidentialité
     story.append(Paragraph("ARTICLE 6 – CONFIDENTIALITÉ ET NON-CONCURRENCE", styles['SectionTitle']))
