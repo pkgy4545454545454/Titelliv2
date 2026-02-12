@@ -56,7 +56,7 @@ def create_styles():
     ))
     
     styles.add(ParagraphStyle(
-        name='Bullet', fontSize=9, textColor=BLACK, alignment=TA_LEFT,
+        name='BulletItem', fontSize=9, textColor=BLACK, alignment=TA_LEFT,
         fontName='Helvetica', leftIndent=15, spaceAfter=4, spaceBefore=2, leading=12
     ))
     
