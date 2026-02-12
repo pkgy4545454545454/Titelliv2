@@ -18,7 +18,7 @@ def generate_welcome_video():
     
     prompt = """Cinematic aerial establishing shot of Lausanne city waterfront promenade along Lake Geneva. 
 
-A romantic couple walks hand in hand FROM BEHIND, walking AWAY from the camera along the lakeside path, passing by local shops and cafes with terraces. We see their backs as they stroll together towards the beautiful view of the Swiss Alps mountains in the background across the shimmering blue lake water.
+A romantic couple walks hand in hand FROM BEHIND, walking AWAY from the camera along the lakeside path, passing by local shops and cafes with terraces. The man is wearing an elegant dark coat. We see their backs as they stroll together towards the beautiful view of the Swiss Alps mountains in the background across the shimmering blue lake water.
 
 Local merchants and shop owners visible in their storefronts. Warm golden hour sunlight, European charm atmosphere. The couple walks away from the camera into the scenic landscape.
 
