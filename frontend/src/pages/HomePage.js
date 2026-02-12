@@ -195,7 +195,7 @@ const HomePage = () => {
   };
 
   // Panoramic video URL - Couple walking in Lausanne (Sora 2 generated)
-  const panoramicVideoUrl = `${process.env.REACT_APP_BACKEND_URL}/api/uploads/video_accueil.mp4?v=couple`;
+  const panoramicVideoUrl = `${process.env.REACT_APP_BACKEND_URL}/api/uploads/video_accueil_couple_lausanne.mp4`;
   const heroImage = 'https://images.unsplash.com/photo-1733950489642-bd1a7c3e69bb?w=1920&q=80';
 
   const mainCategories = [
