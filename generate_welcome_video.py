@@ -34,7 +34,7 @@ def generate_welcome_video():
     video_bytes = video_gen.text_to_video(
         prompt=prompt,
         model="sora-2",
-        size="1792x1024",  # Format cinématique widescreen
+        size="1280x720",  # Format HD widescreen
         duration=8,  # 8 secondes pour une belle intro
         max_wait_time=900
     )
