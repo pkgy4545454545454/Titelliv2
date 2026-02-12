@@ -170,7 +170,7 @@ def generate_manager_contract():
         "Fournir ses propres outils pour se déplacer et contacter les clients",
     ]
     for m in missions:
-        story.append(Paragraph(f"• {m}", styles['Bullet']))
+        story.append(Paragraph(f"• {m}", styles['BulletItem']))
     
     story.append(PageBreak())
     
