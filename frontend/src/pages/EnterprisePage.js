@@ -749,14 +749,56 @@ const EnterprisePage = () => {
                       {mediaGallery.photos.map((photo, index) => (
                         <div 
                           key={photo.id || index} 
-                          className="aspect-square rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity border border-white/10 hover:border-[#0047AB]/50"
-                          onClick={() => setSelectedMedia({ type: 'photo', url: getImageUrl(photo.url) })}
+                          className="relative aspect-square rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity border border-white/10 hover:border-[#0047AB]/50 group"
+                          onClick={() => setSelectedMedia({ type: 'photo', url: getImageUrl(photo.url), index })}
                         >
                           <img 
                             src={getImageUrl(photo.url)} 
                             alt={photo.title || `Photo ${index + 1}`}
                             className="w-full h-full object-cover"
                           />
+                          
+                          {/* Tags on photo */}
+                          {(photoTags[index] || []).map((tag, tagIdx) => (
+                            <Link
+                              key={tagIdx}
+                              to={tag.link}
+                              className="absolute group/tag"
+                              style={{ left: `${tag.x}%`, top: `${tag.y}%`, transform: 'translate(-50%, -50%)' }}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {/* Tag dot */}
+                              <div className={`w-6 h-6 rounded-full border-2 border-white shadow-lg flex items-center justify-center cursor-pointer hover:scale-110 transition-transform ${
+                                tag.type === 'client' ? 'bg-[#0047AB]' : 
+                                tag.type === 'product' ? 'bg-[#D4AF37]' : 'bg-green-500'
+                              }`}>
+                                {tag.type === 'client' ? (
+                                  <UserCircle className="w-3 h-3 text-white" />
+                                ) : tag.type === 'product' ? (
+                                  <Package className="w-3 h-3 text-white" />
+                                ) : (
+                                  <Sparkles className="w-3 h-3 text-white" />
+                                )}
+                              </div>
+                              
+                              {/* Tag tooltip on hover */}
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover/tag:opacity-100 transition-opacity pointer-events-none z-20">
+                                <div className="bg-black/90 backdrop-blur-sm rounded-lg px-3 py-2 whitespace-nowrap border border-white/10 shadow-xl">
+                                  <p className="text-white text-sm font-medium">{tag.name}</p>
+                                  <p className="text-xs text-gray-400 capitalize">{tag.type === 'product' ? 'Produit' : tag.type === 'service' ? 'Service' : 'Client'}</p>
+                                </div>
+                                <div className="w-3 h-3 bg-black/90 rotate-45 absolute -bottom-1.5 left-1/2 -translate-x-1/2 border-r border-b border-white/10" />
+                              </div>
+                            </Link>
+                          ))}
+                          
+                          {/* Tags count badge */}
+                          {(photoTags[index] || []).length > 0 && (
+                            <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
+                              <Package className="w-3 h-3 text-[#D4AF37]" />
+                              <span className="text-xs text-white">{photoTags[index].length}</span>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
