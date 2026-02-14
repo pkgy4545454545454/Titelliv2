@@ -277,7 +277,7 @@ const HomePage = () => {
       </section>
 
       {/* Transition dégradé noir vers sections */}
-      <div className="relative h-24 bg-gradient-to-b from-black via-[#080808] to-[#050505]" />
+      <div className="relative h-32 bg-gradient-to-b from-black to-[#050505]" />
 
       {/* Services Section - Dark with subtle gradient */}
       <section className="py-20 md:py-28 relative overflow-hidden" data-testid="services-section">
