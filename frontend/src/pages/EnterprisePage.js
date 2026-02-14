@@ -234,7 +234,6 @@ const EnterprisePage = () => {
     { id: 'presentation', label: 'Présentation' },
     { id: 'services', label: 'Services' },
     { id: 'produits', label: 'Produits' },
-    { id: 'photos', label: 'Photos/Vidéos' },
     { id: 'formations', label: 'Formations' },
     { id: 'emplois', label: 'Offres d\'emploi' },
     { id: 'contact', label: 'Contact' },

@@ -168,7 +168,7 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo statique Titelli */}
-          <Link to="/" className="flex items-center gap-2" data-testid="logo-link">
+          <Link to="/" className="flex items-center" data-testid="logo-link">
             <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-[#0047AB]/30 bg-black flex items-center justify-center">
               <img 
                 src="/logo_titelli.png" 
@@ -176,9 +176,6 @@ const Header = () => {
                 className="w-8 h-8 object-contain"
               />
             </div>
-            <span className="font-semibold text-lg hidden sm:block" style={{ fontFamily: 'Playfair Display, serif' }}>
-              Titelli
-            </span>
           </Link>
 
           {/* Desktop Navigation */}
