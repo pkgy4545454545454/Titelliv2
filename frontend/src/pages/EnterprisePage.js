@@ -149,6 +149,9 @@ const EnterprisePage = () => {
         }));
         setMediaGallery({ photos, videos });
         
+        // Extract photo tags
+        setPhotoTags(response.data.photo_tags || {});
+        
         // Fetch enterprise trainings
         try {
           const trainingsRes = await trainingsAPI.listAll();
