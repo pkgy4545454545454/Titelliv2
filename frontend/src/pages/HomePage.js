@@ -277,9 +277,10 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Transition dégradé noir vers sections */}
-      <div className="relative">
-        <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black to-transparent -mt-1 z-10" />
+      {/* Transition dégradé noir vers blanc */}
+      <div className="relative bg-gradient-to-b from-black via-[#0a0a0a] to-white pb-0">
+        {/* Petite zone de transition */}
+        <div className="h-32" />
       </div>
 
       {/* Services Section - Blue Background */}
