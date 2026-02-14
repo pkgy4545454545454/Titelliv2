@@ -15,25 +15,10 @@ GOLD_TEXT = Color(0.75, 0.72, 0.55)  # Gold/champagne color for NOM
 LIGHT_TEXT = Color(0.6, 0.6, 0.6)  # Light gray for other text
 WHITE = Color(1, 1, 1)
 
-def draw_geometric_pattern(c, width, height):
-    """Draw subtle geometric pattern on black background"""
-    c.setFillColor(BLACK_BG)
+def draw_black_background(c, width, height):
+    """Draw solid black background"""
+    c.setFillColor(black)
     c.rect(0, 0, width, height, fill=1, stroke=0)
-    
-    # Draw subtle geometric pattern (darker lines on black)
-    pattern_color = Color(0.12, 0.12, 0.12)
-    c.setStrokeColor(pattern_color)
-    c.setLineWidth(0.3)
-    
-    # Create interlocking geometric pattern
-    spacing = 4 * mm
-    for x in range(0, int(width / spacing) + 2):
-        for y in range(0, int(height / spacing) + 2):
-            px = x * spacing
-            py = y * spacing
-            # Draw small geometric shapes
-            c.rect(px, py, spacing * 0.6, spacing * 0.6, fill=0, stroke=1)
-            c.rect(px + spacing * 0.2, py + spacing * 0.2, spacing * 0.4, spacing * 0.4, fill=0, stroke=1)
 
 def draw_logo_placeholder(c, x, y, size):
     """Draw white logo placeholder square"""
