@@ -249,7 +249,7 @@ const AuthPage = () => {
         
         <div className="absolute inset-0 flex flex-col justify-center px-12 z-10">
           <Link to="/" className="flex items-center gap-3 mb-8">
-            <div className="logo-circle">T</div>
+            <img src="/logo_titelli.png" alt="Titelli" className="w-12 h-12 object-contain" />
             <span className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
               Titelli
             </span>
