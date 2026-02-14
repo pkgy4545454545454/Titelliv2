@@ -295,7 +295,7 @@ const AuthPage = () => {
           </Link>
 
           <div className="lg:hidden flex items-center gap-3 mb-8">
-            <div className="logo-circle">T</div>
+            <img src="/logo_titelli.png" alt="Titelli" className="w-10 h-10 object-contain" />
             <span className="text-xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
               Titelli
             </span>
