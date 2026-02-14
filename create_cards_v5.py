@@ -24,7 +24,7 @@ def create_front_card(c, is_white_version=False):
         c.setFillColor(white)
         c.rect(0, 0, CARD_WIDTH, CARD_HEIGHT, fill=1, stroke=0)
         # Logo noir pour fond blanc
-        logo = ImageReader("/app/backend/uploads/logo_titelli_noir.png")
+        logo = ImageReader("/app/backend/uploads/logo_titelli_noir_v2.png")
     else:
         c.setFillColor(black)
         c.rect(0, 0, CARD_WIDTH, CARD_HEIGHT, fill=1, stroke=0)
