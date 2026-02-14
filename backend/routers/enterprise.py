@@ -74,6 +74,7 @@ class ReviewCreate(BaseModel):
 @router.post("/enterprises")
 async def create_enterprise(data: EnterpriseCreate, current_user: dict = Depends(get_current_user)):
     """Create a new enterprise profile"""
+    print(f"DEBUG: user_type = {current_user.get('user_type')}, allowed = ['enterprise', 'entreprise', 'admin']")
     if current_user.get("user_type") not in ["enterprise", "entreprise", "admin"]:
         raise HTTPException(status_code=403, detail="Seules les entreprises peuvent créer un profil")
     
