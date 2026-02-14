@@ -3,7 +3,38 @@
 ## Overview
 Titelli est une plateforme de social commerce régionale pour les services et produits en Suisse (région de Lausanne). Elle connecte les entreprises locales avec les clients pour des services comme la beauté, le bien-être, les restaurants et le commerce de luxe.
 
-## Last Update: 6 Février 2026
+## Last Update: 14 Février 2026
+
+### Session Progress - 14 Février 2026 (En cours)
+
+#### ✅ Bugs Corrigés
+
+1. **Header - Mot "Titelli" supprimé**
+   - Le texte "Titelli" a été retiré du header
+   - Seul le logo reste visible
+
+2. **Galerie média déplacée sur la page principale**
+   - La galerie Photos/Vidéos est maintenant affichée directement sous "À propos" sur la page entreprise
+   - L'onglet "Photos/Vidéos" a été supprimé des tabs
+   - Tabs restants : Présentation, Services, Produits, Formations, Offres d'emploi, Contact
+
+3. **Tags cliquables fonctionnels**
+   - Les tags sur les images de la galerie sont maintenant cliquables
+   - Clic sur un tag redirige vers la page du produit/service/client tagué
+   - Tooltip amélioré avec indication "Cliquer pour voir →"
+   - Route `/item/:id` ajoutée pour compatibilité avec les liens existants
+
+#### Fichiers modifiés
+- `/app/frontend/src/components/Header.js` - Suppression texte "Titelli"
+- `/app/frontend/src/pages/EnterprisePage.js` - Galerie sur page principale + tags cliquables
+- `/app/frontend/src/App.js` - Ajout route `/item/:id`
+
+#### Compte de test pour vérification
+- **Email**: `boutique.demo@titelli.com`
+- **Password**: `Demo123!`
+- **Page entreprise test**: `/entreprise/276fde72-8086-4b65-8e15-13ff8e263698`
+
+---
 
 ### Session Progress - 6 Février 2026 (Complète)
 
