@@ -229,10 +229,20 @@ const HomePage = () => {
             className="absolute inset-0 w-full h-full object-cover -z-10"
           />
           <div className="panoramic-overlay absolute inset-0" />
+          {/* Gradient noir en bas de la vidéo */}
+          <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black via-black/80 to-transparent" />
         </div>
 
         {/* Hero Content */}
         <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4 pt-20">
+          {/* Logo Titelli centré */}
+          <div className="mb-6 animate-fade-in">
+            <img 
+              src="/logo_titelli.png" 
+              alt="Titelli" 
+              className="w-20 h-20 mx-auto object-contain"
+            />
+          </div>
           <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-white mb-6 animate-fade-in" style={{ fontFamily: 'Playfair Display, serif' }}>
             Les meilleurs prestataires<br />
             <span className="gold-gradient">de ta région</span>
@@ -266,6 +276,11 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Transition dégradé noir vers sections */}
+      <div className="relative">
+        <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black to-transparent -mt-1 z-10" />
+      </div>
 
       {/* Services Section - Blue Background */}
       <section className="py-20 md:py-28 section-blue" data-testid="services-section">
