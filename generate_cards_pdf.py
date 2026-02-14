@@ -59,8 +59,8 @@ def draw_back_card(c, x, y, is_white_version=False):
     else:
         c.setFillColor(black)
         c.rect(x, y, CARD_WIDTH, CARD_HEIGHT, fill=1, stroke=0)
-        text_color_main = GOLD_TEXT
-        text_color_secondary = LIGHT_TEXT
+        text_color_main = white  # Changed to WHITE instead of gold
+        text_color_secondary = Color(0.85, 0.85, 0.85)  # Light white/gray
     
     # Margins
     left_margin = x + 10 * mm
