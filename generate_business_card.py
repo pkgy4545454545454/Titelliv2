@@ -52,36 +52,29 @@ def create_business_card(output_path):
     """Create the business card PDF"""
     c = canvas.Canvas(output_path, pagesize=(CARD_WIDTH, CARD_HEIGHT))
     
-    # Draw background with pattern
-    draw_geometric_pattern(c, CARD_WIDTH, CARD_HEIGHT)
+    # Draw solid black background
+    draw_black_background(c, CARD_WIDTH, CARD_HEIGHT)
     
-    # Draw logo placeholder (top right)
-    logo_size = 10 * mm
-    logo_x = CARD_WIDTH - logo_size - 5 * mm
-    logo_y = CARD_HEIGHT - logo_size - 5 * mm
-    draw_logo_placeholder(c, logo_x, logo_y, logo_size)
-    
-    # Text positioning
+    # Text positioning (matching original layout)
     left_margin = 8 * mm
     
-    # NOM - Main name (gold, larger, spaced letters)
+    # NOM - Main name (gold, larger, spaced letters) - positioned left, middle-ish
     c.setFillColor(GOLD_TEXT)
     c.setFont("Helvetica", 14)
-    nom_y = CARD_HEIGHT - 25 * mm
-    # Draw with letter spacing
+    nom_y = CARD_HEIGHT - 28 * mm
     nom_text = "N O M"
     c.drawString(left_margin, nom_y, nom_text)
     
-    # TITRE PROFESSIONNEL (light gray, smaller, spaced)
+    # TITRE PROFESSIONNEL (light gray, smaller, spaced) - right next to NOM
     c.setFillColor(LIGHT_TEXT)
     c.setFont("Helvetica", 7)
     titre_y = nom_y - 5 * mm
     c.drawString(left_margin, titre_y, "T I T R E   P R O F E S S I O N N E L")
     
-    # email / autre (right side, upper)
+    # email / autre (right side, aligned with title area)
     c.setFont("Helvetica", 6)
-    email_x = CARD_WIDTH - 30 * mm
-    email_y = titre_y - 2 * mm
+    email_x = CARD_WIDTH - 25 * mm
+    email_y = nom_y
     c.drawString(email_x, email_y, "email / autre")
     
     # @reseauxsociaux (right side, below email)
@@ -89,7 +82,7 @@ def create_business_card(output_path):
     c.drawString(email_x, social_y, "@reseauxsociaux")
     
     # téléphone / autre (bottom left)
-    bottom_y = 12 * mm
+    bottom_y = 10 * mm
     c.drawString(left_margin, bottom_y, "téléphone / autre")
     
     # site web / autre (below phone)
