@@ -1303,7 +1303,7 @@ async def get_salonpro_autologin_token(current_user: dict = Depends(get_current_
 
 @api_router.post("/enterprises")
 async def create_enterprise(data: EnterpriseCreate, current_user: dict = Depends(get_current_user)):
-    if current_user['user_type'] != 'entreprise':
+    if current_user['user_type'] not in ['enterprise', 'entreprise', 'admin']:
         raise HTTPException(status_code=403, detail="Seules les entreprises peuvent créer un profil")
     
     existing = await db.enterprises.find_one({"user_id": current_user['id']})
