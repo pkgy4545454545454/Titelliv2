@@ -55,38 +55,33 @@ def create_business_card(output_path):
     # Draw solid black background
     draw_black_background(c, CARD_WIDTH, CARD_HEIGHT)
     
-    # Text positioning (matching original layout)
-    left_margin = 8 * mm
+    # Text positioning (matching original layout exactly)
+    left_margin = 6 * mm
+    right_margin = CARD_WIDTH - 6 * mm
     
-    # NOM - Main name (gold, larger, spaced letters) - positioned left, middle-ish
+    # NOM - Main name (gold, spaced letters) - top left area
     c.setFillColor(GOLD_TEXT)
-    c.setFont("Helvetica", 14)
-    nom_y = CARD_HEIGHT - 28 * mm
-    nom_text = "N O M"
-    c.drawString(left_margin, nom_y, nom_text)
+    c.setFont("Helvetica", 12)
+    nom_y = CARD_HEIGHT - 30 * mm
+    c.drawString(left_margin, nom_y, "N O M")
     
-    # TITRE PROFESSIONNEL (light gray, smaller, spaced) - right next to NOM
+    # TITRE PROFESSIONNEL (light gray, smaller, spaced) - below NOM
     c.setFillColor(LIGHT_TEXT)
-    c.setFont("Helvetica", 7)
-    titre_y = nom_y - 5 * mm
+    c.setFont("Helvetica", 6)
+    titre_y = nom_y - 4 * mm
     c.drawString(left_margin, titre_y, "T I T R E   P R O F E S S I O N N E L")
     
-    # email / autre (right side, aligned with title area)
-    c.setFont("Helvetica", 6)
-    email_x = CARD_WIDTH - 25 * mm
-    email_y = nom_y
-    c.drawString(email_x, email_y, "email / autre")
+    # Bottom row - two columns side by side
+    bottom_row1 = 10 * mm  # First line (téléphone / email)
+    bottom_row2 = 6 * mm   # Second line (site web / @reseaux)
     
-    # @reseauxsociaux (right side, below email)
-    social_y = email_y - 4 * mm
-    c.drawString(email_x, social_y, "@reseauxsociaux")
+    # LEFT COLUMN - téléphone / site web
+    c.drawString(left_margin, bottom_row1, "téléphone / autre")
+    c.drawString(left_margin, bottom_row2, "site web / autre")
     
-    # téléphone / autre (bottom left)
-    bottom_y = 10 * mm
-    c.drawString(left_margin, bottom_y, "téléphone / autre")
-    
-    # site web / autre (below phone)
-    c.drawString(left_margin, bottom_y - 4 * mm, "site web / autre")
+    # RIGHT COLUMN - email / @reseauxsociaux (aligned to right)
+    c.drawRightString(right_margin, bottom_row1, "email / autre")
+    c.drawRightString(right_margin, bottom_row2, "@reseauxsociaux")
     
     c.save()
     print(f"Business card created: {output_path}")
