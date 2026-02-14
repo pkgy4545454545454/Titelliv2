@@ -302,7 +302,7 @@ Collections principales:
 ---
 
 ## URL Application
-**Production**: https://titelli-revenue.preview.emergentagent.com
+**Production**: https://chaotic-boutique.preview.emergentagent.com
 
 ---
 
