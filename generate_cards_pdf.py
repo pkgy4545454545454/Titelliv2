@@ -30,31 +30,22 @@ def create_inverted_logo():
     g = ImageOps.invert(g)
     b = ImageOps.invert(b)
     
-    # Merge back with original alpha
+    # Merge back
     inverted = Image.merge("RGBA", (r, g, b, a))
     inverted.save(LOGO_BLANC_PATH)
     print(f"Inverted logo created: {LOGO_BLANC_PATH}")
 
 
-def draw_front_card_with_image(c, x, y, is_white_version=False):
-    """Draw front card using the actual logo image"""
-    # Background
+def draw_front_card(c, x, y, is_white_version=False):
+    """Draw front card - just the image, nothing else"""
     if is_white_version:
-        c.setFillColor(white)
         logo_path = LOGO_BLANC_PATH
     else:
-        c.setFillColor(black)
         logo_path = LOGO_NOIR_PATH
     
-    c.rect(x, y, CARD_WIDTH, CARD_HEIGHT, fill=1, stroke=0)
-    
-    # Draw logo image centered
+    # Draw image directly at card dimensions - PURE image
     img = ImageReader(logo_path)
-    img_width = CARD_WIDTH * 0.6
-    img_height = CARD_HEIGHT * 0.7
-    img_x = x + (CARD_WIDTH - img_width) / 2
-    img_y = y + (CARD_HEIGHT - img_height) / 2
-    c.drawImage(img, img_x, img_y, width=img_width, height=img_height, mask='auto')
+    c.drawImage(img, x, y, width=CARD_WIDTH, height=CARD_HEIGHT)
 
 
 def draw_back_card(c, x, y, is_white_version=False):
@@ -109,14 +100,14 @@ def create_complete_pdf(output_path):
     margin = 20 * mm
     spacing = 15 * mm
     
-    # === PAGE 1: VERSION NOIRE (Avant noir + Arrière noir) ===
+    # === VERSION NOIRE (Avant noir + Arrière noir) ===
     c.setFont("Helvetica-Bold", 16)
     c.setFillColor(black)
     c.drawString(margin, page_height - 30 * mm, "VERSION NOIRE")
     
     c.setFont("Helvetica", 10)
     c.drawString(margin, page_height - 40 * mm, "Face avant")
-    draw_front_card_with_image(c, margin, page_height - 45 * mm - CARD_HEIGHT, is_white_version=False)
+    draw_front_card(c, margin, page_height - 45 * mm - CARD_HEIGHT, is_white_version=False)
     
     c.drawString(margin + CARD_WIDTH + spacing, page_height - 40 * mm, "Face arrière")
     draw_back_card(c, margin + CARD_WIDTH + spacing, page_height - 45 * mm - CARD_HEIGHT, is_white_version=False)
@@ -127,24 +118,25 @@ def create_complete_pdf(output_path):
     
     c.setFont("Helvetica", 10)
     c.drawString(margin, page_height - 130 * mm, "Face avant")
-    # Add border for white card visibility
-    c.setStrokeColor(Color(0.8, 0.8, 0.8))
-    c.rect(margin, page_height - 135 * mm - CARD_HEIGHT, CARD_WIDTH, CARD_HEIGHT, fill=0, stroke=1)
-    draw_front_card_with_image(c, margin, page_height - 135 * mm - CARD_HEIGHT, is_white_version=True)
+    draw_front_card(c, margin, page_height - 135 * mm - CARD_HEIGHT, is_white_version=True)
     
     c.drawString(margin + CARD_WIDTH + spacing, page_height - 130 * mm, "Face arrière")
+    # Border for visibility
+    c.setStrokeColor(Color(0.8, 0.8, 0.8))
     c.rect(margin + CARD_WIDTH + spacing, page_height - 135 * mm - CARD_HEIGHT, CARD_WIDTH, CARD_HEIGHT, fill=0, stroke=1)
     draw_back_card(c, margin + CARD_WIDTH + spacing, page_height - 135 * mm - CARD_HEIGHT, is_white_version=True)
     
     # === VERSION MIXTE (Avant noir + Arrière blanc) ===
     c.setFont("Helvetica-Bold", 16)
+    c.setFillColor(black)
     c.drawString(margin, page_height - 210 * mm, "VERSION MIXTE (Avant noir / Arrière blanc)")
     
     c.setFont("Helvetica", 10)
     c.drawString(margin, page_height - 220 * mm, "Face avant")
-    draw_front_card_with_image(c, margin, page_height - 225 * mm - CARD_HEIGHT, is_white_version=False)
+    draw_front_card(c, margin, page_height - 225 * mm - CARD_HEIGHT, is_white_version=False)
     
     c.drawString(margin + CARD_WIDTH + spacing, page_height - 220 * mm, "Face arrière")
+    c.setStrokeColor(Color(0.8, 0.8, 0.8))
     c.rect(margin + CARD_WIDTH + spacing, page_height - 225 * mm - CARD_HEIGHT, CARD_WIDTH, CARD_HEIGHT, fill=0, stroke=1)
     draw_back_card(c, margin + CARD_WIDTH + spacing, page_height - 225 * mm - CARD_HEIGHT, is_white_version=True)
     
