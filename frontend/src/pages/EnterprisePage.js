@@ -589,12 +589,14 @@ const EnterprisePage = () => {
                           
                           {/* Tags on photo - Clickable */}
                           {(photoTags[index] || []).map((tag, tagIdx) => {
-                            // Build the correct link based on tag type
-                            const tagLink = tag.type === 'product' 
-                              ? `/product/${tag.targetId}` 
-                              : tag.type === 'service' 
-                                ? `/service/${tag.targetId}` 
-                                : `/profil/${tag.targetId}`;
+                            // Use tag.link if available, otherwise build from tag.id or tag.targetId
+                            const tagLink = tag.link 
+                              ? tag.link 
+                              : tag.type === 'product' 
+                                ? `/product/${tag.id || tag.targetId}` 
+                                : tag.type === 'service' 
+                                  ? `/service/${tag.id || tag.targetId}` 
+                                  : `/profil/${tag.id || tag.targetId}`;
                             
                             return (
                               <div
