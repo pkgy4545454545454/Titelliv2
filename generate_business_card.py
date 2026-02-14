@@ -48,38 +48,46 @@ def draw_logo_placeholder(c, x, y, size):
     path.lineTo(x + icon_margin + icon_size, y + icon_margin + icon_size * 0.2)
     c.drawPath(path, fill=0, stroke=1)
 
-def create_business_card(output_path):
+def create_business_card(output_path, is_white_version=False):
     """Create the business card PDF"""
     c = canvas.Canvas(output_path, pagesize=(CARD_WIDTH, CARD_HEIGHT))
     
-    # Draw solid black background
-    draw_black_background(c, CARD_WIDTH, CARD_HEIGHT)
+    # Draw background
+    if is_white_version:
+        c.setFillColor(white)
+        c.rect(0, 0, CARD_WIDTH, CARD_HEIGHT, fill=1, stroke=0)
+        text_color_main = black
+        text_color_secondary = Color(0.3, 0.3, 0.3)
+    else:
+        draw_black_background(c, CARD_WIDTH, CARD_HEIGHT)
+        text_color_main = GOLD_TEXT
+        text_color_secondary = LIGHT_TEXT
     
-    # Text positioning (matching original layout exactly)
-    left_margin = 6 * mm
-    right_margin = CARD_WIDTH - 6 * mm
+    # Text positioning - more margins and higher placement
+    left_margin = 10 * mm
+    right_margin = CARD_WIDTH - 10 * mm
     
-    # NOM - Main name (gold, spaced letters) - top left area
-    c.setFillColor(GOLD_TEXT)
+    # NOM - Main name (higher position)
+    c.setFillColor(text_color_main)
     c.setFont("Helvetica", 12)
-    nom_y = CARD_HEIGHT - 30 * mm
+    nom_y = CARD_HEIGHT - 18 * mm
     c.drawString(left_margin, nom_y, "N O M")
     
-    # TITRE PROFESSIONNEL (light gray, smaller, spaced) - below NOM
-    c.setFillColor(LIGHT_TEXT)
+    # TITRE PROFESSIONNEL - below NOM
+    c.setFillColor(text_color_secondary)
     c.setFont("Helvetica", 6)
     titre_y = nom_y - 4 * mm
     c.drawString(left_margin, titre_y, "T I T R E   P R O F E S S I O N N E L")
     
-    # Bottom row - two columns side by side
-    bottom_row1 = 10 * mm  # First line (téléphone / email)
-    bottom_row2 = 6 * mm   # Second line (site web / @reseaux)
+    # Bottom row - two columns side by side (moved higher)
+    bottom_row1 = 14 * mm
+    bottom_row2 = 10 * mm
     
     # LEFT COLUMN - téléphone / site web
     c.drawString(left_margin, bottom_row1, "téléphone / autre")
     c.drawString(left_margin, bottom_row2, "site web / autre")
     
-    # RIGHT COLUMN - email / @reseauxsociaux (aligned to right)
+    # RIGHT COLUMN - email / @reseauxsociaux
     c.drawRightString(right_margin, bottom_row1, "email / autre")
     c.drawRightString(right_margin, bottom_row2, "@reseauxsociaux")
     
@@ -87,8 +95,13 @@ def create_business_card(output_path):
     print(f"Business card created: {output_path}")
     return output_path
 
+
 if __name__ == "__main__":
     output_dir = "/app/backend/uploads"
     os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, "carte_visite_noire.pdf")
-    create_business_card(output_path)
+    
+    # Version noire
+    create_business_card(os.path.join(output_dir, "carte_visite_noire.pdf"), is_white_version=False)
+    
+    # Version blanche
+    create_business_card(os.path.join(output_dir, "carte_visite_blanche.pdf"), is_white_version=True)
