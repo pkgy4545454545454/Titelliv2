@@ -12,7 +12,7 @@ import requests
 import os
 from datetime import datetime
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://chaotic-boutique.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://enterprise-profiles.preview.emergentagent.com')
 
 # Test credentials
 ENTERPRISE_EMAIL = "test.entreprise@titelli.com"
@@ -328,7 +328,7 @@ class TestStripePaymentIntegration:
         # Create payment session
         payment_data = {
             "order_id": order_id,
-            "origin_url": "https://chaotic-boutique.preview.emergentagent.com"
+            "origin_url": "https://enterprise-profiles.preview.emergentagent.com"
         }
         
         response = requests.post(
@@ -364,7 +364,7 @@ class TestStripePaymentIntegration:
         # Create payment session
         payment_data = {
             "order_id": order_id,
-            "origin_url": "https://chaotic-boutique.preview.emergentagent.com"
+            "origin_url": "https://enterprise-profiles.preview.emergentagent.com"
         }
         
         response = requests.post(

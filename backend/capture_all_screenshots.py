@@ -6,7 +6,7 @@ import os
 import time
 from playwright.sync_api import sync_playwright
 
-BASE_URL = 'https://chaotic-boutique.preview.emergentagent.com'
+BASE_URL = 'https://enterprise-profiles.preview.emergentagent.com'
 SCREENSHOTS_DIR = '/app/backend/uploads/brochure_screenshots'
 
 os.makedirs(SCREENSHOTS_DIR, exist_ok=True)

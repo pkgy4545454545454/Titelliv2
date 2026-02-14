@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { toast } from 'sonner';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || 'https://chaotic-boutique.preview.emergentagent.com';
+const API_URL = process.env.REACT_APP_BACKEND_URL || 'https://enterprise-profiles.preview.emergentagent.com';
 
 const CartPage = () => {
   const { items, removeItem, updateQuantity, clearCart, getTotal, getItemsByEnterprise } = useCart();

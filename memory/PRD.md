@@ -302,7 +302,7 @@ Collections principales:
 ---
 
 ## URL Application
-**Production**: https://chaotic-boutique.preview.emergentagent.com
+**Production**: https://enterprise-profiles.preview.emergentagent.com
 
 ---
 
