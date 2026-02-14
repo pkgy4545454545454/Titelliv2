@@ -1614,11 +1614,126 @@ const ProfileSection = ({ enterprise, onUpdate }) => {
 // Media Gallery Section Component
 const MediaGallerySection = ({ enterprise, onUpdate }) => {
   const [photos, setPhotos] = useState(enterprise?.photos || []);
+  const [photoTags, setPhotoTags] = useState(enterprise?.photo_tags || {}); // { photoIndex: [{ id, type, name, x, y }] }
   const [videos, setVideos] = useState(enterprise?.videos || []);
   const [uploading, setUploading] = useState(false);
   const [uploadType, setUploadType] = useState('photo');
   const [videoUrl, setVideoUrl] = useState('');
   const photoInputRef = useRef(null);
+  
+  // Tag system states
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(null);
+  const [showTagModal, setShowTagModal] = useState(false);
+  const [tagPosition, setTagPosition] = useState({ x: 0, y: 0 });
+  const [tagType, setTagType] = useState('client'); // 'client' | 'product' | 'service'
+  const [tagSearch, setTagSearch] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [viewingPhoto, setViewingPhoto] = useState(null);
+
+  // Search for clients, products or services to tag
+  const handleTagSearch = async (query, type) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    
+    setSearchLoading(true);
+    try {
+      let results = [];
+      if (type === 'client') {
+        // Search clients (contacts)
+        const res = await enterpriseContactsAPI.list({ search: query });
+        results = (res.data?.contacts || []).map(c => ({
+          id: c.id,
+          name: `${c.first_name} ${c.last_name}`,
+          type: 'client',
+          link: `/client/${c.id}`
+        }));
+      } else if (type === 'product' || type === 'service') {
+        // Search products/services
+        const res = await servicesProductsAPI.list({ 
+          enterprise_id: enterprise.id, 
+          search: query,
+          type: type
+        });
+        results = (res.data?.items || []).map(p => ({
+          id: p.id,
+          name: p.name,
+          type: type,
+          link: `/item/${p.id}`
+        }));
+      }
+      setSearchResults(results);
+    } catch (error) {
+      console.error('Search error:', error);
+      setSearchResults([]);
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  // Handle click on photo to add tag
+  const handlePhotoClick = (e, photoIndex) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    
+    setSelectedPhotoIndex(photoIndex);
+    setTagPosition({ x, y });
+    setShowTagModal(true);
+    setTagSearch('');
+    setSearchResults([]);
+  };
+
+  // Add tag to photo
+  const handleAddTag = async (item) => {
+    const newTag = {
+      id: item.id,
+      type: item.type,
+      name: item.name,
+      link: item.link,
+      x: tagPosition.x,
+      y: tagPosition.y
+    };
+    
+    const currentTags = photoTags[selectedPhotoIndex] || [];
+    const updatedTags = {
+      ...photoTags,
+      [selectedPhotoIndex]: [...currentTags, newTag]
+    };
+    
+    setPhotoTags(updatedTags);
+    setShowTagModal(false);
+    
+    // Save to backend
+    try {
+      await enterpriseAPI.update(enterprise.id, { photo_tags: updatedTags });
+      toast.success(`${item.name} tagué !`);
+      onUpdate();
+    } catch (error) {
+      toast.error('Erreur lors du tag');
+    }
+  };
+
+  // Remove tag from photo
+  const handleRemoveTag = async (photoIndex, tagIndex) => {
+    const currentTags = photoTags[photoIndex] || [];
+    const updatedTags = {
+      ...photoTags,
+      [photoIndex]: currentTags.filter((_, i) => i !== tagIndex)
+    };
+    
+    setPhotoTags(updatedTags);
+    
+    try {
+      await enterpriseAPI.update(enterprise.id, { photo_tags: updatedTags });
+      toast.success('Tag supprimé');
+      onUpdate();
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
 
   const handlePhotoUpload = async (e) => {
     const files = Array.from(e.target.files);
@@ -1693,8 +1808,21 @@ const MediaGallerySection = ({ enterprise, onUpdate }) => {
   const handleDeletePhoto = async (index) => {
     const newPhotos = photos.filter((_, i) => i !== index);
     setPhotos(newPhotos);
+    
+    // Also remove tags for this photo and reindex
+    const newTags = {};
+    Object.keys(photoTags).forEach(key => {
+      const keyNum = parseInt(key);
+      if (keyNum < index) {
+        newTags[keyNum] = photoTags[key];
+      } else if (keyNum > index) {
+        newTags[keyNum - 1] = photoTags[key];
+      }
+    });
+    setPhotoTags(newTags);
+    
     try {
-      await enterpriseAPI.update(enterprise.id, { photos: newPhotos });
+      await enterpriseAPI.update(enterprise.id, { photos: newPhotos, photo_tags: newTags });
       toast.success('Photo supprimée');
       onUpdate();
     } catch (error) {
@@ -1733,7 +1861,7 @@ const MediaGallerySection = ({ enterprise, onUpdate }) => {
           <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
             Galerie Média
           </h1>
-          <p className="text-gray-400 text-sm mt-1">Gérez les photos et vidéos de votre entreprise</p>
+          <p className="text-gray-400 text-sm mt-1">Gérez les photos et vidéos • Cliquez sur une photo pour tagger des clients ou produits</p>
         </div>
       </div>
 
@@ -1813,25 +1941,94 @@ const MediaGallerySection = ({ enterprise, onUpdate }) => {
         )}
       </div>
 
-      {/* Photos Grid */}
+      {/* Photos Grid with Tags */}
       <div className="card-service rounded-xl p-6">
         <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
           <Camera className="w-5 h-5 text-[#0047AB]" />
           Photos ({photos.length})
+          <span className="text-xs text-gray-500 font-normal ml-2">• Cliquez sur une photo pour ajouter un tag</span>
         </h3>
         {photos.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {photos.map((photo, index) => (
-              <div key={index} className="relative group aspect-square rounded-xl overflow-hidden">
+              <div 
+                key={index} 
+                className="relative group aspect-square rounded-xl overflow-hidden cursor-crosshair"
+                onClick={(e) => handlePhotoClick(e, index)}
+              >
                 <img src={photo} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                
+                {/* Tags on photo */}
+                {(photoTags[index] || []).map((tag, tagIdx) => (
+                  <div
+                    key={tagIdx}
+                    className="absolute group/tag"
+                    style={{ left: `${tag.x}%`, top: `${tag.y}%`, transform: 'translate(-50%, -50%)' }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Tag dot */}
+                    <div className={`w-6 h-6 rounded-full border-2 border-white shadow-lg flex items-center justify-center cursor-pointer ${
+                      tag.type === 'client' ? 'bg-[#0047AB]' : 
+                      tag.type === 'product' ? 'bg-[#D4AF37]' : 'bg-green-500'
+                    }`}>
+                      {tag.type === 'client' ? (
+                        <UserCircle className="w-3 h-3 text-white" />
+                      ) : tag.type === 'product' ? (
+                        <Package className="w-3 h-3 text-white" />
+                      ) : (
+                        <Sparkles className="w-3 h-3 text-white" />
+                      )}
+                    </div>
+                    
+                    {/* Tag tooltip on hover */}
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover/tag:opacity-100 transition-opacity pointer-events-none group-hover/tag:pointer-events-auto z-20">
+                      <div className="bg-black/90 backdrop-blur-sm rounded-lg px-3 py-2 whitespace-nowrap border border-white/10 shadow-xl">
+                        <p className="text-white text-sm font-medium">{tag.name}</p>
+                        <p className="text-xs text-gray-400 capitalize">{tag.type}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <a 
+                            href={tag.link} 
+                            className="text-xs text-[#0047AB] hover:underline"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Voir le profil →
+                          </a>
+                          <button 
+                            onClick={() => handleRemoveTag(index, tagIdx)}
+                            className="text-xs text-red-400 hover:text-red-300"
+                          >
+                            Supprimer
+                          </button>
+                        </div>
+                      </div>
+                      <div className="w-3 h-3 bg-black/90 rotate-45 absolute -bottom-1.5 left-1/2 -translate-x-1/2 border-r border-b border-white/10" />
+                    </div>
+                  </div>
+                ))}
+                
+                {/* Hover overlay */}
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                   <button
-                    onClick={() => handleDeletePhoto(index)}
+                    onClick={(e) => { e.stopPropagation(); setViewingPhoto(index); }}
+                    className="p-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-colors"
+                  >
+                    <Eye className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleDeletePhoto(index); }}
                     className="p-2 bg-red-500/80 hover:bg-red-500 rounded-full text-white transition-colors"
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>
                 </div>
+                
+                {/* Tags count badge */}
+                {(photoTags[index] || []).length > 0 && (
+                  <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
+                    <UserPlus className="w-3 h-3 text-[#0047AB]" />
+                    <span className="text-xs text-white">{photoTags[index].length}</span>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -1883,6 +2080,154 @@ const MediaGallerySection = ({ enterprise, onUpdate }) => {
           </div>
         )}
       </div>
+
+      {/* Tag Modal */}
+      {showTagModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onClick={() => setShowTagModal(false)}>
+          <div className="bg-[#0F0F0F] rounded-2xl w-full max-w-md border border-white/10" onClick={(e) => e.stopPropagation()}>
+            <div className="p-4 border-b border-white/10 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-white">Ajouter un tag</h3>
+              <button onClick={() => setShowTagModal(false)} className="text-gray-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-4 space-y-4">
+              {/* Tag type selector */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => { setTagType('client'); setTagSearch(''); setSearchResults([]); }}
+                  className={`flex-1 py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-2 ${
+                    tagType === 'client' ? 'bg-[#0047AB] text-white' : 'bg-white/10 text-gray-300'
+                  }`}
+                >
+                  <UserCircle className="w-4 h-4" />
+                  Client
+                </button>
+                <button
+                  onClick={() => { setTagType('product'); setTagSearch(''); setSearchResults([]); }}
+                  className={`flex-1 py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-2 ${
+                    tagType === 'product' ? 'bg-[#D4AF37] text-black' : 'bg-white/10 text-gray-300'
+                  }`}
+                >
+                  <Package className="w-4 h-4" />
+                  Produit
+                </button>
+                <button
+                  onClick={() => { setTagType('service'); setTagSearch(''); setSearchResults([]); }}
+                  className={`flex-1 py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-2 ${
+                    tagType === 'service' ? 'bg-green-500 text-white' : 'bg-white/10 text-gray-300'
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Service
+                </button>
+              </div>
+              
+              {/* Search input */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  value={tagSearch}
+                  onChange={(e) => {
+                    setTagSearch(e.target.value);
+                    handleTagSearch(e.target.value, tagType);
+                  }}
+                  placeholder={`Rechercher un ${tagType === 'client' ? 'client' : tagType === 'product' ? 'produit' : 'service'}...`}
+                  className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-[#0047AB]/50"
+                />
+              </div>
+              
+              {/* Search results */}
+              <div className="max-h-64 overflow-y-auto space-y-2">
+                {searchLoading ? (
+                  <div className="text-center py-4">
+                    <div className="w-6 h-6 border-2 border-[#0047AB] border-t-transparent rounded-full animate-spin mx-auto" />
+                  </div>
+                ) : searchResults.length > 0 ? (
+                  searchResults.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => handleAddTag(item)}
+                      className="w-full p-3 bg-white/5 hover:bg-white/10 rounded-xl text-left transition-colors flex items-center gap-3"
+                    >
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        item.type === 'client' ? 'bg-[#0047AB]/20' : 
+                        item.type === 'product' ? 'bg-[#D4AF37]/20' : 'bg-green-500/20'
+                      }`}>
+                        {item.type === 'client' ? (
+                          <UserCircle className="w-5 h-5 text-[#0047AB]" />
+                        ) : item.type === 'product' ? (
+                          <Package className="w-5 h-5 text-[#D4AF37]" />
+                        ) : (
+                          <Sparkles className="w-5 h-5 text-green-500" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-white font-medium">{item.name}</p>
+                        <p className="text-xs text-gray-400">ID: {item.id.slice(0, 8)}...</p>
+                      </div>
+                    </button>
+                  ))
+                ) : tagSearch.trim() ? (
+                  <p className="text-center text-gray-400 py-4">Aucun résultat</p>
+                ) : (
+                  <p className="text-center text-gray-500 py-4 text-sm">
+                    Tapez pour rechercher un {tagType === 'client' ? 'client' : tagType === 'product' ? 'produit' : 'service'}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Photo Viewer Modal */}
+      {viewingPhoto !== null && (
+        <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-50 p-4" onClick={() => setViewingPhoto(null)}>
+          <button 
+            onClick={() => setViewingPhoto(null)}
+            className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white"
+          >
+            <X className="w-6 h-6" />
+          </button>
+          <div className="relative max-w-4xl max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+            <img 
+              src={photos[viewingPhoto]} 
+              alt="" 
+              className="max-w-full max-h-[90vh] object-contain rounded-xl"
+            />
+            {/* Tags on enlarged photo */}
+            {(photoTags[viewingPhoto] || []).map((tag, tagIdx) => (
+              <div
+                key={tagIdx}
+                className="absolute group/tag"
+                style={{ left: `${tag.x}%`, top: `${tag.y}%`, transform: 'translate(-50%, -50%)' }}
+              >
+                <div className={`w-8 h-8 rounded-full border-2 border-white shadow-lg flex items-center justify-center cursor-pointer ${
+                  tag.type === 'client' ? 'bg-[#0047AB]' : 
+                  tag.type === 'product' ? 'bg-[#D4AF37]' : 'bg-green-500'
+                }`}>
+                  {tag.type === 'client' ? (
+                    <UserCircle className="w-4 h-4 text-white" />
+                  ) : tag.type === 'product' ? (
+                    <Package className="w-4 h-4 text-white" />
+                  ) : (
+                    <Sparkles className="w-4 h-4 text-white" />
+                  )}
+                </div>
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover/tag:opacity-100 transition-opacity z-20">
+                  <div className="bg-black/90 backdrop-blur-sm rounded-lg px-4 py-3 whitespace-nowrap border border-white/10 shadow-xl">
+                    <p className="text-white font-medium">{tag.name}</p>
+                    <p className="text-sm text-gray-400 capitalize">{tag.type}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
