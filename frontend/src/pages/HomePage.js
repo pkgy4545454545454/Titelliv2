@@ -283,17 +283,19 @@ const HomePage = () => {
         <div className="h-32" />
       </div>
 
-      {/* Services Section - White Background with black gradient top */}
-      <section className="py-20 md:py-28 bg-white relative" data-testid="services-section">
-        {/* Dégradé noir subtil en haut */}
-        <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-[#0a0a0a] to-transparent" />
+      {/* Services Section - Dark with subtle gradient */}
+      <section className="py-20 md:py-28 relative overflow-hidden" data-testid="services-section">
+        {/* Dégradé noir vers blanc très subtil sur les côtés */}
+        <div className="absolute inset-0 bg-[#050505]" />
+        <div className="absolute top-0 left-0 w-1/4 h-full bg-gradient-to-r from-white/5 to-transparent" />
+        <div className="absolute top-0 right-0 w-1/4 h-full bg-gradient-to-l from-white/5 to-transparent" />
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
           <div className="flex items-center justify-between mb-12">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-black mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>
                 Les meilleurs services de ta région
               </h2>
-              <p className="text-gray-600">Découvrez nos prestataires de confiance</p>
+              <p className="text-gray-400">Découvrez nos prestataires de confiance</p>
             </div>
             <Link to="/services" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors" data-testid="view-all-services">
               Voir tout
@@ -307,7 +309,7 @@ const HomePage = () => {
               <Link
                 key={cat.id}
                 to={`/services?category=${cat.id}`}
-                className="px-5 py-2.5 bg-black/5 hover:bg-black/10 border border-black/10 rounded-full text-sm text-gray-700 hover:text-black transition-all"
+                className="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm text-gray-300 hover:text-white transition-all"
                 data-testid={`service-cat-${cat.id}`}
               >
                 {cat.name}
