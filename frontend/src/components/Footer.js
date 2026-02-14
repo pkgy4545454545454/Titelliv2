@@ -12,7 +12,7 @@ const Footer = () => {
           {/* Brand */}
           <div>
             <Link to="/" className="flex items-center gap-3 mb-6">
-              <div className="logo-circle">T</div>
+              <img src="/logo_titelli.png" alt="Titelli" className="w-10 h-10 object-contain" />
               <span className="font-semibold text-xl" style={{ fontFamily: 'Playfair Display, serif' }}>
                 Titelli
               </span>
