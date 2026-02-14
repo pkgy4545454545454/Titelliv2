@@ -167,7 +167,7 @@ const InfluencerDashboard = () => {
       <aside className="w-64 border-r border-white/5 bg-[#0A0A0A] flex flex-col">
         <div className="p-6 border-b border-white/5">
           <Link to="/" className="flex items-center gap-3">
-            <div className="logo-circle">T</div>
+            <img src="/logo_titelli.png" alt="Titelli" className="w-10 h-10 object-contain" />
             <span className="text-xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
               Titelli
             </span>
