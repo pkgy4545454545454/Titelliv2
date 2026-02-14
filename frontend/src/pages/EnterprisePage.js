@@ -559,6 +559,131 @@ const EnterprisePage = () => {
               </p>
             </div>
 
+            {/* Media Gallery Section - Always visible on main page */}
+            {(mediaGallery.photos.length > 0 || mediaGallery.videos.length > 0) && (
+              <div className="card-service rounded-xl p-6">
+                <h2 className="text-xl font-semibold text-white mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Galerie Photos & Vidéos
+                </h2>
+                
+                {/* Photos Section */}
+                {mediaGallery.photos.length > 0 && (
+                  <div className="mb-8">
+                    <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
+                      <Image className="w-5 h-5 text-[#0047AB]" />
+                      Photos ({mediaGallery.photos.length})
+                    </h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {mediaGallery.photos.map((photo, index) => (
+                        <div 
+                          key={photo.id || index} 
+                          className="relative aspect-square rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity border border-white/10 hover:border-[#0047AB]/50 group"
+                          onClick={() => setSelectedMedia({ type: 'photo', url: getImageUrl(photo.url), index })}
+                          data-testid={`gallery-photo-${index}`}
+                        >
+                          <img 
+                            src={getImageUrl(photo.url)} 
+                            alt={photo.title || `Photo ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                          
+                          {/* Tags on photo - Clickable */}
+                          {(photoTags[index] || []).map((tag, tagIdx) => {
+                            // Build the correct link based on tag type
+                            const tagLink = tag.type === 'product' 
+                              ? `/product/${tag.targetId}` 
+                              : tag.type === 'service' 
+                                ? `/service/${tag.targetId}` 
+                                : `/profil/${tag.targetId}`;
+                            
+                            return (
+                              <div
+                                key={tagIdx}
+                                className="absolute group/tag"
+                                style={{ left: `${tag.x}%`, top: `${tag.y}%`, transform: 'translate(-50%, -50%)' }}
+                                onClick={(e) => e.stopPropagation()}
+                                data-testid={`photo-tag-${index}-${tagIdx}`}
+                              >
+                                {/* Tag dot - Clickable */}
+                                <button
+                                  onClick={() => navigate(tagLink)}
+                                  className={`w-6 h-6 rounded-full border-2 border-white shadow-lg flex items-center justify-center cursor-pointer hover:scale-125 transition-transform ${
+                                    tag.type === 'client' ? 'bg-[#0047AB]' : 
+                                    tag.type === 'product' ? 'bg-[#D4AF37]' : 'bg-green-500'
+                                  }`}
+                                  title={`Voir ${tag.name || tag.targetName}`}
+                                >
+                                  {tag.type === 'client' ? (
+                                    <UserCircle className="w-3 h-3 text-white" />
+                                  ) : tag.type === 'product' ? (
+                                    <Package className="w-3 h-3 text-white" />
+                                  ) : (
+                                    <Sparkles className="w-3 h-3 text-white" />
+                                  )}
+                                </button>
+                                
+                                {/* Tag tooltip on hover */}
+                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover/tag:opacity-100 transition-opacity pointer-events-none z-20">
+                                  <div className="bg-black/90 backdrop-blur-sm rounded-lg px-3 py-2 whitespace-nowrap border border-white/10 shadow-xl">
+                                    <p className="text-white text-sm font-medium">{tag.name || tag.targetName}</p>
+                                    <p className="text-xs text-gray-400 capitalize">{tag.type === 'product' ? 'Produit' : tag.type === 'service' ? 'Service' : 'Client'}</p>
+                                    <p className="text-xs text-[#0047AB] mt-1">Cliquer pour voir →</p>
+                                  </div>
+                                  <div className="w-3 h-3 bg-black/90 rotate-45 absolute -bottom-1.5 left-1/2 -translate-x-1/2 border-r border-b border-white/10" />
+                                </div>
+                              </div>
+                            );
+                          })}
+                          
+                          {/* Tags count badge */}
+                          {(photoTags[index] || []).length > 0 && (
+                            <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
+                              <Package className="w-3 h-3 text-[#D4AF37]" />
+                              <span className="text-xs text-white">{photoTags[index].length}</span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Videos Section */}
+                {mediaGallery.videos.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
+                      <Video className="w-5 h-5 text-[#D4AF37]" />
+                      Vidéos ({mediaGallery.videos.length})
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {mediaGallery.videos.map((video, index) => (
+                        <div 
+                          key={video.id || index} 
+                          className="aspect-video rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity border border-white/10 hover:border-[#D4AF37]/50 relative group"
+                          onClick={() => setSelectedMedia({ type: 'video', url: getImageUrl(video.url) })}
+                        >
+                          <video 
+                            src={getImageUrl(video.url)}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/30 transition-colors">
+                            <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                              <Play className="w-8 h-8 text-white fill-white" />
+                            </div>
+                          </div>
+                          {video.title && (
+                            <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                              <p className="text-white text-sm font-medium">{video.title}</p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Services - Variant Display */}
             {(activeTab === 'presentation' || activeTab === 'services') && services.filter(s => s.type === 'service').length > 0 && (
               <div className="card-service rounded-xl p-6">
