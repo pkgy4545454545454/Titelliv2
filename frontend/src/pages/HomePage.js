@@ -235,13 +235,12 @@ const HomePage = () => {
 
         {/* Hero Content */}
         <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4 pt-20">
-          {/* Logo Titelli centré */}
+          {/* Logo Titelli centré - cercle rond avec T */}
           <div className="mb-6 animate-fade-in">
-            <img 
-              src="/logo_titelli.png" 
-              alt="Titelli" 
-              className="w-20 h-20 mx-auto object-contain"
-            />
+            <div className="w-20 h-20 mx-auto rounded-full bg-black border-2 border-white/20 flex items-center justify-center shadow-2xl">
+              <span className="text-white text-3xl font-serif">T</span>
+            </div>
+            <p className="text-white/80 text-sm mt-2 tracking-widest">TITELLI</p>
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-white mb-6 animate-fade-in" style={{ fontFamily: 'Playfair Display, serif' }}>
             Les meilleurs prestataires<br />
