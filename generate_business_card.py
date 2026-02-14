@@ -89,7 +89,7 @@ def create_business_card(output_path):
     
     # TITRE PROFESSIONNEL (light gray, smaller, spaced)
     c.setFillColor(LIGHT_TEXT)
-    c.setFont("Helvetica-Light", 8)
+    c.setFont("Helvetica", 7)
     titre_y = nom_y - 5 * mm
     c.drawString(left_margin, titre_y, "T I T R E   P R O F E S S I O N N E L")
     
