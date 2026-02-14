@@ -84,27 +84,27 @@ def create_back_commercial(c, is_white_version=False):
     c.setFont("Helvetica", 9)
     c.drawCentredString(center_x, CARD_HEIGHT - 18 * mm, "C O M M E R C I A L")
     
-    # Ligne vide (pour garder même espacement que Founder)
-    
     # Infos - même format que Founder
     c.setFillColor(secondary_color)
     c.setFont("Helvetica", 5)
     c.drawCentredString(center_x, 18 * mm, "+41 79 895 03 13   •   info@titelli.com")
     
-    # Ligne site avec QR mini comme icône devant
-    # Calculer position pour centrer "QR www.titelli.com • @titelli.ch"
+    # Ligne site avec petit QR comme icône - mieux centré
+    # Format: [QR] www.titelli.com • @titelli.ch
     text_site = "www.titelli.com   •   @titelli.ch"
     text_width = c.stringWidth(text_site, "Helvetica", 5)
-    qr_size = 3.5 * mm  # Petit QR comme icône
-    total_width = qr_size + 1.5 * mm + text_width
+    qr_size = 2.8 * mm  # Encore plus petit pour être vraiment comme une icône
+    spacing = 1 * mm  # Espace entre QR et texte
+    total_width = qr_size + spacing + text_width
     start_x = (CARD_WIDTH - total_width) / 2
     
-    # QR mini
+    # QR mini comme icône
     qr = ImageReader(qr_path)
-    c.drawImage(qr, start_x, 12 * mm, width=qr_size, height=qr_size, mask='auto')
+    qr_y = 13 * mm - (qr_size / 2) + 0.5 * mm  # Centré verticalement avec le texte
+    c.drawImage(qr, start_x, qr_y, width=qr_size, height=qr_size, mask='auto')
     
     # Texte après QR
-    c.drawString(start_x + qr_size + 1.5 * mm, 13 * mm, text_site)
+    c.drawString(start_x + qr_size + spacing, 13 * mm, text_site)
 
 
 def create_pdf(output_path):
