@@ -4,7 +4,7 @@ import sys
 
 def test_specific_login_credentials():
     """Test the specific login credentials mentioned in requirements"""
-    base_url = "https://enterprise-profiles.preview.emergentagent.com/api"
+    base_url = "https://card-layout-fix-11.preview.emergentagent.com/api"
     
     # Test credentials from requirements
     test_cases = [

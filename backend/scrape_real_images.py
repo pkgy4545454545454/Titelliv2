@@ -18,7 +18,7 @@ load_dotenv()
 MONGO_URL = os.environ.get('MONGO_URL')
 DB_NAME = os.environ.get('DB_NAME', 'secondevie')
 UPLOADS_DIR = "/app/backend/uploads/enterprises"
-BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://enterprise-profiles.preview.emergentagent.com")
+BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://card-layout-fix-11.preview.emergentagent.com")
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger(__name__)
