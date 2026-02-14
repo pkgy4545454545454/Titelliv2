@@ -102,6 +102,7 @@ function AppRoutes() {
       <Route path="/produits" element={<MainLayout><ProductsPage /></MainLayout>} />
       <Route path="/service/:id" element={<MainLayout><ServiceProductDetailPage /></MainLayout>} />
       <Route path="/product/:id" element={<MainLayout><ServiceProductDetailPage /></MainLayout>} />
+      <Route path="/item/:id" element={<MainLayout><ServiceProductDetailPage /></MainLayout>} />
       <Route path="/entreprises" element={<MainLayout><EnterprisesPage /></MainLayout>} />
       <Route path="/entreprise/:id" element={<MainLayout><EnterprisePage /></MainLayout>} />
       
