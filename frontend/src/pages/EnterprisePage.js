@@ -17,6 +17,7 @@ const EnterprisePage = () => {
   const [trainings, setTrainings] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [mediaGallery, setMediaGallery] = useState({ photos: [], videos: [] });
+  const [photoTags, setPhotoTags] = useState({});
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('presentation');
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
