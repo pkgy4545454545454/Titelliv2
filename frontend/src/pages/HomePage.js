@@ -229,8 +229,8 @@ const HomePage = () => {
             className="absolute inset-0 w-full h-full object-cover -z-10"
           />
           <div className="panoramic-overlay absolute inset-0" />
-          {/* Gradient noir en bas de la vidéo */}
-          <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black via-black/80 to-transparent" />
+          {/* Dégradé noir intense en bas de la vidéo */}
+          <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-black via-black/90 to-transparent" />
         </div>
 
         {/* Hero Content */}
