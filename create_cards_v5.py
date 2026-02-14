@@ -19,15 +19,20 @@ qr_black.save("/app/backend/uploads/qr_mini_black.png")
 
 
 def create_front_card(c, is_white_version=False):
-    """Face avant - logo centré"""
+    """Face avant - logo centré, taille réelle"""
     if is_white_version:
         c.setFillColor(white)
+        c.rect(0, 0, CARD_WIDTH, CARD_HEIGHT, fill=1, stroke=0)
+        # Logo noir pour fond blanc
+        logo = ImageReader("/app/backend/uploads/logo_titelli_noir.png")
     else:
         c.setFillColor(black)
-    c.rect(0, 0, CARD_WIDTH, CARD_HEIGHT, fill=1, stroke=0)
+        c.rect(0, 0, CARD_WIDTH, CARD_HEIGHT, fill=1, stroke=0)
+        # Logo blanc/clair pour fond noir
+        logo = ImageReader("/app/backend/uploads/logo_titelli_new.png")
     
-    logo = ImageReader("/app/backend/uploads/logo_titelli_new.png")
-    logo_size = 32 * mm
+    # Logo plus grand - taille réelle
+    logo_size = 45 * mm
     x = (CARD_WIDTH - logo_size) / 2
     y = (CARD_HEIGHT - logo_size) / 2
     c.drawImage(logo, x, y, width=logo_size, height=logo_size, mask='auto')
