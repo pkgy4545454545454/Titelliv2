@@ -55,10 +55,10 @@ def draw_footer(c, page_num, total_pages):
 
 
 def draw_section_title(c, y, title):
+    # Titre de section simple sans bloc noir
     c.setFillColor(PRIMARY_BLACK)
-    c.rect(MARGIN, y - 1 * mm, 3 * mm, 5 * mm, fill=1, stroke=0)
     c.setFont("Helvetica-Bold", 11)
-    c.drawString(MARGIN + 5 * mm, y, title.upper())
+    c.drawString(MARGIN, y, title)
     return y - 8 * mm
 
 
