@@ -128,23 +128,23 @@ const ServiceProductCard = ({ item, onAddToCart }) => {
       {/* Content */}
       <div className="p-5">
         <Link to={`/${type}/${id}`}>
-          <h3 className="text-lg font-semibold text-gray-800 group-hover:text-[#0047AB] transition-colors mb-2 line-clamp-1">
+          <h3 className="text-lg font-semibold text-white group-hover:text-[#0047AB] transition-colors mb-2 line-clamp-1">
             {name}
           </h3>
         </Link>
 
-        <p className="text-sm text-gray-500 mb-4 line-clamp-2">
+        <p className="text-sm text-gray-400 mb-4 line-clamp-2">
           {description}
         </p>
 
         <div className="flex items-center justify-between">
-          <span className="text-xl font-bold text-gray-800">
+          <span className="text-xl font-bold text-white">
             {price.toFixed(2)} <span className="text-sm text-gray-400">{currency}</span>
           </span>
           
           <button
             onClick={() => onAddToCart?.(item)}
-            className="p-3 bg-[#0047AB] hover:bg-[#003380] text-white rounded-full transition-all hover:scale-110"
+            className="p-3 bg-[#0047AB] hover:bg-[#0047AB]/80 text-white rounded-full transition-all hover:scale-110"
             data-testid={`add-to-cart-${id}`}
           >
             <ShoppingCart className="w-5 h-5" />

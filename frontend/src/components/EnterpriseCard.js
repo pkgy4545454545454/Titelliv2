@@ -127,27 +127,27 @@ const EnterpriseCard = ({ enterprise, large = false }) => {
       {/* Content */}
       <div className={cardPadding}>
         <div className="flex items-start justify-between gap-4 mb-2">
-          <h3 className={`${titleSize} font-semibold text-gray-800 group-hover:text-[#0047AB] transition-colors line-clamp-1`}>
+          <h3 className={`${titleSize} font-semibold text-white group-hover:text-[#0047AB] transition-colors line-clamp-1`}>
             {category ? `${category} - ${displayName}` : displayName}
           </h3>
           {rating > 0 && (
             <div className="flex items-center gap-1 flex-shrink-0">
               <Star className="w-4 h-4 fill-[#D4AF37] text-[#D4AF37]" />
-              <span className="text-sm font-medium text-gray-700">{rating.toFixed(1)}</span>
+              <span className="text-sm font-medium text-white">{rating.toFixed(1)}</span>
             </div>
           )}
         </div>
 
         {slogan && (
-          <p className="text-sm text-[#0047AB] mb-2 line-clamp-1">{slogan}</p>
+          <p className="text-sm text-[#D4AF37] mb-2 line-clamp-1">{slogan}</p>
         )}
 
-        <p className={`text-sm text-gray-500 mb-4 ${descHeight}`}>
+        <p className={`text-sm text-gray-400 mb-4 ${descHeight}`}>
           {description}
         </p>
 
         <div className="flex items-center justify-between text-sm">
-          <span className="px-3 py-1 bg-gray-100 rounded-full text-gray-600">
+          <span className="px-3 py-1 bg-white/5 rounded-full text-gray-400">
             {category}
           </span>
           <div className="flex items-center gap-1 text-gray-500">
@@ -157,7 +157,7 @@ const EnterpriseCard = ({ enterprise, large = false }) => {
         </div>
 
         {review_count > 0 && (
-          <p className="text-xs text-gray-400 mt-3">
+          <p className="text-xs text-gray-500 mt-3">
             {review_count} avis
           </p>
         )}
