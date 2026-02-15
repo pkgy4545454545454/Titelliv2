@@ -45,7 +45,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 # Use relative path for uploads to work on both Emergent and OnRender
 BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 UPLOADS_DIR = os.path.join(BACKEND_DIR, "uploads", "pub_orders")
-BASE_URL = os.getenv("REACT_APP_BACKEND_URL", "https://card-layout-fix-11.preview.emergentagent.com")
+BASE_URL = os.getenv("REACT_APP_BACKEND_URL", "https://template-replica-2.preview.emergentagent.com")
 
 # Créer le dossier si nécessaire (avec gestion d'erreur pour les environnements restreints)
 try:

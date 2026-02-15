@@ -333,7 +333,7 @@ Collections principales:
 ---
 
 ## URL Application
-**Production**: https://card-layout-fix-11.preview.emergentagent.com
+**Production**: https://template-replica-2.preview.emergentagent.com
 
 ---
 
