@@ -223,20 +223,8 @@ const Header = () => {
             </DropdownMenu>
           </nav>
 
-          {/* Search Bar */}
-          <form onSubmit={handleSearch} className="hidden md:flex items-center flex-1 max-w-md mx-8">
-            <div className="relative w-full">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Rechercher des produits et services"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-11 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-full text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-[#0047AB]/50"
-                data-testid="search-input"
-              />
-            </div>
-          </form>
+          {/* Spacer - search bar moved to homepage */}
+          <div className="hidden md:flex flex-1 max-w-md mx-8" />
 
           {/* Right Actions */}
           <div className="flex items-center gap-2 md:gap-4">
