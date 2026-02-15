@@ -224,7 +224,7 @@ const Header = () => {
           {/* Right Actions */}
           <div className="flex items-center gap-2 md:gap-4">
             {/* Icons */}
-            <button className="p-2 text-gray-500 hover:text-[#0047AB] transition-colors hidden sm:block" data-testid="wishlist-btn">
+            <button className="p-2 text-gray-400 hover:text-white transition-colors hidden sm:block" data-testid="wishlist-btn">
               <Heart className="w-5 h-5" />
             </button>
 
@@ -233,7 +233,7 @@ const Header = () => {
               <>
                 <button 
                   onClick={() => setNotifOpen(true)}
-                  className="p-2 text-gray-500 hover:text-[#0047AB] transition-colors relative" 
+                  className="p-2 text-gray-400 hover:text-white transition-colors relative" 
                   data-testid="notifications-btn"
                   title={wsConnected ? 'Connecté en temps réel' : 'Mode polling'}
                 >
@@ -244,7 +244,7 @@ const Header = () => {
                     </span>
                   )}
                   {/* WebSocket connection indicator */}
-                  <span className={`absolute -bottom-1 -right-1 w-2 h-2 rounded-full ${wsConnected ? 'bg-green-500' : 'bg-gray-400'}`} title={wsConnected ? 'Temps réel actif' : 'Temps réel inactif'} />
+                  <span className={`absolute -bottom-1 -right-1 w-2 h-2 rounded-full ${wsConnected ? 'bg-green-500' : 'bg-gray-500'}`} title={wsConnected ? 'Temps réel actif' : 'Temps réel inactif'} />
                 </button>
                 <NotificationCenter
                   isOpen={notifOpen}
@@ -258,7 +258,7 @@ const Header = () => {
               </>
             )}
 
-            <Link to="/cart" className="p-2 text-gray-500 hover:text-[#0047AB] transition-colors relative" data-testid="cart-btn">
+            <Link to="/cart" className="p-2 text-gray-400 hover:text-white transition-colors relative" data-testid="cart-btn">
               <ShoppingCart className="w-5 h-5" />
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#D4AF37] text-black text-xs font-bold rounded-full flex items-center justify-center">
@@ -271,37 +271,37 @@ const Header = () => {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 p-2 text-gray-500 hover:text-[#0047AB] transition-colors" data-testid="user-menu-btn">
+                  <button className="flex items-center gap-2 p-2 text-gray-400 hover:text-white transition-colors" data-testid="user-menu-btn">
                     <div className="w-8 h-8 rounded-full bg-[#0047AB] flex items-center justify-center text-white text-sm font-medium">
                       {user?.first_name?.[0]}{user?.last_name?.[0]}
                     </div>
                     <ChevronDown className="w-4 h-4 hidden sm:block" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-white border-gray-200 shadow-lg">
-                  <div className="px-3 py-2 border-b border-gray-100">
-                    <p className="text-sm font-medium text-gray-800">{user?.first_name} {user?.last_name}</p>
-                    <p className="text-xs text-gray-500">{user?.email}</p>
+                <DropdownMenuContent align="end" className="w-56 bg-[#0F0F0F] border-white/10">
+                  <div className="px-3 py-2 border-b border-white/10">
+                    <p className="text-sm font-medium text-white">{user?.first_name} {user?.last_name}</p>
+                    <p className="text-xs text-gray-400">{user?.email}</p>
                   </div>
                   <DropdownMenuItem asChild>
-                    <Link to={isEnterprise ? '/dashboard/entreprise' : '/dashboard/client'} className="cursor-pointer text-gray-700 hover:text-[#0047AB]">
+                    <Link to={isEnterprise ? '/dashboard/entreprise' : '/dashboard/client'} className="cursor-pointer">
                       Mon Dashboard
                     </Link>
                   </DropdownMenuItem>
                   {isEnterprise && (
                     <DropdownMenuItem asChild>
-                      <Link to="/dashboard/entreprise/profile" className="cursor-pointer text-gray-700 hover:text-[#0047AB]">
+                      <Link to="/dashboard/entreprise/profile" className="cursor-pointer">
                         Mon Profil Entreprise
                       </Link>
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuItem asChild>
-                    <Link to="/orders" className="cursor-pointer text-gray-700 hover:text-[#0047AB]">
+                    <Link to="/orders" className="cursor-pointer">
                       Mes Commandes
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-gray-100" />
-                  <DropdownMenuItem onClick={logout} className="text-red-500 cursor-pointer" data-testid="logout-btn">
+                  <DropdownMenuSeparator className="bg-white/10" />
+                  <DropdownMenuItem onClick={logout} className="text-red-400 cursor-pointer" data-testid="logout-btn">
                     Déconnexion
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -318,7 +318,7 @@ const Header = () => {
 
             {/* Mobile Menu Toggle */}
             <button 
-              className="lg:hidden p-2 text-gray-500"
+              className="lg:hidden p-2 text-gray-400"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               data-testid="mobile-menu-btn"
             >
@@ -329,7 +329,7 @@ const Header = () => {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-gray-200">
+          <div className="lg:hidden py-4 border-t border-white/10">
             <form onSubmit={handleSearch} className="mb-4">
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -338,7 +338,7 @@ const Header = () => {
                   placeholder="Rechercher..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-[#0047AB]"
+                  className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-gray-500 focus:outline-none"
                 />
               </div>
             </form>
@@ -348,7 +348,7 @@ const Header = () => {
                   key={link.path}
                   to={link.path}
                   className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors ${link.className || ''} ${
-                    isActive(link.path) ? 'bg-[#0047AB]/10 text-[#0047AB]' : `${link.className ? '' : 'text-gray-600'} hover:bg-gray-100 hover:text-gray-800`
+                    isActive(link.path) ? 'bg-white/10 text-white' : `${link.className ? '' : 'text-gray-400'} hover:bg-white/5 hover:text-white`
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
