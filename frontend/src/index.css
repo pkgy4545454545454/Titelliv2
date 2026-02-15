@@ -732,12 +732,12 @@ code, pre {
 
 .scrolling-container::before {
   left: 0;
-  background: linear-gradient(to right, #FAFAFA, transparent);
+  background: linear-gradient(to right, #F9FAFB, transparent);
 }
 
 .scrolling-container::after {
   right: 0;
-  background: linear-gradient(to left, #FAFAFA, transparent);
+  background: linear-gradient(to left, #F9FAFB, transparent);
 }
 
 .scrolling-track {
