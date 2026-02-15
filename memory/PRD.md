@@ -1,408 +1,94 @@
-# Titelli - Product Requirements Document
+# PRD - Titelli Platform
 
-## Overview
-Titelli est une plateforme de social commerce régionale pour les services et produits en Suisse (région de Lausanne). Elle connecte les entreprises locales avec les clients pour des services comme la beauté, le bien-être, les restaurants et le commerce de luxe.
+## Problem Statement
+Titelli is a regional service/product marketplace platform for Lausanne, Switzerland. The platform connects local businesses (enterprises) with customers looking for services and products.
 
-## Last Update: 14 Février 2026
+## User Personas
+1. **Clients** - Residents looking for local services/products
+2. **Enterprise Owners** - Businesses wanting to showcase their offerings
+3. **Admins** - Platform administrators managing users and content
 
-### Session Progress - 14 Février 2026 (En cours)
+## Core Requirements
+- Business discovery and search
+- Service/product catalog with categories
+- User authentication and profiles
+- Booking system for appointments
+- Job listings from enterprises
+- Training/formation marketplace
+- Premium/certified/labeled enterprise badges
+- Real-time notifications
 
-#### ✅ Bugs Corrigés
+## What's Been Implemented
 
-1. **Header - Mot "Titelli" supprimé**
-   - Le texte "Titelli" a été retiré du header
-   - Seul le logo reste visible
+### Session - February 15, 2026
+**Homepage Redesign:**
+- [x] Search bar moved from navbar to under hero video
+- [x] New "Les meilleurs prestataires" section with carousel
+- [x] All sections converted to carousels with navigation arrows
+- [x] Card format changed to "Category - Enterprise Name"
+- [x] Background color changed from dark (#050505) to light white (#FAFAFA)
+- [x] Enterprises sorted by profile completeness (not alphabetically)
+- [x] Light theme applied across Header, Cards, Reviews
 
-2. **Galerie média déplacée sur la page principale**
-   - La galerie Photos/Vidéos est maintenant affichée directement sous "À propos" sur la page entreprise
-   - L'onglet "Photos/Vidéos" a été supprimé des tabs
-   - Tabs restants : Présentation, Services, Produits, Formations, Offres d'emploi, Contact
+### Previous Sessions
+- Business cards PDF generation (Founder & Commercial)
+- Training sheets creation (4 documents)
+- Document template with header/footer
+- Website logo update
+- Monetization brochure (in progress)
 
-3. **Tags cliquables fonctionnels**
-   - Les tags sur les images de la galerie sont maintenant cliquables
-   - Clic sur un tag redirige vers la page du produit/service/client tagué
-   - Tooltip amélioré avec indication "Cliquer pour voir →"
-   - Route `/item/:id` ajoutée pour compatibilité avec les liens existants
-
-#### Fichiers modifiés
-- `/app/frontend/src/components/Header.js` - Suppression texte "Titelli"
-- `/app/frontend/src/pages/EnterprisePage.js` - Galerie sur page principale + tags cliquables
-- `/app/frontend/src/App.js` - Ajout route `/item/:id`
-
-#### Compte de test pour vérification
-- **Email**: `boutique.demo@titelli.com`
-- **Password**: `Demo123!`
-- **Page entreprise test**: `/entreprise/276fde72-8086-4b65-8e15-13ff8e263698`
-
----
-
-### Session Progress - 6 Février 2026 (Complète)
-
-#### ✅ Navigation "Pub IA" avec Dropdown (NOUVEAU)
-- **Menu "✨ Pub IA"** ajouté dans la navigation principale
-- **Dropdown** avec 2 options :
-  - "Images IA" (icône ambre) → `/media-pub`
-  - "Vidéos IA" (icône violet) → `/video-pub`
-- Styles CSS personnalisés (couleur dorée, hover)
-
-#### ✅ Vidéo Pub IA (COMPLET)
-- **13 templates vidéo** dans 6 catégories
-- Prix : 129.90 - 399.90 CHF
-- Génération Sora 2 (~1h)
-- Paiement Stripe intégré
-- Page `/video-pub` avec UI violet
-
-#### ✅ Commandes Titelli - Images + Vidéos
-- **Tabs** : Toutes / Images / Vidéos
-- **Affichage complet** : produit, slogan, description, prix, durée
-- **Badges type** : violet=Vidéo, ambre=Image
-- **Endpoint ajouté** : `GET /api/media-pub/orders/enterprise/{id}`
-
-#### ✅ Bug Images Corrigé
-- Anciennes URLs (`digital-bazaar`) nettoyées de la DB
-- Toutes les images du site fonctionnent
-
-#### ✅ Enrichissement Entreprises (TERMINÉ)
-- **343 entreprises** enrichies avec logos et covers
-- Images dans `/app/backend/uploads/enterprises/`
-
-#### ✅ Autres accomplissements session
-- Email confirmation après paiement Pub Média
-- Dashboard Admin "Pub Média IA"
-- PDFs CDC V2 détaillés
-- Vidéo Marketing V2 assemblée (7.3MB)
-
-### Refactoring server.py - Plan documenté
-Le fichier `server.py` fait 10,008 lignes. Routers modulaires existent dans `/routers/` mais ne sont pas tous utilisés :
-- **Actifs** : rdv_titelli, specialists, titelli_pro, sports, notifications, gamification, webhooks, subscriptions, cashback, media_pub, video_pub
-- **Inactifs** : auth.py, admin.py (code dupliqué dans server.py)
-- **À migrer** : auth routes, enterprise routes, orders routes, payments routes
-
-### Session Progress - 5 Février 2026
-
-#### ✅ Pub Média avec Post-Processing (COMPLET)
-- **Éditeur style Canva** : 34 templates dans 7 catégories
-- **Filigrane "TITELLI"** : Protection anti-screenshot (retiré après paiement)
-- **Génération IA DALL-E** : Images de fond sans texte
-- **Post-processing Pillow** : Texte parfait ajouté en overlay (CORRIGÉ)
-- **Section "Sur Mesure"** : 149.90 CHF création personnalisée
-- Tests: 100% backend (17/17) + frontend vérifié
-
-#### ✅ Pages Contenu Site (AJOUTÉES)
-- **AboutPage.js** : Vision, Mission, Avantages, Vidéos promo lifestyle
-- **CGVPage.js** : Procédé facturation 20%, Tarification, Renouvellement
-- **MentionsLegalesPage.js** : Protection données, Cookies, Droits
-
-#### ✅ Cahiers des Charges PDF (GÉNÉRÉS)
-- **CDC_MONETISATION_TITELLI.pdf** : Facturation, Cash-Back, Tarifs, Labellisation
-- **CDC_FONCTIONNALITES_TITELLI.pdf** : Toutes fonctionnalités Client/Entreprise/Admin
-
-## Core Features
-
-### 1. Multi-User System
-- **Clients**: Parcourir, réserver des services, acheter des produits, fonctionnalités sociales
-- **Entreprises**: Gérer le profil d'entreprise, services, produits, commandes, équipe
-- **Influenceurs**: Promouvoir les entreprises, gagner des commissions
-- **Admins**: Gestion de la plateforme, validation, analytics
-
-### 2. Enterprise Registration System
-- Base de données pré-chargée avec 8,249 entreprises de Lausanne
-- Inscription en deux étapes : Sélectionner entreprise → Remplir formulaire
-- Documents requis : ID registre du commerce, document d'identité
-- Sélection du manager référent
-- Workflow de validation admin avec boutons approuver/rejeter
-
-### 3. E-Commerce
-- Catalogue de produits avec catégories
-- Panier avec formulaire de checkout complet
-- Intégration paiement Stripe (clés LIVE)
-- Gestion des commandes pour clients et entreprises
-
-### 4. Advertising & Campaigns
-- Types de publicités multiples : standard, premium, spotlight, vidéo, bannière
-- Intégration paiement Stripe pour activation de campagne
-- Gestion des campagnes dans le Dashboard Entreprise
-
-### 5. Social Features
-- Profils utilisateurs et fil d'activité
-- Favoris et wishlists
-- Avis et notations
-- Suggestions d'amis
-
----
-
-## NOUVELLES FONCTIONNALITÉS (Février 2026)
-
-### 6. RDV chez Titelli (Social Booking) ✅ VÉRIFIÉ
-**Routes Backend**: `/app/backend/routers/rdv_titelli.py` (1,135 lignes)
-**Page Frontend**: `/app/frontend/src/pages/RdvTitelliPage.js`
-
-**Fonctionnalités**:
-- Offres pour 2 personnes (amical ou romantique)
-- Système d'invitations avec acceptation payante (2 CHF)
-- Abonnement romantique (200 CHF/mois) via Stripe
-- Chat temps réel entre participants (WebSocket)
-- 8 catégories: restaurant, sport, wellness, culture, nature, party, creative, autre
-
-**API Endpoints**:
-- `POST /api/rdv/offers` - Créer une offre
-- `GET /api/rdv/offers` - Liste des offres
-- `GET /api/rdv/categories` - 8 catégories
-- `POST /api/rdv/invitations/{id}/accept` - Accepter invitation (2 CHF Stripe)
-- `POST /api/rdv/subscriptions/romantic` - S'abonner romantique (200 CHF/mois)
-- `WS /ws/rdv/{chat_room_id}` - Chat temps réel
-
-### 7. Demandes Spécialistes ✅ VÉRIFIÉ
-**Routes Backend**: `/app/backend/routers/specialists.py` (585 lignes)
-**Page Frontend**: `/app/frontend/src/pages/SpecialistsPage.js`
-
-**Fonctionnalités**:
-- Recherche IA de spécialistes
-- Création de demandes urgentes/spécifiques
-- Système de réponses des prestataires
-- 10 catégories de spécialistes
-
-**API Endpoints**:
-- `GET /api/specialists/categories` - 10 catégories
-- `GET /api/specialists/search` - Recherche IA
-- `POST /api/specialists/requests` - Créer demande
-- `GET /api/specialists/requests/{id}/responses` - Voir réponses
-
-### 8. Lifestyle Passes ✅ VÉRIFIÉ
-**Intégré dans**: `/app/backend/routers/specialists.py`
-
-| Pass | Prix | Inclus |
-|------|------|--------|
-| **Healthy Lifestyle** | 99 CHF/mois | Spa, wellness, nutrition, fitness |
-| **Better You** | 149 CHF/mois | Coaching, développement personnel |
-| **Special MVP** | 299 CHF/mois | Accès VIP, venues exclusives, concierge |
-
-**API Endpoints**:
-- `GET /api/specialists/passes` - Liste des passes
-- `POST /api/lifestyle-passes/subscribe` - S'abonner
-
-### 9. Titelli Pro++ (B2B) ✅ VÉRIFIÉ
-**Routes Backend**: `/app/backend/routers/titelli_pro.py` (720 lignes)
-**Page Frontend**: `/app/frontend/src/pages/TitelliProPage.js` (814 lignes)
-
-**Fonctionnalités**:
-- Livraisons B2B récurrentes (quotidien/hebdo/mensuel)
-- Liquidation de stock (surstock, fin saison, expiration)
-- Abonnement Pro++: 199 CHF/mois via Stripe
-- Analytics B2B
-- **Restriction**: Réservé aux comptes entreprise
-
-**API Endpoints**:
-- `GET /api/pro/status` - Statut abonnement
-- `POST /api/pro/subscribe` - S'abonner Pro++ (199 CHF/mois)
-- `GET /api/pro/deliveries` - Clients B2B
-- `POST /api/pro/liquidations` - Articles liquidation
-
-### 10. Sports & Compétitions ✅ VÉRIFIÉ
-**Routes Backend**: `/app/backend/routers/titelli_pro.py` (sports_router)
-**Page Frontend**: `/app/frontend/src/pages/SportsPage.js`
-
-**Fonctionnalités**:
-- Création de matchs (cherche adversaire/joueurs/équipe)
-- Gestion d'équipes
-- Compétitions et tournois
-- 11 catégories sportives: Football, Tennis, Basketball, Volleyball, Badminton, Padel, Running, Swimming, Cycling, Fitness, Autre
-
-**API Endpoints**:
-- `GET /api/sports/categories` - 11 catégories
-- `POST /api/sports/matches` - Créer match
-- `GET /api/sports/matches/my` - Mes matchs
-- `POST /api/sports/matches/{id}/join` - Rejoindre
-- `POST /api/sports/teams` - Créer équipe
-- `POST /api/sports/competitions` - Créer compétition
-
-### 11. Notifications Push ✅ VÉRIFIÉ
-**Routes Backend**: `/app/backend/routers/notifications.py` (316 lignes)
-**Component Frontend**: `/app/frontend/src/components/NotificationsDropdown.js`
-
-**Fonctionnalités**:
-- Notifications temps réel
-- Types: invitations RDV, messages chat, réponses spécialistes, sports
-- Marquer comme lu / Supprimer
-- Préférences utilisateur
-
-### 12. Gamification ✅ VÉRIFIÉ
-**Routes Backend**: `/app/backend/routers/gamification.py` (591 lignes)
-
-**Fonctionnalités**:
-- Points pour chaque action (+5 à +15 points)
-- 8 niveaux (Débutant → Titan)
-- Badges multiples catégories
-- Intégration avec RDV et Sports
-
-### 13. Système de Parrainage ✅ NOUVEAU
-**Routes Backend**: `/app/backend/routers/gamification.py` (section referral)
-**Component Frontend**: `/app/frontend/src/components/ReferralSection.js`
-
-**Fonctionnalités**:
-- Code de parrainage unique par utilisateur (format: TIT + 8 caractères)
-- Partage via lien ou code
-- Points pour le parrain (+50) ET le filleul (+25)
-- Bonus à paliers: 5 parrainages (+100), 10 (+250), 25 (+500)
-- Leaderboard des meilleurs parrains
-- Badge "Influenceur" à 5 parrainages
-
-**API Endpoints**:
-- `GET /api/gamification/referral/my-code` - Mon code de parrainage
-- `GET /api/gamification/referral/stats` - Statistiques détaillées
-- `GET /api/gamification/referral/validate?code=XXX` - Valider un code (public)
-- `POST /api/gamification/referral/apply` - Appliquer un code après inscription
-- `GET /api/gamification/referral/leaderboard` - Classement des parrains
-
----
-
-## Technical Architecture
-
-### Backend (FastAPI)
+## Architecture
 ```
-/app/backend/
-├── server.py                 (10,271 lignes) ⚠️ REFACTORING RECOMMANDÉ
-├── routers/
-│   ├── rdv_titelli.py        (1,135 lignes) ✅ NOUVEAU
-│   ├── titelli_pro.py        (720 lignes)   ✅ NOUVEAU
-│   ├── gamification.py       (591 lignes)   ✅ NOUVEAU
-│   ├── specialists.py        (585 lignes)   ✅ NOUVEAU
-│   ├── notifications.py      (316 lignes)   ✅ NOUVEAU
-│   ├── enterprise.py         (280 lignes)   ✅ NOUVEAU (refactoré)
-│   ├── admin.py              (220 lignes)   ✅ NOUVEAU (refactoré)
-│   ├── orders.py             (200 lignes)   ✅ NOUVEAU (refactoré)
-│   └── ...
-│
-└── TOTAL: ~15,000 lignes de code backend
+/app
+├── backend/
+│   ├── server.py (FastAPI)
+│   ├── models/ (MongoDB schemas)
+│   ├── uploads/ (Generated files, PDFs)
+│   └── .env (MONGO_URL, DB_NAME)
+├── frontend/
+│   ├── src/
+│   │   ├── pages/ (HomePage, EnterprisesPage, etc.)
+│   │   ├── components/ (EnterpriseCard, Header, Footer, etc.)
+│   │   ├── services/api.js
+│   │   └── index.css (Global styles)
+│   └── .env (REACT_APP_BACKEND_URL)
+└── PDF generation scripts (root level)
 ```
 
-### Frontend (React)
-```
-/app/frontend/src/pages/
-├── RdvTitelliPage.js        ✅ NOUVEAU - Social booking
-├── RdvChatPage.js           ✅ NOUVEAU - Chat temps réel
-├── SpecialistsPage.js       ✅ NOUVEAU - Demandes spécialistes
-├── TitelliProPage.js        ✅ NOUVEAU - B2B services (814 lignes complet)
-├── SportsPage.js            ✅ NOUVEAU - Sports & compétitions
-├── AdminDashboard.js
-├── ClientDashboard.js
-├── EnterpriseDashboard.js
-└── ... (23+ pages au total)
-```
+## Prioritized Backlog
 
-### Base de Données (MongoDB)
-```
-Collections principales:
-- enterprises: 6,482 documents
-- users: 60+ documents
-- shared_offers: Offres RDV Titelli
-- chat_rooms / chat_messages: Chat temps réel
-- specialist_requests: Demandes spécialistes
-- lifestyle_subscriptions: Abonnements passes
-- gamification_points / gamification_actions_log: Gamification
-- sports_matches: Matchs sportifs
-- notifications: 294+ notifications
-```
+### P0 (Critical)
+- None currently
 
----
+### P1 (High Priority)
+- [ ] Provider profile redesign (user sketches)
+- [ ] Marketing flyer with custom QR code
+- [ ] Fix broken image URLs in media gallery (data migration)
+- [ ] Fix potential cover image duplication bug
 
-## Stripe Configuration ✅ VÉRIFIÉ EN PRODUCTION
-- **Mode**: LIVE (pas test)
-- **API Key**: `sk_live_51RelvgKG28DxZ5CC...` ✅
-- **Public Key**: `pk_live_51RelvgKG28DxZ5CC...` ✅
+### P2 (Medium Priority)
+- [ ] "Before/After" presentation video
+- [ ] Final specifications document (CDC)
+- [ ] Free AI trial feature
+- [ ] Multi-tag confirmation demonstration
+- [ ] Monetization brochure final design
 
-### Flux de Paiement
-| Service | Type | Prix |
-|---------|------|------|
-| Abonnement Romantique | Récurrent | 200 CHF/mois |
-| Acceptation invitation | One-time | 2 CHF |
-| Abonnement Pro++ | Récurrent | 199 CHF/mois |
-| Healthy Pass | Récurrent | 99 CHF/mois |
-| Better You Pass | Récurrent | 149 CHF/mois |
-| MVP Pass | Récurrent | 299 CHF/mois |
+### P3 (Low Priority)
+- [ ] Eye-clock logo modification (blocked - needs SVG source)
+- [ ] Refactor PDF scripts to /app/scripts directory
 
----
+## Tech Stack
+- **Frontend:** React, TailwindCSS, Shadcn/UI
+- **Backend:** FastAPI, MongoDB
+- **PDF Generation:** reportlab, pdfplumber, Pillow
+- **Payments:** Stripe
+- **Notifications:** WebSocket real-time
 
-## Credentials de Test
-| Rôle | Email | Mot de passe |
-|------|-------|--------------|
-| **Admin** | admin@titelli.com | Admin123! |
-| **Client** | test.client@titelli.com | Test123! |
-| **Enterprise** | test.entreprise@titelli.com | Test123! |
+## Test Credentials
+- Email: boutique.demo@titelli.com
+- Password: Demo123!
 
----
-
-## URL Application
-**Production**: https://template-replica-2.preview.emergentagent.com
-
----
-
-## Tests Complétés (Février 2026)
-- ✅ **Iteration 38**: Vérification Production Complète
-  - 29/29 tests backend passés (100%)
-  - Stripe LIVE mode vérifié
-  - Toutes les nouvelles fonctionnalités testées
-
-- ✅ **Iteration 39**: Audit Production Final
-  - 38/38 tests backend passés (100%)
-  - Vérification complète de toutes les pages frontend
-
-- ✅ **Iteration 40**: Vérification Système de Monétisation (3 Février 2026)
-  - 34/34 tests backend passés (100%)
-  - Splash screen optimisé (10s → 3s)
-  - Tous les flux Stripe vérifiés en mode LIVE
-  - Webhooks Stripe intégrés
-
----
-
-## Backlog Restant
-
-### P1 - Priorité Haute
-- [ ] Refactoring complet de server.py (~10,000 lignes restantes)
-- [x] ~~Webhooks Stripe temps réel~~ ✅ FAIT (3 Février 2026)
-- [ ] Assemblage vidéo finale 30s avec voiceover
-- [ ] Analytics comportemental (activation/désactivation algorithmes)
-
-### P2 - Priorité Moyenne
-- [ ] Logique avancée tournois Sports (brackets)
-- [ ] Inclure routeur client_premium dans server.py
-- [ ] Interface admin médias marketing
-- [ ] Graphiques analytics détaillés
-
-### P3 - Backlog
-- [ ] Refactoring dashboards frontend
-- [ ] Email notifications status inscription
-- [ ] Tendances et analytics charts
-
----
-
-## Dernières Modifications (3 Février 2026)
-
-### Fichiers Créés
-- `/app/backend/routers/webhooks.py` - Webhooks Stripe temps réel
-- `/app/backend/routers/subscriptions.py` - Plans client Premium/VIP
-- `/app/backend/uploads/titelli_presentation_30s_voiceover.mp4` - Vidéo marketing finale
-- `/app/backend/uploads/RAPPORT_JOURNALIER_03022026.pdf` - Rapport PDF
-- `/app/backend/uploads/TITELLI_VIDEOS_COMPLET.zip` - Archive vidéos (16 MB)
-
-### Fichiers Modifiés
-- `/app/frontend/src/components/SplashScreen.js` - Optimisé (3 secondes)
-- `/app/backend/services/email_service.py` - Template échec paiement
-- `/app/backend/server.py` - Inclusion routeurs webhooks, admin, subscriptions
-
----
-
-## Médias Marketing Générés
-- **Images publicitaires**: 8 fichiers
-- **Vidéos V1**: 10 fichiers
-- **Vidéos V2 (révisées)**: 6 fichiers
-- **Voiceover français**: 1 fichier audio (`voiceover_french.mp3`)
-- **Screenshots**: 4 fichiers
-
-**Téléchargement**: `/api/uploads/TITELLI_MEDIAS_COMPLET.zip` (35 MB)
-
----
-
-*Document mis à jour: 3 Février 2026*
-*Version: 2.1 - Post-Optimisation Splash + Webhooks Stripe*
-
+## Known Issues
+1. Old media gallery URLs broken (domain change)
+2. Potential cover image duplication across enterprises
+3. Category names in snake_case format
