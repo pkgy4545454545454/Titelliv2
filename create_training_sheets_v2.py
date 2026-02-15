@@ -27,24 +27,17 @@ def draw_header(c, title):
     logo_width = 12 * mm
     c.drawImage(logo, MARGIN, PAGE_HEIGHT - 20 * mm, width=logo_width, height=logo_height, mask='auto')
     
+    # Titelli - même style que logo (serif, élégant)
     c.setFillColor(PRIMARY_BLACK)
-    c.setFont("Helvetica-Bold", 14)
-    c.drawString(MARGIN + logo_width + 3 * mm, PAGE_HEIGHT - 14 * mm, "TITELLI")
+    c.setFont("Times-Roman", 14)
+    c.drawString(MARGIN + logo_width + 3 * mm, PAGE_HEIGHT - 14 * mm, "Titelli")
     
     c.setFillColor(ACCENT_GRAY)
     c.setFont("Helvetica-Oblique", 7)
     c.drawString(MARGIN + logo_width + 3 * mm, PAGE_HEIGHT - 19 * mm, 
                  "Tous les prestataires préférés de votre région se trouvent sur Titelli")
     
-    badge_text = "FORMATION INTERNE"
-    c.setFillColor(PRIMARY_BLACK)
-    c.setFont("Helvetica", 7)
-    badge_width = c.stringWidth(badge_text, "Helvetica", 7) + 8 * mm
-    badge_x = PAGE_WIDTH - MARGIN - badge_width
-    c.roundRect(badge_x, PAGE_HEIGHT - 17 * mm, badge_width, 6 * mm, 2, fill=1, stroke=0)
-    c.setFillColor(WHITE)
-    c.drawCentredString(badge_x + badge_width/2, PAGE_HEIGHT - 15.5 * mm, badge_text)
-    
+    # Titre avec bonne casse
     c.setFillColor(PRIMARY_BLACK)
     c.setFont("Helvetica-Bold", 22)
     c.drawString(MARGIN, PAGE_HEIGHT - 38 * mm, title)
