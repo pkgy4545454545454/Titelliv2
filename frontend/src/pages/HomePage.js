@@ -304,7 +304,7 @@ const HomePage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]" data-testid="home-page">
+    <div className="min-h-screen bg-[#050505]" data-testid="home-page">
       {/* Hero Section with Panoramic Video */}
       <section className="relative h-screen overflow-hidden" data-testid="hero-section">
         {/* Video Background */}

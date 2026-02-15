@@ -5,7 +5,7 @@
 @tailwind utilities;
 
 :root {
-  --bg-default: #FAFAFA;
+  --bg-default: #050505;
   --bg-paper: #0A0A0A;
   --bg-subtle: #121212;
   --primary-main: #0047AB;
@@ -51,7 +51,7 @@ code, pre {
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
+    --background: 0 0% 2%;
     --foreground: 0 0% 90%;
     --card: 0 0% 4%;
     --card-foreground: 0 0% 90%;
