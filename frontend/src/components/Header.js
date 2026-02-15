@@ -167,19 +167,17 @@ const Header = () => {
     <header className="fixed top-0 left-0 right-0 z-50 glass-heavy" data-testid="main-header">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo statique Titelli */}
+          {/* Logo statique Titelli - sans fond */}
           <Link to="/" className="flex items-center" data-testid="logo-link">
-            <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-[#0047AB]/30 bg-black flex items-center justify-center">
-              <img 
-                src="/logo_titelli.png" 
-                alt="Titelli"
-                className="w-8 h-8 object-contain"
-              />
-            </div>
+            <img 
+              src="/logo_titelli.png" 
+              alt="Titelli"
+              className="w-10 h-10 object-contain"
+            />
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-8">
+          {/* Desktop Navigation - Centré */}
+          <nav className="hidden lg:flex items-center justify-center flex-1 gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
@@ -198,23 +196,23 @@ const Header = () => {
                 Pub IA
                 <ChevronDown className="w-3 h-3" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-white border border-gray-200 rounded-xl p-2 min-w-[200px] shadow-lg">
+              <DropdownMenuContent className="bg-gray-900 border border-white/10 rounded-xl p-2 min-w-[200px]">
                 {pubIALinks.map((link) => (
                   <DropdownMenuItem key={link.path} asChild>
                     <Link
                       to={link.path}
-                      className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
                     >
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                        link.path === '/video-pub' ? 'bg-purple-100' : 'bg-amber-100'
+                        link.path === '/video-pub' ? 'bg-purple-500/20' : 'bg-amber-500/20'
                       }`}>
                         <link.icon className={`w-4 h-4 ${
-                          link.path === '/video-pub' ? 'text-purple-600' : 'text-amber-600'
+                          link.path === '/video-pub' ? 'text-purple-400' : 'text-amber-400'
                         }`} />
                       </div>
                       <div>
-                        <p className="text-gray-800 text-sm font-medium">{link.label}</p>
-                        <p className="text-gray-500 text-xs">{link.description}</p>
+                        <p className="text-white text-sm font-medium">{link.label}</p>
+                        <p className="text-gray-400 text-xs">{link.description}</p>
                       </div>
                     </Link>
                   </DropdownMenuItem>
@@ -222,9 +220,6 @@ const Header = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           </nav>
-
-          {/* Spacer - search bar moved to homepage */}
-          <div className="hidden md:flex flex-1 max-w-md mx-8" />
 
           {/* Right Actions */}
           <div className="flex items-center gap-2 md:gap-4">
