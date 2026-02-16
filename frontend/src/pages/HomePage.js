@@ -700,66 +700,65 @@ const HomePage = () => {
                     <option value="CDD">CDD</option>
                     <option value="Stage">Stage</option>
                     <option value="Freelance">Freelance</option>
-                    <option value="Apprentissage">Apprentissage</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Ville</label>
+                  <label className="block text-xs sm:text-sm text-gray-600 mb-1.5 sm:mb-2">Ville</label>
                   <input 
                     type="text"
                     value={jobFilters.location}
                     onChange={(e) => setJobFilters({...jobFilters, location: e.target.value})}
-                    placeholder="Ex: Lausanne, Genève..."
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-gray-900 placeholder-gray-500 focus:border-[#0047AB] outline-none"
+                    placeholder="Lausanne..."
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-900 placeholder-gray-500 focus:border-[#0047AB] outline-none"
                     data-testid="jobs-filter-location"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm text-gray-600 mb-2">Entreprise</label>
+                <div className="col-span-2 lg:col-span-1">
+                  <label className="block text-xs sm:text-sm text-gray-600 mb-1.5 sm:mb-2">Entreprise</label>
                   <input 
                     type="text"
                     value={jobFilters.enterprise}
                     onChange={(e) => setJobFilters({...jobFilters, enterprise: e.target.value})}
-                    placeholder="Nom de l'entreprise..."
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-gray-900 placeholder-gray-500 focus:border-[#0047AB] outline-none"
+                    placeholder="Nom..."
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-900 placeholder-gray-500 focus:border-[#0047AB] outline-none"
                     data-testid="jobs-filter-enterprise"
                   />
                 </div>
-                <div className="flex items-end">
+                <div className="flex items-end col-span-2 lg:col-span-1">
                   <button 
                     onClick={() => setJobFilters({ type: '', location: '', enterprise: '' })}
-                    className="w-full px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 hover:text-gray-900 transition-colors"
+                    className="w-full px-3 sm:px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs sm:text-sm text-gray-700 hover:text-gray-900 transition-colors"
                   >
                     Réinitialiser
                   </button>
                 </div>
               </div>
               {filteredJobs.length !== jobs.length && (
-                <p className="mt-4 text-sm text-[#0047AB]">{filteredJobs.length} résultat(s) sur {jobs.length}</p>
+                <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-[#0047AB]">{filteredJobs.length} résultat(s) sur {jobs.length}</p>
               )}
             </div>
           )}
 
           {filteredJobs.length > 0 ? (
-            <Carousel itemWidth={350}>
+            <Carousel itemWidth={280}>
               {filteredJobs.slice(0, 9).map((job, index) => (
                 <div 
                   key={job.id} 
-                  className="flex-shrink-0 w-[350px] bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:border-[#0047AB]/30 hover:shadow-md transition-all"
+                  className="flex-shrink-0 w-[280px] sm:w-[320px] bg-white rounded-xl p-3 sm:p-5 border border-gray-200 shadow-sm hover:border-[#0047AB]/30 hover:shadow-md transition-all"
                   data-testid={`job-card-${job.id}`}
                 >
                   <Link to={`/emploi/${job.id}`} className="block">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-lg bg-[#0047AB]/10 flex items-center justify-center">
-                          <Briefcase className="w-6 h-6 text-[#0047AB]" />
+                    <div className="flex items-start justify-between mb-2 sm:mb-3 gap-2">
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-[#0047AB]/10 flex items-center justify-center flex-shrink-0">
+                          <Briefcase className="w-5 h-5 sm:w-6 sm:h-6 text-[#0047AB]" />
                         </div>
-                        <div>
-                          <h3 className="text-gray-900 font-semibold text-sm md:text-base">{job.title}</h3>
-                          <p className="text-[#D4AF37] text-sm font-medium">{job.enterprise_name || 'Entreprise'}</p>
+                        <div className="min-w-0">
+                          <h3 className="text-gray-900 font-semibold text-xs sm:text-sm line-clamp-1">{job.title}</h3>
+                          <p className="text-[#D4AF37] text-xs sm:text-sm font-medium line-clamp-1">{job.enterprise_name || 'Entreprise'}</p>
                         </div>
                       </div>
-                      <span className={`text-xs px-2 py-1 rounded-full ${
+                      <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full flex-shrink-0 ${
                         job.type === 'CDI' ? 'bg-green-100 text-green-700' :
                         job.type === 'CDD' ? 'bg-orange-100 text-orange-700' :
                         job.type === 'Stage' ? 'bg-purple-100 text-purple-700' :
@@ -769,42 +768,36 @@ const HomePage = () => {
                         {job.type || 'CDI'}
                       </span>
                     </div>
-                    <p className="text-gray-600 text-sm line-clamp-2 mb-4">{job.description}</p>
-                    <div className="flex items-center gap-4 text-xs text-gray-500 mb-4">
+                    <p className="text-gray-600 text-xs sm:text-sm line-clamp-2 mb-3 sm:mb-4">{job.description}</p>
+                    <div className="flex items-center gap-3 sm:gap-4 text-[10px] sm:text-xs text-gray-500 mb-3 sm:mb-4">
                       <span className="flex items-center gap-1">
                         <MapPin className="w-3 h-3" /> {job.location || 'Lausanne'}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" /> {job.salary || 'À discuter'}
                       </span>
                     </div>
                   </Link>
                   <button
                     onClick={(e) => handleApplyClick(e, job)}
-                    className="w-full bg-[#0047AB] hover:bg-[#0047AB]/80 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                    className="w-full bg-[#0047AB] hover:bg-[#0047AB]/80 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5 sm:gap-2"
                     data-testid={`job-apply-btn-${job.id}`}
                   >
-                    <Send className="w-4 h-4" />
+                    <Send className="w-3 h-3 sm:w-4 sm:h-4" />
                     Postuler
                   </button>
                 </div>
               ))}
             </Carousel>
           ) : (
-            <div className="text-center py-12">
-              <Briefcase className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-600">
-                {jobs.length === 0 ? "Aucune offre d'emploi pour le moment" : "Aucune offre ne correspond aux filtres"}
-              </p>
-              <p className="text-sm text-gray-500 mt-1">
-                {jobs.length === 0 ? "Les offres de nos prestataires apparaîtront ici" : "Essayez d'autres critères de recherche"}
+            <div className="text-center py-8 sm:py-12">
+              <Briefcase className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-3 sm:mb-4" />
+              <p className="text-gray-600 text-sm">
+                {jobs.length === 0 ? "Aucune offre pour le moment" : "Aucune offre ne correspond"}
               </p>
             </div>
           )}
 
-          <Link to="/emplois" className="md:hidden flex items-center justify-center gap-2 mt-8 text-[#0047AB] font-medium">
+          <Link to="/emplois" className="md:hidden flex items-center justify-center gap-2 mt-4 sm:mt-8 text-[#0047AB] font-medium text-sm">
             Voir toutes les offres
-            <ArrowRight className="w-5 h-5" />
+            <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </section>
