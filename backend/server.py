@@ -9118,6 +9118,68 @@ async def health_check():
 
 # ============ MIGRATION ENDPOINT ============
 
+@api_router.post("/admin/migrate-images")
+async def migrate_local_images():
+    """
+    Migration endpoint to fix local image paths.
+    Replaces /api/uploads/ paths with appropriate external URLs based on category.
+    This is needed for Render deployment where local uploads don't persist.
+    """
+    # Default images by category
+    default_images = {
+        "bijouteries": "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&q=80",
+        "horlogerie": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80",
+        "coiffure": "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=800&q=80",
+        "coiffure_barber": "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=800&q=80",
+        "salon": "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&q=80",
+        "beaute": "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&q=80",
+        "spa": "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800&q=80",
+        "cours_sport": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&q=80",
+        "fitness": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&q=80",
+        "mode": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80",
+        "vetements": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80",
+        "immobilier": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80",
+        "agence": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80",
+        "consulting": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80",
+        "restaurant": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80",
+        "alimentation": "https://images.unsplash.com/photo-1567521464027-f127ff144326?w=800&q=80",
+        "default": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80"
+    }
+    
+    # Find all enterprises with local image paths
+    cursor = db.enterprises.find({
+        "$or": [
+            {"cover_image": {"$regex": "^/api/uploads/", "$options": "i"}},
+            {"cover_image": {"$exists": False}},
+            {"cover_image": None},
+            {"cover_image": ""}
+        ]
+    })
+    
+    updated_count = 0
+    async for ent in cursor:
+        category = (ent.get('category', '') or '').lower()
+        
+        # Find matching default image
+        new_image = default_images["default"]
+        for key, url in default_images.items():
+            if key in category:
+                new_image = url
+                break
+        
+        # Update the enterprise
+        await db.enterprises.update_one(
+            {"_id": ent["_id"]},
+            {"$set": {"cover_image": new_image}}
+        )
+        updated_count += 1
+        logger.info(f"Migrated image for: {ent.get('business_name', ent.get('name', 'Unknown'))}")
+    
+    return {
+        "message": "Image migration completed",
+        "updated_count": updated_count
+    }
+
 @api_router.post("/admin/migrate-trainings")
 async def migrate_trainings_data(current_user: dict = Depends(get_current_user)):
     """Migrate existing trainings to add training_type field"""
