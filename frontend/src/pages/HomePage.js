@@ -124,8 +124,8 @@ const HomePage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [enterprisesRes, tendRes, guestRes, offreRes, premRes, prodCatRes, servCatRes, jobsRes, trainingsRes] = await Promise.all([
-          enterpriseAPI.list({ limit: 50 }),
+        const [enterprisesRes, tendRes, guestRes, offreRes, premRes, prodCatRes, servCatRes, jobsRes, trainingsRes, jewelryProductsRes] = await Promise.all([
+          enterpriseAPI.list({ limit: 100 }),
           featuredAPI.tendances(),
           featuredAPI.guests(),
           featuredAPI.offres(),
@@ -133,30 +133,52 @@ const HomePage = () => {
           categoryAPI.products(),
           categoryAPI.services(),
           jobsAPI.listAll().catch(() => ({ data: [] })),
-          trainingsAPI.listAll({ limit: 6 }).catch(() => ({ data: [] }))
+          trainingsAPI.listAll({ limit: 6 }).catch(() => ({ data: [] })),
+          servicesProductsAPI.list({ type: 'product', limit: 50 }).catch(() => ({ data: [] }))
         ]);
         
-        // Filter and sort all enterprises - only those with real photos
+        // Filter and sort all enterprises - only those with real photos, then ALPHABETICALLY
         const allEnts = enterprisesRes.data.enterprises || [];
         const withRealPhotos = allEnts.filter(hasRealPhoto);
-        const sortedEnterprises = sortByProfileCompleteness(withRealPhotos);
-        setAllEnterprises(sortedEnterprises);
+        // Sort alphabetically by business_name or name
+        const sortedAlphabetically = withRealPhotos.sort((a, b) => {
+          const nameA = (a.business_name || a.name || '').toLowerCase();
+          const nameB = (b.business_name || b.name || '').toLowerCase();
+          return nameA.localeCompare(nameB);
+        });
+        setAllEnterprises(sortedAlphabetically);
         
-        // Filter featured enterprises too
-        const tendData = (tendRes.data || []).filter(hasRealPhoto);
-        const guestData = (guestRes.data || []).filter(hasRealPhoto);
-        const premData = (premRes.data || []).filter(hasRealPhoto);
+        // Filter featured enterprises too - also alphabetically
+        const tendData = (tendRes.data || []).filter(hasRealPhoto).sort((a, b) => 
+          (a.business_name || a.name || '').localeCompare(b.business_name || b.name || '')
+        );
+        const guestData = (guestRes.data || []).filter(hasRealPhoto).sort((a, b) => 
+          (a.business_name || a.name || '').localeCompare(b.business_name || b.name || '')
+        );
+        const premData = (premRes.data || []).filter(hasRealPhoto).sort((a, b) => 
+          (a.business_name || a.name || '').localeCompare(b.business_name || b.name || '')
+        );
         
-        setTendances(sortByProfileCompleteness(tendData));
-        setGuests(sortByProfileCompleteness(guestData));
+        setTendances(tendData);
+        setGuests(guestData);
         setOffres(offreRes.data);
-        setPremium(sortByProfileCompleteness(premData));
+        setPremium(premData);
         setProductCategories(prodCatRes.data);
         setServiceCategories(servCatRes.data);
         const jobsData = jobsRes.data || [];
         setJobs(jobsData);
         setFilteredJobs(jobsData);
         setTrainings(trainingsRes.data || []);
+        
+        // Filter jewelry/watch products for the special section
+        const allProducts = jewelryProductsRes.data?.items || jewelryProductsRes.data || [];
+        const jewelryProducts = allProducts.filter(p => {
+          const cat = (p.category || '').toLowerCase();
+          const name = (p.name || '').toLowerCase();
+          return cat.includes('bijou') || cat.includes('montre') || cat.includes('horlog') || 
+                 cat.includes('joaill') || name.includes('montre') || name.includes('bijou');
+        });
+        setJewelryWatchProducts(jewelryProducts);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
