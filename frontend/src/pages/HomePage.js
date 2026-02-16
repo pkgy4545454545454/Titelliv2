@@ -588,29 +588,29 @@ const HomePage = () => {
 
       {/* Guests du moment - Carousel */}
       {guests.length > 0 && (
-        <section className="py-16 bg-white" data-testid="guests-section">
+        <section className="py-8 sm:py-16 bg-white" data-testid="guests-section">
           <div className="max-w-7xl mx-auto px-4 md:px-8">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-[#0047AB]/10">
-                  <CheckCircle className="w-6 h-6 text-[#0047AB]" />
+            <div className="flex items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="p-2 sm:p-3 rounded-xl bg-[#0047AB]/10 flex-shrink-0">
+                  <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-[#0047AB]" />
                 </div>
-                <div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
+                <div className="min-w-0">
+                  <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
                     Guests du moment
                   </h2>
-                  <p className="text-gray-600 mt-1">Nos prestataires certifiés</p>
+                  <p className="text-gray-600 mt-0.5 sm:mt-1 text-xs sm:text-sm">Nos prestataires certifiés</p>
                 </div>
               </div>
-              <Link to="/certifies" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors">
+              <Link to="/certifies" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors flex-shrink-0">
                 Voir tout
                 <ArrowRight className="w-5 h-5" />
               </Link>
             </div>
 
-            <Carousel itemWidth={350}>
+            <Carousel itemWidth={280}>
               {guests.map((enterprise, index) => (
-                <div key={enterprise.id} className="flex-shrink-0 w-[350px]">
+                <div key={enterprise.id} className="flex-shrink-0 w-[280px] sm:w-[320px]">
                   <EnterpriseCard enterprise={enterprise} />
                 </div>
               ))}
@@ -621,29 +621,29 @@ const HomePage = () => {
 
       {/* Premium Section - Carousel */}
       {premium.length > 0 && (
-        <section className="py-16 relative overflow-hidden bg-gradient-to-r from-blue-50 via-white to-amber-50" data-testid="premium-section">
+        <section className="py-8 sm:py-16 relative overflow-hidden bg-gradient-to-r from-blue-50 via-white to-amber-50" data-testid="premium-section">
           <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#0047AB]">
-                  <Crown className="w-6 h-6 text-white" />
+            <div className="flex items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="p-2 sm:p-3 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#0047AB] flex-shrink-0">
+                  <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
+                <div className="min-w-0">
+                  <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
                     Premium
                   </h2>
-                  <p className="text-gray-600 mt-1">L'excellence à votre service</p>
+                  <p className="text-gray-600 mt-0.5 sm:mt-1 text-xs sm:text-sm">L'excellence à votre service</p>
                 </div>
               </div>
-              <Link to="/premium" className="hidden md:flex items-center gap-2 text-[#D4AF37] hover:text-[#F3CF55] font-medium transition-colors">
+              <Link to="/premium" className="hidden md:flex items-center gap-2 text-[#D4AF37] hover:text-[#F3CF55] font-medium transition-colors flex-shrink-0">
                 Découvrir
                 <ArrowRight className="w-5 h-5" />
               </Link>
             </div>
 
-            <Carousel itemWidth={350}>
+            <Carousel itemWidth={280}>
               {premium.map((enterprise, index) => (
-                <div key={enterprise.id} className="flex-shrink-0 w-[350px]">
+                <div key={enterprise.id} className="flex-shrink-0 w-[280px] sm:w-[320px]">
                   <EnterpriseCard enterprise={enterprise} />
                 </div>
               ))}
@@ -653,31 +653,31 @@ const HomePage = () => {
       )}
 
       {/* Job Offers Section - Carousel */}
-      <section className="py-16 bg-gray-50" data-testid="jobs-section">
+      <section className="py-8 sm:py-16 bg-gray-50" data-testid="jobs-section">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-[#0047AB]/10">
-                <Briefcase className="w-6 h-6 text-[#0047AB]" />
+          <div className="flex items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="p-2 sm:p-3 rounded-xl bg-[#0047AB]/10 flex-shrink-0">
+                <Briefcase className="w-5 h-5 sm:w-6 sm:h-6 text-[#0047AB]" />
               </div>
-              <div>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
+              <div className="min-w-0">
+                <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
                   Offres d'emploi
                 </h2>
-                <p className="text-gray-600 mt-1 text-sm md:text-base">Opportunités chez nos prestataires</p>
+                <p className="text-gray-600 mt-0.5 sm:mt-1 text-xs sm:text-sm">Opportunités disponibles</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
               <button 
                 onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${showFilters ? 'bg-[#0047AB] text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}`}
+                className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm transition-colors ${showFilters ? 'bg-[#0047AB] text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}`}
                 data-testid="jobs-filter-btn"
               >
-                <Filter className="w-4 h-4" />
+                <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline">Filtres</span>
               </button>
               <Link to="/emplois" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors">
-                Voir toutes les offres
+                Voir tout
                 <ArrowRight className="w-5 h-5" />
               </Link>
             </div>
@@ -685,17 +685,17 @@ const HomePage = () => {
           
           {/* Filters */}
           {showFilters && (
-            <div className="mb-6 p-5 bg-white rounded-xl border border-gray-200 shadow-sm animate-fade-in" data-testid="jobs-filters">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="mb-4 sm:mb-6 p-3 sm:p-5 bg-white rounded-xl border border-gray-200 shadow-sm animate-fade-in" data-testid="jobs-filters">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Type de contrat</label>
+                  <label className="block text-xs sm:text-sm text-gray-600 mb-1.5 sm:mb-2">Type</label>
                   <select 
                     value={jobFilters.type}
                     onChange={(e) => setJobFilters({...jobFilters, type: e.target.value})}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-gray-900 focus:border-[#0047AB] outline-none"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-900 focus:border-[#0047AB] outline-none"
                     data-testid="jobs-filter-type"
                   >
-                    <option value="">Tous les types</option>
+                    <option value="">Tous</option>
                     <option value="CDI">CDI</option>
                     <option value="CDD">CDD</option>
                     <option value="Stage">Stage</option>
