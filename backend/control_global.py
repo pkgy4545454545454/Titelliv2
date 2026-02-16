@@ -13,7 +13,7 @@ load_dotenv()
 
 MONGO_URL = os.environ.get('MONGO_URL')
 DB_NAME = os.environ.get('DB_NAME', 'secondevie')
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://product-filter-2.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://photo-restore-43.preview.emergentagent.com')
 
 
 async def check_api_endpoints():

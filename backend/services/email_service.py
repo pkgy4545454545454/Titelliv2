@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 # Configure Resend
 resend.api_key = os.environ.get('RESEND_API_KEY')
 SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'onboarding@resend.dev')
-TITELLI_LOGO = "https://product-filter-2.preview.emergentagent.com/logo192.png"
+TITELLI_LOGO = "https://photo-restore-43.preview.emergentagent.com/logo192.png"
 
 
 # ============ EMAIL TEMPLATES ============
@@ -72,7 +72,7 @@ def get_referral_success_template(referrer_name: str, referee_name: str, points_
                                 <table width="100%" cellpadding="0" cellspacing="0" style="margin: 25px 0;">
                                     <tr>
                                         <td align="center">
-                                            <a href="https://product-filter-2.preview.emergentagent.com/dashboard/client?tab=parrainage" 
+                                            <a href="https://photo-restore-43.preview.emergentagent.com/dashboard/client?tab=parrainage" 
                                                style="display: inline-block; background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); color: white; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: bold;">
                                                 Voir mes parrainages
                                             </a>
@@ -91,7 +91,7 @@ def get_referral_success_template(referrer_name: str, referee_name: str, points_
                             <td style="background-color: #18181b; padding: 20px; text-align: center; border-top: 1px solid #3f3f46;">
                                 <p style="color: #71717a; font-size: 12px; margin: 0;">
                                     © 2026 Titelli - Social Commerce Suisse<br>
-                                    <a href="https://product-filter-2.preview.emergentagent.com" style="color: #a855f7; text-decoration: none;">titelli.ch</a>
+                                    <a href="https://photo-restore-43.preview.emergentagent.com" style="color: #a855f7; text-decoration: none;">titelli.ch</a>
                                 </p>
                             </td>
                         </tr>
@@ -154,7 +154,7 @@ def get_welcome_bonus_template(user_name: str, referrer_name: str, bonus_points:
                                 <table width="100%" cellpadding="0" cellspacing="0" style="margin: 25px 0;">
                                     <tr>
                                         <td align="center">
-                                            <a href="https://product-filter-2.preview.emergentagent.com/dashboard/client" 
+                                            <a href="https://photo-restore-43.preview.emergentagent.com/dashboard/client" 
                                                style="display: inline-block; background: linear-gradient(135deg, #d4af37 0%, #f5d67b 100%); color: #18181b; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: bold;">
                                                 Découvrir Titelli
                                             </a>
@@ -188,7 +188,7 @@ def get_welcome_bonus_template(user_name: str, referrer_name: str, bonus_points:
                             <td style="background-color: #18181b; padding: 20px; text-align: center; border-top: 1px solid #3f3f46;">
                                 <p style="color: #71717a; font-size: 12px; margin: 0;">
                                     © 2026 Titelli - Social Commerce Suisse<br>
-                                    <a href="https://product-filter-2.preview.emergentagent.com" style="color: #d4af37; text-decoration: none;">titelli.ch</a>
+                                    <a href="https://photo-restore-43.preview.emergentagent.com" style="color: #d4af37; text-decoration: none;">titelli.ch</a>
                                 </p>
                             </td>
                         </tr>
@@ -251,7 +251,7 @@ def get_referral_bonus_template(user_name: str, milestone: int, bonus_points: in
                                 <table width="100%" cellpadding="0" cellspacing="0" style="margin: 25px 0;">
                                     <tr>
                                         <td align="center">
-                                            <a href="https://product-filter-2.preview.emergentagent.com/dashboard/client?tab=parrainage" 
+                                            <a href="https://photo-restore-43.preview.emergentagent.com/dashboard/client?tab=parrainage" 
                                                style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); color: #18181b; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: bold;">
                                                 Voir mes récompenses
                                             </a>
@@ -266,7 +266,7 @@ def get_referral_bonus_template(user_name: str, milestone: int, bonus_points: in
                             <td style="background-color: #18181b; padding: 20px; text-align: center; border-top: 1px solid #3f3f46;">
                                 <p style="color: #71717a; font-size: 12px; margin: 0;">
                                     © 2026 Titelli - Social Commerce Suisse<br>
-                                    <a href="https://product-filter-2.preview.emergentagent.com" style="color: #fbbf24; text-decoration: none;">titelli.ch</a>
+                                    <a href="https://photo-restore-43.preview.emergentagent.com" style="color: #fbbf24; text-decoration: none;">titelli.ch</a>
                                 </p>
                             </td>
                         </tr>
@@ -422,7 +422,7 @@ def get_payment_confirmation_template(
                                 <table width="100%" cellpadding="0" cellspacing="0" style="margin: 25px 0;">
                                     <tr>
                                         <td align="center">
-                                            <a href="https://product-filter-2.preview.emergentagent.com/dashboard/client" 
+                                            <a href="https://photo-restore-43.preview.emergentagent.com/dashboard/client" 
                                                style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #34d399 100%); color: white; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: bold;">
                                                 Voir mon compte
                                             </a>
@@ -437,7 +437,7 @@ def get_payment_confirmation_template(
                             <td style="background-color: #18181b; padding: 20px; text-align: center; border-top: 1px solid #3f3f46;">
                                 <p style="color: #71717a; font-size: 12px; margin: 0;">
                                     © 2026 Titelli - Social Commerce Suisse<br>
-                                    <a href="https://product-filter-2.preview.emergentagent.com" style="color: #10b981; text-decoration: none;">titelli.ch</a>
+                                    <a href="https://photo-restore-43.preview.emergentagent.com" style="color: #10b981; text-decoration: none;">titelli.ch</a>
                                 </p>
                             </td>
                         </tr>
@@ -521,7 +521,7 @@ def get_payment_failed_template(user_name: str, service_name: str) -> str:
                                 <table width="100%" cellpadding="0" cellspacing="0" style="margin: 25px 0;">
                                     <tr>
                                         <td align="center">
-                                            <a href="https://product-filter-2.preview.emergentagent.com/dashboard/client" 
+                                            <a href="https://photo-restore-43.preview.emergentagent.com/dashboard/client" 
                                                style="display: inline-block; background: linear-gradient(135deg, #0047AB 0%, #D4AF37 100%); color: white; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: bold;">
                                                 Réessayer le paiement
                                             </a>
@@ -540,7 +540,7 @@ def get_payment_failed_template(user_name: str, service_name: str) -> str:
                             <td style="background-color: #18181b; padding: 20px; text-align: center; border-top: 1px solid #3f3f46;">
                                 <p style="color: #71717a; font-size: 12px; margin: 0;">
                                     © 2026 Titelli - Social Commerce Suisse<br>
-                                    <a href="https://product-filter-2.preview.emergentagent.com" style="color: #d4af37; text-decoration: none;">titelli.ch</a>
+                                    <a href="https://photo-restore-43.preview.emergentagent.com" style="color: #d4af37; text-decoration: none;">titelli.ch</a>
                                 </p>
                             </td>
                         </tr>
@@ -657,7 +657,7 @@ def get_pub_media_confirmation_template(
                                 <table width="100%" cellpadding="0" cellspacing="0" style="margin: 25px 0;">
                                     <tr>
                                         <td align="center">
-                                            <a href="https://product-filter-2.preview.emergentagent.com/dashboard/entreprise?tab=commandes-titelli" 
+                                            <a href="https://photo-restore-43.preview.emergentagent.com/dashboard/entreprise?tab=commandes-titelli" 
                                                style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); color: white; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: bold;">
                                                 📥 Voir mes commandes
                                             </a>
@@ -676,7 +676,7 @@ def get_pub_media_confirmation_template(
                             <td style="background-color: #18181b; padding: 20px; text-align: center; border-top: 1px solid #3f3f46;">
                                 <p style="color: #71717a; font-size: 12px; margin: 0;">
                                     © 2026 Titelli - Pub Média IA<br>
-                                    <a href="https://product-filter-2.preview.emergentagent.com/media-pub" style="color: #f59e0b; text-decoration: none;">Créer une autre publicité</a>
+                                    <a href="https://photo-restore-43.preview.emergentagent.com/media-pub" style="color: #f59e0b; text-decoration: none;">Créer une autre publicité</a>
                                 </p>
                             </td>
                         </tr>

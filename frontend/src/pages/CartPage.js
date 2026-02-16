@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { toast } from 'sonner';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || 'https://product-filter-2.preview.emergentagent.com';
+const API_URL = process.env.REACT_APP_BACKEND_URL || 'https://photo-restore-43.preview.emergentagent.com';
 
 const CartPage = () => {
   const { items, removeItem, updateQuantity, clearCart, getTotal, getItemsByEnterprise } = useCart();

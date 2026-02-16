@@ -17,7 +17,7 @@ import requests
 import os
 import time
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://product-filter-2.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://photo-restore-43.preview.emergentagent.com')
 
 # Test credentials
 ADMIN_CREDS = {"email": "admin@titelli.com", "password": "Admin123!"}
@@ -269,7 +269,7 @@ class TestStripePayment:
         # Create payment session
         payment_data = {
             "order_id": order_id,
-            "origin_url": "https://product-filter-2.preview.emergentagent.com"
+            "origin_url": "https://photo-restore-43.preview.emergentagent.com"
         }
         response = requests.post(f"{BASE_URL}/api/media-pub/payment/create-session", json=payment_data)
         assert response.status_code == 200
@@ -295,7 +295,7 @@ class TestStripePayment:
         # Create payment session
         payment_data = {
             "order_id": order_id,
-            "origin_url": "https://product-filter-2.preview.emergentagent.com"
+            "origin_url": "https://photo-restore-43.preview.emergentagent.com"
         }
         response = requests.post(f"{BASE_URL}/api/video-pub/payment/create-session", json=payment_data)
         assert response.status_code == 200

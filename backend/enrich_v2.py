@@ -15,7 +15,7 @@ import httpx
 
 MONGO_URL = os.environ.get('MONGO_URL')
 UPLOADS_DIR = "/app/backend/uploads/enterprises"
-BASE_URL = "https://product-filter-2.preview.emergentagent.com"
+BASE_URL = "https://photo-restore-43.preview.emergentagent.com"
 MAX_ENTERPRISES = 200
 MAX_IMAGES = 8
 

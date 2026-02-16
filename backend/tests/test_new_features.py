@@ -6,7 +6,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://product-filter-2.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://photo-restore-43.preview.emergentagent.com')
 
 # Test credentials
 ENTERPRISE_EMAIL = "spa.luxury@titelli.com"

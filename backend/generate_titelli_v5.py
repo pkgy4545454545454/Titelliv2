@@ -34,7 +34,7 @@ def capture_titelli_screenshots():
         page = context.new_page()
         
         # Pages à capturer - utiliser l'URL preview
-        BASE_URL = 'https://product-filter-2.preview.emergentagent.com'
+        BASE_URL = 'https://photo-restore-43.preview.emergentagent.com'
         pages_to_capture = [
             (f'{BASE_URL}', 'home', 'Page d\'accueil'),
             (f'{BASE_URL}/prestataires', 'prestataires', 'Liste prestataires'),

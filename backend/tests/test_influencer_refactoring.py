@@ -10,7 +10,7 @@ import requests
 import os
 import uuid
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://product-filter-2.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://photo-restore-43.preview.emergentagent.com')
 
 # Test credentials
 ENTERPRISE_USER = {"email": "spa.luxury@titelli.com", "password": "Demo123!"}

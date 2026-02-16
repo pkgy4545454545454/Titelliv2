@@ -379,4 +379,4 @@ POST /api/gamification/log_action - Logger action (interne)
 ---
 
 **Document généré le:** Février 2026
-**URL Application:** https://product-filter-2.preview.emergentagent.com
+**URL Application:** https://photo-restore-43.preview.emergentagent.com
