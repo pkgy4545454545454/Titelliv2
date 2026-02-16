@@ -804,78 +804,66 @@ const HomePage = () => {
 
       {/* Formations Section - Carousel */}
       {trainings.length > 0 && (
-        <section className="py-16 bg-white" data-testid="trainings-section">
+        <section className="py-8 sm:py-16 bg-white" data-testid="trainings-section">
           <div className="max-w-7xl mx-auto px-4 md:px-8">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-purple-100">
-                  <GraduationCap className="w-6 h-6 text-purple-600" />
+            <div className="flex items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="p-2 sm:p-3 rounded-xl bg-purple-100 flex-shrink-0">
+                  <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
                 </div>
-                <div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
-                    Formations disponibles
+                <div className="min-w-0">
+                  <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
+                    Formations
                   </h2>
-                  <p className="text-gray-600 mt-1 text-sm md:text-base">Développez vos compétences avec nos partenaires</p>
+                  <p className="text-gray-600 mt-0.5 sm:mt-1 text-xs sm:text-sm">Développez vos compétences</p>
                 </div>
               </div>
             </div>
 
-            <Carousel itemWidth={350}>
+            <Carousel itemWidth={280}>
               {trainings.map((training) => (
                 <div 
                   key={training.id} 
-                  className="flex-shrink-0 w-[350px] bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all"
+                  className="flex-shrink-0 w-[280px] sm:w-[320px] bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-all"
                   data-testid={`training-card-${training.id}`}
                 >
-                  <div className="p-6">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                  <div className="p-4 sm:p-6">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                      <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${
                         training.training_type === 'online' 
                           ? 'bg-purple-100 text-purple-700' 
                           : 'bg-blue-100 text-blue-700'
                       }`}>
                         {training.training_type === 'online' ? 'En ligne' : 'Présentiel'}
                       </span>
-                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                      <span className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium bg-gray-100 text-gray-700 line-clamp-1">
                         {training.category}
                       </span>
                     </div>
                     
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{training.title}</h3>
-                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">{training.description}</p>
+                    <h3 className="text-sm sm:text-lg font-semibold text-gray-900 mb-1.5 sm:mb-2 line-clamp-2">{training.title}</h3>
+                    <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mb-2 sm:mb-3">{training.description}</p>
                     
-                    <div className="flex items-center gap-2 mb-4">
+                    <div className="flex items-center gap-2 mb-3 sm:mb-4">
                       {training.enterprise_logo ? (
                         <img 
                           src={training.enterprise_logo.startsWith('http') ? training.enterprise_logo : `${process.env.REACT_APP_BACKEND_URL}${training.enterprise_logo}`}
                           alt={training.enterprise_name}
-                          className="w-8 h-8 rounded-full object-cover"
+                          className="w-6 h-6 sm:w-8 sm:h-8 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="w-8 h-8 rounded-full bg-[#0047AB]/20 flex items-center justify-center text-xs text-[#0047AB] font-bold">
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-[#0047AB]/20 flex items-center justify-center text-[10px] sm:text-xs text-[#0047AB] font-bold">
                           {training.enterprise_name?.[0]}
                         </div>
                       )}
-                      <span className="text-sm text-[#D4AF37] font-medium">{training.enterprise_name}</span>
+                      <span className="text-xs sm:text-sm text-[#D4AF37] font-medium line-clamp-1">{training.enterprise_name}</span>
                     </div>
                     
-                    <div className="flex flex-wrap gap-3 text-xs text-gray-500 mb-4">
+                    <div className="flex flex-wrap gap-2 sm:gap-3 text-[10px] sm:text-xs text-gray-500 mb-3 sm:mb-4">
                       <span className="flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         {training.duration}
                       </span>
-                      {training.training_type === 'on_site' && training.location && (
-                        <span className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
-                          {training.location}
-                        </span>
-                      )}
-                      {training.start_date && (
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {new Date(training.start_date).toLocaleDateString('fr-FR')}
-                        </span>
-                      )}
                       {training.certificate && (
                         <span className="flex items-center gap-1 text-green-600">
                           <CheckCircle className="w-3 h-3" />
@@ -884,20 +872,20 @@ const HomePage = () => {
                       )}
                     </div>
                     
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                    <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-gray-200">
                       <div>
-                        <p className="text-2xl font-bold text-gray-900">{training.price} <span className="text-sm font-normal text-gray-500">CHF</span></p>
+                        <p className="text-lg sm:text-2xl font-bold text-gray-900">{training.price} <span className="text-xs sm:text-sm font-normal text-gray-500">CHF</span></p>
                       </div>
                       <button
                         onClick={() => handlePurchaseTraining(training)}
                         disabled={purchasingTraining === training.id}
-                        className="px-4 py-2 bg-[#0047AB] text-white rounded-lg hover:bg-[#0047AB]/80 transition-colors disabled:opacity-50 flex items-center gap-2"
+                        className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#0047AB] text-white rounded-lg text-xs sm:text-sm hover:bg-[#0047AB]/80 transition-colors disabled:opacity-50 flex items-center gap-1.5 sm:gap-2"
                         data-testid={`buy-training-${training.id}`}
                       >
                         {purchasingTraining === training.id ? (
                           <>
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                            Achat...
+                            <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            <span className="hidden sm:inline">Achat...</span>
                           </>
                         ) : (
                           "S'inscrire"
