@@ -7,7 +7,7 @@ import time
 import requests
 from playwright.sync_api import sync_playwright
 
-BASE_URL = 'https://template-replica-2.preview.emergentagent.com'
+BASE_URL = 'https://homepage-theme-fix.preview.emergentagent.com'
 SCREENSHOTS_DIR = '/app/backend/uploads/brochure_admin_screenshots'
 
 os.makedirs(SCREENSHOTS_DIR, exist_ok=True)

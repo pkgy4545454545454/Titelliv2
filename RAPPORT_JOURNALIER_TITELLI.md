@@ -379,4 +379,4 @@ POST /api/gamification/log_action - Logger action (interne)
 ---
 
 **Document généré le:** Février 2026
-**URL Application:** https://template-replica-2.preview.emergentagent.com
+**URL Application:** https://homepage-theme-fix.preview.emergentagent.com
