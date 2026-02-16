@@ -73,7 +73,7 @@ const ServiceProductCard = ({ item, onAddToCart }) => {
 
   return (
     <div 
-      className="card-service group rounded-xl overflow-hidden"
+      className="bg-white border border-gray-200 shadow-sm hover:shadow-md group rounded-xl overflow-hidden transition-all"
       data-testid={`item-card-${id}`}
     >
       {/* Image */}
@@ -128,18 +128,18 @@ const ServiceProductCard = ({ item, onAddToCart }) => {
       {/* Content */}
       <div className="p-5">
         <Link to={`/${type}/${id}`}>
-          <h3 className="text-lg font-semibold text-white group-hover:text-[#0047AB] transition-colors mb-2 line-clamp-1">
+          <h3 className="text-lg font-semibold text-gray-900 group-hover:text-[#0047AB] transition-colors mb-2 line-clamp-1">
             {name}
           </h3>
         </Link>
 
-        <p className="text-sm text-gray-400 mb-4 line-clamp-2">
+        <p className="text-sm text-gray-600 mb-4 line-clamp-2">
           {description}
         </p>
 
         <div className="flex items-center justify-between">
-          <span className="text-xl font-bold text-white">
-            {price.toFixed(2)} <span className="text-sm text-gray-400">{currency}</span>
+          <span className="text-xl font-bold text-gray-900">
+            {price.toFixed(2)} <span className="text-sm text-gray-500">{currency}</span>
           </span>
           
           <button

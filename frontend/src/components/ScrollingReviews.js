@@ -60,22 +60,22 @@ const sampleReviews = [
 ];
 
 const ReviewCard = ({ review }) => (
-  <div className="comment-card" data-testid={`review-card-${review.id}`}>
+  <div className="bg-white border border-gray-200 shadow-sm rounded-xl p-5 min-w-[320px] max-w-[320px]" data-testid={`review-card-${review.id}`}>
     <div className="flex items-start gap-4 mb-4">
       <img 
         src={review.avatar} 
         alt={review.author}
-        className="w-12 h-12 rounded-full object-cover border-2 border-white/10"
+        className="w-12 h-12 rounded-full object-cover border-2 border-gray-100"
         onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${review.author}&background=0047AB&color=fff`; }}
       />
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between">
-          <h4 className="text-white font-semibold truncate">{review.author}</h4>
+          <h4 className="text-gray-900 font-semibold truncate">{review.author}</h4>
           <div className="flex items-center gap-1">
             {[...Array(5)].map((_, i) => (
               <Star 
                 key={i} 
-                className={`w-4 h-4 ${i < review.rating ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-gray-600'}`} 
+                className={`w-4 h-4 ${i < review.rating ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-gray-300'}`} 
               />
             ))}
           </div>
@@ -86,12 +86,12 @@ const ReviewCard = ({ review }) => (
     
     <div className="relative">
       <Quote className="absolute -top-2 -left-2 w-6 h-6 text-[#0047AB]/20" />
-      <p className="text-gray-300 text-sm leading-relaxed pl-4">
+      <p className="text-gray-600 text-sm leading-relaxed pl-4">
         {review.text}
       </p>
     </div>
     
-    <div className="mt-4 pt-4 border-t border-white/5">
+    <div className="mt-4 pt-4 border-t border-gray-100">
       <span className="text-xs text-gray-500">{review.date}</span>
     </div>
   </div>
@@ -104,14 +104,14 @@ const ScrollingReviews = ({ reviews = sampleReviews, title = "Ce que nos clients
   const duplicatedReviews = [...reviews, ...reviews];
 
   return (
-    <section className="py-16 md:py-24 bg-[#050505] overflow-hidden" data-testid="scrolling-reviews-section">
+    <section className="py-16 md:py-24 bg-gray-50 overflow-hidden" data-testid="scrolling-reviews-section">
       <div className="max-w-7xl mx-auto px-4 md:px-8 mb-10">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
               {title}
             </h2>
-            <p className="text-gray-400 mt-2">Avis vérifiés de notre communauté</p>
+            <p className="text-gray-600 mt-2">Avis vérifiés de notre communauté</p>
           </div>
           <div className="hidden md:flex items-center gap-2 text-gray-500 text-sm">
             <Star className="w-4 h-4 text-[#D4AF37] fill-[#D4AF37]" />
