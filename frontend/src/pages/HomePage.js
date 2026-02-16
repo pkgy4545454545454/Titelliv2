@@ -512,19 +512,19 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Products Section - Carousel */}
-      <section className="py-8 sm:py-16 bg-white" data-testid="products-section">
+      {/* Products Section - Elegant Jewelry & Watches First */}
+      <section className="py-8 sm:py-16 bg-gradient-to-b from-white via-gray-50/50 to-white" data-testid="products-section">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="p-2 sm:p-3 rounded-xl bg-[#D4AF37]/10 flex-shrink-0">
-                <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-[#D4AF37]" />
+              <div className="p-2 sm:p-3 rounded-xl bg-gradient-to-br from-[#D4AF37]/20 to-[#B8860B]/10 flex-shrink-0">
+                <Gem className="w-5 h-5 sm:w-6 sm:h-6 text-[#D4AF37]" />
               </div>
               <div className="min-w-0">
                 <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
-                  Produits
+                  Bijouteries & Horlogerie
                 </h2>
-                <p className="text-gray-600 mt-0.5 sm:mt-1 text-xs sm:text-sm">Trouvez ce dont vous avez besoin</p>
+                <p className="text-gray-600 mt-0.5 sm:mt-1 text-xs sm:text-sm">L'excellence suisse à votre portée</p>
               </div>
             </div>
             <Link to="/products" className="hidden md:flex items-center gap-2 text-[#D4AF37] hover:text-[#F3CF55] font-medium transition-colors flex-shrink-0">
@@ -533,22 +533,56 @@ const HomePage = () => {
             </Link>
           </div>
 
-          <Carousel itemWidth={140}>
-            {productCategories.slice(0, 12).map((cat, index) => (
-              <Link
-                key={cat.id}
-                to={`/products?category=${cat.id}`}
-                className="flex-shrink-0 w-[140px] sm:w-[180px] group relative h-32 sm:h-40 rounded-xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 hover:border-[#D4AF37]/50 transition-all shadow-sm"
-                data-testid={`product-cat-${cat.id}`}
-              >
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-3 sm:p-4 text-center">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#D4AF37]/10 flex items-center justify-center mb-2 sm:mb-3 group-hover:scale-110 transition-transform">
-                    <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-[#D4AF37]" />
-                  </div>
-                  <span className="text-gray-900 font-medium text-xs sm:text-sm line-clamp-2">{cat.name}</span>
-                </div>
-              </Link>
-            ))}
+          <Carousel itemWidth={160}>
+            {/* Sort categories to put jewelry/watches first */}
+            {[...productCategories]
+              .sort((a, b) => {
+                const priority = ['bijouterie', 'horlogerie', 'montre', 'joaillerie', 'accessoire'];
+                const aScore = priority.findIndex(p => a.name?.toLowerCase().includes(p) || a.id?.toLowerCase().includes(p));
+                const bScore = priority.findIndex(p => b.name?.toLowerCase().includes(p) || b.id?.toLowerCase().includes(p));
+                const aRank = aScore === -1 ? 100 : aScore;
+                const bRank = bScore === -1 ? 100 : bScore;
+                return aRank - bRank;
+              })
+              .slice(0, 12).map((cat, index) => {
+                const isJewelry = ['bijouterie', 'horlogerie', 'montre', 'joaillerie'].some(
+                  p => cat.name?.toLowerCase().includes(p) || cat.id?.toLowerCase().includes(p)
+                );
+                return (
+                  <Link
+                    key={cat.id}
+                    to={`/products?category=${cat.id}`}
+                    className={`flex-shrink-0 w-[160px] sm:w-[200px] group relative h-36 sm:h-44 rounded-xl overflow-hidden transition-all shadow-sm hover:shadow-lg ${
+                      isJewelry 
+                        ? 'bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f0f23] border border-[#D4AF37]/30 hover:border-[#D4AF37]' 
+                        : 'bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 hover:border-[#D4AF37]/50'
+                    }`}
+                    data-testid={`product-cat-${cat.id}`}
+                  >
+                    <div className="absolute inset-0 flex flex-col items-center justify-center p-3 sm:p-4 text-center">
+                      <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center mb-2 sm:mb-3 group-hover:scale-110 transition-transform ${
+                        isJewelry 
+                          ? 'bg-gradient-to-br from-[#D4AF37]/30 to-[#B8860B]/20' 
+                          : 'bg-[#D4AF37]/10'
+                      }`}>
+                        {isJewelry ? (
+                          cat.name?.toLowerCase().includes('horlogerie') || cat.name?.toLowerCase().includes('montre')
+                            ? <Watch className="w-6 h-6 sm:w-7 sm:h-7 text-[#D4AF37]" />
+                            : <Gem className="w-6 h-6 sm:w-7 sm:h-7 text-[#D4AF37]" />
+                        ) : (
+                          <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-[#D4AF37]" />
+                        )}
+                      </div>
+                      <span className={`font-medium text-xs sm:text-sm line-clamp-2 ${isJewelry ? 'text-white' : 'text-gray-900'}`}>
+                        {cat.name}
+                      </span>
+                      {isJewelry && (
+                        <span className="mt-1 text-[10px] text-[#D4AF37]/80">Swiss Excellence</span>
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
           </Carousel>
         </div>
       </section>
