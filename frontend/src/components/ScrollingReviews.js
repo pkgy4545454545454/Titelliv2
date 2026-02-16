@@ -104,16 +104,16 @@ const ScrollingReviews = ({ reviews = sampleReviews, title = "Ce que nos clients
   const duplicatedReviews = [...reviews, ...reviews];
 
   return (
-    <section className="py-16 md:py-24 bg-gray-50 overflow-hidden" data-testid="scrolling-reviews-section">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 mb-10">
-        <div className="flex items-center justify-between">
+    <section className="py-8 sm:py-16 md:py-24 bg-gray-50 overflow-hidden" data-testid="scrolling-reviews-section">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 mb-6 sm:mb-10">
+        <div className="flex items-start sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h2 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
               {title}
             </h2>
-            <p className="text-gray-600 mt-2">Avis vérifiés de notre communauté</p>
+            <p className="text-gray-600 mt-0.5 sm:mt-2 text-xs sm:text-base">Avis vérifiés de notre communauté</p>
           </div>
-          <div className="hidden md:flex items-center gap-2 text-gray-500 text-sm">
+          <div className="hidden md:flex items-center gap-2 text-gray-500 text-sm flex-shrink-0">
             <Star className="w-4 h-4 text-[#D4AF37] fill-[#D4AF37]" />
             <span>4.8/5 basé sur {reviews.length * 50}+ avis</span>
           </div>
@@ -140,7 +140,7 @@ const ScrollingReviews = ({ reviews = sampleReviews, title = "Ce que nos clients
       </div>
 
       {/* Mobile hint */}
-      <p className="md:hidden text-center text-gray-500 text-xs mt-6 px-4">
+      <p className="md:hidden text-center text-gray-500 text-[10px] sm:text-xs mt-4 sm:mt-6 px-4">
         Faites glisser pour voir plus d'avis
       </p>
     </section>
