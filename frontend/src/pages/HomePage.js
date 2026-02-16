@@ -373,23 +373,24 @@ const HomePage = () => {
       </section>
 
       {/* Search Bar Section - Under Video */}
-      <section className="py-8 bg-white" data-testid="search-section">
+      <section className="py-4 sm:py-8 bg-white" data-testid="search-section">
         <div className="max-w-3xl mx-auto px-4">
           <form onSubmit={handleSearch} className="relative">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
             <input
               type="text"
-              placeholder="Rechercher des produits, services ou entreprises..."
+              placeholder="Rechercher..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-14 pr-32 py-4 bg-gray-100 border border-gray-200 rounded-full text-lg text-gray-900 placeholder:text-gray-500 focus:outline-none focus:border-[#0047AB] transition-all"
+              className="w-full pl-11 pr-24 sm:pr-32 py-3 sm:py-4 bg-gray-100 border border-gray-200 rounded-full text-sm sm:text-base text-gray-900 placeholder:text-gray-500 focus:outline-none focus:border-[#0047AB] transition-all"
               data-testid="home-search-input"
             />
             <button 
               type="submit"
-              className="absolute right-3 top-1/2 -translate-y-1/2 bg-[#0047AB] text-white px-6 py-2 rounded-full hover:bg-[#0047AB]/80 transition-colors"
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#0047AB] text-white px-3 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm hover:bg-[#0047AB]/80 transition-colors"
             >
-              Rechercher
+              <span className="hidden sm:inline">Rechercher</span>
+              <Search className="w-4 h-4 sm:hidden" />
             </button>
           </form>
         </div>
