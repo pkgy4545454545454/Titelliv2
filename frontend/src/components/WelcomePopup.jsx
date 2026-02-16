@@ -73,11 +73,6 @@ const WelcomePopup = () => {
           
           {/* Section gauche - Titre et branding */}
           <div className="bg-gradient-to-br from-[#0047AB] to-[#002266] p-5 sm:p-8 sm:w-2/5 flex flex-col justify-center items-center text-center">
-            <img 
-              src="/logo_titelli.png" 
-              alt="Titelli" 
-              className="w-14 h-14 sm:w-20 sm:h-20 object-contain mb-3 sm:mb-4"
-            />
             <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
               Bienvenue
             </h1>
