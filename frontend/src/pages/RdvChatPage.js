@@ -14,8 +14,8 @@ import {
   MessageCircle, MoreVertical
 } from 'lucide-react';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL;
-const WS_URL = API_URL.replace('https://', 'wss://').replace('http://', 'ws://');
+const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+const WS_URL = API_URL ? API_URL.replace('https://', 'wss://').replace('http://', 'ws://') : '';
 
 export default function RdvChatPage() {
   const { user, token } = useAuth();
