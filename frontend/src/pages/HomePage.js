@@ -744,7 +744,7 @@ const HomePage = () => {
               {filteredJobs.slice(0, 9).map((job, index) => (
                 <div 
                   key={job.id} 
-                  className="flex-shrink-0 w-[350px] card-service rounded-xl p-5 hover:border-[#0047AB]/30 transition-all"
+                  className="flex-shrink-0 w-[350px] bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:border-[#0047AB]/30 hover:shadow-md transition-all"
                   data-testid={`job-card-${job.id}`}
                 >
                   <Link to={`/emploi/${job.id}`} className="block">
@@ -754,21 +754,21 @@ const HomePage = () => {
                           <Briefcase className="w-6 h-6 text-[#0047AB]" />
                         </div>
                         <div>
-                          <h3 className="text-white font-semibold text-sm md:text-base">{job.title}</h3>
+                          <h3 className="text-gray-900 font-semibold text-sm md:text-base">{job.title}</h3>
                           <p className="text-[#D4AF37] text-sm font-medium">{job.enterprise_name || 'Entreprise'}</p>
                         </div>
                       </div>
                       <span className={`text-xs px-2 py-1 rounded-full ${
-                        job.type === 'CDI' ? 'bg-green-500/20 text-green-400' :
-                        job.type === 'CDD' ? 'bg-orange-500/20 text-orange-400' :
-                        job.type === 'Stage' ? 'bg-purple-500/20 text-purple-400' :
-                        job.type === 'Freelance' ? 'bg-cyan-500/20 text-cyan-400' :
-                        'bg-blue-500/20 text-blue-400'
+                        job.type === 'CDI' ? 'bg-green-100 text-green-700' :
+                        job.type === 'CDD' ? 'bg-orange-100 text-orange-700' :
+                        job.type === 'Stage' ? 'bg-purple-100 text-purple-700' :
+                        job.type === 'Freelance' ? 'bg-cyan-100 text-cyan-700' :
+                        'bg-blue-100 text-blue-700'
                       }`}>
                         {job.type || 'CDI'}
                       </span>
                     </div>
-                    <p className="text-gray-400 text-sm line-clamp-2 mb-4">{job.description}</p>
+                    <p className="text-gray-600 text-sm line-clamp-2 mb-4">{job.description}</p>
                     <div className="flex items-center gap-4 text-xs text-gray-500 mb-4">
                       <span className="flex items-center gap-1">
                         <MapPin className="w-3 h-3" /> {job.location || 'Lausanne'}
@@ -791,11 +791,11 @@ const HomePage = () => {
             </Carousel>
           ) : (
             <div className="text-center py-12">
-              <Briefcase className="w-16 h-16 text-gray-700 mx-auto mb-4" />
-              <p className="text-gray-500">
+              <Briefcase className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-600">
                 {jobs.length === 0 ? "Aucune offre d'emploi pour le moment" : "Aucune offre ne correspond aux filtres"}
               </p>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-gray-500 mt-1">
                 {jobs.length === 0 ? "Les offres de nos prestataires apparaîtront ici" : "Essayez d'autres critères de recherche"}
               </p>
             </div>
@@ -810,18 +810,18 @@ const HomePage = () => {
 
       {/* Formations Section - Carousel */}
       {trainings.length > 0 && (
-        <section className="py-16 bg-gradient-to-b from-[#0A0A0A] to-[#050505]" data-testid="trainings-section">
+        <section className="py-16 bg-white" data-testid="trainings-section">
           <div className="max-w-7xl mx-auto px-4 md:px-8">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-purple-500/20">
-                  <GraduationCap className="w-6 h-6 text-purple-400" />
+                <div className="p-3 rounded-xl bg-purple-100">
+                  <GraduationCap className="w-6 h-6 text-purple-600" />
                 </div>
                 <div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
                     Formations disponibles
                   </h2>
-                  <p className="text-gray-400 mt-1 text-sm md:text-base">Développez vos compétences avec nos partenaires</p>
+                  <p className="text-gray-600 mt-1 text-sm md:text-base">Développez vos compétences avec nos partenaires</p>
                 </div>
               </div>
             </div>
@@ -830,25 +830,25 @@ const HomePage = () => {
               {trainings.map((training) => (
                 <div 
                   key={training.id} 
-                  className="flex-shrink-0 w-[350px] card-service rounded-xl overflow-hidden hover:scale-[1.02] transition-transform"
+                  className="flex-shrink-0 w-[350px] bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all"
                   data-testid={`training-card-${training.id}`}
                 >
                   <div className="p-6">
                     <div className="flex items-center gap-2 mb-3">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                         training.training_type === 'online' 
-                          ? 'bg-purple-500/20 text-purple-400' 
-                          : 'bg-blue-500/20 text-blue-400'
+                          ? 'bg-purple-100 text-purple-700' 
+                          : 'bg-blue-100 text-blue-700'
                       }`}>
                         {training.training_type === 'online' ? 'En ligne' : 'Présentiel'}
                       </span>
-                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-white/10 text-gray-300">
+                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
                         {training.category}
                       </span>
                     </div>
                     
-                    <h3 className="text-lg font-semibold text-white mb-2">{training.title}</h3>
-                    <p className="text-sm text-gray-400 line-clamp-2 mb-3">{training.description}</p>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{training.title}</h3>
+                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">{training.description}</p>
                     
                     <div className="flex items-center gap-2 mb-4">
                       {training.enterprise_logo ? (
@@ -858,14 +858,14 @@ const HomePage = () => {
                           className="w-8 h-8 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="w-8 h-8 rounded-full bg-[#0047AB]/30 flex items-center justify-center text-xs text-white font-bold">
+                        <div className="w-8 h-8 rounded-full bg-[#0047AB]/20 flex items-center justify-center text-xs text-[#0047AB] font-bold">
                           {training.enterprise_name?.[0]}
                         </div>
                       )}
-                      <span className="text-sm text-[#D4AF37]">{training.enterprise_name}</span>
+                      <span className="text-sm text-[#D4AF37] font-medium">{training.enterprise_name}</span>
                     </div>
                     
-                    <div className="flex flex-wrap gap-3 text-xs text-gray-400 mb-4">
+                    <div className="flex flex-wrap gap-3 text-xs text-gray-500 mb-4">
                       <span className="flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         {training.duration}
@@ -883,16 +883,16 @@ const HomePage = () => {
                         </span>
                       )}
                       {training.certificate && (
-                        <span className="flex items-center gap-1 text-green-400">
+                        <span className="flex items-center gap-1 text-green-600">
                           <CheckCircle className="w-3 h-3" />
                           Certificat
                         </span>
                       )}
                     </div>
                     
-                    <div className="flex items-center justify-between pt-4 border-t border-white/10">
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                       <div>
-                        <p className="text-2xl font-bold text-white">{training.price} <span className="text-sm font-normal text-gray-400">CHF</span></p>
+                        <p className="text-2xl font-bold text-gray-900">{training.price} <span className="text-sm font-normal text-gray-500">CHF</span></p>
                       </div>
                       <button
                         onClick={() => handlePurchaseTraining(training)}
@@ -1037,20 +1037,20 @@ const HomePage = () => {
       />
 
       {/* CTA Section */}
-      <section className="py-20 md:py-28 bg-[#050505]" data-testid="cta-section">
+      <section className="py-20 md:py-28 bg-[#0047AB]" data-testid="cta-section">
         <div className="max-w-4xl mx-auto px-4 md:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>
             Vous êtes un prestataire ?
           </h2>
-          <p className="text-lg text-gray-400 mb-10 max-w-2xl mx-auto">
+          <p className="text-lg text-white/80 mb-10 max-w-2xl mx-auto">
             Rejoignez Titelli et exposez vos services aux clients de la région de Lausanne. 
             Bénéficiez d'une visibilité premium et développez votre activité.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/auth?type=entreprise" className="btn-primary text-lg px-10 py-4" data-testid="cta-register-btn">
+            <Link to="/auth?type=entreprise" className="bg-white text-[#0047AB] text-lg px-10 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors" data-testid="cta-register-btn">
               Inscrire mon entreprise
             </Link>
-            <Link to="/about" className="btn-secondary text-lg px-10 py-4">
+            <Link to="/about" className="border-2 border-white text-white text-lg px-10 py-4 rounded-lg font-semibold hover:bg-white/10 transition-colors">
               En savoir plus
             </Link>
           </div>
