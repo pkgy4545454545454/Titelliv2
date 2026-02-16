@@ -128,13 +128,13 @@ const EnterpriseCard = ({ enterprise, large = false }) => {
       {/* Content */}
       <div className={cardPadding}>
         <div className="flex items-start justify-between gap-2 sm:gap-4 mb-1.5 sm:mb-2">
-          <h3 className={`${titleSize} font-semibold text-gray-900 group-hover:text-[#0047AB] transition-colors line-clamp-1`}>
+          <h3 className={`${titleSize} font-semibold text-white group-hover:text-[#D4AF37] transition-colors line-clamp-1`}>
             {category ? `${category} - ${displayName}` : displayName}
           </h3>
           {rating > 0 && (
             <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
               <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-[#D4AF37] text-[#D4AF37]" />
-              <span className="text-xs sm:text-sm font-medium text-gray-900">{rating.toFixed(1)}</span>
+              <span className="text-xs sm:text-sm font-medium text-white">{rating.toFixed(1)}</span>
             </div>
           )}
         </div>
@@ -143,15 +143,15 @@ const EnterpriseCard = ({ enterprise, large = false }) => {
           <p className="text-xs sm:text-sm text-[#D4AF37] mb-1.5 sm:mb-2 line-clamp-1">{slogan}</p>
         )}
 
-        <p className={`text-xs sm:text-sm text-gray-600 mb-2 sm:mb-4 ${descHeight}`}>
+        <p className={`text-xs sm:text-sm text-gray-400 mb-2 sm:mb-4 ${descHeight}`}>
           {description}
         </p>
 
         <div className="flex items-center justify-between text-xs sm:text-sm gap-2">
-          <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-gray-100 rounded-full text-gray-600 line-clamp-1 flex-shrink min-w-0">
+          <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/10 rounded-full text-gray-300 line-clamp-1 flex-shrink min-w-0">
             {category}
           </span>
-          <div className="flex items-center gap-0.5 sm:gap-1 text-gray-500 flex-shrink-0">
+          <div className="flex items-center gap-0.5 sm:gap-1 text-gray-400 flex-shrink-0">
             <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
             <span className="line-clamp-1">{city}</span>
           </div>
