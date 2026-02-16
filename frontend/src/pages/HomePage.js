@@ -7,13 +7,13 @@ import ServiceProductCard from '../components/ServiceProductCard';
 import ScrollingReviews from '../components/ScrollingReviews';
 import { toast } from 'sonner';
 
-// Carousel Component with light theme
-const Carousel = ({ children, itemWidth = 400 }) => {
+// Carousel Component with light theme - Responsive
+const Carousel = ({ children, itemWidth = 280 }) => {
   const carouselRef = useRef(null);
 
   const scrollCarousel = (direction) => {
     if (carouselRef.current) {
-      const scrollAmount = itemWidth + 24;
+      const scrollAmount = itemWidth + 16;
       const newScrollLeft = carouselRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
       carouselRef.current.scrollTo({
         left: newScrollLeft,
@@ -23,26 +23,26 @@ const Carousel = ({ children, itemWidth = 400 }) => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative group">
       <button
         onClick={() => scrollCarousel('left')}
-        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-gray-50 text-gray-700 p-3 rounded-full shadow-lg border border-gray-200 transition-all hover:scale-110 -ml-4"
+        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-gray-50 text-gray-700 p-2 sm:p-3 rounded-full shadow-lg border border-gray-200 transition-all hover:scale-110 -ml-2 sm:-ml-4 opacity-0 group-hover:opacity-100 sm:opacity-100"
         data-testid="carousel-prev"
       >
-        <ChevronLeft className="w-6 h-6" />
+        <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6" />
       </button>
       
       <button
         onClick={() => scrollCarousel('right')}
-        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-gray-50 text-gray-700 p-3 rounded-full shadow-lg border border-gray-200 transition-all hover:scale-110 -mr-4"
+        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-gray-50 text-gray-700 p-2 sm:p-3 rounded-full shadow-lg border border-gray-200 transition-all hover:scale-110 -mr-2 sm:-mr-4 opacity-0 group-hover:opacity-100 sm:opacity-100"
         data-testid="carousel-next"
       >
-        <ChevronRight className="w-6 h-6" />
+        <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6" />
       </button>
 
       <div 
         ref={carouselRef}
-        className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4 px-2"
+        className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4 px-1"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {children}
