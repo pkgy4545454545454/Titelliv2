@@ -373,16 +373,16 @@ const HomePage = () => {
       </section>
 
       {/* Search Bar Section - Under Video */}
-      <section className="py-8 bg-[#050505]" data-testid="search-section">
+      <section className="py-8 bg-white" data-testid="search-section">
         <div className="max-w-3xl mx-auto px-4">
           <form onSubmit={handleSearch} className="relative">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" />
             <input
               type="text"
               placeholder="Rechercher des produits, services ou entreprises..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-14 pr-32 py-4 bg-white/5 border border-white/10 rounded-full text-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-[#0047AB] transition-all"
+              className="w-full pl-14 pr-32 py-4 bg-gray-100 border border-gray-200 rounded-full text-lg text-gray-900 placeholder:text-gray-500 focus:outline-none focus:border-[#0047AB] transition-all"
               data-testid="home-search-input"
             />
             <button 
@@ -396,7 +396,7 @@ const HomePage = () => {
       </section>
 
       {/* Les meilleurs prestataires Section - Carousel */}
-      <section className="py-12 bg-[#050505]" data-testid="top-providers-section">
+      <section className="py-12 bg-white" data-testid="top-providers-section">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
@@ -404,10 +404,10 @@ const HomePage = () => {
                 <Award className="w-6 h-6 text-[#0047AB]" />
               </div>
               <div>
-                <h2 className="text-2xl md:text-3xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
                   Les meilleurs prestataires
                 </h2>
-                <p className="text-gray-400 mt-1">Triés par profil le plus complet</p>
+                <p className="text-gray-600 mt-1">Triés par profil le plus complet</p>
               </div>
             </div>
             <Link to="/entreprises" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors">
@@ -435,7 +435,7 @@ const HomePage = () => {
               ))}
             </Carousel>
           ) : (
-            <p className="text-gray-400 text-center py-8">Aucun prestataire avec photo disponible</p>
+            <p className="text-gray-500 text-center py-8">Aucun prestataire avec photo disponible</p>
           )}
 
           <Link to="/entreprises" className="md:hidden flex items-center justify-center gap-2 mt-6 text-[#0047AB] font-medium">
@@ -446,7 +446,7 @@ const HomePage = () => {
       </section>
 
       {/* Services Section - Carousel */}
-      <section className="py-16 bg-[#050505]" data-testid="services-section">
+      <section className="py-16 bg-gray-50" data-testid="services-section">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
@@ -454,10 +454,10 @@ const HomePage = () => {
                 <Sparkles className="w-6 h-6 text-[#0047AB]" />
               </div>
               <div>
-                <h2 className="text-2xl md:text-3xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
                   Les meilleurs services de ta région
                 </h2>
-                <p className="text-gray-400 mt-1">Découvrez nos prestataires de confiance</p>
+                <p className="text-gray-600 mt-1">Découvrez nos prestataires de confiance</p>
               </div>
             </div>
             <Link to="/services" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors" data-testid="view-all-services">
@@ -472,7 +472,7 @@ const HomePage = () => {
               <Link
                 key={cat.id}
                 to={`/services?category=${cat.id}`}
-                className="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm text-gray-300 hover:text-white transition-all"
+                className="px-5 py-2.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-full text-sm text-gray-700 hover:text-gray-900 transition-all"
                 data-testid={`service-cat-${cat.id}`}
               >
                 {cat.name}
@@ -492,12 +492,12 @@ const HomePage = () => {
           ) : (
             <div className="flex gap-6 overflow-hidden">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="flex-shrink-0 w-[350px] card-service rounded-xl overflow-hidden">
-                  <div className="h-56 bg-white/5 animate-pulse" />
+                <div key={i} className="flex-shrink-0 w-[350px] bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
+                  <div className="h-56 bg-gray-100 animate-pulse" />
                   <div className="p-5 space-y-3">
-                    <div className="h-6 bg-white/5 rounded animate-pulse" />
-                    <div className="h-4 bg-white/5 rounded w-3/4 animate-pulse" />
-                    <div className="h-8 bg-white/5 rounded w-1/3 animate-pulse" />
+                    <div className="h-6 bg-gray-100 rounded animate-pulse" />
+                    <div className="h-4 bg-gray-100 rounded w-3/4 animate-pulse" />
+                    <div className="h-8 bg-gray-100 rounded w-1/3 animate-pulse" />
                   </div>
                 </div>
               ))}
@@ -512,7 +512,7 @@ const HomePage = () => {
       </section>
 
       {/* Products Section - Carousel */}
-      <section className="py-16 bg-[#0A0A0A]" data-testid="products-section">
+      <section className="py-16 bg-white" data-testid="products-section">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
@@ -520,10 +520,10 @@ const HomePage = () => {
                 <Gift className="w-6 h-6 text-[#D4AF37]" />
               </div>
               <div>
-                <h2 className="text-2xl md:text-3xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
                   Produits
                 </h2>
-                <p className="text-gray-400 mt-1">Trouvez ce dont vous avez besoin</p>
+                <p className="text-gray-600 mt-1">Trouvez ce dont vous avez besoin</p>
               </div>
             </div>
             <Link to="/products" className="hidden md:flex items-center gap-2 text-[#D4AF37] hover:text-[#F3CF55] font-medium transition-colors">
@@ -537,14 +537,14 @@ const HomePage = () => {
               <Link
                 key={cat.id}
                 to={`/products?category=${cat.id}`}
-                className="flex-shrink-0 w-[200px] group relative h-48 rounded-xl overflow-hidden bg-gradient-to-br from-white/10 to-white/5 border border-white/5 hover:border-[#D4AF37]/30 transition-all"
+                className="flex-shrink-0 w-[200px] group relative h-48 rounded-xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 hover:border-[#D4AF37]/50 transition-all shadow-sm"
                 data-testid={`product-cat-${cat.id}`}
               >
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
                   <div className="w-12 h-12 rounded-full bg-[#D4AF37]/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                     <Gift className="w-6 h-6 text-[#D4AF37]" />
                   </div>
-                  <span className="text-white font-medium text-sm">{cat.name}</span>
+                  <span className="text-gray-900 font-medium text-sm">{cat.name}</span>
                 </div>
               </Link>
             ))}
@@ -554,7 +554,7 @@ const HomePage = () => {
 
       {/* Tendances Actuelles - Carousel */}
       {tendances.length > 0 && (
-        <section className="py-16 bg-gradient-to-b from-[#0A0A0A] to-[#050505]" data-testid="tendances-section">
+        <section className="py-16 bg-gray-50" data-testid="tendances-section">
           <div className="max-w-7xl mx-auto px-4 md:px-8">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
@@ -562,10 +562,10 @@ const HomePage = () => {
                   <TrendingUp className="w-6 h-6 text-[#D4AF37]" />
                 </div>
                 <div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
                     Tendances actuelles
                   </h2>
-                  <p className="text-gray-400 mt-1">Nos prestataires labellisés du moment</p>
+                  <p className="text-gray-600 mt-1">Nos prestataires labellisés du moment</p>
                 </div>
               </div>
               <Link to="/labellises" className="hidden md:flex items-center gap-2 text-[#D4AF37] hover:text-[#F3CF55] font-medium transition-colors">
@@ -587,7 +587,7 @@ const HomePage = () => {
 
       {/* Guests du moment - Carousel */}
       {guests.length > 0 && (
-        <section className="py-16 bg-[#050505]" data-testid="guests-section">
+        <section className="py-16 bg-white" data-testid="guests-section">
           <div className="max-w-7xl mx-auto px-4 md:px-8">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
@@ -595,10 +595,10 @@ const HomePage = () => {
                   <CheckCircle className="w-6 h-6 text-[#0047AB]" />
                 </div>
                 <div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
                     Guests du moment
                   </h2>
-                  <p className="text-gray-400 mt-1">Nos prestataires certifiés</p>
+                  <p className="text-gray-600 mt-1">Nos prestataires certifiés</p>
                 </div>
               </div>
               <Link to="/certifies" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors">
@@ -620,9 +620,7 @@ const HomePage = () => {
 
       {/* Premium Section - Carousel */}
       {premium.length > 0 && (
-        <section className="py-16 relative overflow-hidden bg-[#050505]" data-testid="premium-section">
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0047AB]/10 via-transparent to-[#D4AF37]/10" />
-          
+        <section className="py-16 relative overflow-hidden bg-gradient-to-r from-blue-50 via-white to-amber-50" data-testid="premium-section">
           <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
@@ -630,10 +628,10 @@ const HomePage = () => {
                   <Crown className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
                     Premium
                   </h2>
-                  <p className="text-gray-400 mt-1">L'excellence à votre service</p>
+                  <p className="text-gray-600 mt-1">L'excellence à votre service</p>
                 </div>
               </div>
               <Link to="/premium" className="hidden md:flex items-center gap-2 text-[#D4AF37] hover:text-[#F3CF55] font-medium transition-colors">
@@ -654,24 +652,24 @@ const HomePage = () => {
       )}
 
       {/* Job Offers Section - Carousel */}
-      <section className="py-16 bg-gradient-to-b from-[#050505] to-[#0A0A0A]" data-testid="jobs-section">
+      <section className="py-16 bg-gray-50" data-testid="jobs-section">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-[#0047AB]/20">
+              <div className="p-3 rounded-xl bg-[#0047AB]/10">
                 <Briefcase className="w-6 h-6 text-[#0047AB]" />
               </div>
               <div>
-                <h2 className="text-2xl md:text-3xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
                   Offres d'emploi
                 </h2>
-                <p className="text-gray-400 mt-1 text-sm md:text-base">Opportunités chez nos prestataires</p>
+                <p className="text-gray-600 mt-1 text-sm md:text-base">Opportunités chez nos prestataires</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <button 
                 onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${showFilters ? 'bg-[#0047AB] text-white' : 'bg-white/10 text-gray-300 hover:bg-white/20'}`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${showFilters ? 'bg-[#0047AB] text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}`}
                 data-testid="jobs-filter-btn"
               >
                 <Filter className="w-4 h-4" />
@@ -686,14 +684,14 @@ const HomePage = () => {
           
           {/* Filters */}
           {showFilters && (
-            <div className="mb-6 p-5 bg-white/5 rounded-xl border border-white/10 animate-fade-in" data-testid="jobs-filters">
+            <div className="mb-6 p-5 bg-white rounded-xl border border-gray-200 shadow-sm animate-fade-in" data-testid="jobs-filters">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
-                  <label className="block text-sm text-gray-400 mb-2">Type de contrat</label>
+                  <label className="block text-sm text-gray-600 mb-2">Type de contrat</label>
                   <select 
                     value={jobFilters.type}
                     onChange={(e) => setJobFilters({...jobFilters, type: e.target.value})}
-                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2.5 text-white focus:border-[#0047AB] outline-none"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-gray-900 focus:border-[#0047AB] outline-none"
                     data-testid="jobs-filter-type"
                   >
                     <option value="">Tous les types</option>
@@ -705,31 +703,31 @@ const HomePage = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-400 mb-2">Ville</label>
+                  <label className="block text-sm text-gray-600 mb-2">Ville</label>
                   <input 
                     type="text"
                     value={jobFilters.location}
                     onChange={(e) => setJobFilters({...jobFilters, location: e.target.value})}
                     placeholder="Ex: Lausanne, Genève..."
-                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:border-[#0047AB] outline-none"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-gray-900 placeholder-gray-500 focus:border-[#0047AB] outline-none"
                     data-testid="jobs-filter-location"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-400 mb-2">Entreprise</label>
+                  <label className="block text-sm text-gray-600 mb-2">Entreprise</label>
                   <input 
                     type="text"
                     value={jobFilters.enterprise}
                     onChange={(e) => setJobFilters({...jobFilters, enterprise: e.target.value})}
                     placeholder="Nom de l'entreprise..."
-                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:border-[#0047AB] outline-none"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-gray-900 placeholder-gray-500 focus:border-[#0047AB] outline-none"
                     data-testid="jobs-filter-enterprise"
                   />
                 </div>
                 <div className="flex items-end">
                   <button 
                     onClick={() => setJobFilters({ type: '', location: '', enterprise: '' })}
-                    className="w-full px-4 py-2.5 bg-white/10 hover:bg-white/20 rounded-lg text-gray-300 hover:text-white transition-colors"
+                    className="w-full px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 hover:text-gray-900 transition-colors"
                   >
                     Réinitialiser
                   </button>
