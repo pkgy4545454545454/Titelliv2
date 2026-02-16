@@ -60,39 +60,39 @@ const sampleReviews = [
 ];
 
 const ReviewCard = ({ review }) => (
-  <div className="bg-white border border-gray-200 shadow-sm rounded-xl p-5 min-w-[320px] max-w-[320px]" data-testid={`review-card-${review.id}`}>
-    <div className="flex items-start gap-4 mb-4">
+  <div className="bg-white border border-gray-200 shadow-sm rounded-xl p-3 sm:p-5 min-w-[260px] sm:min-w-[320px] max-w-[260px] sm:max-w-[320px]" data-testid={`review-card-${review.id}`}>
+    <div className="flex items-start gap-2 sm:gap-4 mb-2 sm:mb-4">
       <img 
         src={review.avatar} 
         alt={review.author}
-        className="w-12 h-12 rounded-full object-cover border-2 border-gray-100"
+        className="w-8 h-8 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-gray-100 flex-shrink-0"
         onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${review.author}&background=0047AB&color=fff`; }}
       />
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between">
-          <h4 className="text-gray-900 font-semibold truncate">{review.author}</h4>
-          <div className="flex items-center gap-1">
+        <div className="flex items-center justify-between gap-2">
+          <h4 className="text-gray-900 font-semibold text-xs sm:text-base truncate">{review.author}</h4>
+          <div className="flex items-center gap-0.5 flex-shrink-0">
             {[...Array(5)].map((_, i) => (
               <Star 
                 key={i} 
-                className={`w-4 h-4 ${i < review.rating ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-gray-300'}`} 
+                className={`w-3 h-3 sm:w-4 sm:h-4 ${i < review.rating ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-gray-300'}`} 
               />
             ))}
           </div>
         </div>
-        <p className="text-sm text-gray-500">{review.enterprise}</p>
+        <p className="text-[10px] sm:text-sm text-gray-500 truncate">{review.enterprise}</p>
       </div>
     </div>
     
     <div className="relative">
-      <Quote className="absolute -top-2 -left-2 w-6 h-6 text-[#0047AB]/20" />
-      <p className="text-gray-600 text-sm leading-relaxed pl-4">
+      <Quote className="absolute -top-1 sm:-top-2 -left-1 sm:-left-2 w-4 h-4 sm:w-6 sm:h-6 text-[#0047AB]/20" />
+      <p className="text-gray-600 text-xs sm:text-sm leading-relaxed pl-3 sm:pl-4 line-clamp-3">
         {review.text}
       </p>
     </div>
     
-    <div className="mt-4 pt-4 border-t border-gray-100">
-      <span className="text-xs text-gray-500">{review.date}</span>
+    <div className="mt-2 sm:mt-4 pt-2 sm:pt-4 border-t border-gray-100">
+      <span className="text-[10px] sm:text-xs text-gray-500">{review.date}</span>
     </div>
   </div>
 );
