@@ -73,7 +73,7 @@ const ServiceProductCard = ({ item, onAddToCart }) => {
 
   return (
     <div 
-      className="bg-white border border-gray-200 shadow-sm hover:shadow-md group rounded-xl overflow-hidden transition-all"
+      className="bg-black border border-white/10 shadow-sm hover:shadow-md group rounded-xl overflow-hidden transition-all"
       data-testid={`item-card-${id}`}
     >
       {/* Image */}

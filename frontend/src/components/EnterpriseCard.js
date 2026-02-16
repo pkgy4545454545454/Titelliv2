@@ -64,7 +64,7 @@ const EnterpriseCard = ({ enterprise, large = false }) => {
   return (
     <Link 
       to={`/entreprise/${id}`}
-      className="bg-white border border-gray-200 shadow-sm hover:shadow-md group block rounded-xl overflow-hidden h-full transition-all"
+      className="bg-black border border-white/10 shadow-sm hover:shadow-md group block rounded-xl overflow-hidden h-full transition-all"
       data-testid={`enterprise-card-${id}`}
     >
       {/* Image */}
