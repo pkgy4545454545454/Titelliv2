@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Contrat Free-lance AURALIS
+Contrat Free-lance AURALIRIS
 Juridiction Suisse - Développement Web/Application
 """
 
@@ -79,8 +79,8 @@ def create_styles():
 
 
 def generate_auralis_contract():
-    """Génère le contrat Free-lance AURALIS"""
-    output_path = "/app/backend/uploads/CONTRAT_FREELANCE_AURALIS.pdf"
+    """Génère le contrat Free-lance AURALIRIS"""
+    output_path = "/app/backend/uploads/CONTRAT_FREELANCE_AURALIRIS.pdf"
     
     doc = SimpleDocTemplate(
         output_path, pagesize=A4,
@@ -92,7 +92,7 @@ def generate_auralis_contract():
     story = []
     
     # En-tête
-    story.append(Paragraph("AURALIS", ParagraphStyle('Logo', fontSize=28, textColor=PURPLE_DARK, alignment=TA_CENTER, fontName='Helvetica-Bold', leading=32)))
+    story.append(Paragraph("AURALIRIS", ParagraphStyle('Logo', fontSize=28, textColor=PURPLE_DARK, alignment=TA_CENTER, fontName='Helvetica-Bold', leading=32)))
     story.append(Paragraph("Plateforme d'entraide communautaire", ParagraphStyle('Tagline', fontSize=10, textColor=PURPLE_MEDIUM, alignment=TA_CENTER, fontName='Helvetica-Oblique', spaceAfter=15, leading=12)))
     story.append(Spacer(1, 0.3*cm))
     story.append(HRFlowable(width="100%", thickness=2, color=PURPLE_MEDIUM))
@@ -142,14 +142,14 @@ def generate_auralis_contract():
     story.append(Paragraph("ARTICLE 1 – OBJET DU CONTRAT", styles['SectionTitle']))
     story.append(Paragraph(
         "L'Employeur confie au Développeur, qui accepte, la conception, le développement et le déploiement "
-        "de la plateforme web/application « <b>AURALIS</b> », selon les spécifications décrites ci-après.",
+        "de la plateforme web/application « <b>AURALIRIS</b> », selon les spécifications décrites ci-après.",
         styles['Body']
     ))
     
     # Article 2 - Description du projet
-    story.append(Paragraph("ARTICLE 2 – DESCRIPTION DU PROJET AURALIS", styles['SectionTitle']))
+    story.append(Paragraph("ARTICLE 2 – DESCRIPTION DU PROJET AURALIRIS", styles['SectionTitle']))
     story.append(Paragraph(
-        "Le projet AURALIS est une plateforme complète structurée en trois parties distinctes mais interconnectées :",
+        "Le projet AURALIRIS est une plateforme complète structurée en trois parties distinctes mais interconnectées :",
         styles['Body']
     ))
     
@@ -184,7 +184,7 @@ def generate_auralis_contract():
     
     story.append(Spacer(1, 0.3*cm))
     story.append(Paragraph(
-        "<i>La vision globale d'AURALIS est de créer un écosystème équilibré, où l'entraide humaine devient une valeur reconnue, "
+        "<i>La vision globale d'AURALIRIS est de créer un écosystème équilibré, où l'entraide humaine devient une valeur reconnue, "
         "où les personnes souvent mises à l'écart trouvent un espace dédié, et où le modèle économique soutient le projet "
         "sans le dénaturer.</i>",
         styles['Body']
@@ -197,7 +197,7 @@ def generate_auralis_contract():
     story.append(Paragraph("Le Développeur s'engage à :", styles['Body']))
     
     obligations = [
-        "Concevoir et développer la plateforme AURALIS selon les spécifications définies à l'Article 2",
+        "Concevoir et développer la plateforme AURALIRIS selon les spécifications définies à l'Article 2",
         "Assurer un travail sérieux, professionnel et honnête tout au long du projet",
         "Déployer le site dès qu'il est prêt, même si c'est avant la date maximale convenue",
         "Assurer un suivi quotidien du site après déploiement",
@@ -218,7 +218,7 @@ def generate_auralis_contract():
     ))
     story.append(Paragraph("<b>4.2 Date maximale de déploiement</b>", styles['SubTitle']))
     story.append(Paragraph(
-        "Le site/application AURALIS devra être déployé et fonctionnel au plus tard le <b>1er septembre 2026</b>.",
+        "Le site/application AURALIRIS devra être déployé et fonctionnel au plus tard le <b>1er septembre 2026</b>.",
         styles['Body']
     ))
     story.append(Paragraph("<b>4.3 Livraison anticipée</b>", styles['SubTitle']))
@@ -301,7 +301,7 @@ def generate_auralis_contract():
     story.append(Paragraph("ARTICLE 8 – CONFIDENTIALITÉ", styles['SectionTitle']))
     story.append(Paragraph(
         "Les Parties s'engagent à maintenir strictement confidentielles toutes les informations échangées "
-        "dans le cadre de ce contrat, notamment les données techniques, commerciales et stratégiques relatives au projet AURALIS. "
+        "dans le cadre de ce contrat, notamment les données techniques, commerciales et stratégiques relatives au projet AURALIRIS. "
         "Cette obligation perdure pendant toute la durée du contrat et pendant une période de 2 ans après sa cessation.",
         styles['Body']
     ))
@@ -354,14 +354,14 @@ def generate_auralis_contract():
     # Footer
     story.append(Spacer(1, 0.8*cm))
     story.append(HRFlowable(width="100%", thickness=1, color=PURPLE_MEDIUM))
-    story.append(Paragraph("AURALIS – Plateforme d'entraide communautaire", styles['Footer']))
+    story.append(Paragraph("AURALIRIS – Plateforme d'entraide communautaire", styles['Footer']))
     story.append(Paragraph("Contrat régi par le droit suisse", styles['Footer']))
     
     doc.build(story)
-    print(f"Contrat AURALIS généré: {output_path}")
+    print(f"Contrat AURALIRIS généré: {output_path}")
     return output_path
 
 
 if __name__ == "__main__":
     generate_auralis_contract()
-    print("\n✅ Le contrat AURALIS a été généré avec succès!")
+    print("\n✅ Le contrat AURALIRIS a été généré avec succès!")
