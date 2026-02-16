@@ -397,38 +397,38 @@ const HomePage = () => {
       </section>
 
       {/* Les meilleurs prestataires Section - Carousel */}
-      <section className="py-12 bg-white" data-testid="top-providers-section">
+      <section className="py-8 sm:py-12 bg-white" data-testid="top-providers-section">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-[#0047AB]/10">
-                <Award className="w-6 h-6 text-[#0047AB]" />
+          <div className="flex items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="p-2 sm:p-3 rounded-xl bg-[#0047AB]/10 flex-shrink-0">
+                <Award className="w-5 h-5 sm:w-6 sm:h-6 text-[#0047AB]" />
               </div>
-              <div>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
+              <div className="min-w-0">
+                <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
                   Les meilleurs prestataires
                 </h2>
-                <p className="text-gray-600 mt-1">Triés par profil le plus complet</p>
+                <p className="text-gray-600 mt-0.5 sm:mt-1 text-xs sm:text-sm">Triés par profil le plus complet</p>
               </div>
             </div>
-            <Link to="/entreprises" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors">
+            <Link to="/entreprises" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors flex-shrink-0">
               Voir tout
               <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
 
           {loading ? (
-            <div className="flex gap-6 overflow-hidden">
+            <div className="flex gap-4 sm:gap-6 overflow-hidden">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="flex-shrink-0 w-[350px] h-[320px] card-service rounded-xl animate-pulse" />
+                <div key={i} className="flex-shrink-0 w-[280px] sm:w-[350px] h-[280px] sm:h-[320px] bg-gray-100 rounded-xl animate-pulse" />
               ))}
             </div>
           ) : allEnterprises.length > 0 ? (
-            <Carousel itemWidth={350}>
+            <Carousel itemWidth={280}>
               {allEnterprises.slice(0, 12).map((enterprise, index) => (
                 <div 
                   key={enterprise.id} 
-                  className="flex-shrink-0 w-[350px] animate-fade-in"
+                  className="flex-shrink-0 w-[280px] sm:w-[350px] animate-fade-in"
                   style={{ animationDelay: `${index * 0.05}s` }}
                 >
                   <EnterpriseCard enterprise={enterprise} />
@@ -436,12 +436,12 @@ const HomePage = () => {
               ))}
             </Carousel>
           ) : (
-            <p className="text-gray-500 text-center py-8">Aucun prestataire avec photo disponible</p>
+            <p className="text-gray-500 text-center py-8 text-sm">Aucun prestataire avec photo disponible</p>
           )}
 
-          <Link to="/entreprises" className="md:hidden flex items-center justify-center gap-2 mt-6 text-[#0047AB] font-medium">
+          <Link to="/entreprises" className="md:hidden flex items-center justify-center gap-2 mt-4 sm:mt-6 text-[#0047AB] font-medium text-sm">
             Voir tous les prestataires
-            <ArrowRight className="w-5 h-5" />
+            <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </section>
