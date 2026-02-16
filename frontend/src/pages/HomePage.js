@@ -7,7 +7,7 @@ import ServiceProductCard from '../components/ServiceProductCard';
 import ScrollingReviews from '../components/ScrollingReviews';
 import { toast } from 'sonner';
 
-// Carousel Component with dark theme
+// Carousel Component with light theme
 const Carousel = ({ children, itemWidth = 400 }) => {
   const carouselRef = useRef(null);
 
@@ -26,7 +26,7 @@ const Carousel = ({ children, itemWidth = 400 }) => {
     <div className="relative">
       <button
         onClick={() => scrollCarousel('left')}
-        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/80 hover:bg-black text-white p-3 rounded-full shadow-lg border border-white/20 transition-all hover:scale-110 -ml-4"
+        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-gray-50 text-gray-700 p-3 rounded-full shadow-lg border border-gray-200 transition-all hover:scale-110 -ml-4"
         data-testid="carousel-prev"
       >
         <ChevronLeft className="w-6 h-6" />
@@ -34,7 +34,7 @@ const Carousel = ({ children, itemWidth = 400 }) => {
       
       <button
         onClick={() => scrollCarousel('right')}
-        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/80 hover:bg-black text-white p-3 rounded-full shadow-lg border border-white/20 transition-all hover:scale-110 -mr-4"
+        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-gray-50 text-gray-700 p-3 rounded-full shadow-lg border border-gray-200 transition-all hover:scale-110 -mr-4"
         data-testid="carousel-next"
       >
         <ChevronRight className="w-6 h-6" />
