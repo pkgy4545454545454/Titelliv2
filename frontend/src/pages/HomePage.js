@@ -535,19 +535,97 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Products Section - Elegant Jewelry & Watches First */}
-      <section className="py-8 sm:py-16 bg-gradient-to-b from-white via-gray-50/50 to-white" data-testid="products-section">
+      {/* Bijouteries & Horlogerie - ACTUAL PRODUCTS */}
+      <section className="py-8 sm:py-16 bg-gradient-to-b from-[#0a0a0f] via-[#111118] to-[#0a0a0f]" data-testid="jewelry-section">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="p-2 sm:p-3 rounded-xl bg-gradient-to-br from-[#D4AF37]/20 to-[#B8860B]/10 flex-shrink-0">
+              <div className="p-2 sm:p-3 rounded-xl bg-gradient-to-br from-[#D4AF37]/30 to-[#B8860B]/20 flex-shrink-0">
                 <Gem className="w-5 h-5 sm:w-6 sm:h-6 text-[#D4AF37]" />
               </div>
               <div className="min-w-0">
-                <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
-                  Bijouteries & Horlogerie
+                <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-white leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Montres & Bijoux
                 </h2>
-                <p className="text-gray-600 mt-0.5 sm:mt-1 text-xs sm:text-sm">L'excellence suisse à votre portée</p>
+                <p className="text-[#D4AF37]/80 mt-0.5 sm:mt-1 text-xs sm:text-sm">L'excellence suisse à votre portée</p>
+              </div>
+            </div>
+            <Link to="/products?category=bijouteries" className="hidden md:flex items-center gap-2 text-[#D4AF37] hover:text-[#F3CF55] font-medium transition-colors flex-shrink-0">
+              Voir tout
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+
+          {jewelryWatchProducts.length > 0 ? (
+            <Carousel itemWidth={280}>
+              {jewelryWatchProducts.map((product) => (
+                <Link
+                  key={product.id}
+                  to={`/product/${product.id}`}
+                  className="flex-shrink-0 w-[280px] sm:w-[320px] group"
+                >
+                  <div className="bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f0f23] rounded-xl overflow-hidden border border-[#D4AF37]/20 hover:border-[#D4AF37]/60 transition-all shadow-lg hover:shadow-2xl">
+                    <div className="relative h-48 sm:h-56 overflow-hidden">
+                      <img
+                        src={product.images?.[0] || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800'}
+                        alt={product.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                      <div className="absolute top-3 left-3">
+                        <span className="px-3 py-1 bg-[#D4AF37] text-black text-xs font-semibold rounded-full">
+                          {product.category || 'Bijouterie'}
+                        </span>
+                      </div>
+                      <div className="absolute bottom-3 right-3">
+                        <Watch className="w-6 h-6 text-[#D4AF37]/80" />
+                      </div>
+                    </div>
+                    <div className="p-4 sm:p-5">
+                      <h3 className="text-white font-semibold text-sm sm:text-base mb-2 line-clamp-1 group-hover:text-[#D4AF37] transition-colors">
+                        {product.name}
+                      </h3>
+                      <p className="text-gray-400 text-xs sm:text-sm mb-3 line-clamp-2">
+                        {product.description}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[#D4AF37] font-bold text-lg sm:text-xl">
+                          {product.price?.toFixed(2) || '0.00'} <span className="text-sm text-gray-500">CHF</span>
+                        </span>
+                        <span className="text-xs text-gray-500">{product.enterprise_name}</span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </Carousel>
+          ) : (
+            <div className="text-center py-12">
+              <Gem className="w-16 h-16 text-[#D4AF37]/30 mx-auto mb-4" />
+              <p className="text-gray-400">Découvrez bientôt notre collection de montres et bijoux</p>
+            </div>
+          )}
+
+          <Link to="/products?category=bijouteries" className="md:hidden flex items-center justify-center gap-2 mt-6 text-[#D4AF37] font-medium text-sm">
+            Voir tous les bijoux
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </section>
+
+      {/* Other Product Categories */}
+      <section className="py-8 sm:py-16 bg-white" data-testid="products-section">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          <div className="flex items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="p-2 sm:p-3 rounded-xl bg-[#D4AF37]/10 flex-shrink-0">
+                <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-[#D4AF37]" />
+              </div>
+              <div className="min-w-0">
+                <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Autres Produits
+                </h2>
+                <p className="text-gray-600 mt-0.5 sm:mt-1 text-xs sm:text-sm">Explorez nos catégories</p>
               </div>
             </div>
             <Link to="/products" className="hidden md:flex items-center gap-2 text-[#D4AF37] hover:text-[#F3CF55] font-medium transition-colors flex-shrink-0">
@@ -556,56 +634,22 @@ const HomePage = () => {
             </Link>
           </div>
 
-          <Carousel itemWidth={160}>
-            {/* Sort categories to put jewelry/watches first */}
-            {[...productCategories]
-              .sort((a, b) => {
-                const priority = ['bijouterie', 'horlogerie', 'montre', 'joaillerie', 'accessoire'];
-                const aScore = priority.findIndex(p => a.name?.toLowerCase().includes(p) || a.id?.toLowerCase().includes(p));
-                const bScore = priority.findIndex(p => b.name?.toLowerCase().includes(p) || b.id?.toLowerCase().includes(p));
-                const aRank = aScore === -1 ? 100 : aScore;
-                const bRank = bScore === -1 ? 100 : bScore;
-                return aRank - bRank;
-              })
-              .slice(0, 12).map((cat, index) => {
-                const isJewelry = ['bijouterie', 'horlogerie', 'montre', 'joaillerie'].some(
-                  p => cat.name?.toLowerCase().includes(p) || cat.id?.toLowerCase().includes(p)
-                );
-                return (
-                  <Link
-                    key={cat.id}
-                    to={`/products?category=${cat.id}`}
-                    className={`flex-shrink-0 w-[160px] sm:w-[200px] group relative h-36 sm:h-44 rounded-xl overflow-hidden transition-all shadow-sm hover:shadow-lg ${
-                      isJewelry 
-                        ? 'bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f0f23] border border-[#D4AF37]/30 hover:border-[#D4AF37]' 
-                        : 'bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 hover:border-[#D4AF37]/50'
-                    }`}
-                    data-testid={`product-cat-${cat.id}`}
-                  >
-                    <div className="absolute inset-0 flex flex-col items-center justify-center p-3 sm:p-4 text-center">
-                      <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center mb-2 sm:mb-3 group-hover:scale-110 transition-transform ${
-                        isJewelry 
-                          ? 'bg-gradient-to-br from-[#D4AF37]/30 to-[#B8860B]/20' 
-                          : 'bg-[#D4AF37]/10'
-                      }`}>
-                        {isJewelry ? (
-                          cat.name?.toLowerCase().includes('horlogerie') || cat.name?.toLowerCase().includes('montre')
-                            ? <Watch className="w-6 h-6 sm:w-7 sm:h-7 text-[#D4AF37]" />
-                            : <Gem className="w-6 h-6 sm:w-7 sm:h-7 text-[#D4AF37]" />
-                        ) : (
-                          <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-[#D4AF37]" />
-                        )}
-                      </div>
-                      <span className={`font-medium text-xs sm:text-sm line-clamp-2 ${isJewelry ? 'text-white' : 'text-gray-900'}`}>
-                        {cat.name}
-                      </span>
-                      {isJewelry && (
-                        <span className="mt-1 text-[10px] text-[#D4AF37]/80">Swiss Excellence</span>
-                      )}
-                    </div>
-                  </Link>
-                );
-              })}
+          <Carousel itemWidth={140}>
+            {productCategories.slice(0, 12).map((cat) => (
+              <Link
+                key={cat.id}
+                to={`/products?category=${cat.id}`}
+                className="flex-shrink-0 w-[140px] sm:w-[180px] group relative h-32 sm:h-40 rounded-xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 hover:border-[#D4AF37]/50 transition-all shadow-sm"
+                data-testid={`product-cat-${cat.id}`}
+              >
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-3 sm:p-4 text-center">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#D4AF37]/10 flex items-center justify-center mb-2 sm:mb-3 group-hover:scale-110 transition-transform">
+                    <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-[#D4AF37]" />
+                  </div>
+                  <span className="text-gray-900 font-medium text-xs sm:text-sm line-clamp-2">{cat.name}</span>
+                </div>
+              </Link>
+            ))}
           </Carousel>
         </div>
       </section>
