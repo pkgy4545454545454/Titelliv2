@@ -1019,20 +1019,19 @@ const HomePage = () => {
       />
 
       {/* CTA Section */}
-      <section className="py-20 md:py-28 bg-[#0047AB]" data-testid="cta-section">
+      <section className="py-12 sm:py-20 md:py-28 bg-[#0047AB]" data-testid="cta-section">
         <div className="max-w-4xl mx-auto px-4 md:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>
+          <h2 className="text-xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>
             Vous êtes un prestataire ?
           </h2>
-          <p className="text-lg text-white/80 mb-10 max-w-2xl mx-auto">
-            Rejoignez Titelli et exposez vos services aux clients de la région de Lausanne. 
-            Bénéficiez d'une visibilité premium et développez votre activité.
+          <p className="text-sm sm:text-lg text-white/80 mb-6 sm:mb-10 max-w-2xl mx-auto">
+            Rejoignez Titelli et développez votre activité avec une visibilité premium.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/auth?type=entreprise" className="bg-white text-[#0047AB] text-lg px-10 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors" data-testid="cta-register-btn">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+            <Link to="/auth?type=entreprise" className="bg-white text-[#0047AB] text-sm sm:text-lg px-6 sm:px-10 py-3 sm:py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors" data-testid="cta-register-btn">
               Inscrire mon entreprise
             </Link>
-            <Link to="/about" className="border-2 border-white text-white text-lg px-10 py-4 rounded-lg font-semibold hover:bg-white/10 transition-colors">
+            <Link to="/about" className="border-2 border-white text-white text-sm sm:text-lg px-6 sm:px-10 py-3 sm:py-4 rounded-lg font-semibold hover:bg-white/10 transition-colors">
               En savoir plus
             </Link>
           </div>
