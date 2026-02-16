@@ -315,8 +315,8 @@ def generate_auralis_contract():
         styles['Body']
     ))
     
-    # Article 11 - Dispositions finales
-    story.append(Paragraph("ARTICLE 11 – DISPOSITIONS FINALES", styles['SectionTitle']))
+    # Article 10 - Dispositions finales
+    story.append(Paragraph("ARTICLE 10 – DISPOSITIONS FINALES", styles['SectionTitle']))
     story.append(Paragraph(
         "Toute modification du présent contrat devra faire l'objet d'un avenant écrit signé par les deux Parties. "
         "Si une clause du présent contrat s'avérait nulle ou inapplicable, les autres clauses resteraient valides et applicables.",
