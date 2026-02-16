@@ -64,7 +64,7 @@ const EnterpriseCard = ({ enterprise, large = false }) => {
   return (
     <Link 
       to={`/entreprise/${id}`}
-      className="card-service group block rounded-xl overflow-hidden h-full"
+      className="bg-white border border-gray-200 shadow-sm hover:shadow-md group block rounded-xl overflow-hidden h-full transition-all"
       data-testid={`enterprise-card-${id}`}
     >
       {/* Image */}
@@ -127,13 +127,13 @@ const EnterpriseCard = ({ enterprise, large = false }) => {
       {/* Content */}
       <div className={cardPadding}>
         <div className="flex items-start justify-between gap-4 mb-2">
-          <h3 className={`${titleSize} font-semibold text-white group-hover:text-[#0047AB] transition-colors line-clamp-1`}>
+          <h3 className={`${titleSize} font-semibold text-gray-900 group-hover:text-[#0047AB] transition-colors line-clamp-1`}>
             {category ? `${category} - ${displayName}` : displayName}
           </h3>
           {rating > 0 && (
             <div className="flex items-center gap-1 flex-shrink-0">
               <Star className="w-4 h-4 fill-[#D4AF37] text-[#D4AF37]" />
-              <span className="text-sm font-medium text-white">{rating.toFixed(1)}</span>
+              <span className="text-sm font-medium text-gray-900">{rating.toFixed(1)}</span>
             </div>
           )}
         </div>
@@ -142,12 +142,12 @@ const EnterpriseCard = ({ enterprise, large = false }) => {
           <p className="text-sm text-[#D4AF37] mb-2 line-clamp-1">{slogan}</p>
         )}
 
-        <p className={`text-sm text-gray-400 mb-4 ${descHeight}`}>
+        <p className={`text-sm text-gray-600 mb-4 ${descHeight}`}>
           {description}
         </p>
 
         <div className="flex items-center justify-between text-sm">
-          <span className="px-3 py-1 bg-white/5 rounded-full text-gray-400">
+          <span className="px-3 py-1 bg-gray-100 rounded-full text-gray-600">
             {category}
           </span>
           <div className="flex items-center gap-1 text-gray-500">
