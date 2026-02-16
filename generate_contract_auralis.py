@@ -306,17 +306,8 @@ def generate_auralis_contract():
         styles['Body']
     ))
     
-    # Article 9 - Résiliation
-    story.append(Paragraph("ARTICLE 9 – DURÉE ET RÉSILIATION", styles['SectionTitle']))
-    story.append(Paragraph(
-        "Le présent contrat est conclu pour la durée du projet, soit jusqu'au déploiement complet de la plateforme AURALIS. "
-        "Chaque partie peut y mettre fin moyennant un préavis d'un mois, notifié par écrit. "
-        "En cas de résiliation, le Développeur sera rémunéré au prorata du travail effectué.",
-        styles['Body']
-    ))
-    
-    # Article 10 - Droit applicable
-    story.append(Paragraph("ARTICLE 10 – DROIT APPLICABLE ET JURIDICTION", styles['SectionTitle']))
+    # Article 9 - Droit applicable
+    story.append(Paragraph("ARTICLE 9 – DROIT APPLICABLE ET JURIDICTION", styles['SectionTitle']))
     story.append(Paragraph(
         "Le présent contrat est régi par le droit suisse, notamment les dispositions du Code des Obligations. "
         "En cas de litige, les parties s'engagent à rechercher une solution amiable. "
