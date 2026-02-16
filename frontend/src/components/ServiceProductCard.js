@@ -77,7 +77,7 @@ const ServiceProductCard = ({ item, onAddToCart }) => {
       data-testid={`item-card-${id}`}
     >
       {/* Image */}
-      <Link to={`/${type}/${id}`} className="block relative h-56 overflow-hidden">
+      <Link to={`/${type}/${id}`} className="block relative h-40 sm:h-56 overflow-hidden">
         <img
           src={images?.[0] || defaultImage}
           alt={name}
@@ -86,17 +86,17 @@ const ServiceProductCard = ({ item, onAddToCart }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         
         {/* Badges */}
-        <div className="absolute top-3 left-3 flex gap-2">
+        <div className="absolute top-2 sm:top-3 left-2 sm:left-3 flex gap-1.5 sm:gap-2">
           {is_premium && (
-            <span className="badge-premium flex items-center gap-1">
-              <Crown className="w-3 h-3" />
-              Premium
+            <span className="badge-premium flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1">
+              <Crown className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+              <span className="hidden sm:inline">Premium</span>
             </span>
           )}
           {is_delivery && (
-            <span className="px-2 py-1 bg-green-500/90 text-white text-xs rounded-full flex items-center gap-1">
-              <Truck className="w-3 h-3" />
-              Livraison
+            <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-green-500/90 text-white text-[10px] sm:text-xs rounded-full flex items-center gap-0.5 sm:gap-1">
+              <Truck className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+              <span className="hidden sm:inline">Livraison</span>
             </span>
           )}
         </div>
@@ -106,18 +106,18 @@ const ServiceProductCard = ({ item, onAddToCart }) => {
           onClick={handleToggleWishlist}
           disabled={wishlistLoading}
           data-testid={`wishlist-btn-${id}`}
-          className={`absolute top-3 right-3 p-2 rounded-full transition-all ${
+          className={`absolute top-2 sm:top-3 right-2 sm:right-3 p-1.5 sm:p-2 rounded-full transition-all ${
             isInWishlist 
               ? 'bg-red-500 text-white' 
               : 'bg-black/50 text-white hover:bg-red-500'
           }`}
         >
-          <Heart className={`w-4 h-4 ${isInWishlist ? 'fill-white' : ''}`} />
+          <Heart className={`w-3 h-3 sm:w-4 sm:h-4 ${isInWishlist ? 'fill-white' : ''}`} />
         </button>
 
         {/* Type Badge */}
-        <div className="absolute bottom-3 left-3">
-          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+        <div className="absolute bottom-2 sm:bottom-3 left-2 sm:left-3">
+          <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${
             type === 'service' ? 'bg-[#0047AB]/90 text-white' : 'bg-[#D4AF37]/90 text-black'
           }`}>
             {type === 'service' ? 'Service' : 'Produit'}
@@ -126,28 +126,28 @@ const ServiceProductCard = ({ item, onAddToCart }) => {
       </Link>
 
       {/* Content */}
-      <div className="p-5">
+      <div className="p-3 sm:p-5">
         <Link to={`/${type}/${id}`}>
-          <h3 className="text-lg font-semibold text-gray-900 group-hover:text-[#0047AB] transition-colors mb-2 line-clamp-1">
+          <h3 className="text-sm sm:text-lg font-semibold text-gray-900 group-hover:text-[#0047AB] transition-colors mb-1.5 sm:mb-2 line-clamp-1">
             {name}
           </h3>
         </Link>
 
-        <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+        <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 line-clamp-2">
           {description}
         </p>
 
         <div className="flex items-center justify-between">
-          <span className="text-xl font-bold text-gray-900">
-            {price.toFixed(2)} <span className="text-sm text-gray-500">{currency}</span>
+          <span className="text-base sm:text-xl font-bold text-gray-900">
+            {price.toFixed(2)} <span className="text-xs sm:text-sm text-gray-500">{currency}</span>
           </span>
           
           <button
             onClick={() => onAddToCart?.(item)}
-            className="p-3 bg-[#0047AB] hover:bg-[#0047AB]/80 text-white rounded-full transition-all hover:scale-110"
+            className="p-2 sm:p-3 bg-[#0047AB] hover:bg-[#0047AB]/80 text-white rounded-full transition-all hover:scale-110"
             data-testid={`add-to-cart-${id}`}
           >
-            <ShoppingCart className="w-5 h-5" />
+            <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
       </div>
