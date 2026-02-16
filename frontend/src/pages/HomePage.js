@@ -447,33 +447,33 @@ const HomePage = () => {
       </section>
 
       {/* Services Section - Carousel */}
-      <section className="py-16 bg-gray-50" data-testid="services-section">
+      <section className="py-8 sm:py-16 bg-gray-50" data-testid="services-section">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-[#0047AB]/10">
-                <Sparkles className="w-6 h-6 text-[#0047AB]" />
+          <div className="flex items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="p-2 sm:p-3 rounded-xl bg-[#0047AB]/10 flex-shrink-0">
+                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-[#0047AB]" />
               </div>
-              <div>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
-                  Les meilleurs services de ta région
+              <div className="min-w-0">
+                <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Les meilleurs services
                 </h2>
-                <p className="text-gray-600 mt-1">Découvrez nos prestataires de confiance</p>
+                <p className="text-gray-600 mt-0.5 sm:mt-1 text-xs sm:text-sm">Découvrez nos prestataires</p>
               </div>
             </div>
-            <Link to="/services" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors" data-testid="view-all-services">
+            <Link to="/services" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors flex-shrink-0" data-testid="view-all-services">
               Voir tout
               <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
 
           {/* Service Category Tabs */}
-          <div className="flex flex-wrap gap-3 mb-8">
-            {serviceCategories.slice(0, 8).map((cat) => (
+          <div className="flex gap-2 sm:gap-3 mb-6 sm:mb-8 overflow-x-auto scrollbar-hide pb-2" style={{ scrollbarWidth: 'none' }}>
+            {serviceCategories.slice(0, 6).map((cat) => (
               <Link
                 key={cat.id}
                 to={`/services?category=${cat.id}`}
-                className="px-5 py-2.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-full text-sm text-gray-700 hover:text-gray-900 transition-all"
+                className="px-3 sm:px-5 py-2 sm:py-2.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-full text-xs sm:text-sm text-gray-700 hover:text-gray-900 transition-all whitespace-nowrap flex-shrink-0"
                 data-testid={`service-cat-${cat.id}`}
               >
                 {cat.name}
@@ -483,31 +483,31 @@ const HomePage = () => {
 
           {/* Service Cards Carousel */}
           {offres.length > 0 ? (
-            <Carousel itemWidth={350}>
+            <Carousel itemWidth={280}>
               {offres.map((item, index) => (
-                <div key={item.id} className="flex-shrink-0 w-[350px]">
+                <div key={item.id} className="flex-shrink-0 w-[280px] sm:w-[320px]">
                   <ServiceProductCard item={item} />
                 </div>
               ))}
             </Carousel>
           ) : (
-            <div className="flex gap-6 overflow-hidden">
+            <div className="flex gap-4 sm:gap-6 overflow-hidden">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="flex-shrink-0 w-[350px] bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
-                  <div className="h-56 bg-gray-100 animate-pulse" />
-                  <div className="p-5 space-y-3">
-                    <div className="h-6 bg-gray-100 rounded animate-pulse" />
+                <div key={i} className="flex-shrink-0 w-[280px] sm:w-[320px] bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
+                  <div className="h-40 sm:h-56 bg-gray-100 animate-pulse" />
+                  <div className="p-4 sm:p-5 space-y-3">
+                    <div className="h-5 sm:h-6 bg-gray-100 rounded animate-pulse" />
                     <div className="h-4 bg-gray-100 rounded w-3/4 animate-pulse" />
-                    <div className="h-8 bg-gray-100 rounded w-1/3 animate-pulse" />
+                    <div className="h-6 sm:h-8 bg-gray-100 rounded w-1/3 animate-pulse" />
                   </div>
                 </div>
               ))}
             </div>
           )}
 
-          <Link to="/services" className="md:hidden flex items-center justify-center gap-2 mt-8 text-[#0047AB] font-medium">
+          <Link to="/services" className="md:hidden flex items-center justify-center gap-2 mt-4 sm:mt-8 text-[#0047AB] font-medium text-sm">
             Voir tous les services
-            <ArrowRight className="w-5 h-5" />
+            <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </section>
