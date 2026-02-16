@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 # Stripe config
 stripe.api_key = STRIPE_API_KEY
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://homepage-theme-fix.preview.emergentagent.com')
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://product-filter-2.preview.emergentagent.com')
 
 SUBSCRIPTION_PLANS = {
     "premium": {
