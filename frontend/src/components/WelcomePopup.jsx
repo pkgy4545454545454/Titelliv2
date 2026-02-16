@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, Gift, Sparkles, QrCode, ArrowRight, Check } from 'lucide-react';
-import API from '../services/api';
+import { X, Users, Building2, Check, Star, ShoppingBag, Briefcase, Search, Award, Shield } from 'lucide-react';
 
 const WelcomePopup = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const [promoCode, setPromoCode] = useState(null);
-  const [isValidating, setIsValidating] = useState(false);
-  const [copySuccess, setCopySuccess] = useState(false);
 
   useEffect(() => {
     // Vérifier si c'est la première visite
@@ -16,34 +12,11 @@ const WelcomePopup = () => {
       // Attendre un peu avant d'afficher la popup
       const timer = setTimeout(() => {
         setIsVisible(true);
-        fetchPromoCode();
       }, 2000);
       
       return () => clearTimeout(timer);
     }
   }, []);
-
-  const fetchPromoCode = async () => {
-    setIsValidating(true);
-    try {
-      // Valider le code promo BIENVENUE100 via l'API
-      const response = await API.post('/api/promo/validate', { code: 'BIENVENUE100' });
-      if (response.data.valid) {
-        setPromoCode(response.data);
-      }
-    } catch (error) {
-      // En cas d'erreur API, afficher quand même le code promo
-      setPromoCode({
-        valid: true,
-        code: 'BIENVENUE100',
-        description: 'Code de bienvenue - 100 CHF de crédit publicitaire',
-        credit_amount: 100,
-        type: 'pub_credit'
-      });
-    } finally {
-      setIsValidating(false);
-    }
-  };
 
   const handleClose = () => {
     setIsVisible(false);
@@ -52,162 +25,136 @@ const WelcomePopup = () => {
     localStorage.setItem('titelli_first_visit_date', new Date().toISOString());
   };
 
-  const handleCopyCode = () => {
-    if (promoCode?.code) {
-      navigator.clipboard.writeText(promoCode.code);
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
-    }
-  };
-
   const handleExplore = () => {
     handleClose();
-    // Scroll vers les services ou rediriger
-    window.location.href = '/media-pub';
+    window.location.href = '/auth';
   };
 
   if (!isVisible) return null;
 
+  // Avantages pour les clients
+  const clientAdvantages = [
+    { icon: Search, text: "Trouvez facilement les meilleurs prestataires" },
+    { icon: Star, text: "Accédez aux avis vérifiés" },
+    { icon: ShoppingBag, text: "Réservez et commandez en ligne" },
+    { icon: Shield, text: "Paiement sécurisé garanti" },
+  ];
+
+  // Avantages pour les entreprises
+  const enterpriseAdvantages = [
+    { icon: Users, text: "Développez votre clientèle locale" },
+    { icon: Award, text: "Obtenez la certification Titelli" },
+    { icon: Briefcase, text: "Publiez vos offres d'emploi" },
+    { icon: Star, text: "Boostez votre visibilité premium" },
+  ];
+
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4">
       {/* Overlay sombre */}
       <div 
         className="absolute inset-0 bg-black/80 backdrop-blur-sm"
         onClick={handleClose}
       />
       
-      {/* Popup */}
-      <div className="relative w-full max-w-lg bg-gradient-to-b from-[#0a0a0f] to-[#111118] rounded-2xl border border-white/10 shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+      {/* Popup - Landscape sur desktop, Portrait sur mobile */}
+      <div className="relative w-full max-w-[340px] sm:max-w-3xl lg:max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
         
-        {/* Header avec gradient */}
-        <div className="relative h-32 bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 overflow-hidden">
-          {/* Particules décoratives */}
-          <div className="absolute inset-0">
-            <div className="absolute top-4 left-8 w-2 h-2 bg-white/30 rounded-full animate-pulse" />
-            <div className="absolute top-12 right-12 w-3 h-3 bg-yellow-400/40 rounded-full animate-pulse delay-100" />
-            <div className="absolute bottom-8 left-1/4 w-2 h-2 bg-white/20 rounded-full animate-pulse delay-200" />
-            <div className="absolute top-6 right-1/3 w-1.5 h-1.5 bg-yellow-300/50 rounded-full animate-pulse delay-300" />
-          </div>
+        {/* Bouton fermer */}
+        <button 
+          onClick={handleClose}
+          className="absolute top-3 right-3 z-10 w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all"
+          data-testid="welcome-popup-close"
+        >
+          <X className="w-4 h-4" />
+        </button>
+
+        {/* Layout: Colonne sur mobile, Ligne sur desktop */}
+        <div className="flex flex-col sm:flex-row">
           
-          {/* Icône centrale */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20">
-              <Gift className="w-10 h-10 text-yellow-400" />
+          {/* Section gauche - Titre et branding */}
+          <div className="bg-gradient-to-br from-[#0047AB] to-[#002266] p-5 sm:p-8 sm:w-2/5 flex flex-col justify-center items-center text-center">
+            <img 
+              src="/logo_titelli.png" 
+              alt="Titelli" 
+              className="w-14 h-14 sm:w-20 sm:h-20 object-contain mb-3 sm:mb-4"
+            />
+            <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
+              Bienvenue
+            </h1>
+            <p className="text-white/80 text-xs sm:text-sm">
+              La plateforme suisse qui connecte<br className="hidden sm:block" /> clients et prestataires
+            </p>
+            <div className="mt-3 sm:mt-6 flex items-center gap-2">
+              <div className="w-2 h-2 bg-[#D4AF37] rounded-full" />
+              <span className="text-[#D4AF37] text-xs sm:text-sm font-medium">Lausanne & région</span>
             </div>
           </div>
-          
-          {/* Bouton fermer */}
-          <button 
-            onClick={handleClose}
-            className="absolute top-3 right-3 w-8 h-8 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-black/50 transition-all"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-        
-        {/* Contenu */}
-        <div className="p-6 text-center">
-          {/* Titre */}
-          <h2 className="text-2xl font-bold text-white mb-2">
-            Bienvenue sur <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Titelli</span> !
-          </h2>
-          
-          <p className="text-gray-400 text-sm mb-6">
-            Merci de votre confiance. Profitez de votre cadeau de bienvenue<br />
-            et commencez à rentabiliser votre business !
-          </p>
-          
-          {/* Code promo */}
-          {isValidating ? (
-            <div className="bg-white/5 rounded-xl p-4 mb-6 border border-white/10">
-              <div className="animate-pulse flex items-center justify-center gap-2">
-                <Sparkles className="w-5 h-5 text-yellow-400" />
-                <span className="text-gray-400">Chargement de votre cadeau...</span>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 rounded-xl p-4 mb-6 border border-yellow-500/30">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Sparkles className="w-5 h-5 text-yellow-400" />
-                <span className="text-yellow-400 text-sm font-medium">VOTRE CODE PROMO</span>
-                <Sparkles className="w-5 h-5 text-yellow-400" />
-              </div>
+
+          {/* Section droite - Avantages */}
+          <div className="p-4 sm:p-8 sm:w-3/5 bg-white">
+            
+            {/* Layout en colonnes sur desktop, empilé sur mobile */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               
-              <button 
-                onClick={handleCopyCode}
-                className="group relative bg-[#0a0a0f] px-6 py-3 rounded-lg border border-yellow-500/50 hover:border-yellow-400 transition-all"
-              >
-                <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400">
-                  {promoCode?.code || 'BIENVENUE100'}
-                </span>
-                <div className="absolute -top-2 -right-2 bg-green-500 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {copySuccess ? (
-                    <Check className="w-3 h-3 text-white" />
-                  ) : (
-                    <span className="text-[10px] text-white px-1">Copier</span>
-                  )}
+              {/* Colonne Clients */}
+              <div>
+                <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-[#0047AB]/10">
+                    <Users className="w-4 h-4 sm:w-5 sm:h-5 text-[#0047AB]" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Pour les clients</h3>
                 </div>
+                <ul className="space-y-2 sm:space-y-3">
+                  {clientAdvantages.map((item, index) => (
+                    <li key={index} className="flex items-start gap-2 sm:gap-3">
+                      <div className="mt-0.5 flex-shrink-0">
+                        <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" />
+                      </div>
+                      <span className="text-gray-700 text-xs sm:text-sm leading-snug">{item.text}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Colonne Entreprises */}
+              <div>
+                <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-[#D4AF37]/10">
+                    <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-[#D4AF37]" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Pour les entreprises</h3>
+                </div>
+                <ul className="space-y-2 sm:space-y-3">
+                  {enterpriseAdvantages.map((item, index) => (
+                    <li key={index} className="flex items-start gap-2 sm:gap-3">
+                      <div className="mt-0.5 flex-shrink-0">
+                        <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" />
+                      </div>
+                      <span className="text-gray-700 text-xs sm:text-sm leading-snug">{item.text}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Boutons */}
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-5 sm:mt-8">
+              <button
+                onClick={handleClose}
+                className="flex-1 px-4 py-2.5 sm:py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all text-xs sm:text-sm font-medium"
+                data-testid="welcome-popup-later"
+              >
+                Plus tard
               </button>
-              
-              <p className="text-white font-semibold mt-3">
-                {promoCode?.credit_amount || 100} CHF de crédit publicitaire offert
-              </p>
-              <p className="text-gray-400 text-xs mt-1">
-                {promoCode?.description || 'Code de bienvenue pour les entreprises'}
-              </p>
-            </div>
-          )}
-          
-          {/* Suggestions */}
-          <div className="bg-white/5 rounded-xl p-4 mb-6 border border-white/10">
-            <h3 className="text-white font-semibold mb-3 flex items-center justify-center gap-2">
-              <Sparkles className="w-4 h-4 text-purple-400" />
-              Découvrez nos prestations IA
-            </h3>
-            <div className="space-y-2 text-sm text-gray-300">
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full" />
-                <span>Images publicitaires IA - <span className="text-green-400">Testez gratuitement !</span></span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-purple-400 rounded-full" />
-                <span>Vidéos promotionnelles IA - Aperçu avant paiement</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-yellow-400 rounded-full" />
-                <span>Ciblage intelligent - Optimisez votre audience</span>
-              </div>
+              <button
+                onClick={handleExplore}
+                className="flex-1 px-4 py-2.5 sm:py-3 bg-[#0047AB] hover:bg-[#003080] text-white rounded-xl transition-all text-xs sm:text-sm font-medium"
+                data-testid="welcome-popup-signup"
+              >
+                S'inscrire gratuitement
+              </button>
             </div>
           </div>
-          
-          {/* Message bas */}
-          <p className="text-gray-500 text-xs mb-4">
-            Essayez sans engagement • Rentrez votre photo ou descriptif • Validez et payez si satisfait !
-          </p>
-          
-          {/* Boutons */}
-          <div className="flex gap-3">
-            <button
-              onClick={handleClose}
-              className="flex-1 px-4 py-3 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl border border-white/10 transition-all text-sm font-medium"
-            >
-              Plus tard
-            </button>
-            <button
-              onClick={handleExplore}
-              className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-xl transition-all text-sm font-medium flex items-center justify-center gap-2"
-            >
-              Découvrir
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-        
-        {/* Footer */}
-        <div className="px-6 py-3 bg-white/5 border-t border-white/10 text-center">
-          <p className="text-gray-500 text-xs">
-            🌐 www.titelli.com • La plateforme suisse de mise en relation
-          </p>
         </div>
       </div>
     </div>
