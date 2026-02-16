@@ -164,7 +164,7 @@ const Header = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 glass-heavy" data-testid="main-header">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-black" data-testid="main-header">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo statique Titelli - sans fond */}
