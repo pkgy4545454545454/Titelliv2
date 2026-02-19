@@ -99,7 +99,7 @@ const HomePage = () => {
     if (coverImage.includes('placeholder')) return false;
     if (coverImage.includes('default')) return false;
     // Keep only real uploaded images (usually from backend uploads)
-    return coverImage.includes('/api/uploads') || coverImage.includes('titelli') || coverImage.includes('pkgyweb');
+    return coverImage.includes('/api/uploads') || coverImage.includes('titelli') || coverImage.includes('render');
   };
 
   // Sort enterprises by profile completeness
