@@ -4166,7 +4166,9 @@ const FormModal = ({ type, item, onClose, onSuccess }) => {
       onSuccess();
     } catch (error) {
       console.error('Error creating:', error);
-      toast.error(error.message || 'Erreur lors de la création');
+      // Afficher le message d'erreur du serveur si disponible
+      const errorMessage = error.response?.data?.detail || error.message || 'Erreur lors de la création';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
