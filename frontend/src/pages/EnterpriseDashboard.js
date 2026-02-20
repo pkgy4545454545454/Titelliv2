@@ -4148,6 +4148,7 @@ const FormModal = ({ type, item, onClose, onSuccess }) => {
           await investmentsAPI.create({ ...formData, investment_type: formData.investment_type || 'equity' });
           break;
         case 'service':
+          if (!enterprise) throw new Error('Veuillez d\'abord créer votre profil entreprise dans la section "Mon Entreprise"');
           if (!formData.name) throw new Error('Nom requis');
           if (!formData.description) throw new Error('Description requise');
           if (!formData.price) throw new Error('Prix requis');
