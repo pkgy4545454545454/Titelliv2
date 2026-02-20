@@ -28,7 +28,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(135deg, #000 0%, #0a0a1a 50%, #000 100%);
+            background: #000;
         }
 
         /* Container pour le texte et l'œil */
@@ -125,7 +125,9 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
-            filter: drop-shadow(0 0 20px rgba(30, 144, 255, 0.5));
+            /* Pas de fond - image PNG transparente */
+            background: transparent;
+            filter: drop-shadow(0 0 15px rgba(30, 144, 255, 0.4));
         }
 
         .eye-logo.bounce {
@@ -153,94 +155,29 @@
             }
         }
 
-        /* Overlay pour l'effet de fermeture des aiguilles */
-        .eye-overlay {
+        /* Glow subtil autour de l'œil (sans overlay) */
+        .final-glow {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-
-        .clock-hand-overlay {
-            position: absolute;
-            width: 4px;
-            height: 30px;
-            background: #000;
+            width: 150px;
+            height: 150px;
             top: 50%;
             left: 50%;
-            transform-origin: center bottom;
-            opacity: 0;
-        }
-
-        .hour-overlay {
-            transform: translate(-50%, -100%) rotate(-60deg);
-        }
-
-        .minute-overlay {
-            width: 3px;
-            height: 35px;
-            transform: translate(-50%, -100%) rotate(-30deg);
-        }
-
-        .clock-hand-overlay.closing {
-            opacity: 1;
-            animation: closeHand 1.2s ease-in-out forwards;
-        }
-
-        .hour-overlay.closing {
-            animation: closeHourHand 1.2s ease-in-out forwards;
-        }
-
-        .minute-overlay.closing {
-            animation: closeMinuteHand 1.2s ease-in-out forwards;
-        }
-
-        @keyframes closeHourHand {
-            0% { transform: translate(-50%, -100%) rotate(-60deg); opacity: 0; }
-            20% { opacity: 1; }
-            100% { transform: translate(-50%, -100%) rotate(0deg); opacity: 1; }
-        }
-
-        @keyframes closeMinuteHand {
-            0% { transform: translate(-50%, -100%) rotate(-30deg); opacity: 0; }
-            20% { opacity: 1; }
-            100% { transform: translate(-50%, -100%) rotate(0deg); opacity: 1; }
-        }
-
-        /* Effet de fermeture de l'œil (paupières) */
-        .eyelid {
-            position: absolute;
-            width: 100%;
-            height: 50%;
-            background: radial-gradient(ellipse at center, #0a0a1a 0%, #000 100%);
-            left: 0;
-            opacity: 0;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(30, 144, 255, 0.3) 0%, transparent 70%);
             border-radius: 50%;
+            opacity: 0;
+            pointer-events: none;
+            z-index: -1;
         }
 
-        .eyelid-top {
-            top: 0;
-            transform-origin: center bottom;
-            transform: scaleY(0);
+        .final-glow.pulse {
+            animation: glowPulse 2s ease-in-out forwards;
         }
 
-        .eyelid-bottom {
-            bottom: 0;
-            transform-origin: center top;
-            transform: scaleY(0);
-        }
-
-        .eyelid.closing {
-            animation: closeEyelid 0.6s ease-in-out forwards;
-            animation-delay: 0.8s;
-        }
-
-        @keyframes closeEyelid {
-            0% { opacity: 0; transform: scaleY(0); }
-            50% { opacity: 1; transform: scaleY(0.8); }
-            100% { opacity: 1; transform: scaleY(1); }
+        @keyframes glowPulse {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.5); }
+            100% { opacity: 0.4; transform: translate(-50%, -50%) scale(1); }
         }
 
         /* Curseur typing */
@@ -291,30 +228,6 @@
                 opacity: 0;
                 transform: scale(1.5) translate(var(--tx), var(--ty));
             }
-        }
-
-        /* Glow final autour de l'œil */
-        .final-glow {
-            position: absolute;
-            width: 150px;
-            height: 150px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: radial-gradient(circle, rgba(30, 144, 255, 0.4) 0%, transparent 70%);
-            border-radius: 50%;
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .final-glow.pulse {
-            animation: glowPulse 2s ease-in-out forwards;
-        }
-
-        @keyframes glowPulse {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
-            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.5); }
-            100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
         }
 
         /* Slogan */
@@ -374,12 +287,8 @@
                 <span class="letter" data-index="5">l</span>
                 <div class="final-i-container">
                     <div class="eye-logo" id="eyeLogo">
-                        <img src="titelli_eye_logo.png" alt="Titelli Eye">
-                        <div class="eye-overlay">
-                            <div class="eyelid eyelid-top" id="eyelidTop"></div>
-                            <div class="eyelid eyelid-bottom" id="eyelidBottom"></div>
-                        </div>
                         <div class="final-glow" id="finalGlow"></div>
+                        <img src="titelli_eye_logo.png" alt="Titelli Eye">
                     </div>
                     <span class="i-body" id="iBody">ı</span>
                 </div>
@@ -395,8 +304,6 @@
         const letters = document.querySelectorAll('.letter');
         const iBody = document.getElementById('iBody');
         const eyeLogo = document.getElementById('eyeLogo');
-        const eyelidTop = document.getElementById('eyelidTop');
-        const eyelidBottom = document.getElementById('eyelidBottom');
         const cursor = document.getElementById('cursor');
         const slogan = document.getElementById('slogan');
         const finalGlow = document.getElementById('finalGlow');
@@ -439,9 +346,6 @@
             eyeLogo.classList.remove('bounce');
             eyeLogo.style.opacity = '0';
             
-            eyelidTop.classList.remove('closing');
-            eyelidBottom.classList.remove('closing');
-            
             cursor.classList.remove('hidden');
             cursor.style.opacity = '1';
             
@@ -481,17 +385,15 @@
                 setTimeout(() => createSparkles(eyeLogo, 20), 400);
             }, letterDelay * 9);
             
-            // Fermer les paupières (effet de clignement)
+            // Activer le glow
             setTimeout(() => {
-                eyelidTop.classList.add('closing');
-                eyelidBottom.classList.add('closing');
                 finalGlow.classList.add('pulse');
-            }, letterDelay * 14);
+            }, letterDelay * 12);
             
             // Afficher le slogan
             setTimeout(() => {
                 slogan.classList.add('show');
-            }, letterDelay * 18);
+            }, letterDelay * 16);
         }
 
         // Event listeners
