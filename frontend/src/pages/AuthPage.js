@@ -178,7 +178,9 @@ const AuthPage = () => {
       }
       
       const redirectType = loggedUser?.user_type || userType;
-      if (redirectType === 'entreprise') {
+      if (redirectType === 'admin') {
+        navigate('/admin');
+      } else if (redirectType === 'entreprise' || redirectType === 'enterprise') {
         navigate('/dashboard/entreprise');
       } else if (redirectType === 'influencer') {
         navigate('/dashboard/influencer');
