@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 const API_URL = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 // List of admin emails
-const ADMIN_EMAILS = ['admin@titelli.com', 'spa.luxury@titelli.com'];
+const ADMIN_EMAILS = ['admin@titelli.com', 'spa.luxury@titelli.com', 'admin@titelli.ch'];
 
 const AdminDashboard = () => {
   const { user } = useAuth();
