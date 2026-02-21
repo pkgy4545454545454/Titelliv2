@@ -365,3 +365,11 @@ backend/uploads/ALL_TITELLI_VIDEOS.zip
 *.env
 *.env.*
 backend/uploads/TITELLI_TOUTES_LES_VIDEOS_COMPLETE.zip
+-e 
+# Environment files
+*.env
+*.env.*
+-e 
+# Environment files
+*.env
+*.env.*
