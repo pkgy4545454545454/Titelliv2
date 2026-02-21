@@ -2505,7 +2505,7 @@ async def verify_user(user_id: str, is_certified: bool = False, is_labeled: bool
 # ============ ADMIN WITHDRAWAL MANAGEMENT ============
 
 # List of admin emails (can be expanded)
-ADMIN_EMAILS = ['admin@titelli.com', 'spa.luxury@titelli.com']
+ADMIN_EMAILS = ['admin@titelli.com', 'spa.luxury@titelli.com', 'admin@titelli.ch']
 
 def is_admin(user: dict) -> bool:
     """Check if user is an admin"""
