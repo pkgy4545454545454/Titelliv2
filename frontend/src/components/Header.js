@@ -335,6 +335,13 @@ const Header = () => {
               {/* Wishlist mobile */}
               <div className="pt-2 border-t border-white/10 mt-2">
                 <Link
+                  to="/cashback"
+                  className="block py-3 px-4 rounded-lg text-center text-sm font-medium text-amber-400 hover:bg-white/5"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Cashback
+                </Link>
+                <Link
                   to="/wishlist"
                   className="block py-3 px-4 rounded-lg text-center text-sm font-medium text-gray-300 hover:bg-white/5"
                   onClick={() => setMobileMenuOpen(false)}
