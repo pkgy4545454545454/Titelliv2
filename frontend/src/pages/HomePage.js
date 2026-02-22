@@ -480,13 +480,13 @@ const HomePage = () => {
             </Link>
           </div>
 
-          {/* Service Category Tabs */}
+          {/* Service Category Tabs - Transparent style */}
           <div className="flex gap-2 sm:gap-3 mb-6 sm:mb-8 overflow-x-auto scrollbar-hide pb-2" style={{ scrollbarWidth: 'none' }}>
             {serviceCategories.slice(0, 6).map((cat) => (
               <Link
                 key={cat.id}
                 to={`/services?category=${cat.id}`}
-                className="px-3 sm:px-5 py-2 sm:py-2.5 bg-white hover:bg-gray-100 border border-gray-200 rounded-full text-xs sm:text-sm text-gray-700 hover:text-gray-900 transition-all whitespace-nowrap flex-shrink-0"
+                className="px-3 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm text-gray-600 hover:text-[#0047AB] transition-all whitespace-nowrap flex-shrink-0"
                 data-testid={`service-cat-${cat.id}`}
               >
                 {cat.name}
