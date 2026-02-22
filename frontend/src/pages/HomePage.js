@@ -614,21 +614,15 @@ const HomePage = () => {
 
       {/* Premium Section - Carousel */}
       {premium.length > 0 && (
-        <section className="py-8 sm:py-16 relative overflow-hidden bg-gradient-to-r from-blue-50 via-white to-amber-50" data-testid="premium-section">
-          <div className="max-w-7xl mx-auto px-4 md:px-8 relative">
-            <div className="flex items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
-              <div className="flex items-center gap-3 sm:gap-4">
-                <div className="p-2 sm:p-3 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#0047AB] flex-shrink-0">
-                  <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                </div>
-                <div className="min-w-0">
-                  <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
-                    Premium
-                  </h2>
-                  <p className="text-gray-600 mt-0.5 sm:mt-1 text-xs sm:text-sm">L'excellence à votre service</p>
-                </div>
+        <section className="py-8 sm:py-16 bg-gray-50" data-testid="premium-section">
+          <div className="max-w-7xl mx-auto px-4 md:px-8">
+            <div className="flex items-center justify-between mb-6 sm:mb-8">
+              <div>
+                <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold text-gray-900">
+                  Premium
+                </h2>
               </div>
-              <Link to="/premium" className="hidden md:flex items-center gap-2 text-[#D4AF37] hover:text-[#F3CF55] font-medium transition-colors flex-shrink-0">
+              <Link to="/premium" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors">
                 Découvrir
                 <ArrowRight className="w-5 h-5" />
               </Link>
