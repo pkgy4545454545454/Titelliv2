@@ -395,6 +395,9 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Gradient Transition from Video to Content */}
+      <div className="h-24 bg-gradient-to-b from-black via-gray-900 to-white"></div>
+
       {/* Search Bar Section - Under Video */}
       <section className="py-4 sm:py-6 bg-white" data-testid="search-section">
         <div className="max-w-2xl mx-auto px-4">
