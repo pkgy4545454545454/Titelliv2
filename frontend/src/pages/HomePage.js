@@ -396,24 +396,23 @@ const HomePage = () => {
       </section>
 
       {/* Search Bar Section - Under Video */}
-      <section className="py-4 sm:py-8 bg-white" data-testid="search-section">
-        <div className="max-w-3xl mx-auto px-4">
+      <section className="py-4 sm:py-6 bg-white" data-testid="search-section">
+        <div className="max-w-2xl mx-auto px-4">
           <form onSubmit={handleSearch} className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Rechercher..."
+              placeholder="Rechercher un service, produit, entreprise..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-11 pr-24 sm:pr-32 py-3 sm:py-4 bg-gray-100 border border-gray-200 rounded-full text-sm sm:text-base text-gray-900 placeholder:text-gray-500 focus:outline-none focus:border-[#0047AB] transition-all"
+              className="w-full pl-10 pr-20 py-2.5 bg-gray-50 border border-gray-200 rounded-full text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#0047AB] focus:bg-white transition-all"
               data-testid="home-search-input"
             />
             <button 
               type="submit"
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#0047AB] text-white px-3 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm hover:bg-[#0047AB]/80 transition-colors"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-[#0047AB] text-white px-4 py-1.5 rounded-full text-xs font-medium hover:bg-[#0047AB]/90 transition-colors"
             >
-              <span className="hidden sm:inline">Rechercher</span>
-              <Search className="w-4 h-4 sm:hidden" />
+              Rechercher
             </button>
           </form>
         </div>
