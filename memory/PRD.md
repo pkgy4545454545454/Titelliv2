@@ -22,28 +22,32 @@ Titelli est une plateforme suisse connectant clients et prestataires de services
 - Notifications en temps réel (WebSocket)
 - Génération IA (images, vidéos avec Sora 2)
 - Intégration Stripe pour paiements
+- **Programme Cashback** complet avec niveaux de fidélité
 
 ### ✅ Corrections récentes (22 Février 2025)
 1. **UI Polish pour présentation**:
    - Tags de catégories sans fond (texte simple)
    - Bouton "Ajouter au panier" (remplace "Réserver")
-   - Icône cashback dans la navigation
+   - Icône cashback dans la navigation (desktop + mobile)
    - Icône panier moderne (ShoppingBag)
    
 2. **Fix des images cassées en production**:
-   - 248 logos corrigés (URLs relatives)
+   - 248 logos d'entreprises corrigés (URLs relatives)
    - 312 galeries photos corrigées
    - 2 images produits corrigées
    
-3. **Conflit npm résolu**:
-   - date-fns@3.6.0 compatible avec react-day-picker@8.10.1
+3. **Nouvelles fonctionnalités**:
+   - **Section "Les meilleurs produits"** avec vraies cartes produits (filtrées par image + prix)
+   - **Page Cashback** complète avec niveaux Bronze/Silver/Gold/Platinum
+   - **Popup avantages entreprise** lors de l'inscription
+
+4. **Conflit npm** : Résolu (date-fns@3.6.0)
 
 ## Backlog Prioritisé
 
 ### P1 - À faire
-- [ ] Filtrer produits homepage (image + prix requis)
-- [ ] Prioriser produits commençant par 't' sur la homepage
 - [ ] Investiguer images corrompues section "photo vidéo"
+- [ ] Améliorer le tri des produits (priorité aux produits commençant par 't')
 
 ### P2 - Futur
 - [ ] Corriger design brochure monétisation
@@ -64,15 +68,16 @@ Titelli est une plateforme suisse connectant clients et prestataires de services
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── Header.js           # Navigation responsive
+│   │   │   ├── Header.js           # Navigation responsive + Cashback
 │   │   │   ├── ServiceProductCard.js
 │   │   │   ├── EnterpriseCard.js
 │   │   │   └── Footer.js
 │   │   ├── pages/
-│   │   │   ├── HomePage.js         # Page d'accueil
+│   │   │   ├── HomePage.js         # Section produits améliorée
+│   │   │   ├── CashbackPage.js     # Page programme de fidélité
+│   │   │   ├── EnterpriseRegistrationPage.js # + Popup avantages
 │   │   │   ├── ServicesPage.js
-│   │   │   ├── ProductsPage.js
-│   │   │   └── EnterprisePage.js
+│   │   │   └── ProductsPage.js
 │   │   └── context/
 │   │       ├── AuthContext.js
 │   │       └── CartContext.js
@@ -84,3 +89,4 @@ Titelli est une plateforme suisse connectant clients et prestataires de services
 - REACT_APP_BACKEND_URL utilisé pour toutes les requêtes API
 - Les images doivent utiliser des chemins relatifs (/api/uploads/...)
 - Le déploiement Render nécessite yarn (pas npm)
+- Programme Cashback : 4 niveaux (Bronze 2%, Silver 3%, Gold 5%, Platinum 8%)
