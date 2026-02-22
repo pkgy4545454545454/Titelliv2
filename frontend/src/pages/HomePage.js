@@ -545,7 +545,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Product Categories */}
+      {/* Les meilleurs produits - Real Product Cards */}
       <section className="py-8 sm:py-16 bg-white" data-testid="products-section">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex items-center justify-between mb-6 sm:mb-8">
@@ -560,37 +560,59 @@ const HomePage = () => {
             </Link>
           </div>
 
-          <Carousel itemWidth={220}>
-            {[
-              { id: 'montres', name: 'Montres', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600' },
-              { id: 'bijoux', name: 'Bijoux', image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600' },
-              { id: 'vetements', name: 'Vêtements', image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=600' },
-              { id: 'chaussures', name: 'Chaussures', image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600' },
-              { id: 'sacs', name: 'Sacs & Maroquinerie', image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600' },
-              { id: 'cosmetiques', name: 'Cosmétiques', image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600' },
-              { id: 'parfums', name: 'Parfums', image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=600' },
-              { id: 'accessoires', name: 'Accessoires', image: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=600' },
-              { id: 'lunettes', name: 'Lunettes', image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=600' },
-              { id: 'electronique', name: 'Électronique', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600' },
-            ].map((cat) => (
-              <Link
-                key={cat.id}
-                to={`/products?category=${cat.id}`}
-                className="flex-shrink-0 w-[200px] sm:w-[220px] group relative h-56 sm:h-64 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all"
-                data-testid={`product-cat-${cat.id}`}
-              >
-                <img 
-                  src={cat.image} 
-                  alt={cat.name}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-4">
-                  <span className="text-white font-semibold text-base">{cat.name}</span>
+          {loading ? (
+            <div className="flex gap-4 sm:gap-6 overflow-hidden">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="flex-shrink-0 w-[260px] sm:w-[300px] h-[320px] bg-gray-100 rounded-xl animate-pulse" />
+              ))}
+            </div>
+          ) : bestProducts.length > 0 ? (
+            <Carousel itemWidth={260}>
+              {bestProducts.map((product, index) => (
+                <div 
+                  key={product.id || product._id} 
+                  className="flex-shrink-0 w-[260px] sm:w-[300px] animate-fade-in"
+                  style={{ animationDelay: `${index * 0.05}s` }}
+                >
+                  <ServiceProductCard item={product} />
                 </div>
-              </Link>
-            ))}
-          </Carousel>
+              ))}
+            </Carousel>
+          ) : (
+            /* Fallback to category cards if no products with images */
+            <Carousel itemWidth={220}>
+              {[
+                { id: 'montres', name: 'Montres', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600' },
+                { id: 'bijoux', name: 'Bijoux', image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600' },
+                { id: 'vetements', name: 'Vêtements', image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=600' },
+                { id: 'chaussures', name: 'Chaussures', image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600' },
+                { id: 'sacs', name: 'Sacs & Maroquinerie', image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600' },
+                { id: 'cosmetiques', name: 'Cosmétiques', image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600' },
+              ].map((cat) => (
+                <Link
+                  key={cat.id}
+                  to={`/products?category=${cat.id}`}
+                  className="flex-shrink-0 w-[200px] sm:w-[220px] group relative h-56 sm:h-64 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all"
+                  data-testid={`product-cat-${cat.id}`}
+                >
+                  <img 
+                    src={cat.image} 
+                    alt={cat.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <span className="text-white font-semibold text-base">{cat.name}</span>
+                  </div>
+                </Link>
+              ))}
+            </Carousel>
+          )}
+
+          <Link to="/products" className="md:hidden flex items-center justify-center gap-2 mt-4 sm:mt-6 text-[#0047AB] font-medium text-sm">
+            Voir tous les produits
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </section>
 
