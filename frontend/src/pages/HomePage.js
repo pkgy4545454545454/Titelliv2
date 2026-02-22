@@ -64,6 +64,7 @@ const HomePage = () => {
   const [productCategories, setProductCategories] = useState([]);
   const [serviceCategories, setServiceCategories] = useState([]);
   const [jewelryWatchProducts, setJewelryWatchProducts] = useState([]);
+  const [bestProducts, setBestProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   
   // Search state
