@@ -181,6 +181,25 @@ const HomePage = () => {
                  cat.includes('joaill') || name.includes('montre') || name.includes('bijou');
         });
         setJewelryWatchProducts(jewelryProducts);
+        
+        // Filter best products with nice images and price
+        const productsWithImages = allProducts.filter(p => {
+          const images = p.images || [];
+          const hasImage = images.length > 0 && images[0] && !images[0].includes('placeholder');
+          const hasPrice = p.price && p.price > 0;
+          return hasImage && hasPrice;
+        });
+        // Sort by those starting with 't' first, then alphabetically
+        const sortedProducts = productsWithImages.sort((a, b) => {
+          const nameA = (a.name || '').toLowerCase();
+          const nameB = (b.name || '').toLowerCase();
+          const startsWithTA = nameA.startsWith('t');
+          const startsWithTB = nameB.startsWith('t');
+          if (startsWithTA && !startsWithTB) return -1;
+          if (!startsWithTA && startsWithTB) return 1;
+          return nameA.localeCompare(nameB);
+        });
+        setBestProducts(sortedProducts.slice(0, 20));
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
