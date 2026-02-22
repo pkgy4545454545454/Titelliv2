@@ -234,7 +234,8 @@ const EnterpriseRegistrationPage = () => {
         identity_document: formData.identity_document
       });
       
-      setStep(3);
+      // Show benefits popup first, then proceed to success
+      setShowBenefitsPopup(true);
     } catch (error) {
       console.error('Error registering:', error);
       toast.error(error.response?.data?.detail || 'Erreur lors de l\'inscription');
