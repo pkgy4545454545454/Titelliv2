@@ -525,37 +525,32 @@ const HomePage = () => {
       {/* Product Categories */}
       <section className="py-8 sm:py-16 bg-white" data-testid="products-section">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="flex items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <div className="p-2 sm:p-3 rounded-xl bg-[#D4AF37]/10 flex-shrink-0">
-                <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-[#D4AF37]" />
-              </div>
-              <div className="min-w-0">
-                <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
-                  Autres Produits
-                </h2>
-                <p className="text-gray-600 mt-0.5 sm:mt-1 text-xs sm:text-sm">Explorez nos catégories</p>
-              </div>
+          <div className="flex items-center justify-between mb-6 sm:mb-8">
+            <div>
+              <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold text-gray-900">
+                Les meilleurs produits de votre région
+              </h2>
             </div>
-            <Link to="/products" className="hidden md:flex items-center gap-2 text-[#D4AF37] hover:text-[#F3CF55] font-medium transition-colors flex-shrink-0">
+            <Link to="/products" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors">
               Voir tout
               <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
 
-          <Carousel itemWidth={140}>
-            {productCategories.slice(0, 12).map((cat) => (
+          <Carousel itemWidth={280}>
+            {tendances.length > 0 ? tendances.slice(0, 12).map((enterprise, index) => (
+              <div key={enterprise.id} className="flex-shrink-0 w-[280px] sm:w-[320px]">
+                <EnterpriseCard enterprise={enterprise} />
+              </div>
+            )) : productCategories.slice(0, 12).map((cat) => (
               <Link
                 key={cat.id}
                 to={`/products?category=${cat.id}`}
-                className="flex-shrink-0 w-[140px] sm:w-[180px] group relative h-32 sm:h-40 rounded-xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 hover:border-[#D4AF37]/50 transition-all shadow-sm"
+                className="flex-shrink-0 w-[200px] sm:w-[240px] group relative h-40 sm:h-48 rounded-2xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 hover:border-[#0047AB]/30 transition-all shadow-sm"
                 data-testid={`product-cat-${cat.id}`}
               >
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-3 sm:p-4 text-center">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#D4AF37]/10 flex items-center justify-center mb-2 sm:mb-3 group-hover:scale-110 transition-transform">
-                    <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-[#D4AF37]" />
-                  </div>
-                  <span className="text-gray-900 font-medium text-xs sm:text-sm line-clamp-2">{cat.name}</span>
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
+                  <span className="text-gray-900 font-medium text-sm">{cat.name}</span>
                 </div>
               </Link>
             ))}
