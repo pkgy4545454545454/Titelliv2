@@ -167,17 +167,9 @@ const Header = () => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-black" data-testid="main-header">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo statique Titelli - sans fond */}
-          <Link to="/" className="flex items-center" data-testid="logo-link">
-            <img 
-              src="/logo_titelli.png" 
-              alt="Titelli"
-              className="w-10 h-10 object-contain"
-            />
-          </Link>
-
-          {/* Desktop Navigation - Centré */}
-          <nav className="hidden lg:flex items-center justify-center flex-1 gap-8">
+          
+          {/* Desktop Navigation - À gauche */}
+          <nav className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
