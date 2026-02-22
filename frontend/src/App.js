@@ -193,6 +193,7 @@ function AppRoutes() {
 
       {/* Static Pages */}
       <Route path="/about" element={<MainLayout><AboutPage /></MainLayout>} />
+      <Route path="/cashback" element={<MainLayout><CashbackPage /></MainLayout>} />
       <Route path="/cgv" element={<MainLayout><CGVPage /></MainLayout>} />
       <Route path="/mentions-legales" element={<MainLayout><MentionsLegalesPage /></MainLayout>} />
       <Route path="/faq" element={<MainLayout><FAQPage /></MainLayout>} />
