@@ -310,21 +310,12 @@ const Header = () => {
             ) : (
               <Link 
                 to="/auth" 
-                className="btn-primary text-sm py-2 px-4 md:px-6"
+                className="btn-primary text-sm py-2 px-4"
                 data-testid="login-btn"
               >
                 Connexion
               </Link>
             )}
-
-            {/* Mobile Menu Toggle */}
-            <button 
-              className="lg:hidden p-2 text-gray-400"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              data-testid="mobile-menu-btn"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
 
             {/* Logo à droite */}
             <Link to="/" className="flex items-center" data-testid="logo-link">
@@ -339,8 +330,8 @@ const Header = () => {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-white/10">
-            <form onSubmit={handleSearch} className="mb-4">
+          <div className="lg:hidden py-6 border-t border-white/10">
+            <form onSubmit={handleSearch} className="mb-6">
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
@@ -348,23 +339,38 @@ const Header = () => {
                   placeholder="Rechercher..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-gray-500 focus:outline-none"
+                  className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-500 focus:outline-none"
                 />
               </div>
             </form>
-            <nav className="flex flex-col gap-2">
+            <nav className="flex flex-col items-center gap-1">
               {navLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors ${link.className || ''} ${
-                    isActive(link.path) ? 'bg-white/10 text-white' : `${link.className ? '' : 'text-gray-400'} hover:bg-white/5 hover:text-white`
+                  className={`w-full text-center px-4 py-4 rounded-xl text-base font-medium transition-colors ${link.className || ''} ${
+                    isActive(link.path) ? 'bg-white/10 text-white' : `${link.className ? '' : 'text-gray-300'} hover:bg-white/5 hover:text-white`
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {link.label}
                 </Link>
               ))}
+              {/* Pub IA sur mobile */}
+              <Link
+                to="/media-pub"
+                className="w-full text-center px-4 py-4 rounded-xl text-base font-medium text-amber-400 hover:bg-white/5"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Pub IA - Images
+              </Link>
+              <Link
+                to="/video-pub"
+                className="w-full text-center px-4 py-4 rounded-xl text-base font-medium text-purple-400 hover:bg-white/5"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Pub IA - Vidéos
+              </Link>
             </nav>
           </div>
         )}
