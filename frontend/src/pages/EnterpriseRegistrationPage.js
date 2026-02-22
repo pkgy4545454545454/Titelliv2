@@ -339,13 +339,16 @@ const EnterpriseRegistrationPage = () => {
           </p>
         </div>
       </div>
+      </>
     );
   }
 
   // Step 2: Registration Form
   if (step === 2) {
     return (
-      <div className="min-h-screen bg-[#050505] pt-24 px-4 pb-12">
+      <>
+        {showBenefitsPopup && <EnterpriseBenefitsPopup onClose={handleCloseBenefitsPopup} />}
+        <div className="min-h-screen bg-[#050505] pt-24 px-4 pb-12">
         <div className="max-w-2xl mx-auto">
           <button
             onClick={() => setStep(1)}
