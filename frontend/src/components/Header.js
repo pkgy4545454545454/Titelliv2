@@ -213,6 +213,11 @@ const Header = () => {
 
           {/* Right: Actions + Logo */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Cashback */}
+            <Link to="/cashback" className="p-2 text-amber-400 hover:text-amber-300 hidden sm:block" data-testid="cashback-link">
+              <HandCoins className="w-5 h-5" />
+            </Link>
+
             {/* Wishlist */}
             <Link to="/wishlist" className="p-2 text-gray-400 hover:text-white hidden sm:block">
               <Heart className="w-5 h-5" />
@@ -220,7 +225,7 @@ const Header = () => {
 
             {/* Cart */}
             <Link to="/cart" className="p-2 text-gray-400 hover:text-white relative">
-              <ShoppingCart className="w-5 h-5" />
+              <ShoppingBag className="w-5 h-5" />
               {cartCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">
                   {cartCount}
