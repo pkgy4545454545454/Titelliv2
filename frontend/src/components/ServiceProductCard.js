@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Truck, Crown, Heart } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { wishlistAPI } from '../services/api';
 import { toast } from 'sonner';
 
@@ -20,7 +20,10 @@ const ServiceProductCard = ({ item, onAddToCart }) => {
     is_premium,
     is_delivery,
     enterprise_id,
-    enterprise_name
+    enterprise_name,
+    rating,
+    review_count,
+    available = true
   } = item;
 
   const handleToggleWishlist = async (e) => {
@@ -71,83 +74,76 @@ const ServiceProductCard = ({ item, onAddToCart }) => {
     ? 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=800'
     : 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800';
 
+  // Format rating display
+  const displayRating = rating ? `${rating.toFixed(1)} / 5` : '4.5 / 5';
+  const displayReviews = review_count || 0;
+
   return (
     <div 
-      className="bg-black border border-white/10 shadow-sm hover:shadow-md group rounded-xl overflow-hidden transition-all"
+      className="bg-white border border-gray-100 shadow-sm hover:shadow-lg group rounded-2xl overflow-hidden transition-all"
       data-testid={`item-card-${id}`}
     >
-      {/* Image */}
-      <Link to={`/${type}/${id}`} className="block relative h-40 sm:h-56 overflow-hidden">
+      {/* Image - Clean without overlays */}
+      <Link to={`/${type}/${id}`} className="block relative h-44 sm:h-52 overflow-hidden">
         <img
           src={images?.[0] || defaultImage}
           alt={name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        
-        {/* Badges */}
-        <div className="absolute top-2 sm:top-3 left-2 sm:left-3 flex gap-1.5 sm:gap-2">
-          {is_premium && (
-            <span className="badge-premium flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1">
-              <Crown className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-              <span className="hidden sm:inline">Premium</span>
-            </span>
-          )}
-          {is_delivery && (
-            <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-green-500/90 text-white text-[10px] sm:text-xs rounded-full flex items-center gap-0.5 sm:gap-1">
-              <Truck className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-              <span className="hidden sm:inline">Livraison</span>
-            </span>
-          )}
-        </div>
-
-        {/* Wishlist Heart Button */}
-        <button
-          onClick={handleToggleWishlist}
-          disabled={wishlistLoading}
-          data-testid={`wishlist-btn-${id}`}
-          className={`absolute top-2 sm:top-3 right-2 sm:right-3 p-1.5 sm:p-2 rounded-full transition-all ${
-            isInWishlist 
-              ? 'bg-red-500 text-white' 
-              : 'bg-black/50 text-white hover:bg-red-500'
-          }`}
-        >
-          <Heart className={`w-3 h-3 sm:w-4 sm:h-4 ${isInWishlist ? 'fill-white' : ''}`} />
-        </button>
-
-        {/* Type Badge */}
-        <div className="absolute bottom-2 sm:bottom-3 left-2 sm:left-3">
-          <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${
-            type === 'service' ? 'bg-[#0047AB]/90 text-white' : 'bg-[#D4AF37]/90 text-black'
-          }`}>
-            {type === 'service' ? 'Service' : 'Produit'}
-          </span>
-        </div>
       </Link>
 
       {/* Content */}
-      <div className="p-3 sm:p-5">
+      <div className="p-4">
         <Link to={`/${type}/${id}`}>
-          <h3 className="text-sm sm:text-lg font-semibold text-white group-hover:text-[#D4AF37] transition-colors mb-1.5 sm:mb-2 line-clamp-1">
+          <h3 className="text-base font-semibold text-gray-900 group-hover:text-[#0047AB] transition-colors mb-1 line-clamp-1">
             {name}
           </h3>
         </Link>
 
-        <p className="text-xs sm:text-sm text-gray-400 mb-3 sm:mb-4 line-clamp-2">
+        <p className="text-sm text-gray-500 mb-3 line-clamp-2">
           {description}
         </p>
 
-        <div className="flex items-center justify-between">
-          <span className="text-base sm:text-xl font-bold text-white">
-            {price.toFixed(2)} <span className="text-xs sm:text-sm text-gray-400">{currency}</span>
-          </span>
-          
+        {/* Rating */}
+        <div className="flex items-center gap-1 mb-3">
+          <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+          <span className="text-sm text-gray-700 font-medium">{displayRating}</span>
+          {displayReviews > 0 && (
+            <span className="text-xs text-gray-400">({displayReviews} avis)</span>
+          )}
+        </div>
+
+        {/* Price - smaller */}
+        <p className="text-sm font-medium text-gray-900 mb-4">
+          {price.toFixed(2)} {currency}
+        </p>
+
+        {/* Action buttons below */}
+        <div className="flex items-center gap-2">
           <button
             onClick={() => onAddToCart?.(item)}
-            className="p-2 sm:p-3 bg-[#0047AB] hover:bg-[#0047AB]/80 text-white rounded-full transition-all hover:scale-110"
+            disabled={!available}
+            className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
+              available 
+                ? 'bg-[#0047AB] text-white hover:bg-[#0047AB]/90' 
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            }`}
             data-testid={`add-to-cart-${id}`}
           >
-            <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
+            {available ? 'Réserver' : 'Bientôt'}
+          </button>
+          
+          <button
+            onClick={handleToggleWishlist}
+            disabled={wishlistLoading}
+            className={`px-4 py-2.5 rounded-xl text-sm font-medium border transition-all ${
+              isInWishlist 
+                ? 'bg-red-50 text-red-500 border-red-200' 
+                : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+            }`}
+            data-testid={`wishlist-btn-${id}`}
+          >
+            {isInWishlist ? '♥' : '♡'}
           </button>
         </div>
       </div>
