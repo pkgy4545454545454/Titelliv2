@@ -244,10 +244,18 @@ const EnterpriseRegistrationPage = () => {
     }
   };
 
+  // Handle closing benefits popup
+  const handleCloseBenefitsPopup = () => {
+    setShowBenefitsPopup(false);
+    setStep(3);
+  };
+
   // Step 1: Select Enterprise
   if (step === 1) {
     return (
-      <div className="min-h-screen bg-[#050505] pt-24 px-4">
+      <>
+        {showBenefitsPopup && <EnterpriseBenefitsPopup onClose={handleCloseBenefitsPopup} />}
+        <div className="min-h-screen bg-[#050505] pt-24 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-white mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
