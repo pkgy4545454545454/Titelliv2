@@ -642,19 +642,13 @@ const HomePage = () => {
       {/* Job Offers Section - Carousel */}
       <section className="py-8 sm:py-16 bg-gray-50" data-testid="jobs-section">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="flex items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <div className="p-2 sm:p-3 rounded-xl bg-[#0047AB]/10 flex-shrink-0">
-                <Briefcase className="w-5 h-5 sm:w-6 sm:h-6 text-[#0047AB]" />
-              </div>
-              <div className="min-w-0">
-                <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
-                  Offres d'emploi
-                </h2>
-                <p className="text-gray-600 mt-0.5 sm:mt-1 text-xs sm:text-sm">Opportunités disponibles</p>
-              </div>
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <div>
+              <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold text-gray-900">
+                Offres d'emploi
+              </h2>
             </div>
-            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <div className="flex items-center gap-2 sm:gap-3">
               <button 
                 onClick={() => setShowFilters(!showFilters)}
                 className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm transition-colors ${showFilters ? 'bg-[#0047AB] text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}`}
