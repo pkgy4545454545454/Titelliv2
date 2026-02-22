@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { notificationsAPI } from '../services/api';
-import { Search, Menu, X, ShoppingCart, Heart, Bell, ChevronDown, Check, CheckCheck, Trash2, Wifi, WifiOff, Image, Video, Sparkles } from 'lucide-react';
+import { Search, Menu, X, ShoppingCart, Heart, Bell, ChevronDown, Check, CheckCheck, Trash2, Wifi, WifiOff, Image, Video, Sparkles, User } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -62,13 +62,17 @@ const Header = () => {
   }, [isAuthenticated, wsConnected]);
 
   useEffect(() => {
-    // Only poll if WebSocket is not connected
     if (!wsConnected) {
       fetchNotificationsAPI();
       const interval = setInterval(fetchNotificationsAPI, 30000);
       return () => clearInterval(interval);
     }
   }, [fetchNotificationsAPI, wsConnected]);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
 
   const handleMarkRead = async (notifId) => {
     if (wsConnected) {
@@ -102,7 +106,6 @@ const Header = () => {
     }
   };
 
-  // Handle refresh - use WebSocket if connected, otherwise API
   const handleRefresh = () => {
     if (wsConnected) {
       wsFetchNotifications(50);
@@ -121,15 +124,6 @@ const Header = () => {
     }
   };
 
-  const getNotificationIcon = (type) => {
-    switch (type) {
-      case 'order': return '🛒';
-      case 'alert': return '⚠️';
-      case 'promotion': return '🎁';
-      default: return '📬';
-    }
-  };
-
   const formatTime = (dateStr) => {
     const date = new Date(dateStr);
     const now = new Date();
@@ -145,164 +139,117 @@ const Header = () => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+      setMobileMenuOpen(false);
     }
   };
 
   const navLinks = [
     { path: '/services', label: 'Services' },
-    { path: '/products', label: 'Produits', className: 'gold' },
+    { path: '/products', label: 'Produits', className: 'text-amber-400' },
     { path: '/entreprises', label: 'Entreprises' },
-    { path: '/rdv', label: 'Rdv', className: 'rdv' },
-    { path: '/sports', label: 'Sports', className: 'sports' },
-  ];
-
-  const pubIALinks = [
-    { path: '/media-pub', label: 'Images IA', icon: Image, description: 'Créer des publicités images' },
-    { path: '/video-pub', label: 'Vidéos IA', icon: Video, description: 'Créer des vidéos publicitaires' },
+    { path: '/rdv', label: 'Rdv', className: 'text-red-400' },
+    { path: '/sports', label: 'Sports', className: 'text-green-400' },
   ];
 
   const isActive = (path) => location.pathname === path;
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-black" data-testid="main-header">
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <div className="flex items-center justify-between h-16 md:h-20">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Main Header Bar */}
+        <div className="flex items-center justify-between h-14 lg:h-16">
           
-          {/* Mobile: Menu hamburger à gauche */}
-          <button 
-            className="lg:hidden p-2 text-gray-400"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            data-testid="mobile-menu-btn"
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-          
-          {/* Desktop Navigation - À gauche */}
-          <nav className="hidden lg:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`nav-link text-sm font-medium ${link.className || ''} ${isActive(link.path) ? 'active' : ''}`}
-                data-testid={`nav-${link.label.toLowerCase()}`}
-              >
-                {link.label}
-              </Link>
-            ))}
-            
-            {/* Pub IA Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger className="nav-link media-pub text-sm font-medium flex items-center gap-1 outline-none">
-                <Sparkles className="w-4 h-4" />
-                Pub IA
-                <ChevronDown className="w-3 h-3" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-gray-900 border border-white/10 rounded-xl p-2 min-w-[200px]">
-                {pubIALinks.map((link) => (
-                  <DropdownMenuItem key={link.path} asChild>
-                    <Link
-                      to={link.path}
-                      className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
-                    >
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                        link.path === '/video-pub' ? 'bg-purple-500/20' : 'bg-amber-500/20'
-                      }`}>
-                        <link.icon className={`w-4 h-4 ${
-                          link.path === '/video-pub' ? 'text-purple-400' : 'text-amber-400'
-                        }`} />
-                      </div>
-                      <div>
-                        <p className="text-white text-sm font-medium">{link.label}</p>
-                        <p className="text-gray-400 text-xs">{link.description}</p>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </nav>
-
-          {/* Right Actions */}
-          <div className="flex items-center gap-2 md:gap-4">
-            {/* Icons */}
-            <button className="p-2 text-gray-400 hover:text-white transition-colors hidden sm:block" data-testid="wishlist-btn">
-              <Heart className="w-5 h-5" />
+          {/* Left: Hamburger (mobile) + Navigation (desktop) */}
+          <div className="flex items-center gap-6">
+            {/* Mobile hamburger */}
+            <button 
+              className="lg:hidden p-1.5 text-white"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              data-testid="mobile-menu-btn"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
-            {/* Notifications */}
-            {isAuthenticated && (
-              <>
-                <button 
-                  onClick={() => setNotifOpen(true)}
-                  className="p-2 text-gray-400 hover:text-white transition-colors relative" 
-                  data-testid="notifications-btn"
-                  title={wsConnected ? 'Connecté en temps réel' : 'Mode polling'}
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center gap-6">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`text-sm font-medium transition-colors ${
+                    isActive(link.path) 
+                      ? 'text-white' 
+                      : link.className || 'text-gray-400 hover:text-white'
+                  }`}
                 >
-                  <Bell className="w-5 h-5" />
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-[#0047AB] text-white text-xs font-bold rounded-full flex items-center justify-center px-1 animate-pulse">
-                      {unreadCount > 99 ? '99+' : unreadCount}
-                    </span>
-                  )}
-                  {/* WebSocket connection indicator */}
-                  <span className={`absolute -bottom-1 -right-1 w-2 h-2 rounded-full ${wsConnected ? 'bg-green-500' : 'bg-gray-500'}`} title={wsConnected ? 'Temps réel actif' : 'Temps réel inactif'} />
-                </button>
-                <NotificationCenter
-                  isOpen={notifOpen}
-                  onClose={() => setNotifOpen(false)}
-                  notifications={notifications}
-                  onRefresh={handleRefresh}
-                  loading={notifLoading}
-                  userType={isEnterprise ? 'entreprise' : 'client'}
-                  isRealTime={wsConnected}
-                />
-              </>
-            )}
+                  {link.label}
+                </Link>
+              ))}
+              
+              {/* Pub IA Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger className="text-sm font-medium text-purple-400 flex items-center gap-1 outline-none">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Pub IA
+                  <ChevronDown className="w-3 h-3" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-gray-900 border border-white/10 rounded-xl p-2">
+                  <DropdownMenuItem asChild>
+                    <Link to="/media-pub" className="flex items-center gap-2 text-amber-400 cursor-pointer">
+                      <Image className="w-4 h-4" />
+                      Images IA
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/video-pub" className="flex items-center gap-2 text-purple-400 cursor-pointer">
+                      <Video className="w-4 h-4" />
+                      Vidéos IA
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </nav>
+          </div>
 
-            <Link to="/cart" className="p-2 text-gray-400 hover:text-white transition-colors relative" data-testid="cart-btn">
+          {/* Right: Actions + Logo */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Wishlist */}
+            <Link to="/wishlist" className="p-2 text-gray-400 hover:text-white hidden sm:block">
+              <Heart className="w-5 h-5" />
+            </Link>
+
+            {/* Cart */}
+            <Link to="/cart" className="p-2 text-gray-400 hover:text-white relative">
               <ShoppingCart className="w-5 h-5" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#D4AF37] text-black text-xs font-bold rounded-full flex items-center justify-center">
-                  {cartCount > 9 ? '9+' : cartCount}
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">
+                  {cartCount}
                 </span>
               )}
             </Link>
 
-            {/* User Menu */}
+            {/* Auth Button / User Menu */}
             {isAuthenticated ? (
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 p-2 text-gray-400 hover:text-white transition-colors" data-testid="user-menu-btn">
-                    <div className="w-8 h-8 rounded-full bg-[#0047AB] flex items-center justify-center text-white text-sm font-medium">
-                      {user?.first_name?.[0]}{user?.last_name?.[0]}
-                    </div>
-                    <ChevronDown className="w-4 h-4 hidden sm:block" />
-                  </button>
+                <DropdownMenuTrigger className="p-2 text-gray-400 hover:text-white outline-none">
+                  <User className="w-5 h-5" />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-[#0F0F0F] border-white/10">
-                  <div className="px-3 py-2 border-b border-white/10">
-                    <p className="text-sm font-medium text-white">{user?.first_name} {user?.last_name}</p>
-                    <p className="text-xs text-gray-400">{user?.email}</p>
+                <DropdownMenuContent className="bg-gray-900 border border-white/10 rounded-xl p-2 min-w-[180px]">
+                  <div className="px-3 py-2 text-sm text-white border-b border-white/10 mb-2">
+                    {user?.first_name || 'Mon compte'}
                   </div>
                   <DropdownMenuItem asChild>
                     <Link to={isEnterprise ? '/dashboard/entreprise' : '/dashboard/client'} className="cursor-pointer">
-                      Mon Dashboard
+                      Dashboard
                     </Link>
                   </DropdownMenuItem>
-                  {isEnterprise && (
-                    <DropdownMenuItem asChild>
-                      <Link to="/dashboard/entreprise/profile" className="cursor-pointer">
-                        Mon Profil Entreprise
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
                   <DropdownMenuItem asChild>
                     <Link to="/orders" className="cursor-pointer">
                       Mes Commandes
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-white/10" />
-                  <DropdownMenuItem onClick={logout} className="text-red-400 cursor-pointer" data-testid="logout-btn">
+                  <DropdownMenuItem onClick={logout} className="text-red-400 cursor-pointer">
                     Déconnexion
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -310,19 +257,19 @@ const Header = () => {
             ) : (
               <Link 
                 to="/auth" 
-                className="btn-primary text-sm py-2 px-4"
+                className="bg-white text-black text-xs sm:text-sm font-medium py-1.5 px-3 sm:px-4 rounded-full hover:bg-gray-200 transition-colors"
                 data-testid="login-btn"
               >
                 Connexion
               </Link>
             )}
 
-            {/* Logo à droite */}
-            <Link to="/" className="flex items-center" data-testid="logo-link">
+            {/* Logo */}
+            <Link to="/" className="ml-1 sm:ml-2" data-testid="logo-link">
               <img 
                 src="/logo_titelli.png" 
                 alt="Titelli"
-                className="w-10 h-10 object-contain"
+                className="w-8 h-8 sm:w-9 sm:h-9 object-contain"
               />
             </Link>
           </div>
@@ -330,47 +277,66 @@ const Header = () => {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden py-6 border-t border-white/10">
-            <form onSubmit={handleSearch} className="mb-6">
+          <div className="lg:hidden border-t border-white/10 py-4">
+            {/* Search */}
+            <form onSubmit={handleSearch} className="mb-4">
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                 <input
                   type="text"
                   placeholder="Rechercher..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-500 focus:outline-none"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-white/20"
                 />
               </div>
             </form>
-            <nav className="flex flex-col items-center gap-1">
+
+            {/* Navigation Links */}
+            <nav className="space-y-1">
               {navLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`w-full text-center px-4 py-4 rounded-xl text-base font-medium transition-colors ${link.className || ''} ${
-                    isActive(link.path) ? 'bg-white/10 text-white' : `${link.className ? '' : 'text-gray-300'} hover:bg-white/5 hover:text-white`
+                  className={`block py-3 px-4 rounded-lg text-center text-sm font-medium transition-colors ${
+                    isActive(link.path) 
+                      ? 'bg-white/10 text-white' 
+                      : link.className || 'text-gray-300 hover:bg-white/5'
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {link.label}
                 </Link>
               ))}
-              {/* Pub IA sur mobile */}
-              <Link
-                to="/media-pub"
-                className="w-full text-center px-4 py-4 rounded-xl text-base font-medium text-amber-400 hover:bg-white/5"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Pub IA - Images
-              </Link>
-              <Link
-                to="/video-pub"
-                className="w-full text-center px-4 py-4 rounded-xl text-base font-medium text-purple-400 hover:bg-white/5"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Pub IA - Vidéos
-              </Link>
+              
+              {/* Pub IA Links */}
+              <div className="pt-2 border-t border-white/10 mt-2">
+                <Link
+                  to="/media-pub"
+                  className="block py-3 px-4 rounded-lg text-center text-sm font-medium text-amber-400 hover:bg-white/5"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Pub IA - Images
+                </Link>
+                <Link
+                  to="/video-pub"
+                  className="block py-3 px-4 rounded-lg text-center text-sm font-medium text-purple-400 hover:bg-white/5"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Pub IA - Vidéos
+                </Link>
+              </div>
+
+              {/* Wishlist mobile */}
+              <div className="pt-2 border-t border-white/10 mt-2">
+                <Link
+                  to="/wishlist"
+                  className="block py-3 px-4 rounded-lg text-center text-sm font-medium text-gray-300 hover:bg-white/5"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Mes Favoris
+                </Link>
+              </div>
             </nav>
           </div>
         )}
