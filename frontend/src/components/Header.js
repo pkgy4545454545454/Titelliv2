@@ -168,6 +168,15 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           
+          {/* Mobile: Menu hamburger à gauche */}
+          <button 
+            className="lg:hidden p-2 text-gray-400"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            data-testid="mobile-menu-btn"
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+          
           {/* Desktop Navigation - À gauche */}
           <nav className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => (
