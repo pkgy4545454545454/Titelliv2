@@ -316,6 +316,15 @@ const Header = () => {
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
+
+            {/* Logo à droite */}
+            <Link to="/" className="flex items-center" data-testid="logo-link">
+              <img 
+                src="/logo_titelli.png" 
+                alt="Titelli"
+                className="w-10 h-10 object-contain"
+              />
+            </Link>
           </div>
         </div>
 
