@@ -1,10 +1,125 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Building2, MapPin, Phone, Globe, ChevronRight, Upload, User, FileText, Users, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Search, Building2, MapPin, Phone, Globe, ChevronRight, Upload, User, FileText, Users, CheckCircle, ArrowLeft, X, Star, TrendingUp, Shield, Zap, Gift, Crown, Award, Sparkles, Target, BarChart } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
 
 const API_URL = `${process.env.REACT_APP_BACKEND_URL}/api`;
+
+// Enterprise Benefits Popup Component
+const EnterpriseBenefitsPopup = ({ onClose }) => {
+  const benefits = [
+    {
+      icon: Crown,
+      title: "Profil Premium Gratuit",
+      description: "Votre profil mis en avant pendant 30 jours",
+      color: "text-[#D4AF37]"
+    },
+    {
+      icon: Target,
+      title: "Visibilité Maximale",
+      description: "Exposez vos services à des milliers de clients à Lausanne",
+      color: "text-[#0047AB]"
+    },
+    {
+      icon: TrendingUp,
+      title: "Statistiques Détaillées",
+      description: "Suivez vos performances et optimisez votre présence",
+      color: "text-green-500"
+    },
+    {
+      icon: Zap,
+      title: "Outils Marketing IA",
+      description: "Générez des visuels et vidéos promotionnels automatiquement",
+      color: "text-purple-500"
+    },
+    {
+      icon: Gift,
+      title: "Programme Cashback",
+      description: "Fidélisez vos clients avec des récompenses",
+      color: "text-pink-500"
+    },
+    {
+      icon: Shield,
+      title: "Certification Titelli",
+      description: "Gagnez la confiance avec notre badge de certification",
+      color: "text-cyan-500"
+    },
+    {
+      icon: BarChart,
+      title: "Gestion des Réservations",
+      description: "Calendrier intégré et notifications automatiques",
+      color: "text-orange-500"
+    },
+    {
+      icon: Award,
+      title: "Support Prioritaire",
+      description: "Assistance dédiée pour développer votre activité",
+      color: "text-red-500"
+    }
+  ];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div className="bg-gradient-to-br from-[#0a0a0a] to-[#1a1a2e] border border-white/10 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        {/* Header */}
+        <div className="relative p-6 text-center border-b border-white/10 bg-gradient-to-r from-[#0047AB]/20 to-[#D4AF37]/20">
+          <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
+            <div className="absolute -top-10 -left-10 w-32 h-32 bg-[#0047AB]/20 rounded-full blur-3xl animate-pulse" />
+            <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-[#D4AF37]/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+          </div>
+          <div className="relative z-10">
+            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-[#0047AB] to-[#D4AF37] rounded-full flex items-center justify-center">
+              <Sparkles className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
+              Bienvenue sur Titelli !
+            </h2>
+            <p className="text-gray-300">
+              Découvrez tous les avantages exclusifs de votre compte entreprise
+            </p>
+          </div>
+        </div>
+
+        {/* Benefits Grid */}
+        <div className="p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {benefits.map((benefit, index) => (
+              <div 
+                key={index}
+                className="flex items-start gap-3 p-4 bg-white/5 rounded-xl border border-white/5 hover:border-white/10 transition-all"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className={`w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 ${benefit.color}`}>
+                  <benefit.icon className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-white font-semibold text-sm mb-1">{benefit.title}</h3>
+                  <p className="text-gray-400 text-xs leading-relaxed">{benefit.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA Button */}
+        <div className="p-6 pt-0">
+          <button
+            onClick={onClose}
+            className="w-full py-4 bg-gradient-to-r from-[#0047AB] to-[#0047AB]/80 text-white font-semibold rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2 group"
+            data-testid="benefits-popup-close"
+          >
+            <span>C'est compris, commençons !</span>
+            <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </button>
+          <p className="text-center text-gray-500 text-xs mt-3">
+            Cliquez pour fermer et accéder à votre espace
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const EnterpriseRegistrationPage = () => {
   const navigate = useNavigate();
