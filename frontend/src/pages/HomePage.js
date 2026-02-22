@@ -316,7 +316,7 @@ const HomePage = () => {
     }
   };
 
-  const panoramicVideoUrl = `${process.env.REACT_APP_BACKEND_URL}/api/uploads/video_accueil_couple_lausanne.mp4`;
+  const panoramicVideoUrl = `${process.env.REACT_APP_BACKEND_URL}/api/uploads/titelli_v5_final.mp4`;
   const heroImage = 'https://images.unsplash.com/photo-1733950489642-bd1a7c3e69bb?w=1920&q=80';
 
   const mainCategories = [
