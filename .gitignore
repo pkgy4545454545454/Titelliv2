@@ -377,3 +377,11 @@ backend/uploads/TITELLI_TOUTES_LES_VIDEOS_COMPLETE.zip
 # Environment files
 *.env
 *.env.*
+-e 
+# Environment files
+*.env
+*.env.*
+-e 
+# Environment files
+*.env
+*.env.*
