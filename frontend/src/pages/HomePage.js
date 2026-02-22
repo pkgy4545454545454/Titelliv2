@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronRight, ChevronLeft, Star, ArrowRight, Play, Briefcase, MapPin, Clock, Filter, GraduationCap, Calendar, Pause, Volume2, VolumeX, Search, Sparkles, Gift, CheckCircle, Users } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Star, ArrowRight, Play, Briefcase, MapPin, Clock, Filter, GraduationCap, Calendar, Pause, Volume2, VolumeX, Search, Sparkles, Gift, CheckCircle, Users, Send, X, FileText } from 'lucide-react';
 import { featuredAPI, categoryAPI, enterpriseAPI, servicesProductsAPI, jobsAPI, clientDocumentsAPI, trainingsAPI } from '../services/api';
 import EnterpriseCard from '../components/EnterpriseCard';
 import ServiceProductCard from '../components/ServiceProductCard';
