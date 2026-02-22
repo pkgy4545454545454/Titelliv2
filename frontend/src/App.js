@@ -40,6 +40,7 @@ import CGVPage from './pages/CGVPage';
 import MentionsLegalesPage from './pages/MentionsLegalesPage';
 import FAQPage from './pages/FAQPage';
 import StatusPage from './pages/StatusPage';
+import CashbackPage from './pages/CashbackPage';
 import WelcomePopup from './components/WelcomePopup';
 
 import './index.css';
