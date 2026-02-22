@@ -124,6 +124,7 @@ const EnterpriseBenefitsPopup = ({ onClose }) => {
 const EnterpriseRegistrationPage = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1); // 1: Select enterprise, 2: Fill form, 3: Success
+  const [showBenefitsPopup, setShowBenefitsPopup] = useState(false);
   const [enterprises, setEnterprises] = useState([]);
   const [managers, setManagers] = useState([]);
   const [loading, setLoading] = useState(true);
