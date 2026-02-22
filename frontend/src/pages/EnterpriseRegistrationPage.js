@@ -547,6 +547,7 @@ const EnterpriseRegistrationPage = () => {
           </form>
         </div>
       </div>
+      </>
     );
   }
 
