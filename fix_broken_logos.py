@@ -58,7 +58,7 @@ def main():
         name = enterprise.get("business_name", enterprise.get("name", "Unknown"))
         
         # Check if the logo URL is broken
-        if "preview.emergentagent.com" in logo and "urgent-ui-polish" not in logo:
+        if logo and "preview.emergentagent.com" in logo and "urgent-ui-polish" not in logo:
             broken_count += 1
             fixed_url = fix_logo_url(logo)
             
