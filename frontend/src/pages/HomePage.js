@@ -421,19 +421,13 @@ const HomePage = () => {
       {/* Les meilleurs prestataires Section - Carousel */}
       <section className="py-8 sm:py-12 bg-white" data-testid="top-providers-section">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="flex items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <div className="p-2 sm:p-3 rounded-xl bg-[#0047AB]/10 flex-shrink-0">
-                <Award className="w-5 h-5 sm:w-6 sm:h-6 text-[#0047AB]" />
-              </div>
-              <div className="min-w-0">
-                <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
-                  Les meilleurs prestataires
-                </h2>
-                <p className="text-gray-600 mt-0.5 sm:mt-1 text-xs sm:text-sm">Triés par profil le plus complet</p>
-              </div>
+          <div className="flex items-center justify-between mb-6 sm:mb-8">
+            <div>
+              <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold text-gray-900">
+                Les meilleurs prestataires de votre région
+              </h2>
             </div>
-            <Link to="/entreprises" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors flex-shrink-0">
+            <Link to="/entreprises" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors">
               Voir tout
               <ArrowRight className="w-5 h-5" />
             </Link>
