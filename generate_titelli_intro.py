@@ -66,4 +66,4 @@ if __name__ == "__main__":
     result = generate_titelli_intro()
     if result:
         print(f"\n🎉 Animation créée avec succès!")
-        print(f"📥 Téléchargez: https://photo-restore-43.preview.emergentagent.com/api/uploads/TITELLI_INTRO_ANIMATION.mp4")
+        print(f"📥 Téléchargez: https://urgent-ui-polish.preview.emergentagent.com/api/uploads/TITELLI_INTRO_ANIMATION.mp4")

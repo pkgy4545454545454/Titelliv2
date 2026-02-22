@@ -6,7 +6,7 @@ Rapport PDF - Nouvelles Fonctionnalités Titelli (Aujourd'hui à partir de 12h)
 from fpdf import FPDF
 from datetime import datetime
 
-BASE_URL = "https://photo-restore-43.preview.emergentagent.com"
+BASE_URL = "https://urgent-ui-polish.preview.emergentagent.com"
 
 class TitelliPDF(FPDF):
     def __init__(self):
