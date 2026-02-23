@@ -113,44 +113,44 @@ const EnterprisesPage = () => {
         </div>
 
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-8">
-          {/* Filters */}
+          {/* Filters - No background style */}
           <div className="flex flex-wrap gap-3">
             <button
               onClick={() => handleFilterChange('all')}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              className={`px-4 py-2 text-sm font-medium transition-all ${
                 !filter 
-                  ? 'bg-white text-black' 
-                  : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                  ? 'text-white border-b-2 border-white' 
+                  : 'text-gray-400 hover:text-white'
               }`}
             >
               Tous
             </button>
             <button
               onClick={() => handleFilterChange('certified')}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              className={`px-4 py-2 text-sm font-medium transition-all ${
                 filter === 'certified' 
-                  ? 'bg-[#D4AF37] text-black' 
-                  : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                  ? 'text-[#D4AF37] border-b-2 border-[#D4AF37]' 
+                  : 'text-gray-400 hover:text-white'
               }`}
             >
               Certifiés
             </button>
             <button
               onClick={() => handleFilterChange('labeled')}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              className={`px-4 py-2 text-sm font-medium transition-all ${
                 filter === 'labeled' 
-                  ? 'bg-green-500 text-white' 
-                  : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                  ? 'text-green-500 border-b-2 border-green-500' 
+                  : 'text-gray-400 hover:text-white'
               }`}
             >
               Labellisés
             </button>
             <button
               onClick={() => handleFilterChange('premium')}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              className={`px-4 py-2 text-sm font-medium transition-all ${
                 filter === 'premium' 
-                  ? 'bg-[#0047AB] text-white' 
-                  : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                  ? 'text-[#0047AB] border-b-2 border-[#0047AB]' 
+                  : 'text-gray-400 hover:text-white'
               }`}
             >
               Premium

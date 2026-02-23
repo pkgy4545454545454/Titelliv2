@@ -117,14 +117,14 @@ const ProductsPage = () => {
       {/* Filters */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-8">
-          {/* Category Filter */}
+          {/* Category Filter - No background style */}
           <div className="flex flex-wrap gap-3">
             <button
               onClick={() => handleCategoryChange('all')}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              className={`px-4 py-2 text-sm font-medium transition-all ${
                 !selectedCategory 
-                  ? 'bg-[#D4AF37] text-black' 
-                  : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                  ? 'text-[#D4AF37] border-b-2 border-[#D4AF37]' 
+                  : 'text-gray-400 hover:text-white'
               }`}
             >
               Tous
@@ -133,10 +133,10 @@ const ProductsPage = () => {
               <button
                 key={cat.id}
                 onClick={() => handleCategoryChange(cat.id)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                className={`px-4 py-2 text-sm font-medium transition-all ${
                   selectedCategory === cat.id 
-                    ? 'bg-[#D4AF37] text-black' 
-                    : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                    ? 'text-[#D4AF37] border-b-2 border-[#D4AF37]' 
+                    : 'text-gray-400 hover:text-white'
                 }`}
               >
                 {cat.name}

@@ -118,14 +118,14 @@ const ServicesPage = () => {
       {/* Filters */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-8">
-          {/* Category Filter */}
+          {/* Category Filter - No background style */}
           <div className="flex flex-wrap gap-3">
             <button
               onClick={() => handleCategoryChange('all')}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              className={`px-4 py-2 text-sm font-medium transition-all ${
                 !selectedCategory 
-                  ? 'bg-[#0047AB] text-white' 
-                  : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                  ? 'text-[#0047AB] border-b-2 border-[#0047AB]' 
+                  : 'text-gray-400 hover:text-white'
               }`}
             >
               Tous
@@ -134,10 +134,10 @@ const ServicesPage = () => {
               <button
                 key={cat.id}
                 onClick={() => handleCategoryChange(cat.id)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                className={`px-4 py-2 text-sm font-medium transition-all ${
                   selectedCategory === cat.id 
-                    ? 'bg-[#0047AB] text-white' 
-                    : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                    ? 'text-[#0047AB] border-b-2 border-[#0047AB]' 
+                    : 'text-gray-400 hover:text-white'
                 }`}
               >
                 {cat.name}
