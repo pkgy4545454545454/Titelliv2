@@ -1157,8 +1157,6 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-        </div>
-      </section>
 
       {/* CTA Section */}
       <section className="py-12 sm:py-20 md:py-28 bg-[#0047AB]" data-testid="cta-section">
