@@ -491,7 +491,16 @@ const EnterpriseRegistrationPage = () => {
 
   const handleSelectEnterprise = (enterprise) => {
     setSelectedEnterprise(enterprise);
-    setStep(2);
+    // Show benefits popup first when clicking on enterprise
+    setShowBenefitsPopup(true);
+  };
+
+  // Handle closing benefits popup - goes to form after
+  const handleCloseBenefitsPopup = () => {
+    setShowBenefitsPopup(false);
+    if (selectedEnterprise) {
+      setStep(2); // Go to form after closing popup
+    }
   };
 
   const handleFileChange = (e) => {
