@@ -109,7 +109,7 @@ const EnterpriseCard = ({ enterprise, large = false }) => {
               : 'bg-gray-200 text-gray-500'
           }`}
         >
-          {isActive ? 'Ajouter au panier' : 'Bientôt'}
+          {isActive ? 'Réserver' : 'Bientôt'}
         </button>
       </div>
     </Link>
