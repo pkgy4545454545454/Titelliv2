@@ -350,7 +350,7 @@ const HomePage = () => {
     <div className="min-h-screen bg-white" data-testid="home-page">
       {/* Hero Section with Panoramic Video */}
       <section className="relative h-screen overflow-hidden" data-testid="hero-section">
-        {/* Video Background */}
+        {/* Video Background - No overlay, no gradient */}
         <div className="absolute inset-0">
           <video
             ref={videoRef}
@@ -368,26 +368,14 @@ const HomePage = () => {
             alt="Lausanne" 
             className="absolute inset-0 w-full h-full object-cover -z-10"
           />
-          <div className="panoramic-overlay absolute inset-0" />
-          <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-black via-black/90 to-transparent" />
         </div>
 
-        {/* Hero Content */}
+        {/* Hero Content - Just title, no logo, no description */}
         <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4 pt-20">
-          <div className="mb-6 animate-fade-in">
-            <img 
-              src="/logo_titelli.png" 
-              alt="Titelli" 
-              className="w-24 h-24 mx-auto object-contain"
-            />
-          </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-white mb-6 animate-fade-in" style={{ fontFamily: 'Playfair Display, serif' }}>
+          <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-white mb-8 animate-fade-in drop-shadow-lg" style={{ fontFamily: 'Playfair Display, serif' }}>
             Les meilleurs prestataires<br />
             <span className="gold-gradient">de ta région</span>
           </h1>
-          <p className="text-lg md:text-xl text-gray-300 max-w-2xl mb-8 animate-fade-in stagger-1">
-            Découvrez les services et produits de qualité à Lausanne
-          </p>
 
           {/* Category Buttons */}
           <div className="inline-flex flex-wrap justify-center gap-3 animate-fade-in stagger-2">
@@ -406,17 +394,10 @@ const HomePage = () => {
             ))}
           </div>
         </div>
-
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 rounded-full border-2 border-white/30 flex justify-center pt-2">
-            <div className="w-1.5 h-3 bg-white/50 rounded-full" />
-          </div>
-        </div>
       </section>
 
-      {/* Gradient Transition from Video to Content */}
-      <div className="h-24 bg-gradient-to-b from-black via-gray-900 to-white"></div>
+      {/* Simple transition */}
+      <div className="h-8 bg-white"></div>
 
       {/* Search Bar Section - Under Video */}
       <section className="py-4 sm:py-6 bg-white" data-testid="search-section">
