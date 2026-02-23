@@ -379,4 +379,4 @@ POST /api/gamification/log_action - Logger action (interne)
 ---
 
 **Document généré le:** Février 2026
-**URL Application:** https://urgent-ui-polish.preview.emergentagent.com
+**URL Application:** https://image-fix-demo.preview.emergentagent.com

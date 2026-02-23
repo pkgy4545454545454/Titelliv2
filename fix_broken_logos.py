@@ -15,7 +15,7 @@ db = client["secondevie"]
 def fix_logo_url(logo_url):
     """
     Convert absolute URLs to relative paths.
-    Example: https://dependency-cleanup-3.preview.emergentagent.com/api/uploads/enterprises/xxx
+    Example: https://image-fix-demo.preview.emergentagent.com/api/uploads/enterprises/xxx
     Becomes: /api/uploads/enterprises/xxx
     """
     if not logo_url:

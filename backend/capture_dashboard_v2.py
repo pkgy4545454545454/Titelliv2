@@ -7,7 +7,7 @@ import os
 import time
 from playwright.sync_api import sync_playwright
 
-BASE_URL = 'https://urgent-ui-polish.preview.emergentagent.com'
+BASE_URL = 'https://image-fix-demo.preview.emergentagent.com'
 SCREENSHOTS_DIR = '/app/backend/uploads/brochure_screenshots_v2'
 TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYzg5OTNlZDktMGQxNC00YTZjLTk1ODQtYjJiNDc5ZjQzMzg1IiwidXNlcl90eXBlIjoiZW50cmVwcmlzZSIsImV4cCI6MTc3MTI4OTMzOS40MjQ4NTZ9.CuT_YZeJgP4RaxXtWk5sVkMt64CK58JGxRIBuGaet-Q"
 
