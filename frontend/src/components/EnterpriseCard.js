@@ -74,13 +74,12 @@ const EnterpriseCard = ({ enterprise, large = false }) => {
 
       {/* Content */}
       <div className={cardPadding}>
-        <h3 className={`${titleSize} font-semibold text-gray-900 group-hover:text-[#0047AB] transition-colors line-clamp-1 mb-1`}>
+        {/* Category - Enterprise Name */}
+        <h3 className={`${titleSize} font-semibold text-gray-900 group-hover:text-[#0047AB] transition-colors line-clamp-2 mb-2`}>
+          <span className="text-[#D4AF37]">{category}</span>
+          <span className="text-gray-400 mx-1">-</span>
           {displayName}
         </h3>
-
-        {slogan && (
-          <p className="text-xs sm:text-sm text-gray-500 mb-2 line-clamp-1">{slogan}</p>
-        )}
 
         {/* Rating - Full format */}
         <div className="flex items-center gap-1.5 mb-3">
@@ -91,10 +90,7 @@ const EnterpriseCard = ({ enterprise, large = false }) => {
           )}
         </div>
 
-        <div className="flex items-center justify-between text-xs sm:text-sm gap-2">
-          <span className="px-2.5 py-1 bg-gray-100 rounded-full text-gray-600 line-clamp-1">
-            {category}
-          </span>
+        <div className="flex items-center justify-end text-xs sm:text-sm gap-2">
           <div className="flex items-center gap-1 text-gray-400">
             <MapPin className="w-3.5 h-3.5" />
             <span className="line-clamp-1">{city}</span>
