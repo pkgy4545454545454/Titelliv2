@@ -1,92 +1,65 @@
-# Titelli - PRD (Product Requirements Document)
+# Titelli - Product Requirements Document
 
-## Vue d'ensemble
-Titelli est une plateforme suisse connectant clients et prestataires de services/produits dans la région de Lausanne.
+## Original Problem Statement
+Titelli est une plateforme suisse de mise en relation entre clients et prestataires de qualité dans la région de Lausanne. L'application permet aux clients de découvrir, réserver et acheter des services et produits locaux, tandis que les entreprises peuvent développer leur visibilité et leur clientèle.
 
-## Architecture
-- **Frontend**: React 18 + TailwindCSS + Shadcn UI
-- **Backend**: FastAPI + Python
-- **Database**: MongoDB Atlas (secondevie)
-- **Déploiement**: Render (production), Emergent Preview (développement)
+## Core Requirements
+- Marketplace de services et produits locaux
+- Système d'inscription et gestion des entreprises
+- Réservation en ligne et paiement sécurisé
+- Programme cashback pour les clients
+- Certification Titelli pour les entreprises
+- Offres d'emploi et formations
 
-## État actuel (Février 2025)
+## Tech Stack
+- **Frontend**: React + Tailwind CSS + Shadcn/UI
+- **Backend**: FastAPI (Python)
+- **Database**: MongoDB
+- **Image Storage**: Cloudinary (migration effectuée)
+- **Deployment**: Render
 
-### ✅ Fonctionnalités implémentées
-- Système d'authentification (JWT + redirection basée sur le rôle)
-- Catalogue de services/produits avec filtres et catégories
-- Cartes d'entreprises avec système de notation
-- Panier d'achat et wishlist
-- Système de réservation (RDV)
-- Offres d'emploi et candidatures
-- Formations
-- Notifications en temps réel (WebSocket)
-- Génération IA (images, vidéos avec Sora 2)
-- Intégration Stripe pour paiements
-- **Programme Cashback** complet avec niveaux de fidélité
+---
 
-### ✅ Corrections récentes (22 Février 2025)
-1. **UI Polish pour présentation**:
-   - Tags de catégories sans fond (texte simple)
-   - Bouton "Ajouter au panier" (remplace "Réserver")
-   - Icône cashback dans la navigation (desktop + mobile)
-   - Icône panier moderne (ShoppingBag)
-   
-2. **Fix des images cassées en production**:
-   - 248 logos d'entreprises corrigés (URLs relatives)
-   - 312 galeries photos corrigées
-   - 2 images produits corrigées
-   
-3. **Nouvelles fonctionnalités**:
-   - **Section "Les meilleurs produits"** avec vraies cartes produits (filtrées par image + prix)
-   - **Page Cashback** complète avec niveaux Bronze/Silver/Gold/Platinum
-   - **Popup avantages entreprise** lors de l'inscription
+## CHANGELOG
 
-4. **Conflit npm** : Résolu (date-fns@3.6.0)
+### 2025-02-23 - UI/UX Améliorations
+- ✅ **Section Avantages homepage** : Redesignée avec style popup (icônes, titres, descriptions, prix)
+- ✅ **Boutons conditionnels** : "Réserver" pour services, "Ajouter au panier" pour produits
 
-## Backlog Prioritisé
+### 2025-02-22 - Migration Cloudinary & Features
+- ✅ **Migration Cloudinary** : Toutes les images migrées vers Cloudinary (permanent storage)
+- ✅ **Section "Les meilleurs produits"** : Ajoutée sur homepage
+- ✅ **Page Cashback** : Créée et liée dans header
+- ✅ **Popup Enterprise Benefits** : Multi-onglets avec services, fournisseurs, gestion, marketing, packs
+- ✅ **3 PDFs générés** : Prospect_Rendez-vous_Client.pdf, Prospect_Telephonique.pdf, Questions_Formations.pdf
+- ✅ **Filter tags** : Style text-only sans fond sur toutes les pages
 
-### P1 - À faire
-- [ ] Investiguer images corrompues section "photo vidéo"
-- [ ] Améliorer le tri des produits (priorité aux produits commençant par 't')
+---
 
-### P2 - Futur
-- [ ] Corriger design brochure monétisation
-- [ ] Redessiner profils prestataires (selon maquettes)
-- [ ] Créer flyer marketing avec QR code
+## ROADMAP
 
-### P3 - Backlog
+### P0 - Critique (Résolu)
+- ✅ Images Render corrigées via Cloudinary
+
+### P1 - Haute Priorité
+- [ ] Réorganiser produits homepage (priorité noms commençant par "t")
+- [ ] Investiguer corruption d'images lors de l'upload
+
+### P2 - Moyenne Priorité
+- [ ] Corriger design brochure de monétisation
+- [ ] Redesigner profils prestataires selon croquis utilisateur
+- [ ] Créer flyer marketing avec QR code personnalisé
+
+### P3 - Basse Priorité
 - [ ] Démontrer fonctionnalité multi-tags
 - [ ] Créer document CDC final
-- [ ] Implémenter essai IA gratuit
+- [ ] Implémenter essai gratuit IA
 
-## Structure des fichiers clés
-```
-/app
-├── backend/
-│   ├── server.py           # API FastAPI principale
-│   └── .env                 # Config MongoDB, Stripe
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Header.js           # Navigation responsive + Cashback
-│   │   │   ├── ServiceProductCard.js
-│   │   │   ├── EnterpriseCard.js
-│   │   │   └── Footer.js
-│   │   ├── pages/
-│   │   │   ├── HomePage.js         # Section produits améliorée
-│   │   │   ├── CashbackPage.js     # Page programme de fidélité
-│   │   │   ├── EnterpriseRegistrationPage.js # + Popup avantages
-│   │   │   ├── ServicesPage.js
-│   │   │   └── ProductsPage.js
-│   │   └── context/
-│   │       ├── AuthContext.js
-│   │       └── CartContext.js
-│   └── package.json
-└── fix_broken_logos.py     # Script correction URLs
-```
+---
 
-## Notes techniques
-- REACT_APP_BACKEND_URL utilisé pour toutes les requêtes API
-- Les images doivent utiliser des chemins relatifs (/api/uploads/...)
-- Le déploiement Render nécessite yarn (pas npm)
-- Programme Cashback : 4 niveaux (Bronze 2%, Silver 3%, Gold 5%, Platinum 8%)
+## Key Files
+- `/app/frontend/src/pages/HomePage.js` - Page d'accueil avec sections avantages
+- `/app/frontend/src/components/ServiceProductCard.js` - Carte avec logique bouton conditionnel
+- `/app/frontend/src/pages/EnterpriseRegistrationPage.js` - Inscription entreprise avec popup avantages
+- `/app/backend/.env` - Credentials Cloudinary
+- `/app/backend/migrate_to_cloudinary.py` - Script migration images
