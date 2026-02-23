@@ -565,12 +565,6 @@ const EnterpriseRegistrationPage = () => {
     }
   };
 
-  // Handle closing benefits popup
-  const handleCloseBenefitsPopup = () => {
-    setShowBenefitsPopup(false);
-    setStep(3);
-  };
-
   // Step 1: Select Enterprise
   if (step === 1) {
     return (
