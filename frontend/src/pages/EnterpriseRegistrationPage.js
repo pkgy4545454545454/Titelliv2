@@ -1,120 +1,424 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Building2, MapPin, Phone, Globe, ChevronRight, Upload, User, FileText, Users, CheckCircle, ArrowLeft, X, Star, TrendingUp, Shield, Zap, Gift, Crown, Award, Sparkles, Target, BarChart } from 'lucide-react';
+import { Search, Building2, MapPin, Phone, Globe, ChevronRight, Upload, User, FileText, Users, CheckCircle, ArrowLeft, X, Star, TrendingUp, Shield, Zap, Gift, Crown, Award, Sparkles, Target, BarChart, Truck, Megaphone, Package, GraduationCap, Banknote, Briefcase, Heart, Eye, Palette, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
 
 const API_URL = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-// Enterprise Benefits Popup Component
+// Enterprise Benefits Popup Component - CDC Complet
 const EnterpriseBenefitsPopup = ({ onClose }) => {
-  const benefits = [
+  const [activeTab, setActiveTab] = useState('services');
+  const [expandedPack, setExpandedPack] = useState(null);
+
+  const servicesBase = [
     {
-      icon: Crown,
-      title: "Profil Premium Gratuit",
-      description: "Votre profil mis en avant pendant 30 jours",
-      color: "text-[#D4AF37]"
+      title: "Inscription annuelle",
+      price: "250.-",
+      period: "obligatoire",
+      description: "Activation de votre compte entreprise sur Titelli",
+      icon: Building2,
+      color: "text-white",
+      required: true
     },
     {
-      icon: Target,
-      title: "Visibilité Maximale",
-      description: "Exposez vos services à des milliers de clients à Lausanne",
-      color: "text-[#0047AB]"
+      title: "Premium livraison instantanée",
+      price: "50.-/mois ou 500.-/an",
+      description: "Nos clients consomment et apprécient d'avantage que l'on réponde à leurs demandes instantanément.",
+      icon: Truck,
+      color: "text-blue-400"
     },
     {
+      title: "Pub Référencement mensuel",
+      price: "100.-/mois ou 1'000.-/an",
+      description: "Se faire référencer dans son domaine d'activité ou dans sa rubrique préférée tout au long de l'année.",
+      icon: Megaphone,
+      color: "text-purple-400"
+    },
+    {
+      title: "Premium dépôt 24/24",
+      price: "100.-/mois ou 1'000.-/an",
+      description: "Un dépôt accessible à nos chauffeurs après 19h vous permettant de liquider votre stock en vous reposant.",
+      icon: Package,
+      color: "text-green-400"
+    },
+    {
+      title: "Formations avancées",
+      price: "200.- ou 2'000.-/an",
+      description: "Les meilleures techniques, méthodes et outils sur le marché. Des formations faites par des spécialistes Suisses triés sur un registre stricte et ultra sélectif.",
+      icon: GraduationCap,
+      color: "text-orange-400"
+    },
+    {
+      title: "Liquidation de ton stock",
+      price: "1'000.-/mois ou 10'000.-/an",
+      description: "Nos experts liquident vos produits à hauteur du montant engagé mensuellement. Et si Titelli liquide votre stock, que vous reste-t-il à faire ? Quoi que ce soit, Titelli le fait aussi.",
       icon: TrendingUp,
-      title: "Statistiques Détaillées",
-      description: "Suivez vos performances et optimisez votre présence",
-      color: "text-green-500"
-    },
-    {
-      icon: Zap,
-      title: "Outils Marketing IA",
-      description: "Générez des visuels et vidéos promotionnels automatiquement",
-      color: "text-purple-500"
-    },
-    {
-      icon: Gift,
-      title: "Programme Cashback",
-      description: "Fidélisez vos clients avec des récompenses",
-      color: "text-pink-500"
-    },
-    {
-      icon: Shield,
-      title: "Certification Titelli",
-      description: "Gagnez la confiance avec notre badge de certification",
-      color: "text-cyan-500"
-    },
-    {
-      icon: BarChart,
-      title: "Gestion des Réservations",
-      description: "Calendrier intégré et notifications automatiques",
-      color: "text-orange-500"
-    },
-    {
-      icon: Award,
-      title: "Support Prioritaire",
-      description: "Assistance dédiée pour développer votre activité",
-      color: "text-red-500"
+      color: "text-red-400"
     }
   ];
 
+  const investissements = [
+    {
+      title: "Investissement",
+      price: "200.- ou 2'000.-/an",
+      description: "Trouver un partenaire, proposez un prix, proposez des parts.",
+      icon: Banknote,
+      color: "text-green-400"
+    },
+    {
+      title: "Investissement élite",
+      price: "500.- ou 5'000.-/an",
+      description: "Demandez un investissement contre bénéfice pour la durée de votre choix. Accès à d'innombrables opportunités d'investissements.",
+      icon: Crown,
+      color: "text-[#D4AF37]"
+    }
+  ];
+
+  const fournisseurs = [
+    {
+      title: "Fournisseurs",
+      price: "200.- ou 2'000.-/an",
+      description: "Accès à des fournisseurs qui permettent l'optimisation de votre entreprise en répondant à une qualité plus prestigieuse pour un meilleur prix.",
+      level: "Standard"
+    },
+    {
+      title: "Fournisseurs guest",
+      price: "300.- ou 3'000.-/an",
+      description: "Accès à tous les fournisseurs concernant votre domaine d'activité, ce qui vous donne du choix, immédiatement et continuellement.",
+      level: "Guest"
+    },
+    {
+      title: "Fournisseurs premium",
+      price: "500.- ou 5'000.-/an",
+      description: "Accès à tous les fournisseurs du marché, voire même des producteurs, ce qui vaut de l'or.",
+      level: "Premium"
+    },
+    {
+      title: "Fournisseurs élite",
+      price: "1'000.- ou 10'000.-/an",
+      description: "Accès à des fournisseurs et producteurs hors marchés, précieux et rares. Le privilège d'une qualité de haut standing qui ne se voit pas dans son prix.",
+      level: "Élite"
+    }
+  ];
+
+  const gestion = [
+    {
+      title: "Soins entreprise",
+      price: "500.- ou 5'000.-/an",
+      description: "Des soins pour votre personnel ou votre entreprise, un entretien ou un renouvellement continu pour une meilleure ambiance, productivité et image.",
+      icon: Heart
+    },
+    {
+      title: "Gestion d'entreprise starter",
+      price: "1'000.- ou 10'000.-/an",
+      description: "Un expert qui s'occupe de votre image et de votre campagne marketing tous les mois.",
+      icon: Briefcase
+    },
+    {
+      title: "Gestion d'entreprise premium",
+      price: "3'000.- ou 30'000.-/an",
+      description: "Un expert marketing et un fiscaliste pour une meilleure gestion de votre entreprise tout au long de l'année.",
+      icon: Award
+    },
+    {
+      title: "Gestion d'entreprise élite",
+      price: "5'000.-/mois ou 50'000.-/an",
+      description: "Un expert en gestion d'image, un expert juridique et plusieurs spécialistes de votre domaine d'activité font prendre à votre entreprise une nouvelle direction.",
+      icon: Crown
+    }
+  ];
+
+  const marketing = [
+    {
+      title: "Marketing visuel",
+      price: "100.- ou 1'000.-/an",
+      description: "Accès aux meilleurs outils informatisés sur le marché toute l'année afin de vous permettre une nouvelle revalorisation de votre métier, entreprise et prestations.",
+      icon: Eye
+    },
+    {
+      title: "Expert marketing visuel",
+      price: "200.- ou 2'000.-/an",
+      description: "Un expert révise votre publicité par les meilleurs outils informatisés tous les mois.",
+      icon: Palette
+    },
+    {
+      title: "Expert marketing premium",
+      price: "500.- ou 5'000.-/an",
+      description: "Un expert vous suggère de véritables publicités sur-mesure tous les mois.",
+      icon: Sparkles
+    },
+    {
+      title: "Expert marketing élite",
+      price: "1'000.- ou 10'000.-/an",
+      description: "Un expert construit votre image et mène une véritable campagne marketing tout au long de l'année.",
+      icon: Target
+    }
+  ];
+
+  const packs = [
+    {
+      name: "Entreprenariat",
+      price: "200.-/mois",
+      color: "from-gray-600 to-gray-800",
+      items: ["Premium livraison instant 50.-", "Pub Référence mensuelle 100.-", "Marketing visuel 100.-"]
+    },
+    {
+      name: "Patronat",
+      price: "500.-/mois",
+      color: "from-blue-600 to-blue-800",
+      items: ["Premium livraison instant 50.-", "Pub Référence mensuelle 100.-", "Marketing visuel 100.-", "Premium dépôt 24/24 100.-", "Fournisseurs 200.-", "Investissement 200.-"]
+    },
+    {
+      name: "Indépendant",
+      price: "1'000.-/mois",
+      color: "from-purple-600 to-purple-800",
+      items: ["Premium livraison instant 50.-", "Pub référence mensuelle 200.-", "Expert marketing visuel 200.-", "Premium dépôt 24/24 100.-", "Fournisseurs 200.-", "Investissement 500.-", "Formations avancées 200.-"]
+    },
+    {
+      name: "Directeur",
+      price: "2'000.-/mois",
+      color: "from-[#D4AF37] to-yellow-700",
+      items: ["Premium livraison instantanée", "Pub référence mensuelle 400.-", "Expert marketing visuel 500.-", "Premium dépôt 24/24 100.-", "Fournisseurs 300.-", "Investissement 500.-", "Formations avancées 200.-", "Soins entreprise 500.-"]
+    },
+    {
+      name: "Dirigeant",
+      price: "3'000.-/mois",
+      color: "from-orange-500 to-red-600",
+      items: ["Premium livraison instant 50.-", "Pub Référence mensuelle 400.-", "Expert marketing visuel 500.-", "Premium dépôt 24/24 100.-", "Fournisseurs 300.-", "Investissement 500.-", "Formations avancées 500.-", "Soins entreprise 500.-", "Liquidation de votre stock 1'000.-"]
+    },
+    {
+      name: "CEO",
+      price: "5'000.-/mois",
+      color: "from-red-600 to-pink-600",
+      items: ["Premium livraison instant 50.-", "Pub Référence mensuelle 400.-", "Expert marketing visuel 500.-", "Premium dépôt 24/24 100.-", "Fournisseurs 500.-", "Investissement 500.-", "Formations avancées 500.-", "Soins entreprise 500.-", "Liquidation de ton stock 2'000.-", "Gestion d'entreprise starter"]
+    }
+  ];
+
+  const tabs = [
+    { id: 'services', label: 'Services' },
+    { id: 'fournisseurs', label: 'Fournisseurs' },
+    { id: 'gestion', label: 'Gestion' },
+    { id: 'marketing', label: 'Marketing' },
+    { id: 'packs', label: 'Packs' }
+  ];
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="bg-gradient-to-br from-[#0a0a0a] to-[#1a1a2e] border border-white/10 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/90 backdrop-blur-sm">
+      <div className="bg-gradient-to-br from-[#0a0a0a] to-[#1a1a2e] border border-white/10 rounded-2xl max-w-4xl w-full max-h-[95vh] overflow-hidden shadow-2xl flex flex-col">
         {/* Header */}
-        <div className="relative p-6 text-center border-b border-white/10 bg-gradient-to-r from-[#0047AB]/20 to-[#D4AF37]/20">
-          <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
-            <div className="absolute -top-10 -left-10 w-32 h-32 bg-[#0047AB]/20 rounded-full blur-3xl animate-pulse" />
-            <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-[#D4AF37]/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-          </div>
+        <div className="relative p-4 sm:p-6 text-center border-b border-white/10 bg-gradient-to-r from-[#0047AB]/20 to-[#D4AF37]/20 flex-shrink-0">
           <div className="relative z-10">
-            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-[#0047AB] to-[#D4AF37] rounded-full flex items-center justify-center">
-              <Sparkles className="w-8 h-8 text-white" />
+            <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 bg-gradient-to-br from-[#0047AB] to-[#D4AF37] rounded-full flex items-center justify-center">
+              <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-white mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h2 className="text-xl sm:text-2xl font-bold text-white mb-1" style={{ fontFamily: 'Playfair Display, serif' }}>
               Bienvenue sur Titelli !
             </h2>
-            <p className="text-gray-300">
-              Découvrez tous les avantages exclusifs de votre compte entreprise
+            <p className="text-gray-300 text-sm">
+              Découvrez vos opportunités partenariales
             </p>
           </div>
         </div>
 
-        {/* Benefits Grid */}
-        <div className="p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {benefits.map((benefit, index) => (
-              <div 
-                key={index}
-                className="flex items-start gap-3 p-4 bg-white/5 rounded-xl border border-white/5 hover:border-white/10 transition-all"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className={`w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 ${benefit.color}`}>
-                  <benefit.icon className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-white font-semibold text-sm mb-1">{benefit.title}</h3>
-                  <p className="text-gray-400 text-xs leading-relaxed">{benefit.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Tabs */}
+        <div className="flex border-b border-white/10 overflow-x-auto flex-shrink-0 scrollbar-hide">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-all ${
+                activeTab === tab.id 
+                  ? 'text-[#D4AF37] border-b-2 border-[#D4AF37]' 
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
 
-        {/* CTA Button */}
-        <div className="p-6 pt-0">
+        {/* Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+          {/* Services Tab */}
+          {activeTab === 'services' && (
+            <div className="space-y-3">
+              <div className="bg-[#D4AF37]/20 border border-[#D4AF37]/30 rounded-xl p-4 mb-4">
+                <div className="flex items-center gap-3">
+                  <Building2 className="w-6 h-6 text-[#D4AF37]" />
+                  <div>
+                    <h3 className="text-white font-bold">Inscription annuelle - 250.- (obligatoire)</h3>
+                    <p className="text-gray-300 text-sm">L'activation effective de votre compte est soumise à un contrôle stricte et peut prendre 30 à 60 jours ouvrables.</p>
+                  </div>
+                </div>
+              </div>
+              
+              {servicesBase.slice(1).map((service, index) => (
+                <div key={index} className="bg-white/5 border border-white/5 rounded-xl p-4 hover:border-white/10 transition-all">
+                  <div className="flex items-start gap-3">
+                    <div className={`w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 ${service.color}`}>
+                      <service.icon className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <h3 className="text-white font-semibold">{service.title}</h3>
+                        <span className="text-[#D4AF37] text-sm font-medium">{service.price}</span>
+                      </div>
+                      <p className="text-gray-400 text-sm mt-1">{service.description}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {investissements.map((inv, index) => (
+                <div key={index} className="bg-white/5 border border-white/5 rounded-xl p-4 hover:border-white/10 transition-all">
+                  <div className="flex items-start gap-3">
+                    <div className={`w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 ${inv.color}`}>
+                      <inv.icon className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <h3 className="text-white font-semibold">{inv.title}</h3>
+                        <span className="text-[#D4AF37] text-sm font-medium">{inv.price}</span>
+                      </div>
+                      <p className="text-gray-400 text-sm mt-1">{inv.description}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Fournisseurs Tab */}
+          {activeTab === 'fournisseurs' && (
+            <div className="space-y-3">
+              <p className="text-gray-400 text-sm mb-4">Accédez aux meilleurs fournisseurs selon votre niveau de partenariat.</p>
+              {fournisseurs.map((f, index) => (
+                <div key={index} className="bg-white/5 border border-white/5 rounded-xl p-4 hover:border-white/10 transition-all">
+                  <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        f.level === 'Élite' ? 'bg-[#D4AF37]/20 text-[#D4AF37]' :
+                        f.level === 'Premium' ? 'bg-purple-500/20 text-purple-400' :
+                        f.level === 'Guest' ? 'bg-blue-500/20 text-blue-400' :
+                        'bg-gray-500/20 text-gray-400'
+                      }`}>{f.level}</span>
+                      <h3 className="text-white font-semibold">{f.title}</h3>
+                    </div>
+                    <span className="text-[#D4AF37] text-sm font-medium">{f.price}</span>
+                  </div>
+                  <p className="text-gray-400 text-sm">{f.description}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Gestion Tab */}
+          {activeTab === 'gestion' && (
+            <div className="space-y-3">
+              <p className="text-gray-400 text-sm mb-4">Des experts dédiés pour gérer et développer votre entreprise.</p>
+              {gestion.map((g, index) => (
+                <div key={index} className="bg-white/5 border border-white/5 rounded-xl p-4 hover:border-white/10 transition-all">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 text-[#D4AF37]">
+                      <g.icon className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <h3 className="text-white font-semibold">{g.title}</h3>
+                        <span className="text-[#D4AF37] text-sm font-medium">{g.price}</span>
+                      </div>
+                      <p className="text-gray-400 text-sm mt-1">{g.description}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Marketing Tab */}
+          {activeTab === 'marketing' && (
+            <div className="space-y-3">
+              <p className="text-gray-400 text-sm mb-4">Optimisez votre image et votre visibilité avec nos experts marketing.</p>
+              {marketing.map((m, index) => (
+                <div key={index} className="bg-white/5 border border-white/5 rounded-xl p-4 hover:border-white/10 transition-all">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 text-purple-400">
+                      <m.icon className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <h3 className="text-white font-semibold">{m.title}</h3>
+                        <span className="text-[#D4AF37] text-sm font-medium">{m.price}</span>
+                      </div>
+                      <p className="text-gray-400 text-sm mt-1">{m.description}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Packs Tab */}
+          {activeTab === 'packs' && (
+            <div className="space-y-4">
+              <p className="text-gray-400 text-sm mb-4">Choisissez le pack qui correspond à vos ambitions.</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {packs.map((pack, index) => (
+                  <div 
+                    key={index} 
+                    className={`bg-gradient-to-br ${pack.color} rounded-xl overflow-hidden cursor-pointer transition-all hover:scale-[1.02]`}
+                    onClick={() => setExpandedPack(expandedPack === index ? null : index)}
+                  >
+                    <div className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-white font-bold">{pack.name}</h3>
+                        {expandedPack === index ? <ChevronUp className="w-4 h-4 text-white/70" /> : <ChevronDown className="w-4 h-4 text-white/70" />}
+                      </div>
+                      <p className="text-white/90 text-lg font-semibold">{pack.price}</p>
+                    </div>
+                    {expandedPack === index && (
+                      <div className="bg-black/30 p-4 space-y-1">
+                        {pack.items.map((item, i) => (
+                          <div key={i} className="flex items-center gap-2 text-white/80 text-sm">
+                            <CheckCircle className="w-3 h-3 text-white/60" />
+                            <span>{item}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Premium Service Info */}
+              <div className="mt-6 p-4 bg-gradient-to-r from-[#0047AB]/20 to-[#D4AF37]/20 rounded-xl border border-white/10">
+                <h4 className="text-white font-semibold mb-2 flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-[#D4AF37]" />
+                  Le service Premium
+                </h4>
+                <p className="text-gray-300 text-sm">
+                  Permet de renforcer votre accessibilité sur le marché ainsi que de répondre à une clientèle plus exigeante. 
+                  Mettez-vous à disposition du client en tout temps et en tout lieu.
+                </p>
+                <p className="text-[#D4AF37] text-sm mt-2 italic">
+                  « Ce que vous voulez, où vous le voulez, quand vous le voulez »
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* CTA Button - Fixed at bottom */}
+        <div className="p-4 sm:p-6 border-t border-white/10 flex-shrink-0 bg-[#0a0a0a]">
           <button
             onClick={onClose}
-            className="w-full py-4 bg-gradient-to-r from-[#0047AB] to-[#0047AB]/80 text-white font-semibold rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2 group"
+            className="w-full py-4 bg-gradient-to-r from-[#0047AB] to-[#D4AF37] text-white font-semibold rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2 group"
             data-testid="benefits-popup-close"
           >
             <span>C'est compris, commençons !</span>
             <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </button>
-          <p className="text-center text-gray-500 text-xs mt-3">
-            Cliquez pour fermer et accéder à votre espace
-          </p>
         </div>
       </div>
     </div>
