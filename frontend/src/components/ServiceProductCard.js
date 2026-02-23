@@ -130,7 +130,7 @@ const ServiceProductCard = ({ item, onAddToCart }) => {
             }`}
             data-testid={`add-to-cart-${id}`}
           >
-            {available ? 'Réserver' : 'Bientôt'}
+            {available ? (type === 'product' ? 'Ajouter au panier' : 'Réserver') : 'Bientôt'}
           </button>
           
           <button
