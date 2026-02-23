@@ -1057,6 +1057,94 @@ const HomePage = () => {
         speed={35}
       />
 
+      {/* Avantages Clients & Entreprises Section */}
+      <section className="py-16 sm:py-24 bg-gradient-to-b from-white to-gray-50" data-testid="advantages-section">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
+              Pourquoi choisir <span className="text-[#0047AB]">Titelli</span> ?
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              La plateforme suisse qui connecte clients et prestataires de qualité
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+            {/* Pour les Clients */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-14 h-14 rounded-xl bg-[#0047AB]/10 flex items-center justify-center">
+                  <svg className="w-7 h-7 text-[#0047AB]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Pour les clients</h3>
+              </div>
+              <ul className="space-y-4">
+                {[
+                  { text: "Trouvez facilement les meilleurs prestataires", icon: "✓" },
+                  { text: "Accédez aux avis vérifiés", icon: "✓" },
+                  { text: "Réservez et commandez en ligne", icon: "✓" },
+                  { text: "Paiement sécurisé garanti", icon: "✓" },
+                  { text: "Programme cashback jusqu'à 8%", icon: "✓" },
+                  { text: "Service client disponible 7j/7", icon: "✓" }
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-3">
+                    <span className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center flex-shrink-0 text-sm font-bold">
+                      {item.icon}
+                    </span>
+                    <span className="text-gray-700">{item.text}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link 
+                to="/auth" 
+                className="mt-8 w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#0047AB] text-white font-semibold rounded-xl hover:bg-[#0047AB]/90 transition-all"
+              >
+                S'inscrire gratuitement
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            </div>
+
+            {/* Pour les Entreprises */}
+            <div className="bg-gradient-to-br from-[#0a0a0a] to-[#1a1a2e] rounded-2xl p-8 shadow-lg border border-white/10 hover:shadow-xl transition-shadow">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-14 h-14 rounded-xl bg-[#D4AF37]/20 flex items-center justify-center">
+                  <svg className="w-7 h-7 text-[#D4AF37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-white">Pour les entreprises</h3>
+              </div>
+              <ul className="space-y-4">
+                {[
+                  { text: "Développez votre clientèle locale", icon: "★" },
+                  { text: "Obtenez la certification Titelli", icon: "★" },
+                  { text: "Publiez vos offres d'emploi", icon: "★" },
+                  { text: "Boostez votre visibilité premium", icon: "★" },
+                  { text: "Accès aux outils marketing IA", icon: "★" },
+                  { text: "Support et accompagnement dédié", icon: "★" }
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-3">
+                    <span className="w-6 h-6 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] flex items-center justify-center flex-shrink-0 text-sm">
+                      {item.icon}
+                    </span>
+                    <span className="text-gray-300">{item.text}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link 
+                to="/inscription-entreprise" 
+                className="mt-8 w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#D4AF37] to-[#B8960C] text-black font-semibold rounded-xl hover:opacity-90 transition-all"
+              >
+                Inscrire mon entreprise
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-12 sm:py-20 md:py-28 bg-[#0047AB]" data-testid="cta-section">
         <div className="max-w-4xl mx-auto px-4 md:px-8 text-center">
