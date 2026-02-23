@@ -1057,10 +1057,13 @@ const HomePage = () => {
         speed={35}
       />
 
-      {/* Avantages Clients & Entreprises Section */}
+      {/* Avantages Clients & Entreprises Section - Style comme la popup */}
       <section className="py-16 sm:py-24 bg-gradient-to-b from-white to-gray-50" data-testid="advantages-section">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="text-center mb-12 sm:mb-16">
+            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-[#0047AB] to-[#D4AF37] rounded-full flex items-center justify-center">
+              <Sparkles className="w-8 h-8 text-white" />
+            </div>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
               Pourquoi choisir <span className="text-[#0047AB]">Titelli</span> ?
             </h2>
@@ -1071,35 +1074,57 @@ const HomePage = () => {
 
           <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
             {/* Pour les Clients */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
+            <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-14 h-14 rounded-xl bg-[#0047AB]/10 flex items-center justify-center">
-                  <svg className="w-7 h-7 text-[#0047AB]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
+                  <Users className="w-7 h-7 text-[#0047AB]" />
                 </div>
                 <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Pour les clients</h3>
               </div>
-              <ul className="space-y-4">
+              
+              <div className="space-y-4">
                 {[
-                  { text: "Trouvez facilement les meilleurs prestataires", icon: "✓" },
-                  { text: "Accédez aux avis vérifiés", icon: "✓" },
-                  { text: "Réservez et commandez en ligne", icon: "✓" },
-                  { text: "Paiement sécurisé garanti", icon: "✓" },
-                  { text: "Programme cashback jusqu'à 8%", icon: "✓" },
-                  { text: "Service client disponible 7j/7", icon: "✓" }
+                  { 
+                    title: "Meilleurs prestataires", 
+                    desc: "Trouvez facilement les professionnels de qualité près de chez vous",
+                    icon: Star
+                  },
+                  { 
+                    title: "Avis vérifiés", 
+                    desc: "Consultez les retours authentiques de la communauté",
+                    icon: CheckCircle
+                  },
+                  { 
+                    title: "Réservation en ligne", 
+                    desc: "Réservez et commandez en quelques clics, 24h/24",
+                    icon: Calendar
+                  },
+                  { 
+                    title: "Paiement sécurisé", 
+                    desc: "Transactions protégées et garanties",
+                    icon: Gift
+                  },
+                  { 
+                    title: "Programme Cashback", 
+                    desc: "Gagnez jusqu'à 8% sur vos achats",
+                    icon: Gift
+                  }
                 ].map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-3">
-                    <span className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center flex-shrink-0 text-sm font-bold">
-                      {item.icon}
-                    </span>
-                    <span className="text-gray-700">{item.text}</span>
-                  </li>
+                  <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <div className="w-10 h-10 rounded-lg bg-[#0047AB]/10 flex items-center justify-center flex-shrink-0">
+                      <item.icon className="w-5 h-5 text-[#0047AB]" />
+                    </div>
+                    <div>
+                      <h4 className="text-gray-900 font-semibold text-sm">{item.title}</h4>
+                      <p className="text-gray-500 text-xs mt-0.5">{item.desc}</p>
+                    </div>
+                  </div>
                 ))}
-              </ul>
+              </div>
+              
               <Link 
                 to="/auth" 
-                className="mt-8 w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#0047AB] text-white font-semibold rounded-xl hover:bg-[#0047AB]/90 transition-all"
+                className="mt-6 w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#0047AB] text-white font-semibold rounded-xl hover:bg-[#0047AB]/90 transition-all"
               >
                 S'inscrire gratuitement
                 <ArrowRight className="w-5 h-5" />
@@ -1107,35 +1132,66 @@ const HomePage = () => {
             </div>
 
             {/* Pour les Entreprises */}
-            <div className="bg-gradient-to-br from-[#0a0a0a] to-[#1a1a2e] rounded-2xl p-8 shadow-lg border border-white/10 hover:shadow-xl transition-shadow">
+            <div className="bg-gradient-to-br from-[#0a0a0a] to-[#1a1a2e] rounded-2xl p-6 sm:p-8 shadow-lg border border-white/10 hover:shadow-xl transition-shadow">
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-14 h-14 rounded-xl bg-[#D4AF37]/20 flex items-center justify-center">
-                  <svg className="w-7 h-7 text-[#D4AF37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
+                  <Briefcase className="w-7 h-7 text-[#D4AF37]" />
                 </div>
                 <h3 className="text-xl sm:text-2xl font-bold text-white">Pour les entreprises</h3>
               </div>
-              <ul className="space-y-4">
+              
+              <div className="space-y-4">
                 {[
-                  { text: "Développez votre clientèle locale", icon: "★" },
-                  { text: "Obtenez la certification Titelli", icon: "★" },
-                  { text: "Publiez vos offres d'emploi", icon: "★" },
-                  { text: "Boostez votre visibilité premium", icon: "★" },
-                  { text: "Accès aux outils marketing IA", icon: "★" },
-                  { text: "Support et accompagnement dédié", icon: "★" }
+                  { 
+                    title: "Inscription annuelle", 
+                    desc: "250.- - Activation de votre compte entreprise sur Titelli",
+                    price: "250.-",
+                    icon: Briefcase,
+                    highlight: true
+                  },
+                  { 
+                    title: "Premium livraison instantanée", 
+                    desc: "Répondez aux demandes de vos clients instantanément",
+                    price: "50.-/mois",
+                    icon: Clock
+                  },
+                  { 
+                    title: "Pub Référencement", 
+                    desc: "Soyez référencé dans votre domaine d'activité toute l'année",
+                    price: "100.-/mois",
+                    icon: Star
+                  },
+                  { 
+                    title: "Formations avancées", 
+                    desc: "Les meilleures techniques par des spécialistes Suisses",
+                    price: "200.-",
+                    icon: GraduationCap
+                  },
+                  { 
+                    title: "Liquidation de stock", 
+                    desc: "Nos experts liquident vos produits pour vous",
+                    price: "1'000.-/mois",
+                    icon: Gift
+                  }
                 ].map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-3">
-                    <span className="w-6 h-6 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] flex items-center justify-center flex-shrink-0 text-sm">
-                      {item.icon}
-                    </span>
-                    <span className="text-gray-300">{item.text}</span>
-                  </li>
+                  <div key={idx} className={`flex items-start gap-3 p-3 rounded-xl transition-colors ${item.highlight ? 'bg-[#D4AF37]/20 border border-[#D4AF37]/30' : 'bg-white/5 hover:bg-white/10'}`}>
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${item.highlight ? 'bg-[#D4AF37]/30' : 'bg-white/10'}`}>
+                      <item.icon className={`w-5 h-5 ${item.highlight ? 'text-[#D4AF37]' : 'text-gray-400'}`} />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-white font-semibold text-sm">{item.title}</h4>
+                        <span className="text-[#D4AF37] text-xs font-medium">{item.price}</span>
+                      </div>
+                      <p className="text-gray-400 text-xs mt-0.5">{item.desc}</p>
+                    </div>
+                  </div>
                 ))}
-              </ul>
+              </div>
+              
               <Link 
                 to="/inscription-entreprise" 
-                className="mt-8 w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#D4AF37] to-[#B8960C] text-black font-semibold rounded-xl hover:opacity-90 transition-all"
+                className="mt-6 w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#D4AF37] to-[#B8960C] text-black font-semibold rounded-xl hover:opacity-90 transition-all"
               >
                 Inscrire mon entreprise
                 <ArrowRight className="w-5 h-5" />
