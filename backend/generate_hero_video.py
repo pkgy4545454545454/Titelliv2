@@ -9,7 +9,7 @@ from emergentintegrations.llm.openai.video_generation import OpenAIVideoGenerati
 # Load environment variables
 load_dotenv()
 
-def generateVideo(prompt, output_path='/app/backend/uploads/video_accueil_couple_lausanne.mp4', model="sora-2", size="1792x1024", duration=8):
+def generateVideo(prompt, output_path='/app/backend/uploads/video_accueil_couple_lausanne.mp4', model="sora-2", size="1280x720", duration=8):
     """Generate video with Sora 2"""
     video_gen = OpenAIVideoGeneration(api_key=os.environ['EMERGENT_LLM_KEY'])
     
