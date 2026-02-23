@@ -436,6 +436,14 @@ const EnterpriseRegistrationPage = () => {
   const [selectedEnterprise, setSelectedEnterprise] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   
+  // Check for demo mode to preview popup
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('demo') === 'benefits') {
+      setShowBenefitsPopup(true);
+    }
+  }, []);
+  
   const [formData, setFormData] = useState({
     email: '',
     password: '',
