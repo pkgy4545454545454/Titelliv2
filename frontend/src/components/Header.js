@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useCart } from '../context/CartContext';
 import { notificationsAPI } from '../services/api';
-import { Search, Menu, X, ShoppingBag, Heart, Bell, ChevronDown, Check, CheckCheck, Trash2, Wifi, WifiOff, Image, Video, Sparkles, User, HandCoins } from 'lucide-react';
+import { Search, Menu, X, Heart, Bell, ChevronDown, User, Sparkles, Image, Video, HandCoins, Building2, UserCircle, FileText } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,20 +11,14 @@ import {
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu';
 import { toast } from 'sonner';
-import NotificationCenter from './NotificationCenter';
 import { useNotificationWebSocket } from '../hooks/useWebSocket';
 
 const Header = () => {
   const { user, logout, isAuthenticated, isEnterprise } = useAuth();
-  const { getItemCount } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [notifOpen, setNotifOpen] = useState(false);
-  const [notifLoading, setNotifLoading] = useState(false);
-
-  const cartCount = getItemCount();
 
   // Use WebSocket for real-time notifications
   const {
@@ -35,105 +28,18 @@ const Header = () => {
     markRead: wsMarkRead,
     markAllRead: wsMarkAllRead,
     fetchNotifications: wsFetchNotifications,
-    reconnect: wsReconnect
   } = useNotificationWebSocket();
 
   // State for notifications (fallback to API if WS not connected)
   const [apiNotifications, setApiNotifications] = useState([]);
   const [apiUnreadCount, setApiUnreadCount] = useState(0);
 
-  // Use WebSocket data if connected, otherwise use API data
-  const notifications = wsConnected ? wsNotifications : apiNotifications;
   const unreadCount = wsConnected ? wsUnreadCount : apiUnreadCount;
-
-  // Fetch notifications via API (fallback)
-  const fetchNotificationsAPI = useCallback(async () => {
-    if (!isAuthenticated || wsConnected) return;
-    try {
-      setNotifLoading(true);
-      const response = await notificationsAPI.list();
-      setApiNotifications(response.data.notifications || []);
-      setApiUnreadCount(response.data.unread_count || 0);
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
-    } finally {
-      setNotifLoading(false);
-    }
-  }, [isAuthenticated, wsConnected]);
-
-  useEffect(() => {
-    if (!wsConnected) {
-      fetchNotificationsAPI();
-      const interval = setInterval(fetchNotificationsAPI, 30000);
-      return () => clearInterval(interval);
-    }
-  }, [fetchNotificationsAPI, wsConnected]);
 
   // Close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
-
-  const handleMarkRead = async (notifId) => {
-    if (wsConnected) {
-      wsMarkRead(notifId);
-    } else {
-      try {
-        await notificationsAPI.markRead(notifId);
-        setApiNotifications(apiNotifications.map(n => 
-          n.id === notifId ? { ...n, is_read: true } : n
-        ));
-        setApiUnreadCount(Math.max(0, apiUnreadCount - 1));
-      } catch (error) {
-        console.error('Error marking notification as read:', error);
-      }
-    }
-  };
-
-  const handleMarkAllRead = async () => {
-    if (wsConnected) {
-      wsMarkAllRead();
-      toast.success('Toutes les notifications lues');
-    } else {
-      try {
-        await notificationsAPI.markAllRead();
-        setApiNotifications(apiNotifications.map(n => ({ ...n, is_read: true })));
-        setApiUnreadCount(0);
-        toast.success('Toutes les notifications lues');
-      } catch (error) {
-        toast.error('Erreur');
-      }
-    }
-  };
-
-  const handleRefresh = () => {
-    if (wsConnected) {
-      wsFetchNotifications(50);
-    } else {
-      fetchNotificationsAPI();
-    }
-  };
-
-  const handleNotificationClick = (notif) => {
-    if (!notif.is_read) {
-      handleMarkRead(notif.id);
-    }
-    if (notif.link) {
-      navigate(notif.link);
-      setNotifOpen(false);
-    }
-  };
-
-  const formatTime = (dateStr) => {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diff = (now - date) / 1000;
-    
-    if (diff < 60) return 'À l\'instant';
-    if (diff < 3600) return `Il y a ${Math.floor(diff / 60)} min`;
-    if (diff < 86400) return `Il y a ${Math.floor(diff / 3600)} h`;
-    return date.toLocaleDateString('fr-FR');
-  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -159,8 +65,17 @@ const Header = () => {
         {/* Main Header Bar */}
         <div className="flex items-center justify-between h-14 lg:h-16">
           
-          {/* Left: Hamburger (mobile) + Navigation (desktop) */}
-          <div className="flex items-center gap-6">
+          {/* Left: Logo + Menu + Search */}
+          <div className="flex items-center gap-3 sm:gap-4">
+            {/* Logo à gauche */}
+            <Link to="/" className="flex-shrink-0" data-testid="logo-link">
+              <img 
+                src="/logo_titelli.png" 
+                alt="Titelli"
+                className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
+              />
+            </Link>
+
             {/* Mobile hamburger */}
             <button 
               className="lg:hidden p-1.5 text-white"
@@ -170,8 +85,22 @@ const Header = () => {
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
+            {/* Desktop Search Bar */}
+            <form onSubmit={handleSearch} className="hidden lg:flex items-center">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Rechercher..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-64 pl-10 pr-4 py-2 bg-white/10 border border-white/10 rounded-full text-sm text-white placeholder:text-gray-400 focus:outline-none focus:border-white/30 focus:bg-white/15 transition-all"
+                />
+              </div>
+            </form>
+
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-6">
+            <nav className="hidden lg:flex items-center gap-5 ml-4">
               {navLinks.map((link) => (
                 <Link
                   key={link.path}
@@ -208,10 +137,31 @@ const Header = () => {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              {/* Partenaires - Brochure */}
+              <DropdownMenu>
+                <DropdownMenuTrigger className="text-sm font-medium text-gray-400 hover:text-white flex items-center gap-1 outline-none">
+                  Partenaires
+                  <ChevronDown className="w-3 h-3" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-gray-900 border border-white/10 rounded-xl p-2">
+                  <DropdownMenuItem asChild>
+                    <a 
+                      href={`${process.env.REACT_APP_BACKEND_URL}/api/uploads/Brochure_Titelli_Partenaires.pdf`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-white cursor-pointer"
+                    >
+                      <FileText className="w-4 h-4" />
+                      Brochure Titelli
+                    </a>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </nav>
           </div>
 
-          {/* Right: Actions + Logo */}
+          {/* Right: Actions - Profil uniquement */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Cashback */}
             <Link to="/cashback" className="p-2 text-amber-400 hover:text-amber-300 hidden sm:block" data-testid="cashback-link">
@@ -223,60 +173,53 @@ const Header = () => {
               <Heart className="w-5 h-5" />
             </Link>
 
-            {/* Cart */}
-            <Link to="/cart" className="p-2 text-gray-400 hover:text-white relative">
-              <ShoppingBag className="w-5 h-5" />
-              {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">
-                  {cartCount}
-                </span>
-              )}
-            </Link>
-
-            {/* Auth Button / User Menu */}
-            {isAuthenticated ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger className="p-2 text-gray-400 hover:text-white outline-none">
-                  <User className="w-5 h-5" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-gray-900 border border-white/10 rounded-xl p-2 min-w-[180px]">
-                  <div className="px-3 py-2 text-sm text-white border-b border-white/10 mb-2">
-                    {user?.first_name || 'Mon compte'}
-                  </div>
-                  <DropdownMenuItem asChild>
-                    <Link to={isEnterprise ? '/dashboard/entreprise' : '/dashboard/client'} className="cursor-pointer">
-                      Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/orders" className="cursor-pointer">
-                      Mes Commandes
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-white/10" />
-                  <DropdownMenuItem onClick={logout} className="text-red-400 cursor-pointer">
-                    Déconnexion
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Link 
-                to="/auth" 
-                className="bg-white text-black text-xs sm:text-sm font-medium py-1.5 px-3 sm:px-4 rounded-full hover:bg-gray-200 transition-colors"
-                data-testid="login-btn"
-              >
-                Connexion
-              </Link>
-            )}
-
-            {/* Logo */}
-            <Link to="/" className="ml-1 sm:ml-2" data-testid="logo-link">
-              <img 
-                src="/logo_titelli.png" 
-                alt="Titelli"
-                className="w-8 h-8 sm:w-9 sm:h-9 object-contain"
-              />
-            </Link>
+            {/* Profile Icon - Always visible */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="p-2 text-gray-400 hover:text-white outline-none" data-testid="profile-btn">
+                <User className="w-5 h-5" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-gray-900 border border-white/10 rounded-xl p-2 min-w-[200px]">
+                {isAuthenticated ? (
+                  <>
+                    <div className="px-3 py-2 text-sm text-white border-b border-white/10 mb-2">
+                      {user?.first_name || 'Mon compte'}
+                    </div>
+                    <DropdownMenuItem asChild>
+                      <Link to={isEnterprise ? '/dashboard/entreprise' : '/dashboard/client'} className="cursor-pointer">
+                        Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/orders" className="cursor-pointer">
+                        Mes Commandes
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-white/10" />
+                    <DropdownMenuItem onClick={logout} className="text-red-400 cursor-pointer">
+                      Déconnexion
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <div className="px-3 py-2 text-sm text-gray-400 border-b border-white/10 mb-2">
+                      Choisissez votre profil
+                    </div>
+                    <DropdownMenuItem asChild>
+                      <Link to="/auth?type=client" className="flex items-center gap-2 cursor-pointer">
+                        <UserCircle className="w-4 h-4 text-blue-400" />
+                        <span>Client</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/inscription-entreprise" className="flex items-center gap-2 cursor-pointer">
+                        <Building2 className="w-4 h-4 text-amber-400" />
+                        <span>Entreprise</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -332,7 +275,20 @@ const Header = () => {
                 </Link>
               </div>
 
-              {/* Wishlist mobile */}
+              {/* Partenaires */}
+              <div className="pt-2 border-t border-white/10 mt-2">
+                <a
+                  href={`${process.env.REACT_APP_BACKEND_URL}/api/uploads/Brochure_Titelli_Partenaires.pdf`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block py-3 px-4 rounded-lg text-center text-sm font-medium text-gray-300 hover:bg-white/5"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Brochure Partenaires
+                </a>
+              </div>
+
+              {/* Other links */}
               <div className="pt-2 border-t border-white/10 mt-2">
                 <Link
                   to="/cashback"
