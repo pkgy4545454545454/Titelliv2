@@ -1038,58 +1038,115 @@ const HomePage = () => {
         speed={35}
       />
 
-      {/* Avantages Clients - Section texte simple et élégante */}
+      {/* Avantages Clients Titelli - Section texte complète */}
       <section className="py-16 sm:py-24 bg-white" data-testid="advantages-section">
-        <div className="max-w-5xl mx-auto px-4 md:px-8">
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
           {/* Titre principal */}
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
-              Vos avantages <span className="text-[#0047AB]">clients</span>
+              Avantages clients <span className="text-[#0047AB]">Titelli</span>
             </h2>
             <div className="w-24 h-1 bg-[#D4AF37] mx-auto"></div>
           </div>
 
-          {/* Avantages en grille texte */}
-          <div className="grid md:grid-cols-2 gap-x-16 gap-y-10">
-            {/* Colonne gauche */}
-            <div className="space-y-8">
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Accès aux meilleurs prestataires</h3>
-                <p className="text-gray-600 leading-relaxed">Découvrez une sélection rigoureuse de professionnels qualifiés dans votre région, tous vérifiés et certifiés Titelli.</p>
-              </div>
-              
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Avis authentiques et vérifiés</h3>
-                <p className="text-gray-600 leading-relaxed">Consultez les retours d'expérience réels de notre communauté pour faire vos choix en toute confiance.</p>
-              </div>
-              
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Réservation simplifiée 24h/24</h3>
-                <p className="text-gray-600 leading-relaxed">Réservez vos services et commandez vos produits en quelques clics, à tout moment, depuis votre mobile ou ordinateur.</p>
-              </div>
+          {/* Avantages en grille texte - 3 colonnes */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-10">
+            
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Exposition profil</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">Des photos et vidéos souvenirs de mes expériences préférées.</p>
             </div>
 
-            {/* Colonne droite */}
-            <div className="space-y-8">
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Paiement 100% sécurisé</h3>
-                <p className="text-gray-600 leading-relaxed">Vos transactions sont protégées et garanties. Payez en toute sérénité avec nos solutions de paiement certifiées.</p>
-              </div>
-              
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Programme Cashback exclusif</h3>
-                <p className="text-gray-600 leading-relaxed">Gagnez jusqu'à 8% de cashback sur tous vos achats. Plus vous achetez, plus vous économisez.</p>
-              </div>
-              
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Service client dédié</h3>
-                <p className="text-gray-600 leading-relaxed">Notre équipe est disponible 7j/7 pour vous accompagner et répondre à toutes vos questions.</p>
-              </div>
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Cash-back</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">Un Cash-back perçu pour chacune de mes consommations, réutilisable chez tous mes prestataires préférés et interchangeable avec les personnes de mon choix.</p>
             </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Mode de vie</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">Des objectifs et des suggestions pour venir me réconforter dans mon mode de vie rêvé ! Des opportunités professionnelles, sociales et économiques accessibles 24/24 sur Titelli !</p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Steward 24/24 à ma disposition</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">Un steward répondant à n'importe laquelle de mes demandes les plus inopinées et spontanées et ce 24/24 !</p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Livraison instantanée</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">Ce que je veux, où je le veux, quand je le veux et comme je le veux ! Fais-toi livrer 24/24.</p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Des offres toute l'année</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">Mes prestations préférées aux meilleurs prix du marché.</p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Labellisé ou Certifié</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">Des prestataires de qualité qui garantissent un service en remplissant des conditions d'exigence professionnelles strictes.</p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Fiche d'exigences dans mon profil</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">Soyez exigeant, payez pour ce que vous voulez vraiment. Détaillez-nous toutes vos exigences, et épargnez-vous d'avoir à les répéter à chaque prestation. Titelli vous comprend.</p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Donation</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">Donner c'est bien, recevoir c'est encore mieux ? Et si à chaque fois que tu donnais, tu remplissais le cœur de quelqu'un en remplissant ton cash-back ? S'ouvrir en plus à de nouvelles opportunités professionnelles ? Trouve la cause qui te ressemble.</p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Investissements</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">Investir sur une entreprise ? Accessible en un seul click ! Et je paie avec mon CB si je veux !</p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Formations et opportunités</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">Et si je commençais une nouvelle formation maintenant ! C'est possible avec Titelli. Un emploi à court terme ou long terme. Un apprentissage, un stage ou une formation. Un emploi spontané à la journée, rémunéré le jour même en CB !</p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Proposer ses services</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">Faire des sous avec son savoir-faire c'est possible en tant que particulier !</p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Devenir influenceur</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">Et si chacune de mes sorties étaient rémunérées ? Propose-toi en tant qu'influenceur !</p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Page publicité</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">J'ai accès à une page de publicité 24/24 avec l'opportunité de mieux faire exposer mon profil, mes prestations ou encore mon influence !</p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Fil d'actualité</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">Feed et business news : je suis au courant de tous les événements de ma région.</p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Répertoire complet</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">Cartes bancaires et cartes de fidélités, documents importants, factures ou tout simplement un œil sur mes activités.</p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Messagerie</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">Converser avec mes amis, ma famille, des connaissances, des collègues et même de nouveaux partenaires en affaires... n'aura jamais été aussi simple.</p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Agenda et calendrier</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">Tous mes plannings et prises de rendez-vous sont dispersés ? Plus maintenant. Titelli te permet de joindre en un seul endroit tes rendez-vous professionnels, sociaux et prestataires.</p>
+            </div>
+
           </div>
 
           {/* CTA */}
           <div className="text-center mt-16">
+            <p className="text-gray-600 mb-6 text-lg">Rejoignez Titelli maintenant et inscrivez-vous aussi !</p>
             <Link 
               to="/auth?type=client" 
               className="inline-flex items-center gap-2 px-8 py-4 bg-[#0047AB] text-white font-semibold rounded-xl hover:bg-[#0047AB]/90 transition-all text-lg"
@@ -1098,6 +1155,8 @@ const HomePage = () => {
               <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
+        </div>
+      </section>
         </div>
       </section>
 
