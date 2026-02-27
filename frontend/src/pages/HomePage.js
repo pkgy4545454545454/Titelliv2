@@ -350,7 +350,7 @@ const HomePage = () => {
     <div className="min-h-screen bg-white" data-testid="home-page">
       {/* Hero Section with Panoramic Video */}
       <section className="relative h-screen overflow-hidden" data-testid="hero-section">
-        {/* Video Background - No overlay, no gradient */}
+        {/* Video Background */}
         <div className="absolute inset-0">
           <video
             ref={videoRef}
@@ -396,8 +396,12 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Simple transition */}
-      <div className="h-8 bg-white"></div>
+      {/* Smooth Gradient Transition - Black to White (Canva bubble style) */}
+      <div className="relative h-32">
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-neutral-900 to-neutral-800" style={{ height: '33%' }}></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-neutral-800 via-neutral-600 to-neutral-400" style={{ top: '33%', height: '33%' }}></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-neutral-400 via-neutral-200 to-white" style={{ top: '66%', height: '34%' }}></div>
+      </div>
 
       {/* Search Bar Section - Under Video */}
       <section className="py-4 sm:py-6 bg-white" data-testid="search-section">
