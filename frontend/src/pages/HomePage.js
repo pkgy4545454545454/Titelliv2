@@ -378,7 +378,7 @@ const HomePage = () => {
           </h1>
 
           {/* Category Buttons - 2 rows */}
-          <div className="flex flex-col items-center gap-2 animate-fade-in stagger-2">
+          <div className="flex flex-col items-center gap-1 animate-fade-in stagger-2">
             <div className="flex flex-wrap justify-center gap-2">
               {[
                 { label: 'Services', path: '/services' },
