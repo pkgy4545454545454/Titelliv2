@@ -614,7 +614,7 @@ const HomePage = () => {
             </div>
           ) : (
             /* Fallback to category cards if no products with images */
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
               {[
                 { id: 'montres', name: 'Montres', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600' },
                 { id: 'bijoux', name: 'Bijoux', image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600' },
