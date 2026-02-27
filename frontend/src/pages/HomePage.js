@@ -426,7 +426,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Les meilleurs prestataires Section - Carousel */}
+      {/* Les meilleurs prestataires Section - Grid 4 columns */}
       <section className="py-8 sm:py-12 bg-white" data-testid="top-providers-section">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex items-center justify-between mb-6 sm:mb-8">
@@ -442,23 +442,23 @@ const HomePage = () => {
           </div>
 
           {loading ? (
-            <div className="flex gap-4 sm:gap-6 overflow-hidden">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="flex-shrink-0 w-[280px] sm:w-[350px] h-[280px] sm:h-[320px] bg-gray-100 rounded-xl animate-pulse" />
+                <div key={i} className="h-[280px] sm:h-[320px] bg-gray-100 rounded-xl animate-pulse" />
               ))}
             </div>
           ) : allEnterprises.length > 0 ? (
-            <Carousel itemWidth={280}>
-              {allEnterprises.slice(0, 12).map((enterprise, index) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              {allEnterprises.slice(0, 8).map((enterprise, index) => (
                 <div 
                   key={enterprise.id} 
-                  className="flex-shrink-0 w-[280px] sm:w-[350px] animate-fade-in"
+                  className="animate-fade-in"
                   style={{ animationDelay: `${index * 0.05}s` }}
                 >
                   <EnterpriseCard enterprise={enterprise} />
                 </div>
               ))}
-            </Carousel>
+            </div>
           ) : (
             <p className="text-gray-500 text-center py-8 text-sm">Aucun prestataire avec photo disponible</p>
           )}
