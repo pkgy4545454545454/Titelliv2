@@ -401,11 +401,12 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Smooth Gradient Transition - No visible limits */}
+      {/* Smooth Gradient Transition - No visible limits, seamless */}
       <div 
-        className="h-20"
+        className="h-12"
         style={{ 
-          background: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(15,15,26,0.8) 20%, rgba(30,30,50,0.4) 50%, rgba(255,255,255,0.2) 75%, rgba(255,255,255,1) 100%)'
+          background: 'linear-gradient(to bottom, #000 0%, #111 40%, #eee 80%, #fff 100%)',
+          filter: 'blur(1px)'
         }}
       ></div>
 
