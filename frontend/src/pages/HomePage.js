@@ -377,30 +377,35 @@ const HomePage = () => {
             <span className="gold-gradient">de ta région</span>
           </h1>
 
-          {/* Category Buttons */}
-          <div className="inline-flex flex-wrap justify-center gap-3 animate-fade-in stagger-2">
-            {mainCategories.map((cat) => (
+          {/* Category Buttons - Small, no icons */}
+          <div className="inline-flex flex-wrap justify-center gap-2 animate-fade-in stagger-2">
+            {[
+              { label: 'Services', path: '/services' },
+              { label: 'Produits', path: '/products' },
+              { label: 'Certifiés', path: '/certifies' },
+              { label: 'Labelisés', path: '/labellises' },
+              { label: 'Premium', path: '/premium' },
+              { label: 'Tendances', path: '/tendances' },
+              { label: 'Guests', path: '/guests' },
+              { label: 'Offres', path: '/offres' },
+            ].map((cat) => (
               <Link
-                key={cat.id}
+                key={cat.label}
                 to={cat.path}
-                className="inline-block px-6 py-3 bg-black/70 backdrop-blur-lg border border-white/10 rounded-lg text-white font-medium hover:bg-white hover:text-black transition-all duration-300"
-                data-testid={`hero-btn-${cat.id}`}
+                className="px-4 py-2 bg-black/50 backdrop-blur-md border border-white/20 rounded-full text-white text-sm hover:bg-white hover:text-black transition-all duration-300"
               >
-                <span className="flex items-center gap-2">
-                  <cat.icon className="w-5 h-5" />
-                  {cat.label}
-                </span>
+                {cat.label}
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Smooth Gradient Transition - Elegant, thin */}
+      {/* Smooth Gradient Transition - No visible limits */}
       <div 
-        className="h-16"
+        className="h-20"
         style={{ 
-          background: 'linear-gradient(180deg, #000000 0%, #0f0f1a 50%, #ffffff 100%)'
+          background: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(15,15,26,0.8) 20%, rgba(30,30,50,0.4) 50%, rgba(255,255,255,0.2) 75%, rgba(255,255,255,1) 100%)'
         }}
       ></div>
 
