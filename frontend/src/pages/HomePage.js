@@ -548,9 +548,9 @@ const HomePage = () => {
             ))}
           </div>
 
-          {/* Service Cards Grid - 4 columns x 5 rows */}
+          {/* Service Cards Grid - 5 columns */}
           {offres.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
               {offres.slice(0, 20).map((item, index) => (
                 <div key={item.id}>
                   <ServiceProductCard item={item} />
@@ -558,7 +558,7 @@ const HomePage = () => {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map((i) => (
                 <div key={i} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
                   <div className="h-40 sm:h-56 bg-gray-100 animate-pulse" />
