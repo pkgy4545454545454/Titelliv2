@@ -430,7 +430,7 @@ const HomePage = () => {
       {/* Les meilleurs prestataires Section - Grid 5 columns */}
       <section className="py-8 sm:py-12 bg-white" data-testid="top-providers-section">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="flex items-center justify-between mb-6 sm:mb-8">
+          <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold text-gray-900">
               Les meilleurs prestataires de votre région
             </h2>
@@ -438,6 +438,27 @@ const HomePage = () => {
               Voir tout
               <ArrowRight className="w-5 h-5" />
             </Link>
+          </div>
+
+          {/* Category Tags - Small, no icons */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            {[
+              { label: 'Services', path: '/services' },
+              { label: 'Certifiés', path: '/certifies' },
+              { label: 'Labelisés', path: '/labellises' },
+              { label: 'Premium', path: '/premium' },
+              { label: 'Tendances', path: '/tendances' },
+              { label: 'Guests', path: '/guests' },
+              { label: 'Offres', path: '/offres' },
+            ].map((cat) => (
+              <Link
+                key={cat.label}
+                to={cat.path}
+                className="px-3 py-1 text-xs text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+              >
+                {cat.label}
+              </Link>
+            ))}
           </div>
 
           {loading ? (
