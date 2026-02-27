@@ -595,13 +595,13 @@ const HomePage = () => {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map((i) => (
-                <div key={i} className="h-[320px] bg-gray-100 rounded-xl animate-pulse" />
+                <div key={i} className="h-[280px] bg-gray-100 rounded-xl animate-pulse" />
               ))}
             </div>
           ) : bestProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
               {bestProducts.slice(0, 20).map((product, index) => (
                 <div 
                   key={product.id || product._id} 
