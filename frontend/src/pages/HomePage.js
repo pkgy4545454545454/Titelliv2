@@ -650,7 +650,7 @@ const HomePage = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              {guests.slice(0, 8).map((enterprise, index) => (
+              {guests.slice(0, 20).map((enterprise, index) => (
                 <div key={enterprise.id}>
                   <EnterpriseCard enterprise={enterprise} />
                 </div>
