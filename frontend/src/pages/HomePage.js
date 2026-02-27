@@ -397,11 +397,12 @@ const HomePage = () => {
       </section>
 
       {/* Smooth Gradient Transition - Black to White (Canva bubble style) */}
-      <div className="relative h-32">
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-neutral-900 to-neutral-800" style={{ height: '33%' }}></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-neutral-800 via-neutral-600 to-neutral-400" style={{ top: '33%', height: '33%' }}></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-neutral-400 via-neutral-200 to-white" style={{ top: '66%', height: '34%' }}></div>
-      </div>
+      <div 
+        className="h-40" 
+        style={{ 
+          background: 'linear-gradient(to bottom, #000000 0%, #1a1a1a 15%, #333333 30%, #666666 50%, #999999 65%, #cccccc 80%, #ffffff 100%)'
+        }}
+      ></div>
 
       {/* Search Bar Section - Under Video */}
       <section className="py-4 sm:py-6 bg-white" data-testid="search-section">
