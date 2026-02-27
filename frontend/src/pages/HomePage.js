@@ -377,26 +377,40 @@ const HomePage = () => {
             <span className="gold-gradient">de ta région</span>
           </h1>
 
-          {/* Category Buttons - Small, no icons */}
-          <div className="inline-flex flex-wrap justify-center gap-2 animate-fade-in stagger-2">
-            {[
-              { label: 'Services', path: '/services' },
-              { label: 'Produits', path: '/products' },
-              { label: 'Certifiés', path: '/certifies' },
-              { label: 'Labelisés', path: '/labellises' },
-              { label: 'Premium', path: '/premium' },
-              { label: 'Tendances', path: '/tendances' },
-              { label: 'Guests', path: '/guests' },
-              { label: 'Offres', path: '/offres' },
-            ].map((cat) => (
-              <Link
-                key={cat.label}
-                to={cat.path}
-                className="px-4 py-2 bg-black/50 backdrop-blur-md border border-white/20 rounded-full text-white text-sm hover:bg-white hover:text-black transition-all duration-300"
-              >
-                {cat.label}
-              </Link>
-            ))}
+          {/* Category Buttons - 2 rows */}
+          <div className="flex flex-col items-center gap-2 animate-fade-in stagger-2">
+            <div className="flex flex-wrap justify-center gap-2">
+              {[
+                { label: 'Services', path: '/services' },
+                { label: 'Produits', path: '/products' },
+                { label: 'Certifiés', path: '/certifies' },
+                { label: 'Labelisés', path: '/labellises' },
+              ].map((cat) => (
+                <Link
+                  key={cat.label}
+                  to={cat.path}
+                  className="px-4 py-2 bg-black/50 backdrop-blur-md border border-white/20 rounded-full text-white text-sm hover:bg-white hover:text-black transition-all duration-300"
+                >
+                  {cat.label}
+                </Link>
+              ))}
+            </div>
+            <div className="flex flex-wrap justify-center gap-2">
+              {[
+                { label: 'Premium', path: '/premium' },
+                { label: 'Tendances', path: '/tendances' },
+                { label: 'Guests', path: '/guests' },
+                { label: 'Offres', path: '/offres' },
+              ].map((cat) => (
+                <Link
+                  key={cat.label}
+                  to={cat.path}
+                  className="px-4 py-2 bg-black/50 backdrop-blur-md border border-white/20 rounded-full text-white text-sm hover:bg-white hover:text-black transition-all duration-300"
+                >
+                  {cat.label}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </section>
