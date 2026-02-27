@@ -599,7 +599,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Tendances Actuelles - Carousel */}
+      {/* Tendances Actuelles - Grid 4 columns */}
       {tendances.length > 0 && (
         <section className="py-8 sm:py-16 bg-gray-50" data-testid="tendances-section">
           <div className="max-w-7xl mx-auto px-4 md:px-8">
@@ -615,18 +615,18 @@ const HomePage = () => {
               </Link>
             </div>
 
-            <Carousel itemWidth={280}>
-              {tendances.map((enterprise, index) => (
-                <div key={enterprise.id} className="flex-shrink-0 w-[280px] sm:w-[320px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              {tendances.slice(0, 8).map((enterprise, index) => (
+                <div key={enterprise.id}>
                   <EnterpriseCard enterprise={enterprise} />
                 </div>
               ))}
-            </Carousel>
+            </div>
           </div>
         </section>
       )}
 
-      {/* Guests du moment - Carousel */}
+      {/* Guests du moment - Grid 4 columns */}
       {guests.length > 0 && (
         <section className="py-8 sm:py-16 bg-white" data-testid="guests-section">
           <div className="max-w-7xl mx-auto px-4 md:px-8">
@@ -642,18 +642,18 @@ const HomePage = () => {
               </Link>
             </div>
 
-            <Carousel itemWidth={280}>
-              {guests.map((enterprise, index) => (
-                <div key={enterprise.id} className="flex-shrink-0 w-[280px] sm:w-[320px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              {guests.slice(0, 8).map((enterprise, index) => (
+                <div key={enterprise.id}>
                   <EnterpriseCard enterprise={enterprise} />
                 </div>
               ))}
-            </Carousel>
+            </div>
           </div>
         </section>
       )}
 
-      {/* Premium Section - Carousel */}
+      {/* Premium Section - Grid 4 columns */}
       {premium.length > 0 && (
         <section className="py-8 sm:py-16 bg-gray-50" data-testid="premium-section">
           <div className="max-w-7xl mx-auto px-4 md:px-8">
@@ -669,13 +669,13 @@ const HomePage = () => {
               </Link>
             </div>
 
-            <Carousel itemWidth={280}>
-              {premium.map((enterprise, index) => (
-                <div key={enterprise.id} className="flex-shrink-0 w-[280px] sm:w-[320px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              {premium.slice(0, 8).map((enterprise, index) => (
+                <div key={enterprise.id}>
                   <EnterpriseCard enterprise={enterprise} />
                 </div>
               ))}
-            </Carousel>
+            </div>
           </div>
         </section>
       )}
