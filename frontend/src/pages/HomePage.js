@@ -470,7 +470,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Services Section - Carousel */}
+      {/* Services Section - Grid 4 columns */}
       <section className="py-8 sm:py-16 bg-gray-50" data-testid="services-section">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex items-center justify-between mb-6 sm:mb-8">
@@ -499,19 +499,19 @@ const HomePage = () => {
             ))}
           </div>
 
-          {/* Service Cards Carousel */}
+          {/* Service Cards Grid */}
           {offres.length > 0 ? (
-            <Carousel itemWidth={280}>
-              {offres.map((item, index) => (
-                <div key={item.id} className="flex-shrink-0 w-[280px] sm:w-[320px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              {offres.slice(0, 8).map((item, index) => (
+                <div key={item.id}>
                   <ServiceProductCard item={item} />
                 </div>
               ))}
-            </Carousel>
+            </div>
           ) : (
-            <div className="flex gap-4 sm:gap-6 overflow-hidden">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex-shrink-0 w-[280px] sm:w-[320px] bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
                   <div className="h-40 sm:h-56 bg-gray-100 animate-pulse" />
                   <div className="p-4 sm:p-5 space-y-3">
                     <div className="h-5 sm:h-6 bg-gray-100 rounded animate-pulse" />
