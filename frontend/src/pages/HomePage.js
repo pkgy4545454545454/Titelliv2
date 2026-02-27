@@ -396,13 +396,55 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Smooth Gradient Transition - Less black, subtle blue touch */}
-      <div 
-        className="h-32" 
-        style={{ 
-          background: 'linear-gradient(to bottom, #000000 0%, #1a1a2a 15%, #3a3a4a 35%, #6a6a7a 55%, #9a9aaa 72%, #c5c5d5 85%, #ffffff 100%)'
-        }}
-      ></div>
+      {/* Smooth Gradient Transition - Canva bubble style floating effect */}
+      <div className="relative h-48 overflow-hidden">
+        {/* Base gradient */}
+        <div 
+          className="absolute inset-0"
+          style={{ 
+            background: 'linear-gradient(180deg, #000000 0%, #0a0a15 30%, #ffffff 100%)'
+          }}
+        ></div>
+        {/* Floating bubble 1 */}
+        <div 
+          className="absolute -left-20 top-0 w-96 h-96 rounded-full opacity-60"
+          style={{ 
+            background: 'radial-gradient(circle, #1a1a2a 0%, transparent 70%)',
+            filter: 'blur(40px)'
+          }}
+        ></div>
+        {/* Floating bubble 2 */}
+        <div 
+          className="absolute right-0 -top-10 w-80 h-80 rounded-full opacity-50"
+          style={{ 
+            background: 'radial-gradient(circle, #2a2a3a 0%, transparent 70%)',
+            filter: 'blur(50px)'
+          }}
+        ></div>
+        {/* Floating bubble 3 - subtle blue */}
+        <div 
+          className="absolute left-1/3 top-10 w-72 h-72 rounded-full opacity-30"
+          style={{ 
+            background: 'radial-gradient(circle, #1a2a4a 0%, transparent 70%)',
+            filter: 'blur(60px)'
+          }}
+        ></div>
+        {/* Floating bubble 4 */}
+        <div 
+          className="absolute right-1/4 top-20 w-64 h-64 rounded-full opacity-40"
+          style={{ 
+            background: 'radial-gradient(circle, #3a3a4a 0%, transparent 70%)',
+            filter: 'blur(45px)'
+          }}
+        ></div>
+        {/* Bottom white fade */}
+        <div 
+          className="absolute bottom-0 left-0 right-0 h-24"
+          style={{ 
+            background: 'linear-gradient(to top, #ffffff 0%, transparent 100%)'
+          }}
+        ></div>
+      </div>
 
       {/* Search Bar Section - Under Video */}
       <section className="py-4 sm:py-6 bg-white" data-testid="search-section">
