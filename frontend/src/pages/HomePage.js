@@ -396,47 +396,13 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Smooth Gradient Transition - Canva watercolor style */}
-      <div className="relative h-56 overflow-hidden">
-        {/* Base soft gradient */}
-        <div 
-          className="absolute inset-0"
-          style={{ 
-            background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 20%, #f5f5f5 60%, #ffffff 100%)'
-          }}
-        ></div>
-        {/* Soft color wash - top left dark */}
-        <div 
-          className="absolute -top-20 -left-20 w-[500px] h-[500px]"
-          style={{ 
-            background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, transparent 60%)',
-            filter: 'blur(80px)'
-          }}
-        ></div>
-        {/* Soft color wash - top right subtle blue-gray */}
-        <div 
-          className="absolute -top-10 -right-20 w-[450px] h-[450px]"
-          style={{ 
-            background: 'radial-gradient(ellipse at center, rgba(30,30,50,0.3) 0%, transparent 60%)',
-            filter: 'blur(90px)'
-          }}
-        ></div>
-        {/* Center soft transition */}
-        <div 
-          className="absolute top-1/3 left-1/3 w-[400px] h-[400px]"
-          style={{ 
-            background: 'radial-gradient(ellipse at center, rgba(50,50,60,0.2) 0%, transparent 70%)',
-            filter: 'blur(100px)'
-          }}
-        ></div>
-        {/* Bottom fade to white */}
-        <div 
-          className="absolute bottom-0 left-0 right-0 h-32"
-          style={{ 
-            background: 'linear-gradient(to top, #ffffff 0%, rgba(255,255,255,0.8) 40%, transparent 100%)'
-          }}
-        ></div>
-      </div>
+      {/* Smooth Gradient Transition - Simple floating */}
+      <div 
+        className="h-48"
+        style={{ 
+          background: 'linear-gradient(180deg, #000000 0%, #1a1a1a 30%, #4a4a4a 55%, #9a9a9a 75%, #d5d5d5 90%, #ffffff 100%)'
+        }}
+      ></div>
 
       {/* Search Bar Section - Under Video */}
       <section className="py-4 sm:py-6 bg-white" data-testid="search-section">
@@ -461,17 +427,9 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Les meilleurs prestataires Section - Grid 4 columns */}
+      {/* Les meilleurs prestataires Section - Grid 5 columns */}
       <section className="py-8 sm:py-12 bg-white" data-testid="top-providers-section">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          {/* Gradient bar above title */}
-          <div 
-            className="h-2 rounded-full mb-6"
-            style={{ 
-              background: 'linear-gradient(to right, #000000 0%, #0a0a0f 20%, #1a1a2a 40%, #2a2a3a 55%, #4a4a5a 70%, #8a8a9a 85%, #d0d0e0 100%)'
-            }}
-          ></div>
-          
           <div className="flex items-center justify-between mb-6 sm:mb-8">
             <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold text-gray-900">
               Les meilleurs prestataires de votre région
