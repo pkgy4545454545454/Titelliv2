@@ -396,11 +396,11 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Smooth Gradient Transition - Black to White with subtle blue touch */}
+      {/* Smooth Gradient Transition - Less black, subtle blue touch */}
       <div 
-        className="h-40" 
+        className="h-32" 
         style={{ 
-          background: 'linear-gradient(to bottom, #000000 0%, #0a0a0f 20%, #1a1a2a 40%, #2a2a3a 55%, #4a4a5a 70%, #8a8a9a 82%, #d0d0e0 92%, #ffffff 100%)'
+          background: 'linear-gradient(to bottom, #000000 0%, #1a1a2a 15%, #3a3a4a 35%, #6a6a7a 55%, #9a9aaa 72%, #c5c5d5 85%, #ffffff 100%)'
         }}
       ></div>
 
