@@ -396,52 +396,44 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Smooth Gradient Transition - Canva bubble style floating effect */}
-      <div className="relative h-48 overflow-hidden">
-        {/* Base gradient */}
+      {/* Smooth Gradient Transition - Canva watercolor style */}
+      <div className="relative h-56 overflow-hidden">
+        {/* Base soft gradient */}
         <div 
           className="absolute inset-0"
           style={{ 
-            background: 'linear-gradient(180deg, #000000 0%, #0a0a15 30%, #ffffff 100%)'
+            background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 20%, #f5f5f5 60%, #ffffff 100%)'
           }}
         ></div>
-        {/* Floating bubble 1 */}
+        {/* Soft color wash - top left dark */}
         <div 
-          className="absolute -left-20 top-0 w-96 h-96 rounded-full opacity-60"
+          className="absolute -top-20 -left-20 w-[500px] h-[500px]"
           style={{ 
-            background: 'radial-gradient(circle, #1a1a2a 0%, transparent 70%)',
-            filter: 'blur(40px)'
+            background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, transparent 60%)',
+            filter: 'blur(80px)'
           }}
         ></div>
-        {/* Floating bubble 2 */}
+        {/* Soft color wash - top right subtle blue-gray */}
         <div 
-          className="absolute right-0 -top-10 w-80 h-80 rounded-full opacity-50"
+          className="absolute -top-10 -right-20 w-[450px] h-[450px]"
           style={{ 
-            background: 'radial-gradient(circle, #2a2a3a 0%, transparent 70%)',
-            filter: 'blur(50px)'
+            background: 'radial-gradient(ellipse at center, rgba(30,30,50,0.3) 0%, transparent 60%)',
+            filter: 'blur(90px)'
           }}
         ></div>
-        {/* Floating bubble 3 - subtle blue */}
+        {/* Center soft transition */}
         <div 
-          className="absolute left-1/3 top-10 w-72 h-72 rounded-full opacity-30"
+          className="absolute top-1/3 left-1/3 w-[400px] h-[400px]"
           style={{ 
-            background: 'radial-gradient(circle, #1a2a4a 0%, transparent 70%)',
-            filter: 'blur(60px)'
+            background: 'radial-gradient(ellipse at center, rgba(50,50,60,0.2) 0%, transparent 70%)',
+            filter: 'blur(100px)'
           }}
         ></div>
-        {/* Floating bubble 4 */}
+        {/* Bottom fade to white */}
         <div 
-          className="absolute right-1/4 top-20 w-64 h-64 rounded-full opacity-40"
+          className="absolute bottom-0 left-0 right-0 h-32"
           style={{ 
-            background: 'radial-gradient(circle, #3a3a4a 0%, transparent 70%)',
-            filter: 'blur(45px)'
-          }}
-        ></div>
-        {/* Bottom white fade */}
-        <div 
-          className="absolute bottom-0 left-0 right-0 h-24"
-          style={{ 
-            background: 'linear-gradient(to top, #ffffff 0%, transparent 100%)'
+            background: 'linear-gradient(to top, #ffffff 0%, rgba(255,255,255,0.8) 40%, transparent 100%)'
           }}
         ></div>
       </div>
