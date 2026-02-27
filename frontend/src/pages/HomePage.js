@@ -396,11 +396,11 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Smooth Gradient Transition - Black to White (Canva bubble style) */}
+      {/* Smooth Gradient Transition - Black to Blue to White (no gray) */}
       <div 
         className="h-40" 
         style={{ 
-          background: 'linear-gradient(to bottom, #000000 0%, #1a1a1a 15%, #333333 30%, #666666 50%, #999999 65%, #cccccc 80%, #ffffff 100%)'
+          background: 'linear-gradient(to bottom, #000000 0%, #0a0a1a 20%, #0047AB 50%, #4d8bd4 70%, #a8c8e8 85%, #ffffff 100%)'
         }}
       ></div>
 
@@ -427,17 +427,26 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Les meilleurs prestataires Section - Grid 4 columns */}
+      {/* Les meilleurs prestataires Section - Grid 4 columns with gradient header */}
       <section className="py-8 sm:py-12 bg-white" data-testid="top-providers-section">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="flex items-center justify-between mb-6 sm:mb-8">
-            <div>
-              <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold text-gray-900">
+          {/* Header with gradient background */}
+          <div 
+            className="rounded-2xl p-6 mb-6 sm:mb-8"
+            style={{ 
+              background: 'linear-gradient(135deg, #000000 0%, #0a0a1a 30%, #0047AB 70%, #4d8bd4 100%)'
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold text-white">
                 Les meilleurs prestataires de votre région
               </h2>
+              <Link to="/entreprises" className="hidden md:flex items-center gap-2 text-white/80 hover:text-white font-medium transition-colors">
+                Voir tout
+                <ArrowRight className="w-5 h-5" />
+              </Link>
             </div>
-            <Link to="/entreprises" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors">
-              Voir tout
+          </div>
               <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
