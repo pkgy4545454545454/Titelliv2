@@ -6,7 +6,7 @@ import EnterpriseCard from '../components/EnterpriseCard';
 import ServiceProductCard from '../components/ServiceProductCard';
 import ScrollingReviews from '../components/ScrollingReviews';
 import { toast } from 'sonner';
-import { Menu,  Heart, Bell, ChevronDown, User, Image, Video, HandCoins, Building2, UserCircle } from 'lucide-react';
+
 // Carousel Component with light theme - Responsive
 const Carousel = ({ children, itemWidth = 280 }) => {
   const carouselRef = useRef(null);
@@ -336,18 +336,7 @@ const HomePage = () => {
     }
   };
 
-  const enterprisesByCategory = allEnterprises.reduce((acc, enterprise) => {
-    const category = enterprise.category || 'Autres';
-    if (!acc[category]) acc[category] = [];
-    acc[category].push(enterprise);
-    return acc;
-  }, {});
-
-
-
-
-
-  const panoramicVideoUrl = `./head.mp4`;
+  const panoramicVideoUrl = `${process.env.REACT_APP_BACKEND_URL}/api/uploads/video_lausanne_107_v2.mp4`;
   const heroImage = 'https://images.unsplash.com/photo-1733950489642-bd1a7c3e69bb?w=1920&q=80';
 
   const mainCategories = [
@@ -360,7 +349,7 @@ const HomePage = () => {
   return (
     <div className="min-h-screen bg-white" data-testid="home-page">
       {/* Hero Section with Panoramic Video */}
-      <section className="relative h-[70vh]  overflow-hidden" data-testid="hero-section">
+      <section className="relative h-screen overflow-hidden" data-testid="hero-section">
         {/* Video Background */}
         <div className="absolute inset-0">
           <video
@@ -424,25 +413,23 @@ const HomePage = () => {
             </div>
           </div>
         </div>
-
-
-
       </section>
 
+      {/* Smooth Gradient Transition - Long, blurred, no limits */}
+      <div 
+        className="h-40"
+        style={{ 
+          background: 'linear-gradient(to bottom, #000 0%, #0a0a0a 10%, #151515 25%, #252525 40%, #505050 55%, #909090 70%, #c0c0c0 82%, #e8e8e8 92%, #fff 100%)',
+          filter: 'blur(8px)',
+          transform: 'scaleY(1.2)',
+          marginTop: '-10px',
+          marginBottom: '-10px'
+        }}
+      ></div>
 
       {/* Search Bar Section - Under Video */}
       <section className="py-4 sm:py-6 bg-white" data-testid="search-section">
         <div className="max-w-2xl mx-auto px-4">
-            <Link to="/" className="text-amber-400 hover:text-amber-300 hidden sm:inline-block" data-testid="logo-link">
-                        <img 
-                          src="/logo_titellid.png" 
-                          alt="Titelli"
-                          className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
-                        />
-                      </Link>
-           <Link to="/cashback" className="p-2 text-amber-400 hover:text-amber-300 hidden sm:inline-block" data-testid="cashback-link">
-              <HandCoins className="w-5 h-5" />
-            </Link>
           <form onSubmit={handleSearch} className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
@@ -476,6 +463,26 @@ const HomePage = () => {
             </Link>
           </div>
 
+          {/* Category Tags - Small, no icons */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            {[
+              { label: 'Services', path: '/services' },
+              { label: 'Certifiés', path: '/certifies' },
+              { label: 'Labelisés', path: '/labellises' },
+              { label: 'Premium', path: '/premium' },
+              { label: 'Tendances', path: '/tendances' },
+              { label: 'Guests', path: '/guests' },
+              { label: 'Offres', path: '/offres' },
+            ].map((cat) => (
+              <Link
+                key={cat.label}
+                to={cat.path}
+                className="px-3 py-1 text-xs text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+              >
+                {cat.label}
+              </Link>
+            ))}
+          </div>
 
           {loading ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
@@ -485,13 +492,14 @@ const HomePage = () => {
             </div>
           ) : allEnterprises.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-           {Object.entries(enterprisesByCategory).map(([category, list]) => (
-              <div key={category}>
-                <EnterpriseCard
-                  category={category}
-                  enterprises={list}
-                />
-              </div>
+              {allEnterprises.slice(0, 20).map((enterprise, index) => (
+                <div 
+                  key={enterprise.id} 
+                  className="animate-fade-in"
+                  style={{ animationDelay: `${index * 0.05}s` }}
+                >
+                  <EnterpriseCard enterprise={enterprise} />
+                </div>
               ))}
             </div>
           ) : (
@@ -1219,5 +1227,3 @@ const HomePage = () => {
 };
 
 export default HomePage;
-
-
