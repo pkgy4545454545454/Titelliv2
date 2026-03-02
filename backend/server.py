@@ -1329,6 +1329,7 @@ async def create_enterprise(data: EnterpriseCreate, current_user: dict = Depends
 @api_router.get("/enterprises")
 async def list_enterprises(
     category: Optional[str] = None,
+    subcategory: Optional[str] = None,
     is_certified: Optional[bool] = None,
     is_labeled: Optional[bool] = None,
     is_premium: Optional[bool] = None,
@@ -1338,7 +1339,10 @@ async def list_enterprises(
 ):
     query = {}
     if category:
-        query["category"] = category
+        # Case insensitive search for category
+        query["category"] = {"$regex": f"^{category}$", "$options": "i"}
+    if subcategory:
+        query["subcategory"] = {"$regex": subcategory, "$options": "i"}
     if is_certified is not None:
         query["is_certified"] = is_certified
     if is_labeled is not None:
@@ -1437,6 +1441,122 @@ async def get_all_enterprises_public_route(
             ent["status"] = "bientot_disponible" if ent.get("activation_status") != "active" else "disponible"
     
     return {"enterprises": enterprises, "count": len(enterprises)}
+
+
+# ============ ENTERPRISE CATEGORIES WITH SUBCATEGORIES ============
+
+ENTERPRISE_SUBCATEGORIES = {
+    'Restaurant': ['Cuisine française', 'Cuisine italienne', 'Cuisine chinoise', 'Cuisine japonaise', 'Cuisine thaï', 'Cuisine indienne', 'Cuisine mexicaine', 'Cuisine libanaise', 'Cuisine grecque', 'Fast food', 'Gastronomique', 'Végétarien/Vegan', 'Pizzeria', 'Sushi', 'Brasserie'],
+    'Restauration': ['Cuisine française', 'Cuisine italienne', 'Cuisine chinoise', 'Cuisine japonaise', 'Cuisine thaï', 'Cuisine indienne', 'Cuisine mexicaine', 'Cuisine libanaise', 'Cuisine grecque', 'Fast food', 'Gastronomique', 'Végétarien/Vegan', 'Pizzeria', 'Sushi', 'Brasserie'],
+    'Personnel de maison': ['Femme de ménage', 'Majordome', 'Cuisinier privé', 'Jardinier', 'Gouvernante', 'Chauffeur privé', 'Nounou', 'Aide à domicile', 'Agent multiservices', 'Gardien'],
+    'Soins esthétiques': ['Épilation', 'Soins du visage', 'Soins du corps', 'Maquillage', 'Manucure', 'Pédicure', 'Massage', 'Bronzage', 'Extension cils', 'Microblading'],
+    'Institut De Beaute': ['Épilation', 'Soins du visage', 'Soins du corps', 'Maquillage', 'Manucure', 'Pédicure', 'Massage', 'Bronzage', 'Extension cils', 'Microblading'],
+    'Coiffeur': ['Coupe femme', 'Coupe homme', 'Coloration', 'Mèches', 'Lissage', 'Permanente', 'Extensions', 'Coiffure mariage', 'Barbier', 'Coiffure enfant'],
+    'Coiffure & Beauté': ['Coupe femme', 'Coupe homme', 'Coloration', 'Mèches', 'Lissage', 'Permanente', 'Extensions', 'Coiffure mariage', 'Barbier', 'Coiffure enfant'],
+    'Cours de sport': ['Fitness', 'Yoga', 'Pilates', 'CrossFit', 'Boxe', 'Arts martiaux', 'Natation', 'Tennis', 'Golf', 'Danse', 'Musculation', 'Coach personnel'],
+    'Fitness': ['Cardio', 'Musculation', 'CrossFit', 'HIIT', 'Spinning', 'Zumba', 'Body pump', 'Stretching'],
+    'Activités': ['Escape game', 'Bowling', 'Karting', 'Laser game', 'Cinéma', 'Théâtre', 'Parc attractions', 'Zoo', 'Musée', 'Concert'],
+    'Professionnels de santé': ['Médecin généraliste', 'Dentiste', 'Kinésithérapeute', 'Ostéopathe', 'Psychologue', 'Nutritionniste', 'Podologue', 'Ophtalmologue', 'Dermatologue', 'Cardiologue'],
+    'Medecin': ['Généraliste', 'Spécialiste', 'Urgentiste', 'Pédiatre', 'Gynécologue'],
+    'Agent immobilier': ['Vente', 'Location', 'Gestion locative', 'Estimation', 'Immobilier de luxe', 'Immobilier commercial', 'Neuf', 'Ancien'],
+    'Agence Immobiliere': ['Vente', 'Location', 'Gestion locative', 'Estimation', 'Immobilier de luxe', 'Immobilier commercial', 'Neuf', 'Ancien'],
+    'Sécurité': ['Gardiennage', 'Vidéosurveillance', 'Alarme', 'Agent de sécurité', 'Protection rapprochée', 'Sécurité événementielle', 'Cybersécurité'],
+    'Professionnels de transports': ['Taxi', 'VTC', 'Chauffeur privé', 'Transport de marchandises', 'Déménagement', 'Livraison', 'Location véhicule', 'Transport médical'],
+    'Formation': ['Formation continue', 'Certification', 'Langues', 'Informatique', 'Management', 'Comptabilité', 'Marketing'],
+    'Professionnels administratifs': ['Secrétariat', 'Comptabilité', 'Ressources humaines', 'Traduction', 'Domiciliation', 'Services postaux'],
+    'Professionnels juridiques': ['Avocat', 'Notaire', 'Huissier', 'Conseil juridique', 'Médiation', 'Droit des affaires', 'Droit de la famille'],
+    'Avocat': ['Droit pénal', 'Droit civil', 'Droit des affaires', 'Droit de la famille', 'Droit du travail', 'Droit immobilier', 'Droit fiscal'],
+    'Informatique': ['Développement web', 'Développement mobile', 'Maintenance', 'Conseil IT', 'Cybersécurité', 'Cloud', 'Data science', 'Support technique'],
+    'Bijouterie': ['Bagues', 'Colliers', 'Bracelets', "Boucles d'oreilles", 'Montres', 'Bijoux sur mesure', 'Réparation', 'Gravure'],
+    'Bijouteries': ['Bagues', 'Colliers', 'Bracelets', "Boucles d'oreilles", 'Montres', 'Bijoux sur mesure', 'Réparation', 'Gravure'],
+    'Bijouteries & Horlogerie': ['Montres de luxe', 'Bijoux', 'Réparation montres', 'Gravure', 'Estimation', 'Rachat'],
+    'Horlogerie': ['Montres de luxe', 'Montres sport', 'Montres connectées', 'Réparation', 'Estimation', 'Rachat'],
+    'Garage': ['Réparation', 'Entretien', 'Carrosserie', 'Pneus', 'Vidange', 'Diagnostic', 'Climatisation auto'],
+    'Automobile & Garage': ['Réparation', 'Entretien', 'Carrosserie', 'Pneus', 'Vidange', 'Diagnostic', 'Vente véhicules'],
+    'Boulangerie': ['Pain traditionnel', 'Viennoiseries', 'Pâtisseries', 'Snacking', 'Pain bio', 'Pain sans gluten'],
+    'Boulangerie & Pâtisserie': ['Pain', 'Croissants', 'Gâteaux', 'Tartes', 'Macarons', 'Chocolaterie'],
+    'Pharmacie': ['Médicaments', 'Parapharmacie', 'Cosmétiques', 'Homéopathie', 'Matériel médical', 'Conseil santé'],
+    'Banque': ['Compte courant', 'Épargne', 'Crédit immobilier', 'Crédit auto', 'Assurance', 'Investissement', 'Banque privée'],
+    'Hotel': ['Hôtel de luxe', 'Hôtel business', 'Hôtel familial', 'Boutique hôtel', 'Apart-hôtel', 'Auberge'],
+    'Spa': ['Massage', 'Sauna', 'Hammam', 'Jacuzzi', 'Soins du corps', 'Balnéothérapie'],
+    'Veterinaire': ['Chiens', 'Chats', 'NAC', 'Équins', 'Urgences', 'Chirurgie', 'Vaccination'],
+    'Fleuriste': ['Bouquets', 'Compositions', 'Plantes', 'Fleurs de mariage', 'Deuil', 'Événements', 'Abonnement floral'],
+    'Assurance': ['Auto', 'Habitation', 'Santé', 'Vie', 'Professionnelle', 'Voyage'],
+    'Comptable': ['Comptabilité générale', 'Fiscalité', 'Paie', 'Création entreprise', 'Audit', 'Conseil'],
+    'Architecte': ['Maison individuelle', 'Appartement', 'Commercial', 'Rénovation', 'Extension', 'Décoration intérieure'],
+    'Electricien': ['Dépannage', 'Installation', 'Rénovation', 'Domotique', 'Mise aux normes'],
+    'Serrurier': ['Dépannage', 'Ouverture de porte', 'Blindage', 'Coffre-fort', 'Reproduction clés'],
+    'Plombier': ['Dépannage', 'Installation', 'Rénovation salle de bain', 'Chauffe-eau', 'Débouchage'],
+}
+
+
+@api_router.get("/enterprise-categories")
+async def get_enterprise_categories():
+    """Get all enterprise categories with their subcategories"""
+    categories = await db.enterprises.distinct("category")
+    
+    result = []
+    for cat in sorted(categories):
+        if cat:
+            count = await db.enterprises.count_documents({"category": cat})
+            subcats = ENTERPRISE_SUBCATEGORIES.get(cat, [])
+            result.append({
+                "id": cat.lower().replace(' ', '_').replace('&', 'et'),
+                "name": cat,
+                "count": count,
+                "subcategories": subcats,
+                "has_subcategories": len(subcats) > 0
+            })
+    
+    return {"categories": result}
+
+
+@api_router.get("/enterprise-categories/{category_name}")
+async def get_category_details(category_name: str):
+    """Get details for a specific category including enterprises"""
+    decoded_cat = category_name.replace('_', ' ')
+    
+    enterprises = await db.enterprises.find(
+        {"category": {"$regex": f"^{decoded_cat}$", "$options": "i"}},
+        {"_id": 0}
+    ).limit(50).to_list(50)
+    
+    if not enterprises:
+        enterprises = await db.enterprises.find(
+            {"category": {"$regex": decoded_cat, "$options": "i"}},
+            {"_id": 0}
+        ).limit(50).to_list(50)
+    
+    category = enterprises[0]["category"] if enterprises else decoded_cat
+    subcats = ENTERPRISE_SUBCATEGORIES.get(category, [])
+    
+    return {
+        "category": category,
+        "subcategories": subcats,
+        "enterprises": enterprises,
+        "total": len(enterprises)
+    }
+
+
+@api_router.get("/enterprise-subcategories/{category_name}")
+async def get_subcategories(category_name: str):
+    """Get subcategories for a specific category"""
+    decoded_cat = category_name.replace('_', ' ')
+    
+    matching_key = None
+    for key in ENTERPRISE_SUBCATEGORIES.keys():
+        if key.lower() == decoded_cat.lower() or decoded_cat.lower() in key.lower():
+            matching_key = key
+            break
+    
+    if matching_key:
+        return {
+            "category": matching_key,
+            "subcategories": ENTERPRISE_SUBCATEGORIES[matching_key]
+        }
+    
+    return {"category": decoded_cat, "subcategories": []}
+
 
 @api_router.get("/enterprises/{enterprise_id}")
 async def get_enterprise(enterprise_id: str):
@@ -3664,8 +3784,8 @@ async def purchase_training(training_id: str, current_user: dict = Depends(get_c
         checkout_request = CheckoutSessionRequest(
             amount=training['price'],  # Amount in CHF (not cents)
             currency="chf",
-            success_url=f"{os.environ.get('FRONTEND_URL', 'https://image-fix-demo.preview.emergentagent.com')}/payment/success?session_id={{CHECKOUT_SESSION_ID}}&type=training&training_id={training_id}",
-            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://image-fix-demo.preview.emergentagent.com')}/payment/cancel",
+            success_url=f"{os.environ.get('FRONTEND_URL', 'https://swiss-landscape-vids.preview.emergentagent.com')}/payment/success?session_id={{CHECKOUT_SESSION_ID}}&type=training&training_id={training_id}",
+            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://swiss-landscape-vids.preview.emergentagent.com')}/payment/cancel",
             metadata={"type": "training", "training_id": training_id, "user_id": current_user['id'], "product_name": f"Formation: {training['title']}"}
         )
         response = await stripe_checkout.create_checkout_session(checkout_request)
@@ -8623,8 +8743,8 @@ async def create_premium_checkout(plan: str, current_user: dict = Depends(get_cu
             amount=plan_info['price'],  # Amount in CHF
             currency="chf",
             quantity=1,
-            success_url=f"{os.environ.get('FRONTEND_URL', 'https://image-fix-demo.preview.emergentagent.com')}/dashboard/client?tab=premium&success=true&plan={plan}",
-            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://image-fix-demo.preview.emergentagent.com')}/dashboard/client?tab=premium&cancelled=true",
+            success_url=f"{os.environ.get('FRONTEND_URL', 'https://swiss-landscape-vids.preview.emergentagent.com')}/dashboard/client?tab=premium&success=true&plan={plan}",
+            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://swiss-landscape-vids.preview.emergentagent.com')}/dashboard/client?tab=premium&cancelled=true",
             metadata={
                 "plan": plan,
                 "user_id": current_user['id'],
@@ -8884,8 +9004,8 @@ async def apply_for_certification(
             amount=cert_info['price'],
             currency="chf",
             quantity=1,
-            success_url=f"{os.environ.get('FRONTEND_URL', 'https://image-fix-demo.preview.emergentagent.com')}/enterprise-dashboard?tab=certifications&success=true",
-            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://image-fix-demo.preview.emergentagent.com')}/enterprise-dashboard?tab=certifications&cancelled=true",
+            success_url=f"{os.environ.get('FRONTEND_URL', 'https://swiss-landscape-vids.preview.emergentagent.com')}/enterprise-dashboard?tab=certifications&success=true",
+            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://swiss-landscape-vids.preview.emergentagent.com')}/enterprise-dashboard?tab=certifications&cancelled=true",
             metadata={
                 "type": "certification",
                 "certification_type": request.certification_type,
@@ -8974,8 +9094,8 @@ async def book_expert_service(
             amount=service['price'],
             currency="chf",
             quantity=1,
-            success_url=f"{os.environ.get('FRONTEND_URL', 'https://image-fix-demo.preview.emergentagent.com')}/dashboard?success=expert",
-            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://image-fix-demo.preview.emergentagent.com')}/dashboard",
+            success_url=f"{os.environ.get('FRONTEND_URL', 'https://swiss-landscape-vids.preview.emergentagent.com')}/dashboard?success=expert",
+            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://swiss-landscape-vids.preview.emergentagent.com')}/dashboard",
             metadata={
                 "type": "expert_service",
                 "service_type": service_type,

@@ -46,6 +46,9 @@ export const enterpriseAPI = {
   getById: (id) => axios.get(`${API}/enterprises/${id}`),
   create: (data) => axios.post(`${API}/enterprises`, data, { headers: getAuthHeaders() }),
   update: (id, data) => axios.put(`${API}/enterprises/${id}`, data, { headers: getAuthHeaders() }),
+  getCategories: () => axios.get(`${API}/enterprise-categories`),
+  getCategoryDetails: (categoryName) => axios.get(`${API}/enterprise-categories/${categoryName}`),
+  getSubcategories: (categoryName) => axios.get(`${API}/enterprise-subcategories/${categoryName}`),
 };
 
 // Services & Products

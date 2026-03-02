@@ -379,4 +379,4 @@ POST /api/gamification/log_action - Logger action (interne)
 ---
 
 **Document généré le:** Février 2026
-**URL Application:** https://image-fix-demo.preview.emergentagent.com
+**URL Application:** https://swiss-landscape-vids.preview.emergentagent.com

@@ -105,6 +105,7 @@ async def create_enterprise(data: EnterpriseCreate, current_user: dict = Depends
 @router.get("/enterprises")
 async def list_enterprises(
     category: Optional[str] = None,
+    subcategory: Optional[str] = None,
     city: Optional[str] = None,
     search: Optional[str] = None,
     certified_only: bool = False,
@@ -115,7 +116,10 @@ async def list_enterprises(
     query = {"activation_status": "active"}
     
     if category:
-        query["category"] = category
+        # Search case-insensitive
+        query["category"] = {"$regex": f"^{category}$", "$options": "i"}
+    if subcategory:
+        query["subcategory"] = {"$regex": subcategory, "$options": "i"}
     if city:
         query["city"] = {"$regex": city, "$options": "i"}
     if certified_only:
@@ -350,3 +354,127 @@ async def get_service_categories():
         "Fitness & Sport", "Santé", "Éducation & Formation",
         "Services aux entreprises", "Événementiel", "Autre"
     ]}
+
+
+# ============ ENTERPRISE CATEGORIES WITH SUBCATEGORIES ============
+
+ENTERPRISE_SUBCATEGORIES = {
+    'Restaurant': ['Cuisine française', 'Cuisine italienne', 'Cuisine chinoise', 'Cuisine japonaise', 'Cuisine thaï', 'Cuisine indienne', 'Cuisine mexicaine', 'Cuisine libanaise', 'Cuisine grecque', 'Fast food', 'Gastronomique', 'Végétarien/Vegan', 'Pizzeria', 'Sushi', 'Brasserie'],
+    'Restauration': ['Cuisine française', 'Cuisine italienne', 'Cuisine chinoise', 'Cuisine japonaise', 'Cuisine thaï', 'Cuisine indienne', 'Cuisine mexicaine', 'Cuisine libanaise', 'Cuisine grecque', 'Fast food', 'Gastronomique', 'Végétarien/Vegan', 'Pizzeria', 'Sushi', 'Brasserie'],
+    'Personnel de maison': ['Femme de ménage', 'Majordome', 'Cuisinier privé', 'Jardinier', 'Gouvernante', 'Chauffeur privé', 'Nounou', 'Aide à domicile', 'Agent multiservices', 'Gardien'],
+    'Soins esthétiques': ['Épilation', 'Soins du visage', 'Soins du corps', 'Maquillage', 'Manucure', 'Pédicure', 'Massage', 'Bronzage', 'Extension cils', 'Microblading'],
+    'Institut De Beaute': ['Épilation', 'Soins du visage', 'Soins du corps', 'Maquillage', 'Manucure', 'Pédicure', 'Massage', 'Bronzage', 'Extension cils', 'Microblading'],
+    'Coiffeur': ['Coupe femme', 'Coupe homme', 'Coloration', 'Mèches', 'Lissage', 'Permanente', 'Extensions', 'Coiffure mariage', 'Barbier', 'Coiffure enfant'],
+    'Coiffure & Beauté': ['Coupe femme', 'Coupe homme', 'Coloration', 'Mèches', 'Lissage', 'Permanente', 'Extensions', 'Coiffure mariage', 'Barbier', 'Coiffure enfant'],
+    'Cours de sport': ['Fitness', 'Yoga', 'Pilates', 'CrossFit', 'Boxe', 'Arts martiaux', 'Natation', 'Tennis', 'Golf', 'Danse', 'Musculation', 'Coach personnel'],
+    'Fitness': ['Cardio', 'Musculation', 'CrossFit', 'HIIT', 'Spinning', 'Zumba', 'Body pump', 'Stretching'],
+    'Activités': ['Escape game', 'Bowling', 'Karting', 'Laser game', 'Cinéma', 'Théâtre', 'Parc attractions', 'Zoo', 'Musée', 'Concert'],
+    'Professionnels de santé': ['Médecin généraliste', 'Dentiste', 'Kinésithérapeute', 'Ostéopathe', 'Psychologue', 'Nutritionniste', 'Podologue', 'Ophtalmologue', 'Dermatologue', 'Cardiologue'],
+    'Medecin': ['Généraliste', 'Spécialiste', 'Urgentiste', 'Pédiatre', 'Gynécologue'],
+    'Agent immobilier': ['Vente', 'Location', 'Gestion locative', 'Estimation', 'Immobilier de luxe', 'Immobilier commercial', 'Neuf', 'Ancien'],
+    'Agence Immobiliere': ['Vente', 'Location', 'Gestion locative', 'Estimation', 'Immobilier de luxe', 'Immobilier commercial', 'Neuf', 'Ancien'],
+    'Sécurité': ['Gardiennage', 'Vidéosurveillance', 'Alarme', 'Agent de sécurité', 'Protection rapprochée', 'Sécurité événementielle', 'Cybersécurité'],
+    'Professionnels de transports': ['Taxi', 'VTC', 'Chauffeur privé', 'Transport de marchandises', 'Déménagement', 'Livraison', 'Location véhicule', 'Transport médical'],
+    'Professionnels éducation': ['École primaire', 'Collège', 'Lycée', 'Université', 'Cours particuliers', 'Soutien scolaire', 'École de langues', 'Formation professionnelle'],
+    'Formation': ['Formation continue', 'Certification', 'Langues', 'Informatique', 'Management', 'Comptabilité', 'Marketing'],
+    'Professionnels administratifs': ['Secrétariat', 'Comptabilité', 'Ressources humaines', 'Traduction', 'Domiciliation', 'Services postaux'],
+    'Professionnels juridiques': ['Avocat', 'Notaire', 'Huissier', 'Conseil juridique', 'Médiation', 'Droit des affaires', 'Droit de la famille'],
+    'Avocat': ['Droit pénal', 'Droit civil', 'Droit des affaires', 'Droit de la famille', 'Droit du travail', 'Droit immobilier', 'Droit fiscal'],
+    'Professionnels informatiques': ['Développement web', 'Développement mobile', 'Maintenance', 'Conseil IT', 'Cybersécurité', 'Cloud', 'Data science', 'Support technique'],
+    'Informatique': ['Développement web', 'Développement mobile', 'Maintenance', 'Conseil IT', 'Cybersécurité', 'Cloud', 'Data science', 'Support technique'],
+    'Professionnels de construction': ['Maçonnerie', 'Plomberie', 'Électricité', 'Menuiserie', 'Carrelage', 'Peinture', 'Toiture', 'Isolation', 'Chauffage', 'Rénovation'],
+    'Bijouterie': ['Bagues', 'Colliers', 'Bracelets', "Boucles d'oreilles", 'Montres', 'Bijoux sur mesure', 'Réparation', 'Gravure'],
+    'Bijouteries': ['Bagues', 'Colliers', 'Bracelets', "Boucles d'oreilles", 'Montres', 'Bijoux sur mesure', 'Réparation', 'Gravure'],
+    'Bijouteries & Horlogerie': ['Montres de luxe', 'Bijoux', 'Réparation montres', 'Gravure', 'Estimation', 'Rachat'],
+    'Horlogerie': ['Montres de luxe', 'Montres sport', 'Montres connectées', 'Réparation', 'Estimation', 'Rachat'],
+    'Garage': ['Réparation', 'Entretien', 'Carrosserie', 'Pneus', 'Vidange', 'Diagnostic', 'Climatisation auto'],
+    'Automobile & Garage': ['Réparation', 'Entretien', 'Carrosserie', 'Pneus', 'Vidange', 'Diagnostic', 'Vente véhicules'],
+    'Boulangerie': ['Pain traditionnel', 'Viennoiseries', 'Pâtisseries', 'Snacking', 'Pain bio', 'Pain sans gluten'],
+    'Boulangerie & Pâtisserie': ['Pain', 'Croissants', 'Gâteaux', 'Tartes', 'Macarons', 'Chocolaterie'],
+    'Pharmacie': ['Médicaments', 'Parapharmacie', 'Cosmétiques', 'Homéopathie', 'Matériel médical', 'Conseil santé'],
+    'Banque': ['Compte courant', 'Épargne', 'Crédit immobilier', 'Crédit auto', 'Assurance', 'Investissement', 'Banque privée'],
+    'Hotel': ['Hôtel de luxe', 'Hôtel business', 'Hôtel familial', 'Boutique hôtel', 'Apart-hôtel', 'Auberge'],
+    'Spa': ['Massage', 'Sauna', 'Hammam', 'Jacuzzi', 'Soins du corps', 'Balnéothérapie'],
+    'Veterinaire': ['Chiens', 'Chats', 'NAC', 'Équins', 'Urgences', 'Chirurgie', 'Vaccination'],
+    'Fleuriste': ['Bouquets', 'Compositions', 'Plantes', 'Fleurs de mariage', 'Deuil', 'Événements', 'Abonnement floral'],
+    'Assurance': ['Auto', 'Habitation', 'Santé', 'Vie', 'Professionnelle', 'Voyage'],
+    'Comptable': ['Comptabilité générale', 'Fiscalité', 'Paie', 'Création entreprise', 'Audit', 'Conseil'],
+    'Architecte': ['Maison individuelle', 'Appartement', 'Commercial', 'Rénovation', 'Extension', 'Décoration intérieure'],
+    'Electricien': ['Dépannage', 'Installation', 'Rénovation', 'Domotique', 'Mise aux normes'],
+    'Serrurier': ['Dépannage', 'Ouverture de porte', 'Blindage', 'Coffre-fort', 'Reproduction clés'],
+    'Plombier': ['Dépannage', 'Installation', 'Rénovation salle de bain', 'Chauffe-eau', 'Débouchage'],
+}
+
+
+@router.get("/enterprise-categories")
+async def get_enterprise_categories():
+    """Get all enterprise categories with their subcategories"""
+    # Get unique categories from database
+    categories = await db.enterprises.distinct("category")
+    
+    result = []
+    for cat in sorted(categories):
+        if cat:  # Skip empty categories
+            count = await db.enterprises.count_documents({"category": cat})
+            subcats = ENTERPRISE_SUBCATEGORIES.get(cat, [])
+            result.append({
+                "id": cat.lower().replace(' ', '_').replace('&', 'et'),
+                "name": cat,
+                "count": count,
+                "subcategories": subcats,
+                "has_subcategories": len(subcats) > 0
+            })
+    
+    return {"categories": result}
+
+
+@router.get("/enterprise-categories/{category_name}")
+async def get_category_details(category_name: str):
+    """Get details for a specific category including enterprises"""
+    # Decode category name
+    decoded_cat = category_name.replace('_', ' ')
+    
+    # Find matching category (case insensitive)
+    enterprises = await db.enterprises.find(
+        {"category": {"$regex": f"^{decoded_cat}$", "$options": "i"}},
+        {"_id": 0}
+    ).limit(50).to_list(50)
+    
+    if not enterprises:
+        # Try partial match
+        enterprises = await db.enterprises.find(
+            {"category": {"$regex": decoded_cat, "$options": "i"}},
+            {"_id": 0}
+        ).limit(50).to_list(50)
+    
+    category = enterprises[0]["category"] if enterprises else decoded_cat
+    subcats = ENTERPRISE_SUBCATEGORIES.get(category, [])
+    
+    return {
+        "category": category,
+        "subcategories": subcats,
+        "enterprises": enterprises,
+        "total": len(enterprises)
+    }
+
+
+@router.get("/enterprise-subcategories/{category_name}")
+async def get_subcategories(category_name: str):
+    """Get subcategories for a specific category"""
+    decoded_cat = category_name.replace('_', ' ')
+    
+    # Find matching key
+    matching_key = None
+    for key in ENTERPRISE_SUBCATEGORIES.keys():
+        if key.lower() == decoded_cat.lower() or decoded_cat.lower() in key.lower():
+            matching_key = key
+            break
+    
+    if matching_key:
+        return {
+            "category": matching_key,
+            "subcategories": ENTERPRISE_SUBCATEGORIES[matching_key]
+        }
+    
+    return {"category": decoded_cat, "subcategories": []}
+

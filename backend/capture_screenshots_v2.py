@@ -7,7 +7,7 @@ import os
 import time
 from playwright.sync_api import sync_playwright
 
-BASE_URL = 'https://image-fix-demo.preview.emergentagent.com'
+BASE_URL = 'https://swiss-landscape-vids.preview.emergentagent.com'
 SCREENSHOTS_DIR = '/app/backend/uploads/brochure_screenshots_v2'
 
 os.makedirs(SCREENSHOTS_DIR, exist_ok=True)
