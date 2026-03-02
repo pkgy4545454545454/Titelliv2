@@ -463,10 +463,10 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Les meilleurs prestataires Section - Grid 5 columns */}
+      {/* Les meilleurs prestataires Section - Grid 5 columns - Aligned left */}
       <section className="py-8 sm:py-12 bg-white" data-testid="top-providers-section">
-        <div className="max-w-[120rem]  mx-auto px-4 md:px-8">
-          <div className="flex items-center justify-between mb-4">
+        <div className="max-w-[120rem] mx-auto px-4 md:px-8">
+          <div className="flex items-center justify-start mb-4">
             <Link to="/entreprises" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors">
               Voir tout
               <ArrowRight className="w-5 h-5" />
@@ -475,15 +475,15 @@ const HomePage = () => {
 
 
           {loading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 justify-items-start">
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map((i) => (
-                <div key={i} className="h-[240px] sm:h-[280px] bg-gray-100 rounded-xl animate-pulse" />
+                <div key={i} className="h-[240px] sm:h-[280px] w-full bg-gray-100 rounded-xl animate-pulse" />
               ))}
             </div>
           ) : allEnterprises.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 justify-items-start">
            {Object.entries(enterprisesByCategory).map(([category, list]) => (
-              <div key={category}>
+              <div key={category} className="w-full">
                 <EnterpriseCard
                   category={category}
                   enterprises={list}
@@ -492,10 +492,10 @@ const HomePage = () => {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-center py-8 text-sm">Aucun prestataire avec photo disponible</p>
+            <p className="text-gray-500 text-left py-8 text-sm">Aucun prestataire avec photo disponible</p>
           )}
 
-          <Link to="/entreprises" className="md:hidden flex items-center justify-center gap-2 mt-4 sm:mt-6 text-[#0047AB] font-medium text-sm">
+          <Link to="/entreprises" className="md:hidden flex items-center justify-start gap-2 mt-4 sm:mt-6 text-[#0047AB] font-medium text-sm">
             Voir tous les prestataires
             <ArrowRight className="w-4 h-4" />
           </Link>

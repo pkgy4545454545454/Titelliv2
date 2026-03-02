@@ -15,62 +15,76 @@ Titelli est une plateforme suisse de mise en relation entre clients et prestatai
 - **Frontend**: React + Tailwind CSS + Shadcn/UI
 - **Backend**: FastAPI (Python)
 - **Database**: MongoDB
-- **Image Storage**: Cloudinary (migration effectuée)
+- **Image Storage**: Cloudinary
 - **Video Generation**: Sora 2 (via Emergent LLM Key)
-- **Deployment**: Render
 
 ---
 
 ## CHANGELOG
 
-### 2025-03-02 - Système de sous-catégories et refonte HomePage
-- ✅ **Correction MongoDB**: Mise à jour du mot de passe MongoDB (Mini.1996)
-- ✅ **Nouveau système de catégories avec sous-catégories**:
-  - EnterpriseCard.js redesigné avec navigation par catégorie
-  - Menu de sous-catégories animé (slide-in-from-top)
-  - 40+ catégories principales avec leurs sous-catégories (Restaurant, Bijouteries, Coiffeur, etc.)
-  - Inspiré de Globus.ch pour les sous-catégories
-- ✅ **HomePage.js**: Mise à jour complète
-  - Cards entreprises groupées par catégorie avec flèches navigation
-  - Compteur de navigation (ex: 1/14)
-  - Clic sur catégorie ouvre menu sous-catégories
-- ✅ **EnterprisesPage.js**: Nouvelle page de listing
-  - Vidéo centrée en hero section
-  - Barre de filtres par catégorie avec dropdown sous-catégories
-  - Filtres actifs affichés avec bouton X pour supprimer
-  - Vue grille/liste switchable
-  - 8251 entreprises affichables
-- ✅ **Nouveaux endpoints API**:
-  - `GET /api/enterprise-categories` - Liste toutes les catégories avec comptage et sous-catégories
-  - `GET /api/enterprise-categories/{category_name}` - Détails d'une catégorie
-  - `GET /api/enterprise-subcategories/{category_name}` - Sous-catégories d'une catégorie
-  - Endpoint `/api/enterprises` mis à jour pour supporter le paramètre `subcategory`
+### 2025-03-02 - Système de sous-catégories complet
 
-### 2025-02-23 - UI/UX Améliorations
-- ✅ **Section Avantages homepage** : Redesignée avec style popup (icônes, titres, descriptions, prix)
-- ✅ **Boutons conditionnels** : "Réserver" pour services, "Ajouter au panier" pour produits
+#### ✅ Corrections effectuées
+- **MongoDB corrigé** : Mot de passe mis à jour (Mini.1996)
+- **EnterprisesPage.js restauré** : Page originale des entreprises remise en place (avec vidéo et carousel)
 
-### 2025-02-22 - Migration Cloudinary & Features
-- ✅ **Migration Cloudinary** : Toutes les images migrées vers Cloudinary (permanent storage)
-- ✅ **Section "Les meilleurs produits"** : Ajoutée sur homepage
-- ✅ **Page Cashback** : Créée et liée dans header
-- ✅ **Popup Enterprise Benefits** : Multi-onglets avec services, fournisseurs, gestion, marketing, packs
-- ✅ **3 PDFs générés** : Prospect_Rendez-vous_Client.pdf, Prospect_Telephonique.pdf, Questions_Formations.pdf
-- ✅ **Filter tags** : Style text-only sans fond sur toutes les pages
+#### ✅ Nouvelle page CategoryEnterprisesPage.js
+- **Route** : `/categorie/:category` (ex: `/categorie/Restaurant`)
+- **Paramètre URL** : `?subcategory=...` pour filtrer par sous-catégorie
+- **Fonctionnalités** :
+  - Bouton "Retour" en haut
+  - Titre de la catégorie en grand
+  - Badge de sous-catégorie actif avec bouton × pour supprimer
+  - Barre de sous-catégories horizontale avec défilement (sticky)
+  - Barre de recherche "Rechercher dans [catégorie]..."
+  - Compteur de résultats
+  - Toggle vue grille/liste
+  - Cards entreprises avec animation
+
+#### ✅ EnterpriseCard.js amélioré
+- **Menu sous-catégories dynamique** : Chargé via API au clic sur la catégorie
+- **Indicateur de chargement** : Spinner pendant le fetch des sous-catégories
+- **Flèche animée** : ChevronDown qui tourne à 180° quand ouvert
+- **Navigation** : Clic sur sous-catégorie → `/categorie/{category}?subcategory={subcat}`
+
+#### ✅ Nouveaux endpoints API
+- `GET /api/enterprise-categories` : Liste toutes les catégories avec comptage et sous-catégories
+- `GET /api/enterprise-categories/{name}` : Détails d'une catégorie spécifique
+- `GET /api/enterprise-subcategories/{name}` : Sous-catégories d'une catégorie
+- `GET /api/enterprises` mis à jour : Support du paramètre `subcategory`
+
+#### ✅ 250+ sous-catégories configurées
+Catégories principales couvertes :
+- **Restauration** : Cuisine française, italienne, chinoise, japonaise, thaï, indienne, mexicaine, libanaise, grecque, Fast food, Gastronomique, Végétarien/Vegan, Pizzeria, Sushi, Brasserie
+- **Alimentation** : Boulangerie, Pâtisserie, Chocolaterie, Boucherie, Fromagerie, Épicerie, Bio, Caviste, Glacier
+- **Beauté & Bien-être** : Coiffure, Institut, Spa, Massage, Manucure, Épilation, Bronzage, Maquillage, Tatouage
+- **Santé** : Médecin, Dentiste, Pharmacie, Opticien, Kiné, Ostéopathe, Psychologue, Nutritionniste, Vétérinaire
+- **Mode & Accessoires** : Vêtements, Chaussures, Bijouteries, Horlogerie, Maroquinerie, Lingerie
+- **Automobile** : Garage, Carrosserie, Pneus, Location, Taxi, VTC, Déménagement
+- **Immobilier** : Agence, Architecte, Décoration d'intérieur
+- **Services** : Électricien, Plombier, Serrurier, Peinture, Menuiserie, Chauffage, Nettoyage
+- **Informatique** : Développement, Maintenance, Réparation, Cloud
+- **Sport & Loisirs** : Fitness, Yoga, Tennis, Golf, Natation, Arts martiaux
+- **Hôtellerie** : Hôtel, Auberge, Camping, Agence de voyage
+- Et bien plus...
+
+#### ✅ HomePage.js alignement corrigé
+- Cards alignées à gauche sous le titre "Les meilleurs prestataires de ta région"
+- Bouton "Voir tout" aligné à gauche
 
 ---
 
 ## ROADMAP
 
 ### P0 - Critique (Résolu)
-- ✅ Images Render corrigées via Cloudinary
 - ✅ Connexion MongoDB restaurée
+- ✅ Système de sous-catégories fonctionnel
 
 ### P1 - Haute Priorité
-- ✅ Système de sous-catégories implémenté
 - [ ] Régénérer vidéo #107 (Lausanne rue lac) sans personnes
 - [ ] Réorganiser produits homepage (priorité noms commençant par "t")
 - [ ] Investiguer corruption d'images lors de l'upload
+- [ ] Ajouter le champ `subcategory` aux entreprises existantes en base
 
 ### P2 - Moyenne Priorité
 - [ ] Corriger design brochure de monétisation
@@ -85,16 +99,20 @@ Titelli est une plateforme suisse de mise en relation entre clients et prestatai
 ---
 
 ## Key Files
-- `/app/frontend/src/pages/HomePage.js` - Page d'accueil avec système de catégories par métier
-- `/app/frontend/src/components/EnterpriseCard.js` - Carte entreprise avec menu sous-catégories animé
-- `/app/frontend/src/pages/EnterprisesPage.js` - Page listing entreprises avec filtres catégories
+- `/app/frontend/src/pages/HomePage.js` - Page d'accueil avec cartes par catégorie
+- `/app/frontend/src/pages/EnterprisesPage.js` - Page entreprises avec carousel (restaurée)
+- `/app/frontend/src/pages/CategoryEnterprisesPage.js` - **NOUVELLE** Page catégorie avec sous-catégories
+- `/app/frontend/src/components/EnterpriseCard.js` - Card entreprise avec menu sous-catégories dynamique
 - `/app/frontend/src/services/api.js` - API client avec endpoints catégories
-- `/app/backend/server.py` - Endpoints catégories et sous-catégories (ENTERPRISE_SUBCATEGORIES)
-- `/app/backend/.env` - Credentials MongoDB et Cloudinary
+- `/app/backend/server.py` - Endpoints catégories/sous-catégories (ENTERPRISE_SUBCATEGORIES)
+- `/app/frontend/src/App.js` - Route `/categorie/:category` ajoutée
 
-## Sous-catégories implémentées
-Les catégories suivantes ont des sous-catégories configurées:
-- **Restaurant/Restauration**: Cuisine française, italienne, chinoise, japonaise, thaï, indienne, mexicaine, libanaise, grecque, Fast food, Gastronomique, Végétarien/Vegan, Pizzeria, Sushi, Brasserie
-- **Bijouteries/Horlogerie**: Bagues, Colliers, Bracelets, Boucles d'oreilles, Montres, Bijoux sur mesure, Réparation, Gravure
-- **Coiffeur/Coiffure & Beauté**: Coupe femme/homme, Coloration, Mèches, Lissage, Permanente, Extensions, Coiffure mariage, Barbier
-- **Et 35+ autres catégories**...
+## Routes Frontend
+| Route | Page | Description |
+|-------|------|-------------|
+| `/` | HomePage | Accueil avec cards par catégorie |
+| `/entreprises` | EnterprisesPage | Liste entreprises avec carousel |
+| `/entreprise/:id` | EnterprisePage | Détail d'une entreprise |
+| `/categorie/:category` | CategoryEnterprisesPage | **NOUVELLE** Liste entreprises par catégorie/sous-catégorie |
+| `/services` | ServicesPage | Services |
+| `/products` | ProductsPage | Produits |

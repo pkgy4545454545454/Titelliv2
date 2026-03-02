@@ -1,458 +1,239 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useSearchParams, Link, useNavigate } from 'react-router-dom';
-import { Search, Grid, List, Filter, ChevronLeft, ChevronRight, ChevronDown, MapPin, Star, Play, X } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { Search, Grid, List, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import { enterpriseAPI } from '../services/api';
-import { toast } from 'sonner';
+import EnterpriseCard from '../components/EnterpriseCard';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select';
 
 const EnterprisesPage = () => {
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [enterprises, setEnterprises] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
-  const [viewMode, setViewMode] = useState('grid');
+  const [viewMode, setViewMode] = useState('carousel');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [selectedSubcategory, setSelectedSubcategory] = useState(null);
-  const [expandedCategory, setExpandedCategory] = useState(null);
-  const videoRef = useRef(null);
+  const carouselRef = useRef(null);
 
-  const categoryParam = searchParams.get('category') || '';
-  const subcategoryParam = searchParams.get('subcategory') || '';
   const filter = searchParams.get('filter') || '';
 
-  // Fetch categories
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await enterpriseAPI.getCategories();
-        setCategories(response.data.categories || []);
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-      }
-    };
-    fetchCategories();
-  }, []);
-
-  // Fetch enterprises based on filters
   useEffect(() => {
     const fetchEnterprises = async () => {
       setLoading(true);
       try {
-        const params = { limit: 100 };
-        if (categoryParam) params.category = categoryParam;
-        if (subcategoryParam) params.subcategory = subcategoryParam;
+        const params = {};
         if (filter === 'certified') params.is_certified = true;
         if (filter === 'labeled') params.is_labeled = true;
         if (filter === 'premium') params.is_premium = true;
         if (searchQuery) params.search = searchQuery;
 
         const response = await enterpriseAPI.list(params);
-        setEnterprises(response.data.enterprises || []);
-        setTotal(response.data.total || 0);
+        setEnterprises(response.data.enterprises);
+        setTotal(response.data.total);
       } catch (error) {
         console.error('Error fetching enterprises:', error);
-        toast.error('Erreur lors du chargement des entreprises');
       } finally {
         setLoading(false);
       }
     };
     fetchEnterprises();
-  }, [categoryParam, subcategoryParam, filter, searchQuery]);
+  }, [filter, searchQuery]);
 
-  // Handle category click
-  const handleCategoryClick = (category) => {
-    if (expandedCategory === category.name) {
-      setExpandedCategory(null);
+  const handleFilterChange = (value) => {
+    if (value === 'all') {
+      searchParams.delete('filter');
     } else {
-      setExpandedCategory(category.name);
+      searchParams.set('filter', value);
+    }
+    setSearchParams(searchParams);
+  };
+
+  // Carousel scroll functions
+  const scrollCarousel = (direction) => {
+    if (carouselRef.current) {
+      const scrollAmount = 420; // Card width + gap
+      const newScrollLeft = carouselRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
+      carouselRef.current.scrollTo({
+        left: newScrollLeft,
+        behavior: 'smooth'
+      });
     }
   };
 
-  // Handle subcategory selection
-  const handleSubcategorySelect = (category, subcategory) => {
-    setSearchParams({ category: category.name, subcategory });
-    setExpandedCategory(null);
-  };
-
-  // Handle view all in category
-  const handleViewAllCategory = (category) => {
-    setSearchParams({ category: category.name });
-    setExpandedCategory(null);
-  };
-
-  // Clear filters
-  const clearFilters = () => {
-    setSearchParams({});
-    setSearchQuery('');
-  };
-
-  // Group enterprises by category for display
-  const enterprisesByCategory = enterprises.reduce((acc, ent) => {
-    const cat = ent.category || 'Autres';
-    if (!acc[cat]) acc[cat] = [];
-    acc[cat].push(ent);
-    return acc;
-  }, {});
-
-  const defaultImage = 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800';
-
   return (
-    <div className="min-h-screen bg-white" data-testid="enterprises-page">
-      {/* Hero with Video - Centered as per sketch */}
-      <section className="relative bg-gradient-to-b from-gray-100 to-white py-8 sm:py-12">
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
-          {/* Title */}
-          <div className="text-center mb-6">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
-              Tous les prestataires
-            </h1>
-            <p className="text-gray-600 text-lg">Produits / Services</p>
-          </div>
-
-          {/* Video - Centered */}
-          <div className="flex justify-center mb-8">
-            <div className="relative w-full max-w-2xl aspect-video rounded-2xl overflow-hidden shadow-xl border-4 border-white">
-              <video
-                ref={videoRef}
-                autoPlay
-                muted
-                loop
-                playsInline
-                className="w-full h-full object-cover"
-                poster="https://images.unsplash.com/photo-1497366216548-37526070297c?w=800"
-              >
-                <source src={`${process.env.REACT_APP_BACKEND_URL}/api/uploads/video_services.mp4`} type="video/mp4" />
-              </video>
-              <div className="absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                <Play className="w-16 h-16 text-white/80" />
-              </div>
-            </div>
-          </div>
-
-          {/* Search Bar */}
-          <div className="max-w-xl mx-auto mb-6">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Rechercher un prestataire..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-full text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#0047AB] focus:ring-2 focus:ring-[#0047AB]/20 transition-all shadow-sm"
-                data-testid="search-input"
-              />
-            </div>
-          </div>
-
-          {/* Active Filters */}
-          {(categoryParam || subcategoryParam) && (
-            <div className="flex items-center justify-center gap-2 flex-wrap">
-              {categoryParam && (
-                <span className="inline-flex items-center gap-2 px-4 py-2 bg-[#0047AB]/10 text-[#0047AB] rounded-full text-sm font-medium">
-                  {categoryParam}
-                  <button 
-                    onClick={() => setSearchParams(subcategoryParam ? { subcategory: subcategoryParam } : {})}
-                    className="hover:bg-[#0047AB]/20 rounded-full p-0.5"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </span>
-              )}
-              {subcategoryParam && (
-                <span className="inline-flex items-center gap-2 px-4 py-2 bg-[#D4AF37]/10 text-[#D4AF37] rounded-full text-sm font-medium">
-                  {subcategoryParam}
-                  <button 
-                    onClick={() => setSearchParams(categoryParam ? { category: categoryParam } : {})}
-                    className="hover:bg-[#D4AF37]/20 rounded-full p-0.5"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </span>
-              )}
-              <button
-                onClick={clearFilters}
-                className="text-sm text-gray-500 hover:text-gray-700 underline"
-              >
-                Effacer tout
-              </button>
-            </div>
-          )}
+    <div className="min-h-screen bg-[#050505] pt-24" data-testid="enterprises-page">
+      {/* Hero with Video Background - Generated with Sora 2 AI */}
+      <div className="relative h-[40vh] min-h-[300px] overflow-hidden">
+        {/* Video Background */}
+        <div className="absolute inset-0">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="w-full h-full object-cover"
+            poster="https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1920&q=80"
+          >
+            <source src={`${process.env.REACT_APP_BACKEND_URL}/api/uploads/video_services.mp4`} type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/70 via-[#050505]/50 to-[#050505]" />
         </div>
-      </section>
+        
+        {/* Content */}
+        <div className="relative h-full flex items-center">
+          <div className="max-w-7xl mx-auto px-4 md:px-8 w-full">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
+              Nos Entreprises
+            </h1>
+            <p className="text-lg md:text-xl text-gray-300 max-w-2xl">
+              Découvrez les meilleures entreprises de la région de Lausanne
+            </p>
+          </div>
+        </div>
+      </div>
 
-      {/* Categories Navigation */}
-      <section className="sticky top-16 z-40 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="flex gap-2 py-3 overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
+      {/* Search & Filters */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+        {/* Search Bar */}
+        <div className="relative mb-8">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Rechercher une entreprise..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-[#0047AB]/50"
+            data-testid="search-enterprises"
+          />
+        </div>
+
+        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-8">
+          {/* Filters - No background style */}
+          <div className="flex flex-wrap gap-3">
             <button
-              onClick={clearFilters}
-              className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                !categoryParam ? 'bg-[#0047AB] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              onClick={() => handleFilterChange('all')}
+              className={`px-4 py-2 text-sm font-medium transition-all ${
+                !filter 
+                  ? 'text-white border-b-2 border-white' 
+                  : 'text-gray-400 hover:text-white'
               }`}
             >
               Tous
             </button>
-            {categories.slice(0, 15).map((cat) => (
-              <div key={cat.id} className="relative">
-                <button
-                  onClick={() => cat.has_subcategories ? handleCategoryClick(cat) : handleViewAllCategory(cat)}
-                  className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-1 ${
-                    categoryParam === cat.name ? 'bg-[#0047AB] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                  data-testid={`category-filter-${cat.id}`}
-                >
-                  {cat.name}
-                  {cat.has_subcategories && <ChevronDown className={`w-4 h-4 transition-transform ${expandedCategory === cat.name ? 'rotate-180' : ''}`} />}
-                  <span className="ml-1 text-xs opacity-70">({cat.count})</span>
-                </button>
-
-                {/* Subcategories Dropdown */}
-                {expandedCategory === cat.name && cat.subcategories?.length > 0 && (
-                  <div 
-                    className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 p-3 z-50 animate-in slide-in-from-top-2 duration-200 max-h-80 overflow-y-auto"
-                    data-testid="subcategories-dropdown"
-                  >
-                    <div className="space-y-1">
-                      {cat.subcategories.map((subcat, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => handleSubcategorySelect(cat, subcat)}
-                          className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-[#0047AB]/10 hover:text-[#0047AB] rounded-lg transition-all"
-                        >
-                          {subcat}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="mt-3 pt-3 border-t border-gray-100">
-                      <button
-                        onClick={() => handleViewAllCategory(cat)}
-                        className="w-full text-center text-sm text-[#0047AB] font-medium hover:underline"
-                      >
-                        Voir tous les {cat.name}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+            <button
+              onClick={() => handleFilterChange('certified')}
+              className={`px-4 py-2 text-sm font-medium transition-all ${
+                filter === 'certified' 
+                  ? 'text-[#D4AF37] border-b-2 border-[#D4AF37]' 
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              Certifiés
+            </button>
+            <button
+              onClick={() => handleFilterChange('labeled')}
+              className={`px-4 py-2 text-sm font-medium transition-all ${
+                filter === 'labeled' 
+                  ? 'text-green-500 border-b-2 border-green-500' 
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              Labellisés
+            </button>
+            <button
+              onClick={() => handleFilterChange('premium')}
+              className={`px-4 py-2 text-sm font-medium transition-all ${
+                filter === 'premium' 
+                  ? 'text-[#0047AB] border-b-2 border-[#0047AB]' 
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              Premium
+            </button>
           </div>
-        </div>
-      </section>
 
-      {/* Enterprises Grid - Mixed Layout (Panorama for services, Portrait for products as per sketch) */}
-      <section className="py-8 sm:py-12">
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
-          {/* Results count */}
-          <div className="flex items-center justify-between mb-6">
-            <p className="text-gray-600">
-              <span className="font-semibold text-gray-900">{total}</span> prestataires trouvés
-            </p>
-            <div className="flex items-center gap-2">
+          {/* View Toggle & Count */}
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-gray-400">{total} entreprises</span>
+            <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-[#0047AB] text-white' : 'bg-gray-100 text-gray-600'}`}
+                className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-gray-400'}`}
               >
-                <Grid className="w-5 h-5" />
+                <Grid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-[#0047AB] text-white' : 'bg-gray-100 text-gray-600'}`}
+                className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white/10 text-white' : 'text-gray-400'}`}
               >
-                <List className="w-5 h-5" />
+                <List className="w-4 h-4" />
               </button>
             </div>
           </div>
+        </div>
 
-          {loading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {[...Array(20)].map((_, i) => (
-                <div key={i} className="bg-gray-100 rounded-2xl h-72 animate-pulse" />
+        {/* Enterprises Carousel */}
+        {loading ? (
+          <div className="flex gap-6 overflow-hidden">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="flex-shrink-0 w-[400px] h-[320px] card-service rounded-xl animate-pulse" />
+            ))}
+          </div>
+        ) : enterprises.length > 0 ? (
+          <div className="relative">
+            {/* Navigation Buttons */}
+            <button
+              onClick={() => scrollCarousel('left')}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/80 hover:bg-black text-white p-3 rounded-full shadow-lg border border-white/20 transition-all hover:scale-110 -ml-4"
+              data-testid="carousel-prev"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            
+            <button
+              onClick={() => scrollCarousel('right')}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/80 hover:bg-black text-white p-3 rounded-full shadow-lg border border-white/20 transition-all hover:scale-110 -mr-4"
+              data-testid="carousel-next"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+
+            {/* Carousel Container */}
+            <div 
+              ref={carouselRef}
+              className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4 px-2"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {enterprises.map((enterprise, index) => (
+                <div 
+                  key={enterprise.id} 
+                  className="flex-shrink-0 w-[400px] animate-fade-in"
+                  style={{ animationDelay: `${index * 0.05}s` }}
+                >
+                  <EnterpriseCard enterprise={enterprise} large />
+                </div>
               ))}
             </div>
-          ) : enterprises.length > 0 ? (
-            <>
-              {/* If filtered by category, show all in one grid */}
-              {categoryParam ? (
-                <div className={viewMode === 'grid' 
-                  ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
-                  : "space-y-4"
-                }>
-                  {enterprises.map((enterprise) => (
-                    <EnterpriseCardSimple 
-                      key={enterprise.id} 
-                      enterprise={enterprise} 
-                      viewMode={viewMode}
-                    />
-                  ))}
-                </div>
-              ) : (
-                /* Show grouped by category with mixed layout */
-                <div className="space-y-12">
-                  {Object.entries(enterprisesByCategory).slice(0, 10).map(([category, ents]) => (
-                    <div key={category}>
-                      {/* Category Header */}
-                      <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{category}</h2>
-                        <Link
-                          to={`/entreprises?category=${encodeURIComponent(category)}`}
-                          className="text-[#0047AB] hover:underline text-sm font-medium flex items-center gap-1"
-                        >
-                          Voir tout <ChevronRight className="w-4 h-4" />
-                        </Link>
-                      </div>
-
-                      {/* Mixed layout: First row panorama (services), second row portrait (products) */}
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                        {ents.slice(0, 10).map((enterprise, idx) => (
-                          <EnterpriseCardSimple 
-                            key={enterprise.id} 
-                            enterprise={enterprise}
-                            viewMode="grid"
-                            isPanorama={idx < 3} // First 3 are panorama style
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="text-center py-16">
-              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search className="w-10 h-10 text-gray-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucun prestataire trouvé</h3>
-              <p className="text-gray-600 mb-4">Essayez de modifier vos critères de recherche</p>
-              <button
-                onClick={clearFilters}
-                className="px-6 py-2 bg-[#0047AB] text-white rounded-full font-medium hover:bg-[#0047AB]/90 transition-colors"
-              >
-                Voir tous les prestataires
-              </button>
-            </div>
-          )}
-        </div>
-      </section>
-    </div>
-  );
-};
-
-// Simple Enterprise Card for this page
-const EnterpriseCardSimple = ({ enterprise, viewMode = 'grid', isPanorama = false }) => {
-  const navigate = useNavigate();
-  const [imageError, setImageError] = useState(false);
-
-  const {
-    id,
-    business_name,
-    name,
-    city,
-    rating,
-    review_count,
-    cover_image,
-    logo,
-    category,
-    display_status,
-    activation_status
-  } = enterprise;
-
-  const defaultImage = 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800';
-  const actualCover = !imageError && cover_image ? cover_image : defaultImage;
-  const displayName = business_name || name;
-  const displayRating = rating ? rating.toFixed(1) : '4.5';
-  const isActive = display_status === 'actif' || activation_status === 'active';
-
-  if (viewMode === 'list') {
-    return (
-      <div 
-        className="flex items-center gap-4 p-4 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all cursor-pointer"
-        onClick={() => navigate(`/entreprise/${id}`)}
-        data-testid={`enterprise-list-${id}`}
-      >
-        <img
-          src={actualCover}
-          alt={displayName}
-          className="w-24 h-24 object-cover rounded-xl"
-          onError={() => setImageError(true)}
-        />
-        <div className="flex-1">
-          <p className="text-xs text-[#0047AB] font-medium mb-1">{category}</p>
-          <h3 className="text-lg font-semibold text-gray-900">{displayName}</h3>
-          <div className="flex items-center gap-2 mt-1">
-            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            <span className="text-sm text-gray-700">{displayRating}/5</span>
-            {review_count > 0 && <span className="text-xs text-gray-400">({review_count} avis)</span>}
           </div>
-          <div className="flex items-center gap-1 text-sm text-gray-500 mt-1">
-            <MapPin className="w-3.5 h-3.5" />
-            {city || 'Lausanne'}
-          </div>
-        </div>
-        <button
-          className={`px-4 py-2 rounded-lg text-sm font-medium ${
-            isActive ? 'bg-[#0047AB] text-white hover:bg-[#0047AB]/90' : 'bg-gray-200 text-gray-500'
-          }`}
-        >
-          {isActive ? 'Voir' : 'Bientôt'}
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <div 
-      className={`group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all cursor-pointer border border-gray-100 ${
-        isPanorama ? 'col-span-2 sm:col-span-1' : ''
-      }`}
-      onClick={() => navigate(`/entreprise/${id}`)}
-      data-testid={`enterprise-card-${id}`}
-    >
-      {/* Image */}
-      <div className={`relative ${isPanorama ? 'h-32 sm:h-40' : 'h-40 sm:h-48'} overflow-hidden`}>
-        <img
-          src={actualCover}
-          alt={displayName}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          onError={() => setImageError(true)}
-        />
-        {/* Category Badge */}
-        <div className="absolute top-2 left-2">
-          <span className="px-2 py-1 bg-black/60 backdrop-blur-sm text-white text-xs rounded-full">
-            {category}
-          </span>
-        </div>
-        {/* Logo */}
-        {logo && (
-          <div className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-white p-1 shadow-md">
-            <img src={logo} alt="" className="w-full h-full object-cover rounded-full" />
+        ) : (
+          <div className="text-center py-20">
+            <p className="text-gray-400 text-lg mb-4">Aucune entreprise trouvée</p>
+            <button 
+              onClick={() => {
+                handleFilterChange('all');
+                setSearchQuery('');
+              }}
+              className="btn-secondary"
+            >
+              Voir toutes les entreprises
+            </button>
           </div>
         )}
-      </div>
-
-      {/* Content */}
-      <div className="p-3 sm:p-4">
-        <h3 className="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-[#0047AB] transition-colors line-clamp-2 mb-2">
-          {displayName}
-        </h3>
-        <div className="flex items-center gap-1.5 mb-2">
-          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-          <span className="text-sm font-medium text-gray-700">{displayRating}/5</span>
-          {review_count > 0 && <span className="text-xs text-gray-400">({review_count})</span>}
-        </div>
-        <div className="flex items-center gap-1 text-xs text-gray-500">
-          <MapPin className="w-3.5 h-3.5" />
-          <span>{city || 'Lausanne'}</span>
-        </div>
-        <button
-          className={`w-full mt-3 py-2 rounded-xl text-sm font-medium transition-all ${
-            isActive ? 'bg-[#0047AB] text-white hover:bg-[#0047AB]/90' : 'bg-gray-200 text-gray-500'
-          }`}
-        >
-          {isActive ? 'Réserver' : 'Bientôt'}
-        </button>
       </div>
     </div>
   );

@@ -1,57 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Star, MapPin, ChevronRight } from 'lucide-react';
-
-// Mapping des sous-catégories par catégorie principale
-const SUBCATEGORIES_MAP = {
-  'Restaurant': ['Cuisine française', 'Cuisine italienne', 'Cuisine chinoise', 'Cuisine japonaise', 'Cuisine thaï', 'Cuisine indienne', 'Cuisine mexicaine', 'Cuisine libanaise', 'Cuisine grecque', 'Fast food', 'Gastronomique', 'Végétarien/Vegan', 'Pizzeria', 'Sushi', 'Brasserie'],
-  'Restauration': ['Cuisine française', 'Cuisine italienne', 'Cuisine chinoise', 'Cuisine japonaise', 'Cuisine thaï', 'Cuisine indienne', 'Cuisine mexicaine', 'Cuisine libanaise', 'Cuisine grecque', 'Fast food', 'Gastronomique', 'Végétarien/Vegan', 'Pizzeria', 'Sushi', 'Brasserie'],
-  'Personnel de maison': ['Femme de ménage', 'Majordome', 'Cuisinier privé', 'Jardinier', 'Gouvernante', 'Chauffeur privé', 'Nounou', 'Aide à domicile', 'Agent multiservices', 'Gardien'],
-  'Soins esthétiques': ['Épilation', 'Soins du visage', 'Soins du corps', 'Maquillage', 'Manucure', 'Pédicure', 'Massage', 'Bronzage', 'Extension cils', 'Microblading'],
-  'Institut De Beaute': ['Épilation', 'Soins du visage', 'Soins du corps', 'Maquillage', 'Manucure', 'Pédicure', 'Massage', 'Bronzage', 'Extension cils', 'Microblading'],
-  'Coiffeur': ['Coupe femme', 'Coupe homme', 'Coloration', 'Mèches', 'Lissage', 'Permanente', 'Extensions', 'Coiffure mariage', 'Barbier', 'Coiffure enfant'],
-  'Coiffure & Beauté': ['Coupe femme', 'Coupe homme', 'Coloration', 'Mèches', 'Lissage', 'Permanente', 'Extensions', 'Coiffure mariage', 'Barbier', 'Coiffure enfant'],
-  'Cours de sport': ['Fitness', 'Yoga', 'Pilates', 'CrossFit', 'Boxe', 'Arts martiaux', 'Natation', 'Tennis', 'Golf', 'Danse', 'Musculation', 'Coach personnel'],
-  'Fitness': ['Cardio', 'Musculation', 'CrossFit', 'HIIT', 'Spinning', 'Zumba', 'Body pump', 'Stretching'],
-  'Activités': ['Escape game', 'Bowling', 'Karting', 'Laser game', 'Cinéma', 'Théâtre', 'Parc attractions', 'Zoo', 'Musée', 'Concert'],
-  'Professionnels de santé': ['Médecin généraliste', 'Dentiste', 'Kinésithérapeute', 'Ostéopathe', 'Psychologue', 'Nutritionniste', 'Podologue', 'Ophtalmologue', 'Dermatologue', 'Cardiologue'],
-  'Medecin': ['Généraliste', 'Spécialiste', 'Urgentiste', 'Pédiatre', 'Gynécologue'],
-  'Agent immobilier': ['Vente', 'Location', 'Gestion locative', 'Estimation', 'Immobilier de luxe', 'Immobilier commercial', 'Neuf', 'Ancien'],
-  'Agence Immobiliere': ['Vente', 'Location', 'Gestion locative', 'Estimation', 'Immobilier de luxe', 'Immobilier commercial', 'Neuf', 'Ancien'],
-  'Sécurité': ['Gardiennage', 'Vidéosurveillance', 'Alarme', 'Agent de sécurité', 'Protection rapprochée', 'Sécurité événementielle', 'Cybersécurité'],
-  'Professionnels de transports': ['Taxi', 'VTC', 'Chauffeur privé', 'Transport de marchandises', 'Déménagement', 'Livraison', 'Location véhicule', 'Transport médical'],
-  'Professionnels d\'éducation': ['École primaire', 'Collège', 'Lycée', 'Université', 'Cours particuliers', 'Soutien scolaire', 'École de langues', 'Formation professionnelle'],
-  'Formation': ['Formation continue', 'Certification', 'Langues', 'Informatique', 'Management', 'Comptabilité', 'Marketing'],
-  'Professionnels administratifs': ['Secrétariat', 'Comptabilité', 'Ressources humaines', 'Traduction', 'Domiciliation', 'Services postaux'],
-  'Professionnels juridiques': ['Avocat', 'Notaire', 'Huissier', 'Conseil juridique', 'Médiation', 'Droit des affaires', 'Droit de la famille'],
-  'Avocat': ['Droit pénal', 'Droit civil', 'Droit des affaires', 'Droit de la famille', 'Droit du travail', 'Droit immobilier', 'Droit fiscal'],
-  'Professionnels informatiques': ['Développement web', 'Développement mobile', 'Maintenance', 'Conseil IT', 'Cybersécurité', 'Cloud', 'Data science', 'Support technique'],
-  'Informatique': ['Développement web', 'Développement mobile', 'Maintenance', 'Conseil IT', 'Cybersécurité', 'Cloud', 'Data science', 'Support technique'],
-  'Professionnels de construction': ['Maçonnerie', 'Plomberie', 'Électricité', 'Menuiserie', 'Carrelage', 'Peinture', 'Toiture', 'Isolation', 'Chauffage', 'Rénovation'],
-  'Bijouterie': ['Bagues', 'Colliers', 'Bracelets', 'Boucles d\'oreilles', 'Montres', 'Bijoux sur mesure', 'Réparation', 'Gravure'],
-  'Bijouteries': ['Bagues', 'Colliers', 'Bracelets', 'Boucles d\'oreilles', 'Montres', 'Bijoux sur mesure', 'Réparation', 'Gravure'],
-  'Bijouteries & Horlogerie': ['Montres de luxe', 'Bijoux', 'Réparation montres', 'Gravure', 'Estimation', 'Rachat'],
-  'Horlogerie': ['Montres de luxe', 'Montres sport', 'Montres connectées', 'Réparation', 'Estimation', 'Rachat'],
-  'Garage': ['Réparation', 'Entretien', 'Carrosserie', 'Pneus', 'Vidange', 'Diagnostic', 'Climatisation auto'],
-  'Automobile & Garage': ['Réparation', 'Entretien', 'Carrosserie', 'Pneus', 'Vidange', 'Diagnostic', 'Vente véhicules'],
-  'Boulangerie': ['Pain traditionnel', 'Viennoiseries', 'Pâtisseries', 'Snacking', 'Pain bio', 'Pain sans gluten'],
-  'Boulangerie & Pâtisserie': ['Pain', 'Croissants', 'Gâteaux', 'Tartes', 'Macarons', 'Chocolaterie'],
-  'Pharmacie': ['Médicaments', 'Parapharmacie', 'Cosmétiques', 'Homéopathie', 'Matériel médical', 'Conseil santé'],
-  'Banque': ['Compte courant', 'Épargne', 'Crédit immobilier', 'Crédit auto', 'Assurance', 'Investissement', 'Banque privée'],
-  'Hotel': ['Hôtel de luxe', 'Hôtel business', 'Hôtel familial', 'Boutique hôtel', 'Apart-hôtel', 'Auberge'],
-  'Spa': ['Massage', 'Sauna', 'Hammam', 'Jacuzzi', 'Soins du corps', 'Balnéothérapie'],
-  'Veterinaire': ['Chiens', 'Chats', 'NAC', 'Équins', 'Urgences', 'Chirurgie', 'Vaccination'],
-  'Fleuriste': ['Bouquets', 'Compositions', 'Plantes', 'Fleurs de mariage', 'Deuil', 'Événements', 'Abonnement floral'],
-  'Assurance': ['Auto', 'Habitation', 'Santé', 'Vie', 'Professionnelle', 'Voyage'],
-  'Comptable': ['Comptabilité générale', 'Fiscalité', 'Paie', 'Création entreprise', 'Audit', 'Conseil'],
-  'Architecte': ['Maison individuelle', 'Appartement', 'Commercial', 'Rénovation', 'Extension', 'Décoration intérieure'],
-  'Plombier': ['Dépannage', 'Installation', 'Rénovation salle de bain', 'Chauffe-eau', 'Débouchage'],
-  'Electricien': ['Dépannage', 'Installation', 'Rénovation', 'Domotique', 'Mise aux normes'],
-  'Serrurier': ['Dépannage', 'Ouverture de porte', 'Blindage', 'Coffre-fort', 'Reproduction clés'],
-};
-
-// Liste des catégories principales qui ont des sous-catégories
-const CATEGORIES_WITH_SUBCATEGORIES = Object.keys(SUBCATEGORIES_MAP);
+import { Star, MapPin, ChevronRight, ChevronDown } from 'lucide-react';
+import { enterpriseAPI } from '../services/api';
 
 const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
   const navigate = useNavigate();
@@ -59,6 +9,28 @@ const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
   const [coverError, setCoverError] = React.useState(false);
   const [logoError, setLogoError] = React.useState(false);
   const [showSubcategories, setShowSubcategories] = useState(false);
+  const [subcategories, setSubcategories] = useState([]);
+  const [loadingSubcats, setLoadingSubcats] = useState(false);
+
+  // Fetch subcategories when category changes
+  useEffect(() => {
+    if (category && showSubcategories && subcategories.length === 0) {
+      const fetchSubcategories = async () => {
+        setLoadingSubcats(true);
+        try {
+          const response = await enterpriseAPI.getSubcategories(category);
+          if (response.data?.subcategories) {
+            setSubcategories(response.data.subcategories);
+          }
+        } catch (error) {
+          console.error('Error fetching subcategories:', error);
+        } finally {
+          setLoadingSubcats(false);
+        }
+      };
+      fetchSubcategories();
+    }
+  }, [category, showSubcategories, subcategories.length]);
 
   if (!enterprises.length) return null;
 
@@ -121,36 +93,20 @@ const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
     setLogoError(false);
   };
 
-  // Vérifier si cette catégorie a des sous-catégories
-  const hasSubcategories = category && CATEGORIES_WITH_SUBCATEGORIES.some(
-    cat => category.toLowerCase().includes(cat.toLowerCase()) || cat.toLowerCase().includes(category.toLowerCase())
-  );
-  
-  // Trouver les sous-catégories correspondantes
-  const getSubcategories = () => {
-    if (!category) return [];
-    const matchingKey = CATEGORIES_WITH_SUBCATEGORIES.find(
-      cat => category.toLowerCase().includes(cat.toLowerCase()) || cat.toLowerCase().includes(category.toLowerCase())
-    );
-    return matchingKey ? SUBCATEGORIES_MAP[matchingKey] : [];
-  };
-
-  const subcategories = getSubcategories();
+  // Check if category has subcategories (will show after API call)
+  const hasSubcategories = subcategories.length > 0 || loadingSubcats;
 
   const handleCategoryClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (hasSubcategories && subcategories.length > 0) {
-      setShowSubcategories(!showSubcategories);
-    } else {
-      navigate(`/entreprises?category=${encodeURIComponent(category)}`);
-    }
+    // Toggle subcategories menu - will trigger API call via useEffect
+    setShowSubcategories(!showSubcategories);
   };
 
   const handleSubcategoryClick = (e, subcategory) => {
     e.preventDefault();
     e.stopPropagation();
-    navigate(`/entreprises?category=${encodeURIComponent(category)}&subcategory=${encodeURIComponent(subcategory)}`);
+    navigate(`/categorie/${encodeURIComponent(category)}?subcategory=${encodeURIComponent(subcategory)}`);
   };
 
   const handleCardClick = (e) => {
@@ -175,44 +131,63 @@ const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
           data-testid={`category-btn-${category}`}
         >
           {category}
-          {hasSubcategories && (
-            <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${showSubcategories ? 'rotate-90' : ''}`} />
-          )}
+          <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${showSubcategories ? 'rotate-180' : ''}`} />
         </button>
       </div>
 
       {/* SUBCATEGORIES DROPDOWN - Animated */}
-      {showSubcategories && subcategories.length > 0 && (
+      {showSubcategories && (
         <div 
           className="subcategories-menu absolute top-12 left-0 right-0 z-50 bg-white rounded-xl shadow-2xl border border-gray-100 p-3 animate-in slide-in-from-top-2 duration-300 max-h-[300px] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
           data-testid="subcategories-menu"
         >
-          <div className="grid grid-cols-2 gap-2">
-            {subcategories.map((subcat, idx) => (
+          {loadingSubcats ? (
+            <div className="flex items-center justify-center py-4">
+              <div className="w-6 h-6 border-2 border-[#0047AB] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : subcategories.length > 0 ? (
+            <>
+              <div className="grid grid-cols-2 gap-2">
+                {subcategories.map((subcat, idx) => (
+                  <button
+                    key={idx}
+                    onClick={(e) => handleSubcategoryClick(e, subcat)}
+                    className="text-left px-3 py-2 text-sm text-gray-700 hover:bg-[#0047AB]/10 hover:text-[#0047AB] rounded-lg transition-all duration-200 transform hover:translate-x-1"
+                    style={{ animationDelay: `${idx * 30}ms` }}
+                    data-testid={`subcategory-${subcat}`}
+                  >
+                    {subcat}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-3 pt-3 border-t border-gray-100">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    navigate(`/categorie/${encodeURIComponent(category)}`);
+                  }}
+                  className="w-full text-center text-sm text-[#0047AB] font-medium hover:underline"
+                >
+                  Voir tous les {category}
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-3">
               <button
-                key={idx}
-                onClick={(e) => handleSubcategoryClick(e, subcat)}
-                className="text-left px-3 py-2 text-sm text-gray-700 hover:bg-[#0047AB]/10 hover:text-[#0047AB] rounded-lg transition-all duration-200 transform hover:translate-x-1"
-                style={{ animationDelay: `${idx * 30}ms` }}
-                data-testid={`subcategory-${subcat}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  navigate(`/categorie/${encodeURIComponent(category)}`);
+                }}
+                className="text-sm text-[#0047AB] font-medium hover:underline"
               >
-                {subcat}
+                Voir tous les {category}
               </button>
-            ))}
-          </div>
-          <div className="mt-3 pt-3 border-t border-gray-100">
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                navigate(`/entreprises?category=${encodeURIComponent(category)}`);
-              }}
-              className="w-full text-center text-sm text-[#0047AB] font-medium hover:underline"
-            >
-              Voir tous les {category}
-            </button>
-          </div>
+            </div>
+          )}
         </div>
       )}
 

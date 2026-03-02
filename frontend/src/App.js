@@ -41,6 +41,7 @@ import MentionsLegalesPage from './pages/MentionsLegalesPage';
 import FAQPage from './pages/FAQPage';
 import StatusPage from './pages/StatusPage';
 import CashbackPage from './pages/CashbackPage';
+import CategoryEnterprisesPage from './pages/CategoryEnterprisesPage';
 import WelcomePopup from './components/WelcomePopup';
 
 import './index.css';
@@ -106,6 +107,9 @@ function AppRoutes() {
       <Route path="/item/:id" element={<MainLayout><ServiceProductDetailPage /></MainLayout>} />
       <Route path="/entreprises" element={<MainLayout><EnterprisesPage /></MainLayout>} />
       <Route path="/entreprise/:id" element={<MainLayout><EnterprisePage /></MainLayout>} />
+      
+      {/* Category Enterprises Page - For subcategories */}
+      <Route path="/categorie/:category" element={<MainLayout><CategoryEnterprisesPage /></MainLayout>} />
       
       {/* Client Profile Route */}
       <Route path="/profil/:userId" element={<MainLayout><ClientProfilePage /></MainLayout>} />
