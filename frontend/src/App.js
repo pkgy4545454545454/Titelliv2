@@ -74,7 +74,7 @@ const MainLayout = ({ children, showFooter = true }) => {
   return (
     <>
       <Header />
-      <main className="min-h-screen pt-20">
+      <main className="min-h-screen">
         {children}
       </main>
       {showFooter && <Footer />}

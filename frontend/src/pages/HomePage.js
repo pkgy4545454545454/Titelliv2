@@ -359,7 +359,7 @@ const HomePage = () => {
   return (
     <div className="min-h-screen bg-white" data-testid="home-page">
       {/* Hero Section with Panoramic Video - No gap with navbar */}
-      <section className="relative h-[70vh] overflow-hidden pt-14 lg:pt-16" data-testid="hero-section">
+      <section className="relative h-[70vh] overflow-hidden pt-14 lg:" data-testid="hero-section">
         {/* Video Background */}
         <div className="absolute inset-0">
           <video

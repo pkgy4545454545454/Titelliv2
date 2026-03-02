@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
-import { Search, ChevronLeft, ChevronRight, MapPin, Star, ArrowLeft, Play, Pause } from 'lucide-react';
+import { Search, MapPin, Star, ArrowLeft, ArrowRight } from 'lucide-react';
 import { enterpriseAPI } from '../services/api';
 import { toast } from 'sonner';
 
@@ -9,7 +9,6 @@ const CategoryEnterprisesPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const subcategory = searchParams.get('subcategory') || '';
-  const videoRef = useRef(null);
   
   const [enterprises, setEnterprises] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
@@ -17,7 +16,6 @@ const CategoryEnterprisesPage = () => {
   const [total, setTotal] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryName, setCategoryName] = useState('');
-  const [isVideoPlaying, setIsVideoPlaying] = useState(true);
 
   // Decode category from URL
   const decodedCategory = decodeURIComponent(category || '').replace(/_/g, ' ');
@@ -82,104 +80,87 @@ const CategoryEnterprisesPage = () => {
     navigate(`/categorie/${encodeURIComponent(category)}`);
   };
 
-  // Toggle video
-  const toggleVideo = () => {
-    if (videoRef.current) {
-      if (isVideoPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play();
-      }
-      setIsVideoPlaying(!isVideoPlaying);
-    }
-  };
-
-  // Carousel scroll
-  const carouselRef = useRef(null);
-  const scrollCarousel = (direction) => {
-    if (carouselRef.current) {
-      const scrollAmount = 320;
-      const newScrollLeft = carouselRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
-      carouselRef.current.scrollTo({ left: newScrollLeft, behavior: 'smooth' });
-    }
+  // Handle search
+  const handleSearch = (e) => {
+    e.preventDefault();
+    // Search is already reactive via useEffect
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] pt-20" data-testid="category-enterprises-page">
-      {/* Hero Section with Video - Like EnterprisesPage */}
-      <div className="relative h-[45vh] min-h-[350px] overflow-hidden">
-        {/* Video Background */}
+    <div className="min-h-screen bg-white pt-14 lg:pt-16" data-testid="category-enterprises-page">
+      {/* Hero Section - Same style as HomePage */}
+      <section className="relative h-[40vh] min-h-[300px] overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+        {/* Background Image */}
         <div className="absolute inset-0">
-          <video
-            ref={videoRef}
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="w-full h-full object-cover"
-            poster="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=80"
-          >
-            <source src={`${process.env.REACT_APP_BACKEND_URL}/api/uploads/video_services.mp4`} type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/60 via-[#050505]/40 to-[#050505]" />
+          <img 
+            src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=80"
+            alt={categoryName || decodedCategory}
+            className="w-full h-full object-cover opacity-60"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-white" />
         </div>
 
-        {/* Hero Content - Centered */}
-        <div className="relative h-full flex flex-col items-center justify-center text-center px-4">
-          {/* Back Button */}
-          <button 
-            onClick={() => navigate(-1)}
-            className="absolute top-4 left-4 flex items-center gap-2 text-white/80 hover:text-white transition-colors bg-black/30 backdrop-blur-sm px-4 py-2 rounded-full"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span>Retour</span>
-          </button>
+        {/* Hero Content */}
+        <div className="absolute inset-0 flex flex-col justify-center px-4 md:px-8">
+          <div className="max-w-7xl mx-auto w-full">
+            {/* Back Button */}
+            <button 
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2 text-gray-700 hover:text-[#0047AB] transition-colors mb-4"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span>Retour</span>
+            </button>
 
-          {/* Category Title */}
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
-            {categoryName || decodedCategory}
-          </h1>
-          
-          {/* Subcategory Badge */}
-          {subcategory && (
-            <div className="flex items-center gap-2 mb-4">
-              <span className="inline-flex items-center gap-2 px-5 py-2 bg-[#0047AB] text-white rounded-full text-sm font-medium">
-                {subcategory}
-                <button 
-                  onClick={clearSubcategory}
-                  className="hover:bg-white/20 rounded-full p-0.5 transition-colors"
-                >
-                  ×
-                </button>
-              </span>
-            </div>
-          )}
+            {/* Category Title */}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-black mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
+              {categoryName || decodedCategory}
+              {subcategory && (
+                <span className="text-[#0047AB]"> - {subcategory}</span>
+              )}
+            </h1>
 
-          <p className="text-lg text-gray-300 max-w-2xl">
-            {total} prestataires disponibles
-          </p>
-
-          {/* Video Control */}
-          <button 
-            onClick={toggleVideo}
-            className="absolute bottom-6 right-6 bg-black/50 backdrop-blur-sm text-white p-3 rounded-full hover:bg-black/70 transition-colors"
-          >
-            {isVideoPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-          </button>
+            <p className="text-lg text-gray-600">
+              {total} prestataires disponibles
+            </p>
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* Subcategories Navigation - Horizontal scroll */}
+      {/* Search Bar Section */}
+      <section className="py-4 sm:py-6 bg-white" data-testid="search-section">
+        <div className="max-w-2xl mx-auto px-4">
+          <form onSubmit={handleSearch} className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder={`Rechercher dans ${categoryName || decodedCategory}...`}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-20 py-2.5 bg-gray-50 border border-gray-200 rounded-full text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#0047AB] focus:bg-white transition-all"
+              data-testid="search-input"
+            />
+            <button 
+              type="submit"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-[#0047AB] text-white px-4 py-1.5 rounded-full text-xs font-medium hover:bg-[#0047AB]/90 transition-colors"
+            >
+              Rechercher
+            </button>
+          </form>
+        </div>
+      </section>
+
+      {/* Subcategories Filter Bar */}
       {subcategories.length > 0 && (
-        <div className="bg-[#0A0A0A] border-y border-white/10 sticky top-16 z-40">
+        <section className="bg-gray-50 border-y border-gray-200 sticky top-14 lg:top-16 z-40">
           <div className="max-w-7xl mx-auto px-4 md:px-8">
-            <div className="flex gap-3 py-4 overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
+            <div className="flex gap-2 py-3 overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
               <button
                 onClick={clearSubcategory}
-                className={`flex-shrink-0 px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
+                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
                   !subcategory 
-                    ? 'bg-white text-black' 
-                    : 'text-gray-400 hover:text-white border border-white/20 hover:border-white/40'
+                    ? 'bg-[#0047AB] text-white' 
+                    : 'text-gray-600 hover:text-[#0047AB] border border-gray-200 hover:border-[#0047AB]'
                 }`}
               >
                 Tous
@@ -188,10 +169,10 @@ const CategoryEnterprisesPage = () => {
                 <button
                   key={idx}
                   onClick={() => handleSubcategoryClick(subcat)}
-                  className={`flex-shrink-0 px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
+                  className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
                     subcategory === subcat 
                       ? 'bg-[#0047AB] text-white' 
-                      : 'text-gray-400 hover:text-white border border-white/20 hover:border-[#0047AB]'
+                      : 'text-gray-600 hover:text-[#0047AB] border border-gray-200 hover:border-[#0047AB]'
                   }`}
                   data-testid={`subcategory-btn-${subcat}`}
                 >
@@ -200,93 +181,76 @@ const CategoryEnterprisesPage = () => {
               ))}
             </div>
           </div>
-        </div>
+        </section>
       )}
 
-      {/* Search Bar */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
-        <div className="relative max-w-xl">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder={`Rechercher dans ${categoryName || decodedCategory}...`}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-[#0047AB]/50 transition-all"
-            data-testid="search-input"
-          />
-        </div>
-      </div>
-
-      {/* Enterprises Carousel - Like EnterprisesPage */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 pb-12">
-        {loading ? (
-          <div className="flex gap-6 overflow-hidden">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex-shrink-0 w-[300px] h-[280px] bg-white/5 rounded-xl animate-pulse" />
-            ))}
+      {/* Enterprises Grid - Same as HomePage (5 columns) */}
+      <section className="py-6 sm:py-10 bg-white" data-testid="enterprises-section">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          {/* Section Header */}
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
+              {subcategory ? subcategory : `Tous les ${categoryName || decodedCategory}`}
+            </h2>
+            <Link to="/entreprises" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors">
+              Voir tout
+              <ArrowRight className="w-5 h-5" />
+            </Link>
           </div>
-        ) : enterprises.length > 0 ? (
-          <div className="relative">
-            {/* Navigation Buttons */}
-            <button
-              onClick={() => scrollCarousel('left')}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/80 hover:bg-black text-white p-3 rounded-full shadow-lg border border-white/20 transition-all hover:scale-110 -ml-4"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-            
-            <button
-              onClick={() => scrollCarousel('right')}
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/80 hover:bg-black text-white p-3 rounded-full shadow-lg border border-white/20 transition-all hover:scale-110 -mr-4"
-            >
-              <ChevronRight className="w-6 h-6" />
-            </button>
 
-            {/* Carousel Container */}
-            <div 
-              ref={carouselRef}
-              className="flex gap-5 overflow-x-auto scrollbar-hide scroll-smooth pb-4 px-2"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
+          {/* Grid */}
+          {loading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+                <div key={i} className="h-[280px] w-full bg-gray-100 rounded-xl animate-pulse" />
+              ))}
+            </div>
+          ) : enterprises.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
               {enterprises.map((enterprise, index) => (
-                <EnterpriseCardDark 
+                <EnterpriseCardLight 
                   key={enterprise.id} 
                   enterprise={enterprise}
                   index={index}
                 />
               ))}
             </div>
-          </div>
-        ) : (
-          <div className="text-center py-16">
-            <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Search className="w-10 h-10 text-gray-500" />
+          ) : (
+            <div className="text-center py-16">
+              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Search className="w-10 h-10 text-gray-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucune entreprise trouvée</h3>
+              <p className="text-gray-500 mb-4">
+                {subcategory 
+                  ? `Aucune entreprise dans "${subcategory}"` 
+                  : `Aucune entreprise dans "${categoryName || decodedCategory}"`
+                }
+              </p>
+              {subcategory && (
+                <button
+                  onClick={clearSubcategory}
+                  className="px-6 py-3 bg-[#0047AB] text-white rounded-full font-medium hover:bg-[#0047AB]/80 transition-colors"
+                >
+                  Voir tous les {categoryName || decodedCategory}
+                </button>
+              )}
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">Aucune entreprise trouvée</h3>
-            <p className="text-gray-400 mb-4">
-              {subcategory 
-                ? `Aucune entreprise dans "${subcategory}"` 
-                : `Aucune entreprise dans "${categoryName || decodedCategory}"`
-              }
-            </p>
-            {subcategory && (
-              <button
-                onClick={clearSubcategory}
-                className="px-6 py-3 bg-[#0047AB] text-white rounded-full font-medium hover:bg-[#0047AB]/80 transition-colors"
-              >
-                Voir toutes les {categoryName || decodedCategory}
-              </button>
-            )}
-          </div>
-        )}
-      </div>
+          )}
+
+          {/* Mobile link */}
+          <Link to="/entreprises" className="md:hidden flex items-center justify-start gap-2 mt-4 sm:mt-6 text-[#0047AB] font-medium text-sm">
+            Voir toutes les entreprises
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </section>
     </div>
   );
 };
 
-// Dark themed Enterprise Card for this page
-const EnterpriseCardDark = ({ enterprise, index = 0 }) => {
+// Light themed Enterprise Card - Same style as HomePage
+const EnterpriseCardLight = ({ enterprise, index = 0 }) => {
   const navigate = useNavigate();
   const [imageError, setImageError] = useState(false);
 
@@ -312,48 +276,48 @@ const EnterpriseCardDark = ({ enterprise, index = 0 }) => {
 
   return (
     <div 
-      className="flex-shrink-0 w-[280px] sm:w-[320px] bg-[#111] rounded-2xl overflow-hidden border border-white/10 hover:border-[#0047AB]/50 transition-all cursor-pointer group animate-fade-in"
+      className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all cursor-pointer group animate-fade-in border border-gray-100"
       onClick={() => navigate(`/entreprise/${id}`)}
-      style={{ animationDelay: `${index * 50}ms` }}
+      style={{ animationDelay: `${index * 30}ms` }}
       data-testid={`enterprise-card-${id}`}
     >
       {/* Image */}
-      <div className="relative h-44 overflow-hidden">
+      <div className="relative h-28 sm:h-36 overflow-hidden">
         <img
           src={actualCover}
           alt={displayName}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 rounded-t-2xl"
           onError={() => setImageError(true)}
         />
         {/* Subcategory Badge */}
         {subcategory && (
-          <div className="absolute top-3 left-3">
-            <span className="px-3 py-1 bg-black/70 backdrop-blur-sm text-white text-xs rounded-full">
+          <div className="absolute top-2 left-2">
+            <span className="px-2 py-1 bg-black/60 backdrop-blur-sm text-white text-xs rounded-full">
               {subcategory}
             </span>
           </div>
         )}
         {/* Logo */}
-        {logo && (
-          <div className="absolute bottom-3 right-3 w-12 h-12 rounded-full bg-white p-1 shadow-lg">
+        {logo && !imageError && (
+          <div className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-white p-1 shadow-md">
             <img src={logo} alt="" className="w-full h-full object-cover rounded-full" />
           </div>
         )}
       </div>
 
       {/* Content */}
-      <div className="p-4">
-        <h3 className="text-base font-semibold text-white group-hover:text-[#0047AB] transition-colors line-clamp-2 mb-2">
+      <div className="p-2 sm:p-3">
+        <h3 className="text-xs sm:text-sm font-semibold text-gray-900 group-hover:text-[#0047AB] transition-colors line-clamp-2 mb-2 text-center">
           {displayName}
         </h3>
-        <div className="flex items-center gap-2 mb-2">
-          <Star className="w-4 h-4 fill-[#D4AF37] text-[#D4AF37]" />
-          <span className="text-sm text-gray-300">{displayRating}/5</span>
-          {review_count > 0 && <span className="text-xs text-gray-500">({review_count})</span>}
+        <div className="flex items-center gap-1.5 mb-2 justify-center">
+          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+          <span className="text-sm font-medium text-gray-700">{displayRating}/5</span>
+          {review_count > 0 && <span className="text-xs text-gray-400">({review_count})</span>}
         </div>
-        <div className="flex items-center gap-1 text-sm text-gray-400 mb-4">
-          <MapPin className="w-4 h-4" />
-          <span>{city || 'Lausanne'}</span>
+        <div className="flex items-center justify-center text-xs sm:text-sm gap-1 text-gray-400 mb-3">
+          <MapPin className="w-3.5 h-3.5" />
+          <span className="line-clamp-1">{city || 'Lausanne'}</span>
         </div>
         <button
           onClick={(e) => {
@@ -362,8 +326,8 @@ const EnterpriseCardDark = ({ enterprise, index = 0 }) => {
           }}
           className={`w-full py-2.5 rounded-xl text-sm font-medium transition-all ${
             isActive 
-              ? 'bg-[#0047AB] text-white hover:bg-[#0047AB]/80' 
-              : 'bg-white/10 text-gray-400'
+              ? 'bg-[#0047AB] text-white hover:bg-[#0047AB]/90' 
+              : 'bg-gray-200 text-gray-500'
           }`}
         >
           {isActive ? 'Réserver' : 'Bientôt'}
