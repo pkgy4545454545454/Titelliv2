@@ -11,7 +11,7 @@ import os
 
 # Configuration
 UPLOADS_DIR = "/app/backend/uploads"
-BASE_URL = "https://swiss-landscape-vids.preview.emergentagent.com"
+BASE_URL = "https://resto-browse-1.preview.emergentagent.com"
 
 class TitelliPDF(FPDF):
     def __init__(self):

@@ -1,11 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const SplashScreen = ({ onComplete }) => {
   const [progress, setProgress] = useState(0);
   const [currentPhrase, setCurrentPhrase] = useState(0);
   const [fadeOut, setFadeOut] = useState(false);
-  const [videoLoaded, setVideoLoaded] = useState(false);
-  const videoRef = useRef(null);
 
   // Reduced phrases for faster loading (3 seconds total)
   const phrases = [
@@ -124,7 +122,7 @@ const SplashScreen = ({ onComplete }) => {
           }}
         />
         
-        {/* Video logo - optimized with lazy loading and fallback */}
+        {/* Logo image instead of video */}
         <div 
           style={{
             width: '150px',
@@ -135,42 +133,21 @@ const SplashScreen = ({ onComplete }) => {
             boxShadow: '0 0 40px rgba(0, 71, 171, 0.5), 0 0 80px rgba(212, 175, 55, 0.2)',
             position: 'relative',
             zIndex: 1,
-            background: 'linear-gradient(135deg, #0047AB 0%, #D4AF37 100%)',
+            background: '#000',
             flexShrink: 0,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
-          {/* Fallback logo while video loads */}
-          {!videoLoaded && (
-            <span style={{
-              fontSize: '48px',
-              fontWeight: 'bold',
-              color: '#fff',
-              fontFamily: 'Playfair Display, serif',
-            }}>T</span>
-          )}
-          <video 
-            ref={videoRef}
-            autoPlay 
-            loop 
-            muted 
-            playsInline
-            preload="metadata"
-            onLoadedData={() => setVideoLoaded(true)}
+          <img 
+            src="/logo_titelli.png" 
+            alt="Titelli"
             style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              transform: 'scale(1.5)',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              opacity: videoLoaded ? 1 : 0,
-              transition: 'opacity 0.3s ease',
+              width: '80%',
+              height: '80%',
+              objectFit: 'contain',
             }}
-            src={`${process.env.REACT_APP_BACKEND_URL}/api/uploads/video_logo_titelli_final.mp4`}
           />
         </div>
 

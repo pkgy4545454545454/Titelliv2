@@ -22,7 +22,7 @@ cloudinary.config(
 
 # Configuration MongoDB
 MONGO_URL = "mongodb+srv://prankgy:Minijetaime1996@cluster0.kwjifsg.mongodb.net/secondevie?retryWrites=true&w=majority&appName=Cluster0"
-EMERGENT_BASE_URL = "https://swiss-landscape-vids.preview.emergentagent.com"
+EMERGENT_BASE_URL = "https://resto-browse-1.preview.emergentagent.com"
 LOCAL_UPLOADS_DIR = "/app/backend/uploads"
 
 def upload_to_cloudinary(image_url, folder="titelli"):

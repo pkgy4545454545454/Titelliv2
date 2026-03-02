@@ -51,4 +51,4 @@ Smooth dolly camera movement following them from behind. Premium lifestyle adver
 if __name__ == "__main__":
     result = generate_welcome_video()
     if result:
-        print(f"\n🔗 Lien: https://swiss-landscape-vids.preview.emergentagent.com/api/uploads/video_accueil_couple_lausanne.mp4")
+        print(f"\n🔗 Lien: https://resto-browse-1.preview.emergentagent.com/api/uploads/video_accueil_couple_lausanne.mp4")

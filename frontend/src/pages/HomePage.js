@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronRight, ChevronLeft, Star, ArrowRight, Play, Briefcase, MapPin, Clock, Filter, GraduationCap, Calendar, Pause, Volume2, VolumeX, Search, Sparkles, Gift, CheckCircle, Users, Send, X, FileText } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Star, ArrowRight, Briefcase, MapPin, Clock, Filter, GraduationCap, Search, CheckCircle, Send, X, FileText, Sparkles, Gift, Users } from 'lucide-react';
 import { featuredAPI, categoryAPI, enterpriseAPI, servicesProductsAPI, jobsAPI, clientDocumentsAPI, trainingsAPI } from '../services/api';
 import EnterpriseCard from '../components/EnterpriseCard';
 import ServiceProductCard from '../components/ServiceProductCard';
 import ScrollingReviews from '../components/ScrollingReviews';
 import { toast } from 'sonner';
-import { Menu,  Heart, Bell, ChevronDown, User, Image, Video, HandCoins, Building2, UserCircle } from 'lucide-react';
 // Carousel Component with light theme - Responsive
 const Carousel = ({ children, itemWidth = 280 }) => {
   const carouselRef = useRef(null);
@@ -359,8 +358,8 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-white" data-testid="home-page">
-      {/* Hero Section with Panoramic Video */}
-      <section className="relative h-[70vh] overflow-hidden" data-testid="hero-section">
+      {/* Hero Section with Panoramic Video - No gap with navbar */}
+      <section className="relative h-[70vh] overflow-hidden pt-14 lg:pt-16" data-testid="hero-section">
         {/* Video Background */}
         <div className="absolute inset-0">
           <video
@@ -381,46 +380,48 @@ const HomePage = () => {
           />
         </div>
 
-        {/* Hero Content - Just title, no logo, no description */}
-        <div className="absolute inset-0 flex flex-col justify-center items-center text-left px-4">
-          <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-black  mb-8 animate-fade-in drop-shadow-lg" style={{ fontFamily: 'Playfair Display, serif' }}>
-            Les meilleurs prestataires<br />
-            <span style={{ color: 'green' }}>de ta région</span>
-          </h1>
+        {/* Hero Content - Title aligned left */}
+        <div className="absolute inset-0 flex flex-col justify-center px-4 md:px-8">
+          <div className="max-w-7xl mx-auto w-full">
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-black mb-8 animate-fade-in drop-shadow-lg" style={{ fontFamily: 'Playfair Display, serif' }}>
+              Les meilleurs prestataires<br />
+              <span style={{ color: 'green' }}>de ta région</span>
+            </h1>
 
-          {/* Category Buttons - 2 rows */}
-          <div className="flex flex-col items-start gap-1 animate-fade-in stagger-2">
-            <div className="flex flex-wrap justify-center  gap-2">
-              {[
-                { label: 'Services', path: '/services' },
-                { label: 'Produits', path: '/products' },
-                { label: 'Certifiés', path: '/certifies' },
-                { label: 'Labelisés', path: '/labellises' },
-              ].map((cat) => (
-                <Link
-                  key={cat.label}
-                  to={cat.path}
-                  className="px-4 py-2 bg-black/80 backdrop-blur-md border border-white/20 rounded-[10px] text-white text-sm hover:bg-white hover:text-black transition-all duration-300"
-                >
-                  {cat.label}
-                </Link>
-              ))}
-            </div>
-            <div className="flex flex-wrap justify-center gap-2">
-              {[
-                { label: 'Premium', path: '/premium' },
-                { label: 'Tendances', path: '/tendances' },
-                { label: 'Guests', path: '/guests' },
-                { label: 'Offres', path: '/offres' },
-              ].map((cat) => (
-                <Link
-                  key={cat.label}
-                  to={cat.path}
-                  className="px-4 py-2 bg-black/80 backdrop-blur-md border border-white/20 rounded-[10px] text-white text-sm hover:bg-white hover:text-black transition-all duration-300"
-                >
-                  {cat.label}
-                </Link>
-              ))}
+            {/* Category Buttons - 2 rows */}
+            <div className="flex flex-col items-start gap-1 animate-fade-in stagger-2">
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { label: 'Services', path: '/services' },
+                  { label: 'Produits', path: '/products' },
+                  { label: 'Certifiés', path: '/certifies' },
+                  { label: 'Labelisés', path: '/labellises' },
+                ].map((cat) => (
+                  <Link
+                    key={cat.label}
+                    to={cat.path}
+                    className="px-4 py-2 bg-black/80 backdrop-blur-md border border-white/20 rounded-[10px] text-white text-sm hover:bg-white hover:text-black transition-all duration-300"
+                  >
+                    {cat.label}
+                  </Link>
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { label: 'Premium', path: '/premium' },
+                  { label: 'Tendances', path: '/tendances' },
+                  { label: 'Guests', path: '/guests' },
+                  { label: 'Offres', path: '/offres' },
+                ].map((cat) => (
+                  <Link
+                    key={cat.label}
+                    to={cat.path}
+                    className="px-4 py-2 bg-black/80 backdrop-blur-md border border-white/20 rounded-[10px] text-white text-sm hover:bg-white hover:text-black transition-all duration-300"
+                  >
+                    {cat.label}
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -433,16 +434,6 @@ const HomePage = () => {
       {/* Search Bar Section - Under Video */}
       <section className="py-4 sm:py-6 bg-white" data-testid="search-section">
         <div className="max-w-2xl mx-auto px-4">
-            <Link to="/" className="text-amber-400 hover:text-amber-300 hidden sm:inline-block" data-testid="logo-link">
-                        <img 
-                          src="/logo_titellid.png" 
-                          alt="Titelli"
-                          className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
-                        />
-                      </Link>
-           <Link to="/cashback" className="p-2 text-amber-400 hover:text-amber-300 hidden sm:inline-block" data-testid="cashback-link">
-              <HandCoins className="w-5 h-5" />
-            </Link>
           <form onSubmit={handleSearch} className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
@@ -463,9 +454,13 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Les meilleurs prestataires Section - Grid 5 columns - Aligned left */}
-      <section className="py-8 sm:py-12 bg-white" data-testid="top-providers-section">
-        <div className="max-w-[120rem] mx-auto px-4 md:px-8">
+      {/* Les meilleurs prestataires Section - Grid 5 columns max - Aligned with header */}
+      <section className="py-6 sm:py-10 bg-white" data-testid="top-providers-section">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          {/* Title aligned with cards */}
+          <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold text-gray-900 mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
+            Les meilleurs prestataires de ta région
+          </h2>
           <div className="flex items-center justify-start mb-4">
             <Link to="/entreprises" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors">
               Voir tout
@@ -475,13 +470,13 @@ const HomePage = () => {
 
 
           {loading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 justify-items-start">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map((i) => (
-                <div key={i} className="h-[240px] sm:h-[280px] w-full bg-gray-100 rounded-xl animate-pulse" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map((i) => (
+                <div key={i} className="h-[200px] sm:h-[240px] w-full bg-gray-100 rounded-xl animate-pulse" />
               ))}
             </div>
           ) : allEnterprises.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 justify-items-start">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
            {Object.entries(enterprisesByCategory).map(([category, list]) => (
               <div key={category} className="w-full">
                 <EnterpriseCard
@@ -504,7 +499,7 @@ const HomePage = () => {
 
       {/* Services Section - Grid 4 columns */}
       <section className="py-8 sm:py-16 bg-gray-50" data-testid="services-section">
-        <div className="max-w-[120rem] mx-auto px-4 md:px-8">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex items-center justify-between mb-6 sm:mb-8">
             <div>
               <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold text-gray-900">
@@ -564,7 +559,7 @@ const HomePage = () => {
 
       {/* Les meilleurs produits - Grid 4 columns */}
       <section className="py-8 sm:py-16 bg-white" data-testid="products-section">
-        <div className="max-w-[120rem] mx-auto px-4 md:px-8">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex items-center justify-between mb-6 sm:mb-8">
             <div>
               <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold text-gray-900">
@@ -634,7 +629,7 @@ const HomePage = () => {
       {/* Tendances Actuelles - Grid 4 columns */}
       {tendances.length > 0 && (
         <section className="py-8 sm:py-16 bg-gray-50" data-testid="tendances-section">
-          <div className="max-w-[120rem] mx-auto px-4 md:px-8">
+          <div className="max-w-7xl mx-auto px-4 md:px-8">
             <div className="flex items-center justify-between mb-6 sm:mb-8">
               <div>
                 <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold text-gray-900">
@@ -661,7 +656,7 @@ const HomePage = () => {
       {/* Guests du moment - Grid 4 columns */}
       {guests.length > 0 && (
         <section className="py-8 sm:py-16 bg-white" data-testid="guests-section">
-          <div className="max-w-[120rem] mx-auto px-4 md:px-8">
+          <div className="max-w-7xl mx-auto px-4 md:px-8">
             <div className="flex items-center justify-between mb-6 sm:mb-8">
               <div>
                 <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold text-gray-900">
@@ -688,7 +683,7 @@ const HomePage = () => {
       {/* Premium Section - Grid 4 columns */}
       {premium.length > 0 && (
         <section className="py-8 sm:py-16 bg-gray-50" data-testid="premium-section">
-          <div className="max-w-[120rem]mx-auto px-4 md:px-8">
+          <div className="max-w-7xl mx-auto px-4 md:px-8">
             <div className="flex items-center justify-between mb-6 sm:mb-8">
               <div>
                 <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold text-gray-900">
@@ -714,7 +709,7 @@ const HomePage = () => {
 
       {/* Job Offers Section - Carousel */}
       <section className="py-8 sm:py-16 bg-gray-50" data-testid="jobs-section">
-        <div className="max-w-[120rem] mx-auto px-4 md:px-8">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div>
               <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold text-gray-900">

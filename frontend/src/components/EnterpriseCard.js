@@ -71,9 +71,9 @@ const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
     ? `${rating.toFixed(1)} / 5`
     : '4.5 / 5';
 
-  const imageHeight = large ? 'h-44 sm:h-56' : 'h-36 sm:h-48';
-  const cardPadding = large ? 'p-3 sm:p-5' : 'p-3 sm:p-4';
-  const titleSize = large ? 'text-sm sm:text-xl' : 'text-sm sm:text-lg';
+  const imageHeight = large ? 'h-36 sm:h-44' : 'h-28 sm:h-36';
+  const cardPadding = large ? 'p-2 sm:p-4' : 'p-2 sm:p-3';
+  const titleSize = large ? 'text-xs sm:text-base' : 'text-xs sm:text-sm';
 
   const next = (e) => {
     e.preventDefault();
