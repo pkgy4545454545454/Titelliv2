@@ -126,7 +126,7 @@ const HomePage = () => {
     const fetchData = async () => {
       try {
         const [enterprisesRes, tendRes, guestRes, offreRes, premRes, prodCatRes, servCatRes, jobsRes, trainingsRes, jewelryProductsRes] = await Promise.all([
-          enterpriseAPI.list({ limit: 100 }),
+          enterpriseAPI.list({ limit: 1000 }), // Get more enterprises to cover all priority categories
           featuredAPI.tendances(),
           featuredAPI.guests(),
           featuredAPI.offres(),
@@ -162,10 +162,59 @@ const HomePage = () => {
         
         setTendances(tendData);
         setGuests(guestData);
-        setOffres(offreRes.data);
+        
+        // Trier les offres/services par catégorie prioritaire
+        const SERVICE_PRIORITY_CATEGORIES = [
+          'restaurant', 'restauration', 'traiteur',
+          'menage', 'nettoyage', 'maison', 'personnel',
+          'beaute', 'esthetique', 'spa', 'massage', 'soin',
+          'coiffure', 'coiffeur',
+          'sport', 'fitness', 'coach', 'yoga',
+          'loisir', 'activite', 'animation',
+          'sante', 'medical', 'therapie',
+          'immobilier', 'demenagement',
+          'securite', 'gardiennage'
+        ];
+        
+        const sortedOffres = (offreRes.data || []).sort((a, b) => {
+          const catA = (a.category || '').toLowerCase();
+          const catB = (b.category || '').toLowerCase();
+          const indexA = SERVICE_PRIORITY_CATEGORIES.findIndex(p => catA.includes(p) || p.includes(catA));
+          const indexB = SERVICE_PRIORITY_CATEGORIES.findIndex(p => catB.includes(p) || p.includes(catB));
+          if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+          if (indexA !== -1) return -1;
+          if (indexB !== -1) return 1;
+          return (a.title || a.name || '').localeCompare(b.title || b.name || '');
+        });
+        setOffres(sortedOffres);
+        
         setPremium(premData);
         setProductCategories(prodCatRes.data);
-        setServiceCategories(servCatRes.data);
+        
+        // Trier les catégories de services par ordre prioritaire
+        const SERVICE_CAT_PRIORITY = [
+          'restauration', 'restaurant', 'traiteur',
+          'menage', 'nettoyage', 'maison',
+          'beaute', 'esthetique', 'spa',
+          'coiffure',
+          'sport', 'fitness',
+          'loisirs', 'activites',
+          'sante', 'medical',
+          'immobilier',
+          'securite'
+        ];
+        
+        const sortedServiceCats = (servCatRes.data || []).sort((a, b) => {
+          const idA = (a.id || a.name || '').toLowerCase();
+          const idB = (b.id || b.name || '').toLowerCase();
+          const indexA = SERVICE_CAT_PRIORITY.findIndex(p => idA.includes(p) || p.includes(idA));
+          const indexB = SERVICE_CAT_PRIORITY.findIndex(p => idB.includes(p) || p.includes(idB));
+          if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+          if (indexA !== -1) return -1;
+          if (indexB !== -1) return 1;
+          return (a.name || '').localeCompare(b.name || '');
+        });
+        setServiceCategories(sortedServiceCats);
         const jobsData = jobsRes.data || [];
         setJobs(jobsData);
         setFilteredJobs(jobsData);
@@ -188,15 +237,48 @@ const HomePage = () => {
           const hasPrice = p.price && p.price > 0;
           return hasImage && hasPrice;
         });
-        // Sort by those starting with 't' first, then alphabetically
+        
+        // Ordre prioritaire des catégories pour les produits (selon l'ordre demandé)
+        const PRODUCT_PRIORITY_CATEGORIES = [
+          // 1. Restaurant / Alimentaire
+          'courses_alimentaires', 'alimentaire', 'restaurant', 'cuisine',
+          // 2. Maison / Ménage  
+          'ameublement_deco', 'electromenager', 'bricolage_jardinage', 'maison',
+          // 3. Beauté / Soins esthétiques
+          'maquillage_beaute', 'soins', 'cosmetique', 'cosmétique',
+          // 4. Coiffure
+          'coiffure',
+          // 5. Sport
+          'sport',
+          // 6. Loisirs / Activités
+          'loisirs', 'voyages',
+          // 7. Santé
+          'sante', 'medical',
+          // 8. Immobilier
+          'immobilier',
+          // 9. Sécurité
+          'securite',
+          // Autres
+          'vetements_mode', 'enfant', 'electronique', 'automobiles'
+        ];
+        
+        // Sort by category priority, then by name
         const sortedProducts = productsWithImages.sort((a, b) => {
-          const nameA = (a.name || '').toLowerCase();
-          const nameB = (b.name || '').toLowerCase();
-          const startsWithTA = nameA.startsWith('t');
-          const startsWithTB = nameB.startsWith('t');
-          if (startsWithTA && !startsWithTB) return -1;
-          if (!startsWithTA && startsWithTB) return 1;
-          return nameA.localeCompare(nameB);
+          const catA = (a.category || '').toLowerCase();
+          const catB = (b.category || '').toLowerCase();
+          
+          // Find priority index for each product's category
+          const indexA = PRODUCT_PRIORITY_CATEGORIES.findIndex(p => catA.includes(p) || p.includes(catA));
+          const indexB = PRODUCT_PRIORITY_CATEGORIES.findIndex(p => catB.includes(p) || p.includes(catB));
+          
+          // Both have priority - sort by priority index
+          if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+          // Only A has priority
+          if (indexA !== -1) return -1;
+          // Only B has priority
+          if (indexB !== -1) return 1;
+          // Neither has priority - sort alphabetically by name
+          return (a.name || '').localeCompare(b.name || '');
         });
         setBestProducts(sortedProducts.slice(0, 20));
       } catch (error) {
@@ -343,17 +425,26 @@ const HomePage = () => {
     return acc;
   }, {});
 
-  // Ordre prioritaire des catégories avec vidéos
+  // Ordre prioritaire des catégories avec vidéos (noms exacts de la DB)
   const PRIORITY_CATEGORIES = [
-    'Restaurant',
-    'Personnel de maison', 'Linge Maison',
-    'Soins esthétiques', 'Beauté & Santé', 'Beauté & Bien-être', 'Spa', 'spa', 'Massage & Spa',
+    // 1. Restaurant
+    'Restaurant', 'Brasserie', 'Boulangerie & Pâtisserie', 'Boucherie', 'Épicerie', 'Épicerie Fine', 'Japonais', 'Traiteur', 'Pizzeria',
+    // 2. Personnel de maison / Ménage
+    'Soins Domicile', 'Nettoyage', 'Menage',
+    // 3. Soins esthétiques / Beauté
+    'Institut De Beaute', 'Beauté & Bien-être', 'Beauté & Santé', 'Massage', 'Spa', 'spa',
+    // 4. Coiffeur
     'Coiffeur', 'Coiffure & Beauté', 'coiffure', 'coiffure_barber',
-    'Fitness', 'Sport', 'Sports & Loisirs', 'cours_sport',
-    'Activités',
-    'Bio & Santé',
+    // 5. Sport / Fitness
+    'Fitness', 'Sport', 'Sports & Loisirs', 'Coach', 'cours_sport', 'Articles Sport',
+    // 6. Activités / Loisirs
+    'Activités', 'Hotel', 'Montagne',
+    // 7. Santé
+    'Physiotherapie', 'Dentiste', 'Pharmacie', 'Chirurgien', 'Osteopathe', 'Psychologue', 'Sos Medecin', 'Cabinet Medical', 'Bio & Santé',
+    // 8. Immobilier
     'Agence Immobiliere', 'Agences immobilières', 'Immobilier',
-    'Sécurité - Protection'
+    // 9. Sécurité
+    'Sécurité - Protection', 'Securite'
   ];
 
   // Trier les catégories selon l'ordre prioritaire
