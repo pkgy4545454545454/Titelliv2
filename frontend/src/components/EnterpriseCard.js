@@ -14,6 +14,13 @@ const CATEGORY_VIDEOS = {
   'Professionnels de santé': '/api/uploads/category_videos/professionnels_sante.mp4',
   'Agent immobilier': '/api/uploads/category_videos/agent_immobilier.mp4',
   'Sécurité': '/api/uploads/category_videos/securite.mp4',
+  'Professionnels de transports': '/api/uploads/category_videos/professionnels_transports.mp4',
+  'Professionnels d\'éducation': '/api/uploads/category_videos/professionnels_education.mp4',
+  'Professionnels administratifs': '/api/uploads/category_videos/professionnels_administratifs.mp4',
+  // En attente de génération (balance insuffisante):
+  // 'Professionnels juridiques': '/api/uploads/category_videos/professionnels_juridiques.mp4',
+  // 'Professionnels informatiques': '/api/uploads/category_videos/professionnels_informatiques.mp4',
+  // 'Professionnels de construction': '/api/uploads/category_videos/professionnels_construction.mp4',
 };
 
 // Sous-catégories pour chaque catégorie principale
