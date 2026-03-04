@@ -5,51 +5,34 @@ import { enterpriseAPI } from '../services/api';
 
 // Categories that have video backgrounds - mapping exact category names to video files
 const CATEGORY_VIDEOS = {
-  // Restaurant
-  'Restaurant': '/api/uploads/category_videos/restaurant.mp4',
-  'Restaurant gastronomique': '/api/uploads/category_videos/restaurant.mp4',
-  'Restaurant italien': '/api/uploads/category_videos/restaurant.mp4',
-  'Restaurants': '/api/uploads/category_videos/restaurant.mp4',
-  
-  // Coiffeurs
-  'Coiffeur': '/api/uploads/category_videos/coiffeurs.mp4',
-  'Coiffure & Beauté': '/api/uploads/category_videos/coiffeurs.mp4',
-  'coiffure': '/api/uploads/category_videos/coiffeurs.mp4',
-  'coiffure_barber': '/api/uploads/category_videos/coiffeurs.mp4',
-  
-  // Soins esthétiques / Beauté
-  'Beauté & Bien-être': '/api/uploads/category_videos/soins_esthetiques.mp4',
-  'Beauté & Santé': '/api/uploads/category_videos/soins_esthetiques.mp4',
-  'Spa': '/api/uploads/category_videos/soins_esthetiques.mp4',
-  'spa': '/api/uploads/category_videos/soins_esthetiques.mp4',
-  'Massage & Spa': '/api/uploads/category_videos/soins_esthetiques.mp4',
-  
-  // Sport / Fitness
-  'Fitness': '/api/uploads/category_videos/cours_sport.mp4',
-  'Sport': '/api/uploads/category_videos/cours_sport.mp4',
-  'Sports & Loisirs': '/api/uploads/category_videos/cours_sport.mp4',
-  'cours_sport': '/api/uploads/category_videos/cours_sport.mp4',
-  'Articles Sport': '/api/uploads/category_videos/cours_sport.mp4',
-  
-  // Activités
+  'Restauration': '/api/uploads/category_videos/restaurant.mp4',
+  'Personnel de maison': '/api/uploads/category_videos/personnel_maison.mp4',
+  'Soins esthétiques': '/api/uploads/category_videos/soins_esthetiques.mp4',
+  'Coiffeurs': '/api/uploads/category_videos/coiffeurs.mp4',
+  'Cours de sport': '/api/uploads/category_videos/cours_sport.mp4',
   'Activités': '/api/uploads/category_videos/activites.mp4',
-  
-  // Santé
-  'Bio & Santé': '/api/uploads/category_videos/professionnels_sante.mp4',
-  
-  // Immobilier - Video not yet generated, will fall back to image
-  // 'Agence Immobiliere': '/api/uploads/category_videos/agent_immobilier.mp4',
-  // 'Agences immobilières': '/api/uploads/category_videos/agent_immobilier.mp4',
-  // 'Immobilier': '/api/uploads/category_videos/agent_immobilier.mp4',
-  // 'Courtier Immobilier': '/api/uploads/category_videos/agent_immobilier.mp4',
-  // 'Promotion Immobiliere': '/api/uploads/category_videos/agent_immobilier.mp4',
-  // 'Transaction Immobiliere': '/api/uploads/category_videos/agent_immobilier.mp4',
-  
-  // Sécurité - Video not yet generated, will fall back to image
-  // 'Sécurité - Protection': '/api/uploads/category_videos/securite.mp4',
-  
-  // Personnel de maison
-  'Linge Maison': '/api/uploads/category_videos/personnel_maison.mp4',
+  'Professionnels de santé': '/api/uploads/category_videos/professionnels_sante.mp4',
+  'Agent immobilier': '/api/uploads/category_videos/agent_immobilier.mp4',
+  'Sécurité': '/api/uploads/category_videos/securite.mp4',
+};
+
+// Sous-catégories pour chaque catégorie principale
+const MAIN_CATEGORY_SUBCATEGORIES = {
+  'Restauration': ['Restaurant', 'Brasserie', 'Bistrot', 'Bar', 'Café', 'Boulangerie', 'Boucherie', 'Épicerie', 'Traiteur', 'Pizzeria', 'Japonais'],
+  'Personnel de maison': ['Soins Domicile', 'Nettoyage', 'Aide Soignant', 'Ménage', 'Garde Enfant'],
+  'Soins esthétiques': ['Institut De Beauté', 'Massage', 'Spa', 'Bronzage', 'Maquillage', 'Manucure'],
+  'Coiffeurs': ['Coiffeur Homme', 'Coiffeur Femme', 'Barbier', 'Coiffure Mixte'],
+  'Cours de sport': ['Fitness', 'Yoga', 'Arts Martiaux', 'Danse', 'Natation', 'Tennis', 'Football'],
+  'Activités': ['Cinéma', 'Théâtre', 'Musée', 'Parc', 'Escape Game', 'Bowling'],
+  'Professionnels de santé': ['Médecin', 'Dentiste', 'Pharmacie', 'Physiothérapeute', 'Ostéopathe', 'Psychologue'],
+  'Agent immobilier': ['Vente', 'Location', 'Gestion locative', 'Estimation'],
+  'Sécurité': ['Gardiennage', 'Alarme', 'Vidéosurveillance', 'Agent de sécurité'],
+  'Professionnels de transports': ['Taxi', 'VTC', 'Déménagement', 'Livraison', 'Ambulance'],
+  'Professionnels d\'éducation': ['École primaire', 'Collège', 'Lycée', 'Université', 'Formation professionnelle'],
+  'Professionnels administratifs': ['Comptable', 'Fiduciaire', 'Secrétariat', 'Ressources humaines'],
+  'Professionnels juridiques': ['Avocat', 'Notaire', 'Huissier', 'Médiateur'],
+  'Professionnels informatiques': ['Développement web', 'Support IT', 'Cybersécurité', 'Cloud'],
+  'Professionnels de construction': ['Maçonnerie', 'Électricité', 'Plomberie', 'Peinture', 'Menuiserie']
 };
 
 const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
@@ -70,20 +53,26 @@ const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
   // Fetch subcategories when category changes
   useEffect(() => {
     if (category && showSubcategories && subcategories.length === 0) {
-      const fetchSubcategories = async () => {
-        setLoadingSubcats(true);
-        try {
-          const response = await enterpriseAPI.getSubcategories(category);
-          if (response.data?.subcategories) {
-            setSubcategories(response.data.subcategories);
+      // D'abord vérifier si on a les sous-catégories en local
+      if (MAIN_CATEGORY_SUBCATEGORIES[category]) {
+        setSubcategories(MAIN_CATEGORY_SUBCATEGORIES[category]);
+      } else {
+        // Sinon, récupérer depuis l'API
+        const fetchSubcategories = async () => {
+          setLoadingSubcats(true);
+          try {
+            const response = await enterpriseAPI.getSubcategories(category);
+            if (response.data?.subcategories) {
+              setSubcategories(response.data.subcategories);
+            }
+          } catch (error) {
+            console.error('Error fetching subcategories:', error);
+          } finally {
+            setLoadingSubcats(false);
           }
-        } catch (error) {
-          console.error('Error fetching subcategories:', error);
-        } finally {
-          setLoadingSubcats(false);
-        }
-      };
-      fetchSubcategories();
+        };
+        fetchSubcategories();
+      }
     }
   }, [category, showSubcategories, subcategories.length]);
 
