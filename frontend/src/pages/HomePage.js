@@ -542,7 +542,7 @@ const HomePage = () => {
                   <Link
                     key={cat.label}
                     to={cat.path}
-                    className="px-4 py-2 bg-black/80 backdrop-blur-md border border-white/20 rounded-[10px] text-white text-sm hover:bg-white hover:text-black transition-all duration-300"
+                    className="px-4 py-2 bg-black/80 backdrop-blur-md border border-white/20 rounded-[10px] text-white text-sm hover:bg-white hover:text-black transition-all duration-300 min-w[106px]"
                   >
                     {cat.label}
                   </Link>
@@ -558,7 +558,7 @@ const HomePage = () => {
                   <Link
                     key={cat.label}
                     to={cat.path}
-                    className="px-4 py-2 bg-black/80 backdrop-blur-md border border-white/20 rounded-[10px] text-white text-sm hover:bg-white hover:text-black transition-all duration-300"
+                    className="px-4 py-2 bg-black/80 backdrop-blur-md border border-white/20 rounded-[10px] text-white text-sm hover:bg-white hover:text-black transition-all duration-300 min-w[106px]"
                   >
                     {cat.label}
                   </Link>
