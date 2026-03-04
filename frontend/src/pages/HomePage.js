@@ -449,6 +449,9 @@ const HomePage = () => {
     'Professionnels de construction': ['Construction', 'BTP', 'Architecte', 'Maconnerie', 'Peinture', 'Electricien', 'Plombier']
   };
 
+  // Toutes les sous-catégories des 15 principales (pour les exclure des "autres")
+  const ALL_MAIN_SUBCATEGORIES = Object.values(MAIN_CATEGORIES_CONFIG).flat();
+
   // Grouper les entreprises par CATÉGORIE PRINCIPALE
   const enterprisesByMainCategory = {};
   Object.entries(MAIN_CATEGORIES_CONFIG).forEach(([mainCat, subcats]) => {
@@ -458,10 +461,28 @@ const HomePage = () => {
     }
   });
 
-  // Convertir en array trié selon l'ordre des catégories principales
+  // Grouper les entreprises restantes par leur catégorie originale (celles qui ne sont pas dans les 15 principales)
+  const otherEnterprisesByCategory = allEnterprises.reduce((acc, enterprise) => {
+    const category = enterprise.category || 'Autres';
+    // Exclure si la catégorie fait partie des sous-catégories des 15 principales
+    if (!ALL_MAIN_SUBCATEGORIES.includes(category)) {
+      if (!acc[category]) acc[category] = [];
+      acc[category].push(enterprise);
+    }
+    return acc;
+  }, {});
+
+  // Trier les autres catégories par ordre alphabétique
+  const sortedOtherCategories = Object.entries(otherEnterprisesByCategory)
+    .sort(([catA], [catB]) => catA.localeCompare(catB));
+
+  // Convertir les 15 principales en array trié selon l'ordre défini
   const sortedMainCategories = Object.entries(MAIN_CATEGORIES_CONFIG)
     .filter(([mainCat]) => enterprisesByMainCategory[mainCat]?.length > 0)
     .map(([mainCat]) => [mainCat, enterprisesByMainCategory[mainCat]]);
+
+  // Combiner : 15 principales d'abord, puis les autres
+  const allSortedCategories = [...sortedMainCategories, ...sortedOtherCategories];
 
 
 
@@ -598,7 +619,7 @@ const HomePage = () => {
             </div>
           ) : allEnterprises.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
-           {sortedMainCategories.map(([category, list]) => (
+           {allSortedCategories.map(([category, list]) => (
               <div key={category} className="w-full">
                 <EnterpriseCard
                   category={category}
