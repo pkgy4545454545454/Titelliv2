@@ -1865,6 +1865,25 @@ async def get_enterprise_categories():
     return {"categories": result}
 
 
+@api_router.get("/main-categories")
+async def get_main_categories():
+    """Get the 15 main categories with videos and background images"""
+    main_cats = await db.main_categories.find({}, {"_id": 0}).sort("order", 1).to_list(20)
+    
+    # Enrich with enterprise counts
+    for cat in main_cats:
+        subcats = cat.get('subcategories', [])
+        count = await db.enterprises.count_documents({"category": {"$in": subcats}})
+        cat['enterprise_count'] = count
+        
+        # Build video URL if exists
+        if cat.get('video'):
+            cat['video_url'] = f"/api/uploads/category_videos/{cat['video']}"
+    
+    return {"categories": main_cats}
+
+
+
 @api_router.get("/enterprise-categories/{category_name}")
 async def get_category_details(category_name: str):
     """Get details for a specific category including enterprises"""

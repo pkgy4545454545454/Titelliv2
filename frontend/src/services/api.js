@@ -49,6 +49,7 @@ export const enterpriseAPI = {
   getCategories: () => axios.get(`${API}/enterprise-categories`),
   getCategoryDetails: (categoryName) => axios.get(`${API}/enterprise-categories/${categoryName}`),
   getSubcategories: (categoryName) => axios.get(`${API}/enterprise-subcategories/${categoryName}`),
+  getMainCategories: () => axios.get(`${API}/main-categories`),
 };
 
 // Services & Products

@@ -53,6 +53,7 @@ const Carousel = ({ children, itemWidth = 280 }) => {
 const HomePage = () => {
   const navigate = useNavigate();
   const [allEnterprises, setAllEnterprises] = useState([]);
+  const [mainCategories, setMainCategories] = useState([]);
   const [tendances, setTendances] = useState([]);
   const [guests, setGuests] = useState([]);
   const [offres, setOffres] = useState([]);
@@ -125,8 +126,9 @@ const HomePage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [enterprisesRes, tendRes, guestRes, offreRes, premRes, prodCatRes, servCatRes, jobsRes, trainingsRes, jewelryProductsRes] = await Promise.all([
+        const [enterprisesRes, mainCatsRes, tendRes, guestRes, offreRes, premRes, prodCatRes, servCatRes, jobsRes, trainingsRes, jewelryProductsRes] = await Promise.all([
           enterpriseAPI.list({ limit: 1000 }), // Get more enterprises to cover all priority categories
+          enterpriseAPI.getMainCategories(), // Get 15 main categories
           featuredAPI.tendances(),
           featuredAPI.guests(),
           featuredAPI.offres(),
@@ -137,6 +139,9 @@ const HomePage = () => {
           trainingsAPI.listAll({ limit: 6 }).catch(() => ({ data: [] })),
           servicesProductsAPI.list({ type: 'product', limit: 50 }).catch(() => ({ data: [] }))
         ]);
+        
+        // Set main categories
+        setMainCategories(mainCatsRes.data?.categories || []);
         
         // Filter and sort all enterprises - only those with real photos, then ALPHABETICALLY
         const allEnts = enterprisesRes.data.enterprises || [];
@@ -425,26 +430,23 @@ const HomePage = () => {
     return acc;
   }, {});
 
-  // Ordre prioritaire des catégories avec vidéos (noms exacts de la DB)
+  // Ordre prioritaire des 15 premières catégories (exactement comme demandé)
   const PRIORITY_CATEGORIES = [
-    // 1. Restaurant
-    'Restaurant', 'Brasserie', 'Boulangerie & Pâtisserie', 'Boucherie', 'Épicerie', 'Épicerie Fine', 'Japonais', 'Traiteur', 'Pizzeria',
-    // 2. Personnel de maison / Ménage
-    'Soins Domicile', 'Nettoyage', 'Menage',
-    // 3. Soins esthétiques / Beauté
-    'Institut De Beaute', 'Beauté & Bien-être', 'Beauté & Santé', 'Massage', 'Spa', 'spa',
-    // 4. Coiffeur
-    'Coiffeur', 'Coiffure & Beauté', 'coiffure', 'coiffure_barber',
-    // 5. Sport / Fitness
-    'Fitness', 'Sport', 'Sports & Loisirs', 'Coach', 'cours_sport', 'Articles Sport',
-    // 6. Activités / Loisirs
-    'Activités', 'Hotel', 'Montagne',
-    // 7. Santé
-    'Physiotherapie', 'Dentiste', 'Pharmacie', 'Chirurgien', 'Osteopathe', 'Psychologue', 'Sos Medecin', 'Cabinet Medical', 'Bio & Santé',
-    // 8. Immobilier
-    'Agence Immobiliere', 'Agences immobilières', 'Immobilier',
-    // 9. Sécurité
-    'Sécurité - Protection', 'Securite'
+    'Restauration',
+    'Personnel de maison',
+    'Soins esthétiques',
+    'Coiffeurs',
+    'Cours de sport',
+    'Activités',
+    'Professionnels de santé',
+    'Agent immobilier',
+    'Sécurité',
+    'Professionnels de transports',
+    'Professionnels d\'éducation',
+    'Professionnels administratifs',
+    'Professionnels juridiques',
+    'Professionnels informatiques',
+    'Professionnels de construction'
   ];
 
   // Trier les catégories selon l'ordre prioritaire
@@ -469,7 +471,7 @@ const HomePage = () => {
   const panoramicVideoUrl = `head.mp4`;
   const heroImage = 'https://images.unsplash.com/photo-1733950489642-bd1a7c3e69bb?w=1920&q=80';
 
-  const mainCategories = [
+  const heroNavCategories = [
     { id: 'services', label: 'Services', path: '/services', icon: Sparkles },
     { id: 'produits', label: 'Produits', path: '/products', icon: Gift },
     { id: 'certifies', label: 'Certifiés', path: '/certifies', icon: CheckCircle },
@@ -574,40 +576,75 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Les meilleurs prestataires Section - Grid 5 columns max - Aligned with header */}
+      {/* Les 15 catégories principales avec images de fond */}
       <section className="py-6 sm:py-10 bg-white" data-testid="top-providers-section">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           {/* Title aligned with cards */}
           <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold text-gray-900 mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
             Les meilleurs prestataires de ta région
           </h2>
-          <div className="flex items-center justify-start mb-4">
+          <div className="flex items-center justify-start mb-6">
             <Link to="/entreprises" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors">
               Voir tout
               <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
 
-
           {loading ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map((i) => (
-                <div key={i} className="h-[200px] sm:h-[240px] w-full bg-gray-100 rounded-xl animate-pulse" />
+                <div key={i} className="h-[180px] sm:h-[200px] w-full bg-gray-100 rounded-xl animate-pulse" />
               ))}
             </div>
-          ) : allEnterprises.length > 0 ? (
+          ) : mainCategories.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
-           {sortedEnterprisesByCategory.map(([category, list]) => (
-              <div key={category} className="w-full">
-                <EnterpriseCard
-                  category={category}
-                  enterprises={list}
-                />
-              </div>
+              {mainCategories.slice(0, 15).map((cat, index) => (
+                <Link
+                  key={cat.name}
+                  to={`/categorie/${encodeURIComponent(cat.name)}`}
+                  className="group relative h-[180px] sm:h-[200px] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"
+                  style={{ animationDelay: `${index * 50}ms` }}
+                  data-testid={`main-category-${cat.name}`}
+                >
+                  {/* Background Image (always visible as fallback) */}
+                  <div className="absolute inset-0">
+                    <img 
+                      src={cat.background_image} 
+                      alt={cat.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    {/* Video overlay if available */}
+                    {cat.video_url && (
+                      <video
+                        src={cat.video_url}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    )}
+                    {/* Overlay gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="absolute inset-0 flex flex-col justify-end p-4">
+                    <h3 className="text-white font-bold text-sm sm:text-base mb-1 line-clamp-2">
+                      {cat.name}
+                    </h3>
+                    <p className="text-white/80 text-xs">
+                      {cat.enterprise_count} prestataires
+                    </p>
+                  </div>
+                  
+                  {/* Hover effect */}
+                  <div className="absolute inset-0 bg-[#0047AB]/0 group-hover:bg-[#0047AB]/20 transition-all duration-300" />
+                </Link>
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-left py-8 text-sm">Aucun prestataire avec photo disponible</p>
+            <p className="text-gray-500 text-left py-8 text-sm">Aucune catégorie disponible</p>
           )}
 
           <Link to="/entreprises" className="md:hidden flex items-center justify-start gap-2 mt-4 sm:mt-6 text-[#0047AB] font-medium text-sm">
