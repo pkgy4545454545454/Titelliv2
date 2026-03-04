@@ -379,4 +379,4 @@ POST /api/gamification/log_action - Logger action (interne)
 ---
 
 **Document généré le:** Février 2026
-**URL Application:** https://resto-browse-1.preview.emergentagent.com
+**URL Application:** https://category-video-hub.preview.emergentagent.com

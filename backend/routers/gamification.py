@@ -647,7 +647,7 @@ async def get_my_referral_code(current_user: dict = Depends(get_current_user)):
     referrer_name = user.get("name") or user.get("email", "").split("@")[0]
     
     # Generate share URL
-    share_url = f"https://resto-browse-1.preview.emergentagent.com/auth?ref={referral_data['code']}"
+    share_url = f"https://category-video-hub.preview.emergentagent.com/auth?ref={referral_data['code']}"
     
     return {
         "code": referral_data["code"],

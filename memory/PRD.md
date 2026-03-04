@@ -30,15 +30,15 @@ Les catégories sont maintenant affichées dans l'ordre exact demandé :
 
 ### ✅ 9 vidéos générées avec Sora 2
 Toutes les vidéos demandées sont maintenant générées :
-- https://resto-browse-1.preview.emergentagent.com/api/uploads/category_videos/restaurant.mp4
-- https://resto-browse-1.preview.emergentagent.com/api/uploads/category_videos/personnel_maison.mp4
-- https://resto-browse-1.preview.emergentagent.com/api/uploads/category_videos/soins_esthetiques.mp4
-- https://resto-browse-1.preview.emergentagent.com/api/uploads/category_videos/coiffeurs.mp4
-- https://resto-browse-1.preview.emergentagent.com/api/uploads/category_videos/cours_sport.mp4
-- https://resto-browse-1.preview.emergentagent.com/api/uploads/category_videos/activites.mp4
-- https://resto-browse-1.preview.emergentagent.com/api/uploads/category_videos/professionnels_sante.mp4
-- https://resto-browse-1.preview.emergentagent.com/api/uploads/category_videos/agent_immobilier.mp4
-- https://resto-browse-1.preview.emergentagent.com/api/uploads/category_videos/securite.mp4
+- https://category-video-hub.preview.emergentagent.com/api/uploads/category_videos/restaurant.mp4
+- https://category-video-hub.preview.emergentagent.com/api/uploads/category_videos/personnel_maison.mp4
+- https://category-video-hub.preview.emergentagent.com/api/uploads/category_videos/soins_esthetiques.mp4
+- https://category-video-hub.preview.emergentagent.com/api/uploads/category_videos/coiffeurs.mp4
+- https://category-video-hub.preview.emergentagent.com/api/uploads/category_videos/cours_sport.mp4
+- https://category-video-hub.preview.emergentagent.com/api/uploads/category_videos/activites.mp4
+- https://category-video-hub.preview.emergentagent.com/api/uploads/category_videos/professionnels_sante.mp4
+- https://category-video-hub.preview.emergentagent.com/api/uploads/category_videos/agent_immobilier.mp4
+- https://category-video-hub.preview.emergentagent.com/api/uploads/category_videos/securite.mp4
 
 ### ✅ Autres modifications de cette session
 - Animation splash: Logo sans cercle

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Star, MapPin, ChevronRight, ChevronDown } from 'lucide-react';
+import { Star, MapPin, ChevronRight, ChevronLeft, Plus, Minus } from 'lucide-react';
 import { enterpriseAPI } from '../services/api';
 
-// Categories that have video backgrounds - mapping exact category names to video files
+// Categories that have video backgrounds
 const CATEGORY_VIDEOS = {
   'Restauration': '/api/uploads/category_videos/restaurant.mp4',
   'Personnel de maison': '/api/uploads/category_videos/personnel_maison.mp4',
@@ -17,10 +17,6 @@ const CATEGORY_VIDEOS = {
   'Professionnels de transports': '/api/uploads/category_videos/professionnels_transports.mp4',
   'Professionnels d\'éducation': '/api/uploads/category_videos/professionnels_education.mp4',
   'Professionnels administratifs': '/api/uploads/category_videos/professionnels_administratifs.mp4',
-  // En attente de génération (balance insuffisante):
-  // 'Professionnels juridiques': '/api/uploads/category_videos/professionnels_juridiques.mp4',
-  // 'Professionnels informatiques': '/api/uploads/category_videos/professionnels_informatiques.mp4',
-  // 'Professionnels de construction': '/api/uploads/category_videos/professionnels_construction.mp4',
 };
 
 // Sous-catégories pour chaque catégorie principale
@@ -42,6 +38,36 @@ const MAIN_CATEGORY_SUBCATEGORIES = {
   'Professionnels de construction': ['Maçonnerie', 'Électricité', 'Plomberie', 'Peinture', 'Menuiserie']
 };
 
+// Fonction pour nettoyer les titres (enlever _ et - et mettre en forme propre)
+const cleanTitle = (title) => {
+  if (!title) return '';
+  return title
+    .replace(/_/g, ' ')
+    .replace(/-/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};
+
+// Composant pour les bulles de notation (5 mini bulles vertes)
+const RatingDots = ({ rating = 0, maxRating = 5 }) => {
+  const filledDots = Math.round(rating);
+  return (
+    <div className="flex items-center gap-1">
+      {[...Array(maxRating)].map((_, index) => (
+        <div
+          key={index}
+          className={`w-2 h-2 rounded-full ${
+            index < filledDots ? 'bg-green-500' : 'bg-gray-300'
+          }`}
+        />
+      ))}
+    </div>
+  );
+};
+
 const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
   const navigate = useNavigate();
   const videoRef = useRef(null);
@@ -56,6 +82,9 @@ const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
   // Check if this category has a video
   const categoryVideo = CATEGORY_VIDEOS[category];
   const hasVideo = !!categoryVideo;
+
+  // Nettoyer le titre de la catégorie
+  const cleanCategoryTitle = cleanTitle(category);
 
   // Fetch subcategories when category changes
   useEffect(() => {
@@ -85,8 +114,7 @@ const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
 
   if (!enterprises.length) return null;
 
-  const enterprise = enterprises[index];
-
+  const current = enterprises[index] || {};
   const {
     id,
     business_name,
@@ -96,46 +124,27 @@ const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
     review_count,
     cover_image,
     logo,
+    subcategory,
     display_status,
     activation_status
-  } = enterprise;
+  } = current;
 
-  const defaultImage =
-    'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800';
+  const defaultImage = 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800';
+  const actualCover = !coverError && cover_image ? cover_image : defaultImage;
+  const displayName = cleanTitle(business_name || name);
+  const displayRating = rating ? Math.min(5, Math.round(rating)) : 4;
+  const isActive = display_status === 'actif' || activation_status === 'active';
 
-  const isValidUrl = (url) => {
-    if (!url) return false;
-    if (url.includes('enterprise-media.preview.emergentagent.com')) return false;
-    return true;
-  };
+  const imageHeight = large ? 'h-40 sm:h-48 md:h-56' : 'h-28 sm:h-36';
 
-  const actualCover =
-    !coverError && isValidUrl(cover_image) ? cover_image : defaultImage;
-  const actualLogo =
-    !logoError && isValidUrl(logo) ? logo : null;
-
-  const isActive =
-    display_status === 'actif' || activation_status === 'active';
-
-  const displayName = name || business_name;
-  const displayRating = rating
-    ? `${rating.toFixed(1)} / 5`
-    : '4.5 / 5';
-
-  const imageHeight = large ? 'h-36 sm:h-44' : 'h-28 sm:h-36';
-  const cardPadding = large ? 'p-2 sm:p-4' : 'p-2 sm:p-3';
-  const titleSize = large ? 'text-xs sm:text-base' : 'text-xs sm:text-sm';
-
-  const next = (e) => {
-    e.preventDefault();
+  const goNext = (e) => {
     e.stopPropagation();
     setIndex((prev) => (prev + 1) % enterprises.length);
     setCoverError(false);
     setLogoError(false);
   };
 
-  const prev = (e) => {
-    e.preventDefault();
+  const goPrev = (e) => {
     e.stopPropagation();
     setIndex((prev) =>
       prev === 0 ? enterprises.length - 1 : prev - 1
@@ -144,13 +153,9 @@ const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
     setLogoError(false);
   };
 
-  // Check if category has subcategories (will show after API call)
-  const hasSubcategories = subcategories.length > 0 || loadingSubcats;
-
   const handleCategoryClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    // Toggle subcategories menu - will trigger API call via useEffect
     setShowSubcategories(!showSubcategories);
   };
 
@@ -161,7 +166,6 @@ const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
   };
 
   const handleCardClick = (e) => {
-    // Ne pas naviguer si on clique sur les contrôles
     if (e.target.closest('button') || e.target.closest('.subcategories-menu')) {
       return;
     }
@@ -174,19 +178,28 @@ const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
       onClick={handleCardClick}
       data-testid={`enterprise-card-${id}`}
     >
-      {/* CATEGORY LABEL - Clickable */}
-      <div className="flex items-center gap-1.5 mb-3 relative">
+      {/* CATEGORY LABEL with + button */}
+      <div className="flex items-center justify-center gap-2 mb-3 relative">
+        <span 
+          className="text-black text-center font-medium"
+          style={{ fontFamily: 'Playfair Display, serif' }}
+        >
+          {cleanCategoryTitle}
+        </span>
         <button
           onClick={handleCategoryClick}
-          className="text-black justify-center m-auto flex items-center gap-1 hover:text-[#0047AB] transition-colors font-medium"
+          className="w-5 h-5 rounded-full bg-[#0047AB] text-white flex items-center justify-center hover:bg-[#003080] transition-colors"
           data-testid={`category-btn-${category}`}
         >
-          {category}
-          <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${showSubcategories ? 'rotate-180' : ''}`} />
+          {showSubcategories ? (
+            <Minus className="w-3 h-3" />
+          ) : (
+            <Plus className="w-3 h-3" />
+          )}
         </button>
       </div>
 
-      {/* SUBCATEGORIES DROPDOWN - Animated */}
+      {/* SUBCATEGORIES DROPDOWN */}
       {showSubcategories && (
         <div 
           className="subcategories-menu absolute top-12 left-0 right-0 z-50 bg-white rounded-xl shadow-2xl border border-gray-100 p-3 animate-in slide-in-from-top-2 duration-300 max-h-[300px] overflow-y-auto"
@@ -198,55 +211,28 @@ const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
               <div className="w-6 h-6 border-2 border-[#0047AB] border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : subcategories.length > 0 ? (
-            <>
-              <div className="grid grid-cols-2 gap-2">
-                {subcategories.map((subcat, idx) => (
-                  <button
-                    key={idx}
-                    onClick={(e) => handleSubcategoryClick(e, subcat)}
-                    className="text-left px-3 py-2 text-sm text-gray-700 hover:bg-[#0047AB]/10 hover:text-[#0047AB] rounded-lg transition-all duration-200 transform hover:translate-x-1"
-                    style={{ animationDelay: `${idx * 30}ms` }}
-                    data-testid={`subcategory-${subcat}`}
-                  >
-                    {subcat}
-                  </button>
-                ))}
-              </div>
-              <div className="mt-3 pt-3 border-t border-gray-100">
+            <div className="space-y-1">
+              {subcategories.map((subcat, idx) => (
                 <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    navigate(`/categorie/${encodeURIComponent(category)}`);
-                  }}
-                  className="w-full text-center text-sm text-[#0047AB] font-medium hover:underline"
+                  key={idx}
+                  onClick={(e) => handleSubcategoryClick(e, subcat)}
+                  className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-[#0047AB]/10 hover:text-[#0047AB] rounded-lg transition-colors"
+                  style={{ fontFamily: 'Playfair Display, serif' }}
                 >
-                  Voir tous les {category}
+                  {cleanTitle(subcat)}
                 </button>
-              </div>
-            </>
-          ) : (
-            <div className="text-center py-3">
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  navigate(`/categorie/${encodeURIComponent(category)}`);
-                }}
-                className="text-sm text-[#0047AB] font-medium hover:underline"
-              >
-                Voir tous les {category}
-              </button>
+              ))}
             </div>
+          ) : (
+            <p className="text-gray-400 text-sm text-center py-2">Aucune sous-catégorie</p>
           )}
         </div>
       )}
 
-      {/* IMAGE OR VIDEO */}
+      {/* IMAGE/VIDEO with navigation arrows */}
       <div className={`relative ${imageHeight} overflow-hidden`}>
         {hasVideo ? (
           <>
-            {/* Video Background for specific categories */}
             <video
               ref={videoRef}
               src={categoryVideo}
@@ -258,7 +244,6 @@ const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
               onError={() => setVideoLoaded(false)}
               className={`w-full h-full object-cover transition-all duration-500 rounded-2xl ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}
             />
-            {/* Fallback image while video loads or on error */}
             {!videoLoaded && (
               <img
                 src={actualCover}
@@ -277,88 +262,80 @@ const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
           />
         )}
 
+        {/* Navigation arrows on media */}
+        {enterprises.length > 1 && (
+          <>
+            <button
+              onClick={goPrev}
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+              data-testid="prev-enterprise"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button
+              onClick={goNext}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+              data-testid="next-enterprise"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </>
+        )}
+
         {/* LOGO */}
-        {actualLogo && (
-          <div className={`absolute bottom-3 right-3 ${large ? 'w-12 h-12' : 'w-10 h-10'} rounded-full bg-white p-1 shadow-md`}>
+        {logo && !logoError && (
+          <div className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-white p-1 shadow-md z-10">
             <img
-              src={actualLogo}
+              src={logo}
               alt=""
               className="w-full h-full object-cover rounded-full"
               onError={() => setLogoError(true)}
             />
           </div>
         )}
-
-        {/* ARROWS */}
-        {enterprises.length > 1 && (
-          <>
-            <button
-              onClick={prev}
-              className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white px-2 py-1 rounded-lg shadow-md transition-all hover:scale-110"
-              data-testid="prev-enterprise-btn"
-            >
-              ◀
-            </button>
-            <button
-              onClick={next}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white px-2 py-1 rounded-lg shadow-md transition-all hover:scale-110"
-              data-testid="next-enterprise-btn"
-            >
-              ▶
-            </button>
-          </>
-        )}
-
-        {/* Counter indicator */}
-        {enterprises.length > 1 && (
-          <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
-            {index + 1} / {enterprises.length}
-          </div>
-        )}
       </div>
 
       {/* CONTENT */}
-      <div className={cardPadding}>
-        <h3
-          className={`${titleSize} font-semibold text-gray-900 group-hover:text-[#0047AB] transition-colors line-clamp-2 mb-2 justify-center m-auto flex items-center gap-1`}
+      <div className="p-2 sm:p-3">
+        <h3 
+          className="text-xs sm:text-sm font-semibold text-gray-900 group-hover:text-[#0047AB] transition-colors line-clamp-2 mb-2 text-center"
+          style={{ fontFamily: 'Playfair Display, serif' }}
         >
           {displayName}
         </h3>
-
-        <div className="flex items-center gap-1.5 mb-3 justify-center">
-          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-          <span className="text-sm font-medium text-gray-700">
-            {displayRating}
-          </span>
-          {review_count > 0 && (
-            <span className="text-xs text-gray-400">
-              ({review_count} avis)
-            </span>
-          )}
+        
+        {/* Rating with green dots */}
+        <div className="flex items-center justify-center mb-2">
+          <RatingDots rating={displayRating} />
         </div>
-
-        <div className="flex items-center justify-center text-xs sm:text-sm gap-2">
-          <div className="flex items-center gap-1 text-gray-400">
-            <MapPin className="w-3.5 h-3.5" />
-            <span className="line-clamp-1">{city || 'Lausanne'}</span>
-          </div>
+        
+        <div className="flex items-center justify-center text-xs sm:text-sm gap-1 text-gray-400 mb-3">
+          <MapPin className="w-3.5 h-3.5" />
+          <span className="line-clamp-1">{city || 'Lausanne'}</span>
         </div>
-
+        
         <button
           onClick={(e) => {
             e.stopPropagation();
             navigate(`/entreprise/${id}`);
           }}
-          className={`w-full mt-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
-            isActive
-              ? 'bg-[#0047AB] text-white hover:bg-[#0047AB]/90'
+          className={`w-full py-2.5 rounded-xl text-sm font-medium transition-all ${
+            isActive 
+              ? 'bg-[#0047AB] text-white hover:bg-[#0047AB]/90' 
               : 'bg-gray-200 text-gray-500'
           }`}
-          data-testid={`reserve-btn-${id}`}
+          style={{ fontFamily: 'Playfair Display, serif' }}
         >
           {isActive ? 'Réserver' : 'Bientôt'}
         </button>
       </div>
+
+      {/* Enterprise counter */}
+      {enterprises.length > 1 && (
+        <div className="absolute top-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full z-10">
+          {index + 1}/{enterprises.length}
+        </div>
+      )}
     </div>
   );
 };

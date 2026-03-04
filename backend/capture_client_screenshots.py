@@ -7,7 +7,7 @@ import os
 import time
 from playwright.sync_api import sync_playwright
 
-BASE_URL = 'https://resto-browse-1.preview.emergentagent.com'
+BASE_URL = 'https://category-video-hub.preview.emergentagent.com'
 SCREENSHOTS_DIR = '/app/backend/uploads/brochure_client_screenshots'
 TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjEyYzFhZWItODk4NS00M2I3LThmYmMtODdlZjEzZjgzMWIzIiwidXNlcl90eXBlIjoiY2xpZW50IiwiZXhwIjoxNzcxMjkwNzExLjg0ODUwMn0.B82f5Fq-IuTQgOd4Fx5jF_vN_45Z7MFoc7guMh7cMQw"
 
