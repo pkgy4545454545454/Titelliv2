@@ -1,16 +1,71 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Star, MapPin, ChevronRight, ChevronDown } from 'lucide-react';
 import { enterpriseAPI } from '../services/api';
 
+// Categories that have video backgrounds - mapping exact category names to video files
+const CATEGORY_VIDEOS = {
+  // Restaurant
+  'Restaurant': '/api/uploads/category_videos/restaurant.mp4',
+  'Restaurant gastronomique': '/api/uploads/category_videos/restaurant.mp4',
+  'Restaurant italien': '/api/uploads/category_videos/restaurant.mp4',
+  'Restaurants': '/api/uploads/category_videos/restaurant.mp4',
+  
+  // Coiffeurs
+  'Coiffeur': '/api/uploads/category_videos/coiffeurs.mp4',
+  'Coiffure & Beauté': '/api/uploads/category_videos/coiffeurs.mp4',
+  'coiffure': '/api/uploads/category_videos/coiffeurs.mp4',
+  'coiffure_barber': '/api/uploads/category_videos/coiffeurs.mp4',
+  
+  // Soins esthétiques / Beauté
+  'Beauté & Bien-être': '/api/uploads/category_videos/soins_esthetiques.mp4',
+  'Beauté & Santé': '/api/uploads/category_videos/soins_esthetiques.mp4',
+  'Spa': '/api/uploads/category_videos/soins_esthetiques.mp4',
+  'spa': '/api/uploads/category_videos/soins_esthetiques.mp4',
+  'Massage & Spa': '/api/uploads/category_videos/soins_esthetiques.mp4',
+  
+  // Sport / Fitness
+  'Fitness': '/api/uploads/category_videos/cours_sport.mp4',
+  'Sport': '/api/uploads/category_videos/cours_sport.mp4',
+  'Sports & Loisirs': '/api/uploads/category_videos/cours_sport.mp4',
+  'cours_sport': '/api/uploads/category_videos/cours_sport.mp4',
+  'Articles Sport': '/api/uploads/category_videos/cours_sport.mp4',
+  
+  // Activités
+  'Activités': '/api/uploads/category_videos/activites.mp4',
+  
+  // Santé
+  'Bio & Santé': '/api/uploads/category_videos/professionnels_sante.mp4',
+  
+  // Immobilier - Video not yet generated, will fall back to image
+  // 'Agence Immobiliere': '/api/uploads/category_videos/agent_immobilier.mp4',
+  // 'Agences immobilières': '/api/uploads/category_videos/agent_immobilier.mp4',
+  // 'Immobilier': '/api/uploads/category_videos/agent_immobilier.mp4',
+  // 'Courtier Immobilier': '/api/uploads/category_videos/agent_immobilier.mp4',
+  // 'Promotion Immobiliere': '/api/uploads/category_videos/agent_immobilier.mp4',
+  // 'Transaction Immobiliere': '/api/uploads/category_videos/agent_immobilier.mp4',
+  
+  // Sécurité - Video not yet generated, will fall back to image
+  // 'Sécurité - Protection': '/api/uploads/category_videos/securite.mp4',
+  
+  // Personnel de maison
+  'Linge Maison': '/api/uploads/category_videos/personnel_maison.mp4',
+};
+
 const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
   const navigate = useNavigate();
+  const videoRef = useRef(null);
   const [index, setIndex] = React.useState(0);
   const [coverError, setCoverError] = React.useState(false);
   const [logoError, setLogoError] = React.useState(false);
   const [showSubcategories, setShowSubcategories] = useState(false);
   const [subcategories, setSubcategories] = useState([]);
   const [loadingSubcats, setLoadingSubcats] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+
+  // Check if this category has a video
+  const categoryVideo = CATEGORY_VIDEOS[category];
+  const hasVideo = !!categoryVideo;
 
   // Fetch subcategories when category changes
   useEffect(() => {
@@ -191,14 +246,40 @@ const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
         </div>
       )}
 
-      {/* IMAGE */}
+      {/* IMAGE OR VIDEO */}
       <div className={`relative ${imageHeight} overflow-hidden`}>
-        <img
-          src={actualCover}
-          alt={displayName}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 rounded-2xl"
-          onError={() => setCoverError(true)}
-        />
+        {hasVideo ? (
+          <>
+            {/* Video Background for specific categories */}
+            <video
+              ref={videoRef}
+              src={categoryVideo}
+              autoPlay
+              loop
+              muted
+              playsInline
+              onLoadedData={() => setVideoLoaded(true)}
+              onError={() => setVideoLoaded(false)}
+              className={`w-full h-full object-cover transition-all duration-500 rounded-2xl ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}
+            />
+            {/* Fallback image while video loads or on error */}
+            {!videoLoaded && (
+              <img
+                src={actualCover}
+                alt={displayName}
+                className="absolute inset-0 w-full h-full object-cover rounded-2xl"
+                onError={() => setCoverError(true)}
+              />
+            )}
+          </>
+        ) : (
+          <img
+            src={actualCover}
+            alt={displayName}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 rounded-2xl"
+            onError={() => setCoverError(true)}
+          />
+        )}
 
         {/* LOGO */}
         {actualLogo && (

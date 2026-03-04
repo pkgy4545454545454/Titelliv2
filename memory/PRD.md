@@ -29,6 +29,8 @@ Application marketplace locale suisse (Lausanne) connectant clients et prestatai
 - [x] Offres d'emploi (12 actives)
 - [x] Formations (8 actives)
 - [x] Profils entreprises avec indicateurs performance
+- [x] Animation intro: logo au lieu de vidéo
+- [x] Vidéos catégories générées avec Sora 2 (7/9 complétées)
 
 ### Database Stats
 - 8,251 entreprises
@@ -46,14 +48,29 @@ Application marketplace locale suisse (Lausanne) connectant clients et prestatai
 - **AI Generation**: Sora 2 (vidéos), GPT Image (images)
 - **Storage**: Cloudinary
 
-## Last Completed (March 2, 2026)
-1. ✅ Animation intro: vidéo remplacée par logo statique
-2. ✅ HomePage: 5 colonnes, largeur max-w-7xl alignée header
-3. ✅ Hero collé à navbar (suppression espace blanc)
-4. ✅ CategoryEnterprisesPage: redesign complet thème blanc
-5. ✅ Contrôle complet du site: 100% opérationnel
+## Last Completed (March 4, 2026)
+
+### Vidéos catégories générées avec Sora 2:
+| Catégorie | Status | Fichier |
+|-----------|--------|---------|
+| Restaurant | ✅ Fourni par user | restaurant.mp4 |
+| Personnel de maison | ✅ Généré | personnel_maison.mp4 |
+| Soins esthétiques | ✅ Généré | soins_esthetiques.mp4 |
+| Coiffeurs | ✅ Généré | coiffeurs.mp4 |
+| Cours de sport | ✅ Généré | cours_sport.mp4 |
+| Activités | ✅ Généré | activites.mp4 |
+| Professionnels de santé | ✅ Généré | professionnels_sante.mp4 |
+| Agent immobilier | ❌ Balance insuffisante | - |
+| Sécurité | ❌ Balance insuffisante | - |
+
+### Mapping catégories → vidéos:
+- Restaurant, Coiffeur, Spa, Fitness, Beauté & Santé mappés aux vidéos correspondantes
+- Fallback automatique sur image si vidéo non disponible
 
 ## Pending Tasks
+
+### P0 - Urgent
+- [ ] Générer vidéos manquantes (agent_immobilier, securite) - nécessite recharge balance Emergent LLM Key
 
 ### P1 - Priority High
 - [ ] Réorganiser les produits sur la homepage
@@ -86,7 +103,12 @@ GET  /api/media-pub/templates
 GET  /api/video-pub/templates
 POST /api/payments/checkout
 GET  /api/cashback/balance
+GET  /api/uploads/category_videos/{filename}.mp4
 ```
+
+## Files Created This Session
+- `/app/backend/scripts/generate_category_videos.py` - Script Sora 2 pour générer vidéos
+- `/app/backend/uploads/category_videos/*.mp4` - 7 vidéos catégories générées
 
 ## Test Credentials
 - **Client**: test.client@titelli.com / Test123!
