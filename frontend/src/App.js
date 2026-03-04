@@ -42,6 +42,7 @@ import FAQPage from './pages/FAQPage';
 import StatusPage from './pages/StatusPage';
 import CashbackPage from './pages/CashbackPage';
 import CategoryEnterprisesPage from './pages/CategoryEnterprisesPage';
+import FlyerPage from './pages/FlyerPage';
 import WelcomePopup from './components/WelcomePopup';
 
 import './index.css';
@@ -149,6 +150,9 @@ function AppRoutes() {
       {/* Video Pub - Création de vidéos publicitaires IA */}
       <Route path="/video-pub" element={<MainLayout><VideoPubPage /></MainLayout>} />
       <Route path="/video-pub/success" element={<MainLayout><VideoPubPage /></MainLayout>} />
+
+      {/* Flyer Marketing */}
+      <Route path="/flyer" element={<FlyerPage />} />
 
       {/* Titelli Pro++ Route (Enterprise only) */}
       <Route path="/enterprise/pro" element={<TitelliProPage />} />

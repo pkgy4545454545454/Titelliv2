@@ -879,6 +879,21 @@ const EnterpriseRegistrationPage = () => {
         <p className="text-gray-400 text-lg mb-8">
           Votre inscription est en attente de validation. Vous recevrez un email lorsque votre compte sera activé.
         </p>
+        
+        {/* Free AI Credit Bonus */}
+        <div className="bg-gradient-to-r from-[#0047AB]/20 to-[#D4AF37]/20 border border-[#D4AF37]/30 rounded-xl p-6 mb-8">
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <Gift className="w-8 h-8 text-[#D4AF37]" />
+            <h3 className="text-xl font-bold text-white">Cadeau de bienvenue !</h3>
+          </div>
+          <p className="text-gray-300">
+            Vous bénéficiez d'<span className="text-[#D4AF37] font-bold">1 génération d'image IA gratuite</span> pour créer votre première publicité professionnelle !
+          </p>
+          <p className="text-gray-500 text-sm mt-2">
+            Valable 90 jours après activation de votre compte
+          </p>
+        </div>
+        
         <div className="bg-white/5 border border-white/10 rounded-xl p-6 text-left mb-8">
           <h3 className="text-white font-semibold mb-3">Prochaines étapes :</h3>
           <ul className="text-gray-400 space-y-2">

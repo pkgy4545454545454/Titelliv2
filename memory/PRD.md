@@ -7,9 +7,22 @@ Application marketplace locale suisse (Lausanne) connectant clients et prestatai
 
 ## Last Completed (March 4, 2026)
 
-### ✅ 15 Catégories principales avec images/vidéos de fond
-Les catégories sont maintenant affichées dans l'ordre exact demandé :
+### ✅ Flyer Marketing avec QR Code
+- Page accessible à `/flyer`
+- Contenu complet avec tous les slogans
+- Image femme heureuse générée par IA
+- QR code pointant vers titelli.com
+- Coordonnées Titelli (email, téléphone, adresse)
+- Bouton télécharger/imprimer fonctionnel
 
+### ✅ Essai IA Gratuit à l'inscription entreprise
+- 1 crédit d'image IA offert automatiquement
+- Validité 90 jours après activation
+- Système de crédits dans MongoDB (collection `ai_credits`)
+- Endpoints: GET /api/ai-credits, POST /api/ai-credits/use
+- Message de confirmation mis à jour avec "Cadeau de bienvenue"
+
+### ✅ 15 Catégories principales avec images/vidéos de fond
 | # | Catégorie | Entreprises | Vidéo |
 |---|-----------|-------------|-------|
 | 1 | Restauration | 671 | ✅ restaurant.mp4 |
@@ -28,41 +41,47 @@ Les catégories sont maintenant affichées dans l'ordre exact demandé :
 | 14 | Professionnels informatiques | 71 | Image |
 | 15 | Professionnels de construction | 152 | Image |
 
-### ✅ 9 vidéos générées avec Sora 2
-Toutes les vidéos demandées sont maintenant générées :
-- https://category-video-hub.preview.emergentagent.com/api/uploads/category_videos/restaurant.mp4
-- https://category-video-hub.preview.emergentagent.com/api/uploads/category_videos/personnel_maison.mp4
-- https://category-video-hub.preview.emergentagent.com/api/uploads/category_videos/soins_esthetiques.mp4
-- https://category-video-hub.preview.emergentagent.com/api/uploads/category_videos/coiffeurs.mp4
-- https://category-video-hub.preview.emergentagent.com/api/uploads/category_videos/cours_sport.mp4
-- https://category-video-hub.preview.emergentagent.com/api/uploads/category_videos/activites.mp4
-- https://category-video-hub.preview.emergentagent.com/api/uploads/category_videos/professionnels_sante.mp4
-- https://category-video-hub.preview.emergentagent.com/api/uploads/category_videos/agent_immobilier.mp4
-- https://category-video-hub.preview.emergentagent.com/api/uploads/category_videos/securite.mp4
-
-### ✅ Autres modifications de cette session
-- Animation splash: Logo sans cercle
-- Message d'accueil: Nouveau texte avec code promo "Neworldpourtoi"
-- CGV: 13 articles complets selon la loi suisse
-
-## Files Modified/Created
-- `/app/frontend/src/pages/HomePage.js` - 15 catégories principales
-- `/app/frontend/src/services/api.js` - getMainCategories()
-- `/app/backend/server.py` - Endpoint /api/main-categories
-- `/app/backend/scripts/create_main_categories.py` - Script création catégories
-- `/app/backend/uploads/category_videos/*.mp4` - 9 vidéos
+## Files Modified/Created This Session
+- `/app/frontend/src/pages/FlyerPage.js` - Nouveau flyer marketing
+- `/app/frontend/src/pages/EnterpriseRegistrationPage.js` - Cadeau bienvenue IA
+- `/app/backend/server.py` - Endpoints ai-credits + crédit offert à l'inscription
+- `/app/frontend/src/App.js` - Route /flyer ajoutée
 
 ## Pending Tasks
+
+### P0 - Priority Critical
+- [ ] Refinements UI/UX des cartes Enterprise:
+  - Changer flèche dropdown → cercle avec '+'
+  - Nettoyer titres (supprimer _ et -)
+  - Changer police titres cartes
+  - Ajouter flèches navigation médias
+  - Remplacer étoiles par 5 bulles vertes
+  - Changer titre principal "les meilleurs services de ta région"
+  - Ajouter titre "Les meilleurs produits de ta région"
+
 ### P1 - Priority High
+- [ ] Générer vidéos manquantes (6 catégories) - BLOQUÉ sur crédits utilisateur
 - [ ] Régénérer vidéo #107 sans personnes
 
 ### P2 - Medium
+- [ ] Réorganiser produits/services homepage
 - [ ] Investiguer images corrompues
 - [ ] Corriger design brochure monétisation
 - [ ] Redesign profils prestataires
 
+### P3 - Future
+- [ ] Créer flyer QR code personnalisé par entreprise
+- [ ] Démontrer fonctionnalité multi-tags
+- [ ] Créer CDC final
+
 ## API Endpoints
 - GET /api/main-categories - 15 catégories principales avec vidéos
+- GET /api/ai-credits - Crédits IA disponibles
+- POST /api/ai-credits/use - Utiliser un crédit IA gratuit
 
 ## Test Credentials
 - **Client**: test.client@titelli.com / Test123!
+
+## Key Resources
+- Flyer: https://category-video-hub.preview.emergentagent.com/flyer
+- Image femme: https://static.prod-images.emergentagent.com/jobs/f4332303-e66b-4547-8bcc-769c9b82fc6d/images/d343b00951f2d8eec641ab219b9fc88c02f7bab65d4dc93d29c2315d2312032a.png

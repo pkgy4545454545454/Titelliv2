@@ -10204,10 +10204,25 @@ async def register_enterprise_owner(data: EnterpriseRegistrationRequest):
         }}
     )
     
+    # Add free AI credit for new enterprise registration
+    free_ai_credit = {
+        "id": str(uuid.uuid4()),
+        "user_id": user_id,
+        "enterprise_id": data.enterprise_id,
+        "credit_type": "free_ai_image",
+        "amount": 1,
+        "used": 0,
+        "description": "1 génération d'image IA offerte à l'inscription",
+        "expires_at": (datetime.now(timezone.utc) + timedelta(days=90)).isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.ai_credits.insert_one(free_ai_credit)
+    
     return {
         "success": True,
-        "message": "Votre demande d'inscription a été enregistrée. Vous recevrez un email lorsque votre compte sera validé.",
-        "request_id": registration_request["id"]
+        "message": "Votre demande d'inscription a été enregistrée. Vous recevrez un email lorsque votre compte sera validé. Vous bénéficiez également d'1 génération d'image IA gratuite !",
+        "request_id": registration_request["id"],
+        "free_ai_credit": True
     }
 
 @api_router.get("/admin/registration-requests")
@@ -10557,6 +10572,80 @@ async def update_subscription_plan(
         raise HTTPException(status_code=404, detail="Plan non trouvé")
     
     return {"success": True, "message": "Plan mis à jour"}
+
+
+# ============ AI CREDITS ENDPOINTS ============
+
+@api_router.get("/ai-credits")
+async def get_ai_credits(current_user: dict = Depends(get_current_user)):
+    """Get available AI credits for the current user"""
+    user_id = current_user.get("id")
+    enterprise_id = current_user.get("enterprise_id")
+    
+    # Find credits for this user
+    query = {"$or": [{"user_id": user_id}]}
+    if enterprise_id:
+        query["$or"].append({"enterprise_id": enterprise_id})
+    
+    credits = await db.ai_credits.find(
+        query,
+        {"_id": 0}
+    ).to_list(100)
+    
+    # Filter valid credits (not expired and has remaining amount)
+    valid_credits = []
+    now = datetime.now(timezone.utc).isoformat()
+    for credit in credits:
+        remaining = credit.get("amount", 0) - credit.get("used", 0)
+        if remaining > 0 and credit.get("expires_at", now) > now:
+            credit["remaining"] = remaining
+            valid_credits.append(credit)
+    
+    total_free_credits = sum(c.get("remaining", 0) for c in valid_credits if c.get("credit_type") == "free_ai_image")
+    
+    return {
+        "credits": valid_credits,
+        "total_free_credits": total_free_credits,
+        "has_free_credits": total_free_credits > 0
+    }
+
+
+@api_router.post("/ai-credits/use")
+async def use_ai_credit(current_user: dict = Depends(get_current_user)):
+    """Use one free AI credit for image generation"""
+    user_id = current_user.get("id")
+    enterprise_id = current_user.get("enterprise_id")
+    
+    # Find available credit
+    query = {
+        "$or": [{"user_id": user_id}],
+        "credit_type": "free_ai_image"
+    }
+    if enterprise_id:
+        query["$or"].append({"enterprise_id": enterprise_id})
+    
+    now = datetime.now(timezone.utc).isoformat()
+    credits = await db.ai_credits.find(query, {"_id": 0}).to_list(100)
+    
+    # Find first valid credit with remaining amount
+    for credit in credits:
+        remaining = credit.get("amount", 0) - credit.get("used", 0)
+        if remaining > 0 and credit.get("expires_at", now) > now:
+            # Use this credit
+            await db.ai_credits.update_one(
+                {"id": credit["id"]},
+                {
+                    "$inc": {"used": 1},
+                    "$set": {"last_used_at": now}
+                }
+            )
+            return {
+                "success": True,
+                "message": "Crédit IA utilisé avec succès",
+                "remaining_credits": remaining - 1
+            }
+    
+    raise HTTPException(status_code=400, detail="Aucun crédit IA gratuit disponible")
 
 
 # Include the api_router in the main app
