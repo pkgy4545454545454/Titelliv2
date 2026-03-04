@@ -335,12 +335,41 @@ const HomePage = () => {
     }
   };
 
+  // Grouper les entreprises par catégorie
   const enterprisesByCategory = allEnterprises.reduce((acc, enterprise) => {
     const category = enterprise.category || 'Autres';
     if (!acc[category]) acc[category] = [];
     acc[category].push(enterprise);
     return acc;
   }, {});
+
+  // Ordre prioritaire des catégories avec vidéos
+  const PRIORITY_CATEGORIES = [
+    'Restaurant',
+    'Personnel de maison', 'Linge Maison',
+    'Soins esthétiques', 'Beauté & Santé', 'Beauté & Bien-être', 'Spa', 'spa', 'Massage & Spa',
+    'Coiffeur', 'Coiffure & Beauté', 'coiffure', 'coiffure_barber',
+    'Fitness', 'Sport', 'Sports & Loisirs', 'cours_sport',
+    'Activités',
+    'Bio & Santé',
+    'Agence Immobiliere', 'Agences immobilières', 'Immobilier',
+    'Sécurité - Protection'
+  ];
+
+  // Trier les catégories selon l'ordre prioritaire
+  const sortedEnterprisesByCategory = Object.entries(enterprisesByCategory).sort(([catA], [catB]) => {
+    const indexA = PRIORITY_CATEGORIES.findIndex(p => catA.toLowerCase().includes(p.toLowerCase()) || p.toLowerCase().includes(catA.toLowerCase()));
+    const indexB = PRIORITY_CATEGORIES.findIndex(p => catB.toLowerCase().includes(p.toLowerCase()) || p.toLowerCase().includes(catB.toLowerCase()));
+    
+    // Si les deux sont dans la liste prioritaire, trier par index
+    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+    // Si seulement A est dans la liste, il vient en premier
+    if (indexA !== -1) return -1;
+    // Si seulement B est dans la liste, il vient en premier
+    if (indexB !== -1) return 1;
+    // Sinon, tri alphabétique
+    return catA.localeCompare(catB);
+  });
 
 
 
@@ -477,7 +506,7 @@ const HomePage = () => {
             </div>
           ) : allEnterprises.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
-           {Object.entries(enterprisesByCategory).map(([category, list]) => (
+           {sortedEnterprisesByCategory.map(([category, list]) => (
               <div key={category} className="w-full">
                 <EnterpriseCard
                   category={category}

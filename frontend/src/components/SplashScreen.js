@@ -122,33 +122,25 @@ const SplashScreen = ({ onComplete }) => {
           }}
         />
         
-        {/* Logo image instead of video */}
+        {/* Logo image - sans cercle - juste le texte T avec effet glow */}
         <div 
           style={{
-            width: '150px',
-            height: '150px',
-            borderRadius: '50%',
-            overflow: 'hidden',
-            border: '3px solid rgba(212, 175, 55, 0.5)',
-            boxShadow: '0 0 40px rgba(0, 71, 171, 0.5), 0 0 80px rgba(212, 175, 55, 0.2)',
+            width: '120px',
+            height: '120px',
             position: 'relative',
             zIndex: 1,
-            background: '#000',
             flexShrink: 0,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            fontSize: '72px',
+            fontFamily: 'Playfair Display, serif',
+            fontWeight: 'bold',
+            color: '#fff',
+            textShadow: '0 0 30px rgba(212, 175, 55, 0.6), 0 0 60px rgba(0, 71, 171, 0.4)',
           }}
         >
-          <img 
-            src="/logo_titelli.png" 
-            alt="Titelli"
-            style={{
-              width: '80%',
-              height: '80%',
-              objectFit: 'contain',
-            }}
-          />
+          T
         </div>
 
         {/* Brand name - perfectly centered */}
