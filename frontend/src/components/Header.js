@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { notificationsAPI } from '../services/api';
-import { Search, Menu, X, Heart, Bell, ChevronDown, User, Sparkles, Image, Video, HandCoins, Building2, UserCircle, FileText } from 'lucide-react';
+import { Search, Menu, X, HandCoins, Building2, User, UserCircle } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +9,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu';
-import { toast } from 'sonner';
 import { useNotificationWebSocket } from '../hooks/useWebSocket';
 
 const Header = () => {
@@ -24,16 +22,10 @@ const Header = () => {
   const {
     isConnected: wsConnected,
     unreadCount: wsUnreadCount,
-    notifications: wsNotifications,
-    markRead: wsMarkRead,
-    markAllRead: wsMarkAllRead,
-    fetchNotifications: wsFetchNotifications,
   } = useNotificationWebSocket();
 
   // State for notifications (fallback to API if WS not connected)
-  const [apiNotifications, setApiNotifications] = useState([]);
   const [apiUnreadCount, setApiUnreadCount] = useState(0);
-
   const unreadCount = wsConnected ? wsUnreadCount : apiUnreadCount;
 
   // Close mobile menu on route change
@@ -64,40 +56,26 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-4">
         {/* Main Header Bar */}
         <div className="flex items-center justify-between h-14 lg:h-16">
-          
-          {/* Left: Logo + Menu + Search */}
+
+          {/* Left: Logo + Menu */}
           <div className="flex items-center gap-3 sm:gap-4">
             {/* Logo à gauche */}
             <Link to="/" className="flex-shrink-0" data-testid="logo-link">
-              <img 
-                src="/logo_titelli.png" 
+              <img
+                src="/logo_titelli.png"
                 alt="Titelli"
                 className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
               />
             </Link>
 
             {/* Mobile hamburger */}
-            <button 
+            <button
               className="lg:hidden p-1.5 text-white"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               data-testid="mobile-menu-btn"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
-
-            {/* Desktop Search Bar */}
-            <form onSubmit={handleSearch} className="hidden lg:flex items-center">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Rechercher..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-64 pl-10 pr-4 py-2 bg-white/10 border border-white/10 rounded-full text-sm text-white placeholder:text-gray-400 focus:outline-none focus:border-white/30 focus:bg-white/15 transition-all"
-                />
-              </div>
-            </form>
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-5 ml-4">
@@ -106,58 +84,14 @@ const Header = () => {
                   key={link.path}
                   to={link.path}
                   className={`text-sm font-medium transition-colors ${
-                    isActive(link.path) 
-                      ? 'text-white' 
+                    isActive(link.path)
+                      ? 'text-white'
                       : link.className || 'text-gray-400 hover:text-white'
                   }`}
                 >
                   {link.label}
                 </Link>
               ))}
-              
-              {/* Pub IA Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger className="text-sm font-medium text-purple-400 flex items-center gap-1 outline-none">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  Pub IA
-                  <ChevronDown className="w-3 h-3" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-gray-900 border border-white/10 rounded-xl p-2">
-                  <DropdownMenuItem asChild>
-                    <Link to="/media-pub" className="flex items-center gap-2 text-amber-400 cursor-pointer">
-                      <Image className="w-4 h-4" />
-                      Images IA
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/video-pub" className="flex items-center gap-2 text-purple-400 cursor-pointer">
-                      <Video className="w-4 h-4" />
-                      Vidéos IA
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              {/* Partenaires - Brochure */}
-              <DropdownMenu>
-                <DropdownMenuTrigger className="text-sm font-medium text-gray-400 hover:text-white flex items-center gap-1 outline-none">
-                  Partenaires
-                  <ChevronDown className="w-3 h-3" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-gray-900 border border-white/10 rounded-xl p-2">
-                  <DropdownMenuItem asChild>
-                    <a 
-                      href={`${process.env.REACT_APP_BACKEND_URL}/api/uploads/Brochure_Titelli_Partenaires.pdf`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-white cursor-pointer"
-                    >
-                      <FileText className="w-4 h-4" />
-                      Brochure Titelli
-                    </a>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
             </nav>
           </div>
 
@@ -166,11 +100,6 @@ const Header = () => {
             {/* Cashback */}
             <Link to="/cashback" className="p-2 text-amber-400 hover:text-amber-300 hidden sm:block" data-testid="cashback-link">
               <HandCoins className="w-5 h-5" />
-            </Link>
-
-            {/* Wishlist */}
-            <Link to="/wishlist" className="p-2 text-gray-400 hover:text-white hidden sm:block">
-              <Heart className="w-5 h-5" />
             </Link>
 
             {/* Profile Icon - Always visible */}
@@ -247,8 +176,8 @@ const Header = () => {
                   key={link.path}
                   to={link.path}
                   className={`block py-3 px-4 rounded-lg text-center text-sm font-medium transition-colors ${
-                    isActive(link.path) 
-                      ? 'bg-white/10 text-white' 
+                    isActive(link.path)
+                      ? 'bg-white/10 text-white'
                       : link.className || 'text-gray-300 hover:bg-white/5'
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
@@ -256,7 +185,7 @@ const Header = () => {
                   {link.label}
                 </Link>
               ))}
-              
+
               {/* Pub IA Links */}
               <div className="pt-2 border-t border-white/10 mt-2">
                 <Link

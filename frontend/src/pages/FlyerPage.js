@@ -5,161 +5,167 @@ const FlyerPage = () => {
   const flyerRef = useRef(null);
   
   const SITE_URL = "https://titelli.com";
-  const QR_CODE_URL = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(SITE_URL)}`;
+  const QR_CODE_URL = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(SITE_URL)}&bgcolor=ffffff&color=0047AB`;
   
   const handleDownload = () => {
-    // Use html2canvas to download as image (would need library)
-    // For now, just open print dialog
     window.print();
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 py-8 px-4">
       {/* Download Button */}
-      <div className="max-w-[800px] mx-auto mb-6 flex justify-end print:hidden">
+      <div className="max-w-[595px] mx-auto mb-6 flex justify-center print:hidden">
         <button
           onClick={handleDownload}
-          className="flex items-center gap-2 px-6 py-3 bg-[#0047AB] text-white rounded-xl hover:bg-[#0047AB]/80 transition-colors"
+          className="flex items-center gap-2 px-8 py-3 bg-[#0047AB] text-white rounded-full font-semibold hover:bg-[#003380] transition-all shadow-lg hover:shadow-xl"
         >
           <Download className="w-5 h-5" />
-          Télécharger / Imprimer le Flyer
+          Télécharger / Imprimer
         </button>
       </div>
 
-      {/* Flyer Container - A4 Ratio */}
+      {/* Flyer Container - A4 Format - More professional */}
       <div 
         ref={flyerRef}
-        className="max-w-[800px] mx-auto bg-black relative overflow-hidden shadow-2xl print:shadow-none"
-        style={{ aspectRatio: '210/297' }}
+        className="max-w-[595px] mx-auto bg-white relative overflow-hidden shadow-2xl print:shadow-none"
+        style={{ minHeight: '950px' }}
       >
-        {/* Background gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-black/95 to-black" />
+        {/* Top accent bar */}
+        <div className="h-2 bg-gradient-to-r from-[#0047AB] via-red-500 to-[#0047AB]" />
         
         {/* Content Container */}
-        <div className="relative z-10 h-full flex flex-col p-8 md:p-12">
+        <div className="h-full flex flex-col px-8 py-6">
           
           {/* HEADER - Logo & Tagline */}
-          <div className="flex items-center gap-4 mb-8">
-            <div className="flex items-center gap-3">
-              {/* Logo placeholder - Blue T */}
-              <div className="w-14 h-14 md:w-16 md:h-16 rounded-xl bg-gradient-to-br from-[#0047AB] to-[#0033A0] flex items-center justify-center shadow-lg shadow-blue-500/30">
-                <span className="text-white font-bold text-3xl md:text-4xl" style={{ fontFamily: 'Playfair Display, serif' }}>T</span>
-              </div>
-              <div>
-                <h1 className="text-white text-2xl md:text-3xl font-bold" style={{ fontFamily: 'Playfair Display, serif' }}>
-                  Titelli
-                </h1>
-                <p className="text-gray-400 text-xs md:text-sm italic">
-                  Tous les meilleurs prestataires sont sur Titelli
-                </p>
-              </div>
+          <div className="flex items-center gap-4 mb-6 pb-4 border-b border-gray-100">
+            {/* Logo */}
+            <div className="w-14 h-14 rounded-xl bg-[#0047AB] flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-3xl" style={{ fontFamily: 'Playfair Display, serif' }}>T</span>
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-[#0047AB]" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Titelli
+              </h1>
+              <p className="text-gray-500 text-xs italic tracking-wide">
+                Tous les meilleurs prestataires sont sur Titelli
+              </p>
             </div>
           </div>
 
-          {/* MAIN SLOGANS */}
-          <div className="space-y-5 mb-8">
-            {/* Slogan 1 */}
-            <div className="bg-gradient-to-r from-white/10 to-transparent p-4 rounded-lg border-l-4 border-[#D4AF37]">
-              <p className="text-white text-base md:text-lg font-bold leading-relaxed">
-                Tous les meilleurs prestataires préférés de la région sont sur Titelli, les meilleures opportunités aussi.
+          {/* MAIN TITLE */}
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
+              Les meilleurs prestataires
+              <br />
+              <span className="text-[#0047AB]">de votre région</span>
+            </h2>
+          </div>
+
+          {/* SLOGANS - Clean minimalist cards */}
+          <div className="space-y-3 mb-6">
+            <div className="p-4 bg-gradient-to-r from-gray-50 to-white border-l-4 border-[#0047AB] rounded-r-lg">
+              <p className="text-gray-800 text-sm font-medium leading-relaxed">
+                Tous les meilleurs prestataires préférés de la région sont sur Titelli, 
+                <span className="text-[#0047AB] font-bold"> les meilleures opportunités aussi.</span>
               </p>
             </div>
             
-            {/* Slogan 2 - RED accent */}
-            <div className="bg-gradient-to-r from-red-600/20 to-transparent p-4 rounded-lg border-l-4 border-red-500">
-              <p className="text-white text-base md:text-lg font-bold leading-relaxed">
-                Ne cherchez plus vos clients, laissez-les vous trouver maintenant sur 
-                <span className="text-red-400"> Titelli!</span>
+            <div className="p-4 bg-gradient-to-r from-red-50 to-white border-l-4 border-red-500 rounded-r-lg">
+              <p className="text-gray-800 text-sm font-medium leading-relaxed">
+                Ne cherchez plus vos clients, 
+                <span className="text-red-600 font-bold"> laissez-les vous trouver maintenant sur Titelli!</span>
               </p>
             </div>
             
-            {/* Slogan 3 */}
-            <div className="bg-gradient-to-r from-[#0047AB]/20 to-transparent p-4 rounded-lg border-l-4 border-[#0047AB]">
-              <p className="text-white text-base md:text-lg font-bold leading-relaxed">
+            <div className="p-4 bg-gradient-to-r from-blue-50 to-white border-l-4 border-[#0047AB] rounded-r-lg">
+              <p className="text-gray-800 text-sm font-medium leading-relaxed">
                 Titelli accompagne ses clients tout au long de leurs journées de consommation, 
-                <span className="text-[#D4AF37]"> devenez notre recommandation préférée !</span>
+                <span className="text-[#D4AF37] font-bold"> devenez notre recommandation préférée!</span>
               </p>
             </div>
-            
-            {/* Slogan 4 - Question */}
-            <div className="bg-gradient-to-r from-[#D4AF37]/20 to-transparent p-4 rounded-lg border-l-4 border-[#D4AF37]">
-              <p className="text-white text-base md:text-lg font-bold leading-relaxed">
-                Êtes-vous labellisés par un expert Suisse ? 
-                <span className="text-gray-300 font-normal"> Soyez reconnu dans votre domaine d'activité auprès des professionnels.</span>
+
+            <div className="p-4 bg-gradient-to-r from-amber-50 to-white border-l-4 border-[#D4AF37] rounded-r-lg">
+              <p className="text-gray-800 text-sm font-medium leading-relaxed">
+                <span className="font-bold">Êtes-vous labellisés par un expert Suisse?</span>
+                <br />
+                <span className="text-gray-600">Soyez reconnu dans votre domaine d'activité auprès des professionnels.</span>
               </p>
             </div>
           </div>
 
           {/* WOMAN IMAGE - Centered */}
-          <div className="flex-1 flex items-center justify-center relative mb-6">
+          <div className="flex-1 flex items-center justify-center relative py-4">
             <div className="relative">
-              {/* Glow effect */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0047AB]/30 to-transparent blur-3xl scale-125" />
+              {/* Subtle glow */}
+              <div className="absolute inset-0 bg-[#0047AB]/10 blur-3xl scale-110 rounded-full" />
               
-              {/* Image */}
-              <img
-                src="https://static.prod-images.emergentagent.com/jobs/f4332303-e66b-4547-8bcc-769c9b82fc6d/images/d343b00951f2d8eec641ab219b9fc88c02f7bab65d4dc93d29c2315d2312032a.png"
-                alt="Client satisfait sur Titelli"
-                className="relative z-10 h-[250px] md:h-[320px] object-contain drop-shadow-2xl"
-              />
+              {/* Image with elegant frame */}
+              <div className="relative bg-gradient-to-b from-white to-gray-50 p-2 rounded-2xl shadow-xl">
+                <img
+                  src="https://static.prod-images.emergentagent.com/jobs/f4332303-e66b-4547-8bcc-769c9b82fc6d/images/d343b00951f2d8eec641ab219b9fc88c02f7bab65d4dc93d29c2315d2312032a.png"
+                  alt="Réservez facilement sur Titelli"
+                  className="h-[220px] object-contain rounded-xl"
+                />
+              </div>
             </div>
           </div>
 
           {/* CTA - Below woman */}
-          <div className="text-center mb-8">
-            <div className="inline-block bg-gradient-to-r from-[#0047AB] via-[#0047AB] to-red-600 p-[2px] rounded-xl">
-              <div className="bg-black/90 px-6 py-4 rounded-xl">
-                <p className="text-white text-lg md:text-xl font-bold">
-                  Connectez-vous maintenant et profitez de vos 
-                  <span className="text-[#D4AF37]"> innombrables avantages offerts</span> avec Titelli !
-                </p>
-              </div>
+          <div className="text-center py-4 mb-4">
+            <div className="inline-block bg-[#0047AB] px-6 py-4 rounded-xl shadow-lg">
+              <p className="text-white text-base font-bold leading-snug">
+                Connectez-vous maintenant et profitez de vos
+                <br />
+                <span className="text-[#D4AF37]">innombrables avantages offerts</span> avec Titelli!
+              </p>
             </div>
           </div>
 
-          {/* FOOTER - QR Code & Contact */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-6 border-t border-white/10">
+          {/* FOOTER - QR Code & Contact - Clean layout */}
+          <div className="flex items-center justify-between gap-4 pt-4 border-t border-gray-200">
             {/* QR Code */}
-            <div className="flex items-center gap-4">
-              <div className="bg-white p-2 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="bg-white p-2 rounded-lg border-2 border-[#0047AB] shadow-md">
                 <img
                   src={QR_CODE_URL}
                   alt="QR Code Titelli"
-                  className="w-20 h-20 md:w-24 md:h-24"
+                  className="w-20 h-20"
                 />
               </div>
               <div>
-                <p className="text-[#D4AF37] font-bold text-sm">Scannez-moi</p>
-                <p className="text-gray-400 text-xs">pour accéder à Titelli</p>
+                <p className="text-[#0047AB] font-bold text-sm">Scannez-moi</p>
+                <p className="text-gray-500 text-xs">Accédez à Titelli</p>
               </div>
             </div>
             
-            {/* Coordonnées */}
+            {/* Coordonnées - Compact */}
             <div className="text-right space-y-1">
-              <div className="flex items-center justify-end gap-2 text-gray-300 text-sm">
-                <Globe className="w-4 h-4 text-[#0047AB]" />
-                <span>www.titelli.com</span>
+              <div className="flex items-center justify-end gap-2 text-gray-700 text-xs">
+                <Globe className="w-3.5 h-3.5 text-[#0047AB]" />
+                <span className="font-medium">www.titelli.com</span>
               </div>
-              <div className="flex items-center justify-end gap-2 text-gray-300 text-sm">
-                <Mail className="w-4 h-4 text-[#0047AB]" />
+              <div className="flex items-center justify-end gap-2 text-gray-700 text-xs">
+                <Mail className="w-3.5 h-3.5 text-[#0047AB]" />
                 <span>contact@titelli.com</span>
               </div>
-              <div className="flex items-center justify-end gap-2 text-gray-300 text-sm">
-                <Phone className="w-4 h-4 text-[#0047AB]" />
+              <div className="flex items-center justify-end gap-2 text-gray-700 text-xs">
+                <Phone className="w-3.5 h-3.5 text-[#0047AB]" />
                 <span>+41 21 XXX XX XX</span>
               </div>
-              <div className="flex items-center justify-end gap-2 text-gray-300 text-sm">
-                <MapPin className="w-4 h-4 text-[#0047AB]" />
+              <div className="flex items-center justify-end gap-2 text-gray-700 text-xs">
+                <MapPin className="w-3.5 h-3.5 text-[#0047AB]" />
                 <span>Lausanne, Suisse</span>
               </div>
             </div>
           </div>
 
-          {/* Bottom brand bar */}
-          <div className="mt-6 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-transparent via-white/5 to-transparent">
-            <span className="text-gray-500 text-xs">© 2024 Titelli - Tous droits réservés</span>
-            <span className="text-[#D4AF37]">|</span>
-            <span className="text-gray-500 text-xs">Swiss Quality</span>
+          {/* Bottom accent */}
+          <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-center gap-3">
+            <span className="text-gray-400 text-[10px]">© 2024 Titelli</span>
+            <span className="w-1 h-1 rounded-full bg-[#D4AF37]" />
+            <span className="text-gray-400 text-[10px]">Swiss Quality</span>
+            <span className="w-1 h-1 rounded-full bg-[#D4AF37]" />
+            <span className="text-gray-400 text-[10px]">Tous droits réservés</span>
           </div>
         </div>
       </div>
@@ -170,12 +176,17 @@ const FlyerPage = () => {
           body {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            background: white !important;
           }
           .print\\:hidden {
             display: none !important;
           }
           .print\\:shadow-none {
             box-shadow: none !important;
+          }
+          @page {
+            size: A4;
+            margin: 0;
           }
         }
       `}</style>
