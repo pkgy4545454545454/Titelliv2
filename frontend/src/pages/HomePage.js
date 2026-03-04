@@ -430,39 +430,38 @@ const HomePage = () => {
     return acc;
   }, {});
 
-  // Ordre prioritaire des 15 premières catégories (exactement comme demandé)
-  const PRIORITY_CATEGORIES = [
-    'Restauration', 'Restaurant', 'Brasserie', 'Boulangerie', 'Traiteur',
-    'Personnel de maison', 'Soins Domicile', 'Nettoyage', 'Menage',
-    'Soins esthétiques', 'Institut De Beaute', 'Beauté & Bien-être', 'Beauté & Santé', 'Massage', 'Spa', 'spa',
-    'Coiffeurs', 'Coiffeur', 'Coiffure & Beauté', 'coiffure', 'coiffure_barber',
-    'Cours de sport', 'Fitness', 'Sport', 'Sports & Loisirs', 'Coach', 'cours_sport',
-    'Activités', 'Hotel',
-    'Professionnels de santé', 'Physiotherapie', 'Dentiste', 'Pharmacie', 'Cabinet Medical',
-    'Agent immobilier', 'Agence Immobiliere', 'Agences immobilières', 'Immobilier',
-    'Sécurité', 'Sécurité - Protection',
-    'Professionnels de transports', 'Transport', 'Taxi', 'Demenagement',
-    'Professionnels d\'éducation', 'Enseignement', 'Ecole', 'Formation',
-    'Professionnels administratifs', 'Fiduciaire', 'Comptable',
-    'Professionnels juridiques', 'Avocat', 'Notaire',
-    'Professionnels informatiques', 'Informatique', 'expert_tech',
-    'Professionnels de construction', 'Construction', 'Architecte', 'Electricien', 'Plombier'
-  ];
+  // Les 15 catégories principales avec leurs sous-catégories
+  const MAIN_CATEGORIES_CONFIG = {
+    'Restauration': ['Restaurant', 'Brasserie', 'Bistrot', 'Bar', 'Café', 'Boulangerie', 'Boulangerie & Pâtisserie', 'Boucherie', 'Épicerie', 'Épicerie Fine', 'Traiteur', 'Pizzeria', 'Japonais', 'Alimentation', 'Supermarché'],
+    'Personnel de maison': ['Soins Domicile', 'Nettoyage', 'Aide Soignant', 'Menage', 'Garde Enfant', 'Pressing & Laverie'],
+    'Soins esthétiques': ['Institut De Beaute', 'Beauté & Bien-être', 'Beauté & Santé', 'Massage', 'Spa', 'spa', 'Bronzage', 'Maquillage', 'Manucure'],
+    'Coiffeurs': ['Coiffeur', 'Coiffure & Beauté', 'coiffure', 'coiffure_barber'],
+    'Cours de sport': ['Fitness', 'Sport', 'Sports & Loisirs', 'Coach', 'Coach & Thérapeute', 'cours_sport', 'Yoga', 'Arts Martiaux', 'Danse'],
+    'Activités': ['Activités', 'Hotel', 'Montagne', 'Loisirs', 'Cinema', 'Theatre', 'Musee'],
+    'Professionnels de santé': ['Physiotherapie', 'Dentiste', 'Pharmacie', 'Pharmacie & Droguerie', 'Chirurgien', 'Osteopathe', 'Psychologue', 'Cabinet Medical', 'Cardiologue', 'Ophtalmo', 'Bio & Santé'],
+    'Agent immobilier': ['Agence Immobiliere', 'Agences immobilières', 'Immobilier', 'Courtier Immobilier'],
+    'Sécurité': ['Sécurité - Protection', 'Securite', 'Alarme', 'Surveillance'],
+    'Professionnels de transports': ['Transport', 'Taxi', 'VTC', 'Demenagement', 'Livraison', 'Ambulance', 'Assistance Routiere'],
+    'Professionnels d\'éducation': ['Enseignement', 'Enseignement - Ecoles', 'Ecole', 'Formation', 'Cours', 'Auto Ecole', 'Creche'],
+    'Professionnels administratifs': ['Administration', 'Secretariat', 'Comptable', 'Fiduciaire', 'Fiduciaires', 'Gestion'],
+    'Professionnels juridiques': ['Avocat', 'Avocats', 'Notaire', 'Juridique', 'Huissier'],
+    'Professionnels informatiques': ['Informatique', 'Web', 'IT', 'Developpeur', 'expert_tech', 'Numerique'],
+    'Professionnels de construction': ['Construction', 'BTP', 'Architecte', 'Maconnerie', 'Peinture', 'Electricien', 'Plombier']
+  };
 
-  // Trier les catégories selon l'ordre prioritaire
-  const sortedEnterprisesByCategory = Object.entries(enterprisesByCategory).sort(([catA], [catB]) => {
-    const indexA = PRIORITY_CATEGORIES.findIndex(p => catA.toLowerCase().includes(p.toLowerCase()) || p.toLowerCase().includes(catA.toLowerCase()));
-    const indexB = PRIORITY_CATEGORIES.findIndex(p => catB.toLowerCase().includes(p.toLowerCase()) || p.toLowerCase().includes(catB.toLowerCase()));
-    
-    // Si les deux sont dans la liste prioritaire, trier par index
-    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-    // Si seulement A est dans la liste, il vient en premier
-    if (indexA !== -1) return -1;
-    // Si seulement B est dans la liste, il vient en premier
-    if (indexB !== -1) return 1;
-    // Sinon, tri alphabétique
-    return catA.localeCompare(catB);
+  // Grouper les entreprises par CATÉGORIE PRINCIPALE
+  const enterprisesByMainCategory = {};
+  Object.entries(MAIN_CATEGORIES_CONFIG).forEach(([mainCat, subcats]) => {
+    const enterprises = allEnterprises.filter(e => subcats.includes(e.category));
+    if (enterprises.length > 0) {
+      enterprisesByMainCategory[mainCat] = enterprises;
+    }
   });
+
+  // Convertir en array trié selon l'ordre des catégories principales
+  const sortedMainCategories = Object.entries(MAIN_CATEGORIES_CONFIG)
+    .filter(([mainCat]) => enterprisesByMainCategory[mainCat]?.length > 0)
+    .map(([mainCat]) => [mainCat, enterprisesByMainCategory[mainCat]]);
 
 
 
@@ -599,7 +598,7 @@ const HomePage = () => {
             </div>
           ) : allEnterprises.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
-           {sortedEnterprisesByCategory.map(([category, list]) => (
+           {sortedMainCategories.map(([category, list]) => (
               <div key={category} className="w-full">
                 <EnterpriseCard
                   category={category}
