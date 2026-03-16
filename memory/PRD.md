@@ -5,20 +5,21 @@ Application marketplace locale suisse (Lausanne) connectant clients et prestatai
 
 ## User Language: **Français**
 
-## Last Completed (March 4, 2026)
+## Last Completed (March 16, 2026)
 
-### ✅ Modifications GitHub intégrées
-- Header.js simplifié avec navigation (Services, Produits, Entreprises, Rdv, Sports)
-- HomePage.js avec titre "Les meilleurs prestataires de ta région" en vert
+### ✅ Fix Render Deployment - Category Videos
+- Moved videos from `/backend/uploads/category_videos/` to `/frontend/public/videos/`
+- Updated paths in `EnterpriseCard.js`: `/api/uploads/category_videos/` → `/videos/`
+- 12 videos now included in frontend build for production deployment
+- **No additional action required** on Render - videos bundled with frontend
 
-### ✅ Flyer Marketing Professionnel
-- Page accessible à `/flyer`
-- Design minimaliste sur fond blanc
-- 4 slogans formatés avec couleurs (bleu, rouge, or)
-- Image femme heureuse générée par IA
-- QR code bleu vers titelli.com
-- Coordonnées complètes (web, email, téléphone, Lausanne)
-- Bouton télécharger/imprimer
+### ✅ GitHub Changes Integrated
+- Header.js simplified with navigation
+- HomePage.js with "Les meilleurs prestataires de ta région" title
+
+### ✅ Professional Marketing Flyer
+- Page at `/flyer` with minimalist design
+- QR code, contact info, slogans
 
 ### ✅ Essai IA Gratuit à l'inscription entreprise
 - 1 crédit d'image IA offert automatiquement

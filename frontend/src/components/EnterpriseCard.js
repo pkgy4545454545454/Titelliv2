@@ -3,20 +3,20 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Star, MapPin, ChevronRight, ChevronLeft, Plus, Minus } from 'lucide-react';
 import { enterpriseAPI } from '../services/api';
 
-// Categories that have video backgrounds
+// Categories that have video backgrounds - Using public folder for production deployment
 const CATEGORY_VIDEOS = {
-  'Restauration': '/api/uploads/category_videos/restaurant.mp4',
-  'Personnel de maison': '/api/uploads/category_videos/personnel_maison.mp4',
-  'Soins esthétiques': '/api/uploads/category_videos/soins_esthetiques.mp4',
-  'Coiffeurs': '/api/uploads/category_videos/coiffeurs.mp4',
-  'Cours de sport': '/api/uploads/category_videos/cours_sport.mp4',
-  'Activités': '/api/uploads/category_videos/activites.mp4',
-  'Professionnels de santé': '/api/uploads/category_videos/professionnels_sante.mp4',
-  'Agent immobilier': '/api/uploads/category_videos/agent_immobilier.mp4',
-  'Sécurité': '/api/uploads/category_videos/securite.mp4',
-  'Professionnels de transports': '/api/uploads/category_videos/professionnels_transports.mp4',
-  'Professionnels d\'éducation': '/api/uploads/category_videos/professionnels_education.mp4',
-  'Professionnels administratifs': '/api/uploads/category_videos/professionnels_administratifs.mp4',
+  'Restauration': '/videos/restaurant.mp4',
+  'Personnel de maison': '/videos/personnel_maison.mp4',
+  'Soins esthétiques': '/videos/soins_esthetiques.mp4',
+  'Coiffeurs': '/videos/coiffeurs.mp4',
+  'Cours de sport': '/videos/cours_sport.mp4',
+  'Activités': '/videos/activites.mp4',
+  'Professionnels de santé': '/videos/professionnels_sante.mp4',
+  'Agent immobilier': '/videos/agent_immobilier.mp4',
+  'Sécurité': '/videos/securite.mp4',
+  'Professionnels de transports': '/videos/professionnels_transports.mp4',
+  'Professionnels d\'éducation': '/videos/professionnels_education.mp4',
+  'Professionnels administratifs': '/videos/professionnels_administratifs.mp4',
 };
 
 // Sous-catégories pour chaque catégorie principale
