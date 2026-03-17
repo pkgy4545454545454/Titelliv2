@@ -295,7 +295,7 @@ const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
           className="text-xs sm:text-sm font-semibold text-gray-900 group-hover:text-[#0047AB] transition-colors line-clamp-2 mb-2 text-center"
           style={{ fontFamily: 'Playfair Display, serif' }}
         >
-          {displayName}
+          {cleanTitle(category)}
         </h3>
         
         {/* Rating with green dots */}
