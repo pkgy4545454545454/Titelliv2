@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Minus, ChevronRight, ChevronLeft } from 'lucide-react';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
 
 // Vidéos de fond pour les catégories de produits
 const PRODUCT_CATEGORY_VIDEOS = {
@@ -64,18 +64,11 @@ const ProductCategoryCard = ({ category, products = [] }) => {
   const navigate = useNavigate();
   const videoRef = useRef(null);
   const [videoLoaded, setVideoLoaded] = useState(false);
-  const [showSubcategories, setShowSubcategories] = useState(false);
   const [index, setIndex] = useState(0);
 
   const categoryVideo = PRODUCT_CATEGORY_VIDEOS[category];
   const categoryImage = PRODUCT_CATEGORY_IMAGES[category] || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800';
   const hasVideo = !!categoryVideo;
-
-  const handleCategoryClick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setShowSubcategories(!showSubcategories);
-  };
 
   const handleViewAll = (e) => {
     e.preventDefault();
@@ -105,40 +98,17 @@ const ProductCategoryCard = ({ category, products = [] }) => {
       onClick={handleViewAll}
       data-testid={`product-category-card-${category}`}
     >
-      {/* CATEGORY LABEL with + button */}
+      {/* CATEGORY LABEL - Click to go to products page */}
       <div className="flex items-center justify-center gap-2 mb-3 relative">
         <button
-          onClick={handleCategoryClick}
-          className="flex items-center gap-2 text-black hover:text-[#0047AB] transition-colors"
+          onClick={handleViewAll}
+          className="text-black hover:text-[#0047AB] transition-colors"
           style={{ fontFamily: 'Playfair Display, serif' }}
-          data-testid="product-category-toggle-btn"
+          data-testid="product-category-link-btn"
         >
           <span className="font-medium text-sm">{cleanTitle(category)}</span>
-          <span className="w-5 h-5 rounded-full border-2 border-current flex items-center justify-center text-xs">
-            {showSubcategories ? <Minus className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
-          </span>
         </button>
       </div>
-
-      {/* SUBCATEGORIES DROPDOWN */}
-      {showSubcategories && (
-        <div 
-          className="subcategories-menu absolute top-12 left-0 right-0 z-50 bg-white rounded-xl shadow-2xl border border-gray-100 p-3 animate-in slide-in-from-top-2 duration-300 max-h-[300px] overflow-y-auto"
-          onClick={(e) => e.stopPropagation()}
-          data-testid="product-subcategories-menu"
-        >
-          <div className="space-y-1">
-            <button
-              onClick={handleViewAll}
-              className="w-full text-left px-3 py-2 text-sm font-semibold text-[#0047AB] bg-[#0047AB]/10 hover:bg-[#0047AB]/20 rounded-lg transition-colors"
-              style={{ fontFamily: 'Playfair Display, serif' }}
-              data-testid="view-all-products-btn"
-            >
-              Tout voir
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* VIDEO/IMAGE Background */}
       <div className="relative h-28 sm:h-36 overflow-hidden">

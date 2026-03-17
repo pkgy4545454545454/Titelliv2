@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Star, MapPin, ChevronRight, ChevronLeft, Plus, Minus } from 'lucide-react';
-import { enterpriseAPI } from '../services/api';
+import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { MapPin, ChevronRight, ChevronLeft } from 'lucide-react';
 
 // Categories that have video backgrounds - Using public folder for production deployment
 const CATEGORY_VIDEOS = {
@@ -17,25 +16,6 @@ const CATEGORY_VIDEOS = {
   'Professionnels de transports': '/videos/professionnels_transports.mp4',
   'Professionnels d\'éducation': '/videos/professionnels_education.mp4',
   'Professionnels administratifs': '/videos/professionnels_administratifs.mp4',
-};
-
-// Sous-catégories pour chaque catégorie principale
-const MAIN_CATEGORY_SUBCATEGORIES = {
-  'Restauration': ['Restaurant', 'Brasserie', 'Bistrot', 'Bar', 'Café', 'Boulangerie', 'Boucherie', 'Épicerie', 'Traiteur', 'Pizzeria', 'Japonais'],
-  'Personnel de maison': ['Soins Domicile', 'Nettoyage', 'Aide Soignant', 'Ménage', 'Garde Enfant'],
-  'Soins esthétiques': ['Institut De Beauté', 'Massage', 'Spa', 'Bronzage', 'Maquillage', 'Manucure'],
-  'Coiffeurs': ['Coiffeur Homme', 'Coiffeur Femme', 'Barbier', 'Coiffure Mixte'],
-  'Cours de sport': ['Fitness', 'Yoga', 'Arts Martiaux', 'Danse', 'Natation', 'Tennis', 'Football'],
-  'Activités': ['Cinéma', 'Théâtre', 'Musée', 'Parc', 'Escape Game', 'Bowling'],
-  'Professionnels de santé': ['Médecin', 'Dentiste', 'Pharmacie', 'Physiothérapeute', 'Ostéopathe', 'Psychologue'],
-  'Agent immobilier': ['Vente', 'Location', 'Gestion locative', 'Estimation'],
-  'Sécurité': ['Gardiennage', 'Alarme', 'Vidéosurveillance', 'Agent de sécurité'],
-  'Professionnels de transports': ['Taxi', 'VTC', 'Déménagement', 'Livraison', 'Ambulance'],
-  'Professionnels d\'éducation': ['École primaire', 'Collège', 'Lycée', 'Université', 'Formation professionnelle'],
-  'Professionnels administratifs': ['Comptable', 'Fiduciaire', 'Secrétariat', 'Ressources humaines'],
-  'Professionnels juridiques': ['Avocat', 'Notaire', 'Huissier', 'Médiateur'],
-  'Professionnels informatiques': ['Développement web', 'Support IT', 'Cybersécurité', 'Cloud'],
-  'Professionnels de construction': ['Maçonnerie', 'Électricité', 'Plomberie', 'Peinture', 'Menuiserie']
 };
 
 // Fonction pour nettoyer les titres (seulement la première lettre en majuscule)
@@ -72,10 +52,6 @@ const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
   const videoRef = useRef(null);
   const [index, setIndex] = React.useState(0);
   const [coverError, setCoverError] = React.useState(false);
-  const [logoError, setLogoError] = React.useState(false);
-  const [showSubcategories, setShowSubcategories] = useState(false);
-  const [subcategories, setSubcategories] = useState([]);
-  const [loadingSubcats, setLoadingSubcats] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
 
   // Check if this category has a video
@@ -84,31 +60,6 @@ const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
 
   // Nettoyer le titre de la catégorie
   const cleanCategoryTitle = cleanTitle(category);
-
-  // Fetch subcategories from API when category changes
-  useEffect(() => {
-    if (category && showSubcategories && subcategories.length === 0) {
-      // Always fetch from API to get real subcategories from database
-      const fetchSubcategories = async () => {
-        setLoadingSubcats(true);
-        try {
-          const response = await enterpriseAPI.getSubcategories(category);
-          if (response.data?.subcategories) {
-            setSubcategories(response.data.subcategories);
-          }
-        } catch (error) {
-          console.error('Error fetching subcategories:', error);
-          // Fallback to local list if API fails
-          if (MAIN_CATEGORY_SUBCATEGORIES[category]) {
-            setSubcategories(MAIN_CATEGORY_SUBCATEGORIES[category]);
-          }
-        } finally {
-          setLoadingSubcats(false);
-        }
-      };
-      fetchSubcategories();
-    }
-  }, [category, showSubcategories, subcategories.length]);
 
   if (!enterprises.length) return null;
 
@@ -139,7 +90,6 @@ const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
     e.stopPropagation();
     setIndex((prev) => (prev + 1) % enterprises.length);
     setCoverError(false);
-    setLogoError(false);
   };
 
   const goPrev = (e) => {
@@ -148,23 +98,10 @@ const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
       prev === 0 ? enterprises.length - 1 : prev - 1
     );
     setCoverError(false);
-    setLogoError(false);
-  };
-
-  const handleCategoryClick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setShowSubcategories(!showSubcategories);
-  };
-
-  const handleSubcategoryClick = (e, subcategory) => {
-    e.preventDefault();
-    e.stopPropagation();
-    navigate(`/categorie/${encodeURIComponent(category)}?subcategory=${encodeURIComponent(subcategory)}`);
   };
 
   const handleCardClick = (e) => {
-    if (e.target.closest('button') || e.target.closest('.subcategories-menu')) {
+    if (e.target.closest('button')) {
       return;
     }
     navigate(`/entreprise/${id}`);
@@ -176,65 +113,21 @@ const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
       onClick={handleCardClick}
       data-testid={`enterprise-card-${id}`}
     >
-      {/* CATEGORY LABEL with + button */}
+      {/* CATEGORY LABEL - Click to go to category page */}
       <div className="flex items-center justify-center gap-2 mb-3 relative">
         <button
-          onClick={handleCategoryClick}
-          className="flex items-center gap-2 text-black hover:text-[#0047AB] transition-colors"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            navigate(`/categorie/${encodeURIComponent(category)}`);
+          }}
+          className="text-black hover:text-[#0047AB] transition-colors"
           style={{ fontFamily: 'Playfair Display, serif' }}
-          data-testid="category-toggle-btn"
+          data-testid="category-link-btn"
         >
           <span className="font-medium">{cleanCategoryTitle}</span>
-          <span className="w-5 h-5 rounded-full border-2 border-current flex items-center justify-center text-xs">
-            {showSubcategories ? <Minus className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
-          </span>
         </button>
       </div>
-
-      {/* SUBCATEGORIES DROPDOWN */}
-      {showSubcategories && (
-        <div 
-          className="subcategories-menu absolute top-12 left-0 right-0 z-50 bg-white rounded-xl shadow-2xl border border-gray-100 p-3 animate-in slide-in-from-top-2 duration-300 max-h-[300px] overflow-y-auto"
-          onClick={(e) => e.stopPropagation()}
-          data-testid="subcategories-menu"
-        >
-          {loadingSubcats ? (
-            <div className="flex items-center justify-center py-4">
-              <div className="w-6 h-6 border-2 border-[#0047AB] border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          ) : (
-            <div className="space-y-1">
-              {/* Bouton "Tout" pour voir toute la catégorie */}
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  navigate(`/categorie/${encodeURIComponent(category)}`);
-                }}
-                className="w-full text-left px-3 py-2 text-sm font-semibold text-[#0047AB] bg-[#0047AB]/10 hover:bg-[#0047AB]/20 rounded-lg transition-colors"
-                style={{ fontFamily: 'Playfair Display, serif' }}
-                data-testid="view-all-category-btn"
-              >
-                Tout voir
-              </button>
-              {subcategories.length > 0 ? (
-                subcategories.map((subcat, idx) => (
-                  <button
-                    key={idx}
-                    onClick={(e) => handleSubcategoryClick(e, subcat)}
-                    className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-[#0047AB]/10 hover:text-[#0047AB] rounded-lg transition-colors"
-                    style={{ fontFamily: 'Playfair Display, serif' }}
-                  >
-                    {cleanTitle(subcat)}
-                  </button>
-                ))
-              ) : (
-                <p className="text-gray-400 text-sm text-center py-2">Aucune sous-catégorie</p>
-              )}
-            </div>
-          )}
-        </div>
-      )}
 
       {/* IMAGE/VIDEO with navigation arrows */}
       <div className={`relative ${imageHeight} overflow-hidden`}>
