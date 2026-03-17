@@ -1341,8 +1341,13 @@ async def list_enterprises(
 ):
     query = {}
     if category:
-        # Case insensitive search for category
-        query["category"] = {"$regex": f"^{category}$", "$options": "i"}
+        # Case insensitive search for category - also match without trailing 's'
+        cat_base = category.rstrip('s') if category.endswith('s') else category
+        query["$or"] = [
+            {"category": {"$regex": f"^{category}$", "$options": "i"}},
+            {"category": {"$regex": f"^{cat_base}$", "$options": "i"}},
+            {"category": {"$regex": f"^{category}", "$options": "i"}}
+        ]
     if subcategory:
         query["subcategory"] = {"$regex": subcategory, "$options": "i"}
     if is_certified is not None:
@@ -1503,7 +1508,9 @@ ENTERPRISE_SUBCATEGORIES = {
     # BEAUTÉ & BIEN-ÊTRE
     'Institut De Beaute': ['Épilation', 'Soins du visage', 'Soins du corps', 'Maquillage', 'Manucure', 'Pédicure', 'Massage', 'Bronzage', 'Extension cils', 'Microblading'],
     'Institut': ['Soins visage', 'Soins corps', 'Épilation', 'Maquillage', 'Manucure'],
+    'Soins esthétiques': ['Soin visage', 'Soin corps', 'Massage', 'Épilation', 'Manucure', 'Pédicure', 'Onglerie', 'Extension cils', 'Maquillage', 'Bronzage'],
     'Coiffeur': ['Coupe femme', 'Coupe homme', 'Coloration', 'Mèches', 'Lissage', 'Permanente', 'Extensions', 'Coiffure mariage', 'Barbier', 'Coiffure enfant'],
+    'Coiffeurs': ['Coupe femme', 'Coupe homme', 'Coupe mixte', 'Coloration', 'Mèches', 'Lissage', 'Permanente', 'Extensions', 'Coiffure mariage', 'Barbier', 'Coiffure enfant'],
     'Coiffure & Beauté': ['Coupe femme', 'Coupe homme', 'Coloration', 'Mèches', 'Lissage', 'Permanente', 'Extensions', 'Coiffure mariage', 'Barbier', 'Coiffure enfant'],
     'coiffure': ['Coupe femme', 'Coupe homme', 'Coloration', 'Barbier', 'Extensions'],
     'coiffure_barber': ['Coupe homme', 'Barbe', 'Rasage', 'Contours'],
@@ -1533,6 +1540,7 @@ ENTERPRISE_SUBCATEGORIES = {
     'Sauna': ['Finlandais', 'Infrarouge', 'Bio', 'Privé'],
     
     # SANTÉ
+    'Professionnels de santé': ['Médecin généraliste', 'Dentiste', 'Kinésithérapeute', 'Ostéopathe', 'Psychologue', 'Nutritionniste', 'Ophtalmologue', 'Dermatologue', 'Pédiatre', 'Pharmacie'],
     'Medecin': ['Généraliste', 'Spécialiste', 'Urgentiste', 'Pédiatre', 'Gynécologue'],
     'Generaliste': ['Consultation', 'Suivi', 'Vaccination', 'Check-up'],
     'Dentiste': ['Détartrage', 'Soins', 'Implants', 'Orthodontie', 'Esthétique', 'Urgence'],
@@ -1627,6 +1635,7 @@ ENTERPRISE_SUBCATEGORIES = {
     # IMMOBILIER
     'Agence Immobiliere': ['Vente', 'Location', 'Gestion locative', 'Estimation', 'Immobilier de luxe', 'Immobilier commercial', 'Neuf', 'Ancien'],
     'Agences immobilières': ['Vente', 'Location', 'Gestion', 'Commercial', 'Luxe'],
+    'Agent immobilier': ['Vente', 'Location', 'Gestion locative', 'Estimation', 'Conseil', 'Immobilier commercial', 'Immobilier de luxe'],
     'Immobilier': ['Achat', 'Vente', 'Location', 'Neuf', 'Investissement'],
     'Promotion Immobiliere': ['Neuf', 'Rénovation', 'Résidentiel', 'Commercial'],
     'Transaction Immobiliere': ['Vente', 'Achat', 'Mandat', 'Estimation'],
@@ -1665,6 +1674,14 @@ ENTERPRISE_SUBCATEGORIES = {
     'Jardinier': ['Entretien', 'Taille', 'Tonte', 'Plantation'],
     'Garde Meuble': ['Stockage', 'Box', 'Container', 'Courte durée'],
     'Gardiennage': ['Immeuble', 'Entreprise', 'Événement', 'Nuit'],
+    'Personnel de maison': ['Ménage', 'Garde d\'enfants', 'Nounou', 'Aide à domicile', 'Jardinage', 'Cuisinier', 'Repassage', 'Services à domicile'],
+    'Sécurité': ['Surveillance', 'Gardiennage', 'Alarme', 'Vidéosurveillance', 'Agent de sécurité', 'Protection rapprochée'],
+    'Professionnels de transports': ['Taxi', 'VTC', 'Déménagement', 'Livraison', 'Transport de personnes', 'Coursier'],
+    "Professionnels d'éducation": ['Cours particuliers', 'Soutien scolaire', 'Langues', 'Musique', 'Formation', 'Préparation examens'],
+    'Professionnels administratifs': ['Secrétariat', 'Comptabilité', 'Ressources humaines', 'Gestion', 'Assistance administrative'],
+    'Professionnels juridiques': ['Avocat', 'Notaire', 'Huissier', 'Conseil juridique', 'Médiation', 'Fiscalité'],
+    'Professionnels informatiques': ['Développement web', 'Réparation', 'Réseaux', 'Cybersécurité', 'Formation', 'Maintenance'],
+    'Professionnels de construction': ['Maçonnerie', 'Électricité', 'Plomberie', 'Peinture', 'Menuiserie', 'Carrelage', 'Rénovation', 'Architecture'],
     'Alarme': ['Installation', 'Vidéosurveillance', 'Télésurveillance', 'Maintenance'],
     'Videosurveillance': ['Installation', 'Caméras', 'Enregistrement', 'À distance'],
     'Securite Informatique': ['Audit', 'Protection', 'Antivirus', 'Firewall'],
@@ -1721,6 +1738,8 @@ ENTERPRISE_SUBCATEGORIES = {
     'Audiovisuel': ['Son', 'Image', 'Installation', 'Événement'],
     
     # SPORT & LOISIRS
+    'Cours de sport': ['Fitness', 'Yoga', 'Pilates', 'Musculation', 'Danse', 'Arts martiaux', 'Boxe', 'Natation', 'Tennis', 'Coaching personnel'],
+    'Activités': ['Escape game', 'Bowling', 'Laser game', 'Cinéma', 'Karting', 'Parc d\'attractions', 'Musée', 'Loisirs', 'Sortie famille'],
     'Fitness': ['Cardio', 'Musculation', 'CrossFit', 'HIIT', 'Spinning', 'Zumba', 'Body pump', 'Stretching'],
     'cours_sport': ['Fitness', 'Yoga', 'Pilates', 'Danse', 'Arts martiaux'],
     'Gym': ['Musculation', 'Cardio', 'Cours collectifs', 'Coaching'],
