@@ -173,30 +173,25 @@ const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
   };
 
   return (
-    <div 
+     <div 
       className="shadow-sm hover:shadow-lg group block rounded-2xl overflow-hidden h-full transition-all relative cursor-pointer"
       onClick={handleCardClick}
       data-testid={`enterprise-card-${id}`}
     >
       {/* CATEGORY LABEL with + button */}
-      <div className="flex items-center justify-center gap-2 mb-3 relative">
+    <div className="flex items-center justify-center gap-2 mb-3 relative">
         <span 
           className="text-black text-center font-medium"
           style={{ fontFamily: 'Playfair Display, serif' }}
         >
-          {cleanCategoryTitle}
+
         </span>
-        <button
-          onClick={handleCategoryClick}
-          className="w-5 h-5 rounded-full bg-[#0047AB] text-white flex items-center justify-center hover:bg-[#003080] transition-colors"
-          data-testid={`category-btn-${category}`}
-        >
-          {showSubcategories ? (
-            <Minus className="w-3 h-3" />
-          ) : (
-            <Plus className="w-3 h-3" />
-          )}
-        </button>
+         <span onClick={handleSubcategoryClick} style={{ color: 'black' }}>
+  {cleanCategoryTitle}
+
+        </span>
+     
+     
       </div>
 
       {/* SUBCATEGORIES DROPDOWN */}
@@ -331,11 +326,7 @@ const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
       </div>
 
       {/* Enterprise counter */}
-      {enterprises.length > 1 && (
-        <div className="absolute top-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full z-10">
-          {index + 1}/{enterprises.length}
-        </div>
-      )}
+   
     </div>
   );
 };

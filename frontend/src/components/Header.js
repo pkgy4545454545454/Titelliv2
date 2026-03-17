@@ -45,8 +45,7 @@ const Header = () => {
     { path: '/services', label: 'Services' },
     { path: '/products', label: 'Produits', className: 'text-amber-400' },
     { path: '/entreprises', label: 'Entreprises' },
-    { path: '/rdv', label: 'Rdv', className: 'text-red-400' },
-    { path: '/sports', label: 'Sports', className: 'text-green-400' },
+
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -62,7 +61,7 @@ const Header = () => {
             {/* Logo à gauche */}
             <Link to="/" className="flex-shrink-0" data-testid="logo-link">
               <img
-                src="/logo_titelli.png"
+                src="/logo_titelli2.png"
                 alt="Titelli"
                 className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
               />
@@ -98,10 +97,7 @@ const Header = () => {
           {/* Right: Actions - Profil uniquement */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Cashback */}
-            <Link to="/cashback" className="p-2 text-amber-400 hover:text-amber-300 hidden sm:block" data-testid="cashback-link">
-              <HandCoins className="w-5 h-5" />
-            </Link>
-
+       
             {/* Profile Icon - Always visible */}
             <DropdownMenu>
               <DropdownMenuTrigger className="p-2 text-gray-400 hover:text-white outline-none" data-testid="profile-btn">

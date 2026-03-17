@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronRight, ChevronLeft, Star, ArrowRight, Briefcase, MapPin, Clock, Filter, GraduationCap, Search, CheckCircle, Send, X, FileText, Sparkles, Gift, Users } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Star,HandCoins, ArrowRight, Briefcase, MapPin, Clock, Filter, GraduationCap, Search, CheckCircle, Send, X, FileText, Sparkles, Gift, Users } from 'lucide-react';
 import { featuredAPI, categoryAPI, enterpriseAPI, servicesProductsAPI, jobsAPI, clientDocumentsAPI, trainingsAPI } from '../services/api';
 import EnterpriseCard from '../components/EnterpriseCard';
 import ServiceProductCard from '../components/ServiceProductCard';
@@ -523,16 +523,16 @@ const HomePage = () => {
         </div>
 
         {/* Hero Content - Title aligned left */}
-        <div className="absolute inset-0 flex flex-col justify-center px-4 md:px-8">
+      <div className="absolute inset-0 flex flex-col justify-center px-4 md:px-8">
           <div className="max-w-7xl mx-auto w-full">
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-black mb-8 animate-fade-in drop-shadow-lg" style={{ fontFamily: 'Playfair Display, serif' }}>
-              Les meilleurs prestataires<br />
-              <span style={{ color: 'green' }}>de ta région</span>
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-black mb-8 animate-fade-in drop-shadow-lg" style={{ fontFamily: 'inter', textAlign: 'center', marginTop:'300px' }}>
+              Les meilleurs prestataires <br></br><span style={{ color: 'green' }}>de ta région</span>
+              
             </h1>
 
             {/* Category Buttons - 2 rows */}
-            <div className="flex flex-col items-start gap-1 animate-fade-in stagger-2">
-              <div className="flex flex-wrap gap-2">
+            <div className="flex flex-col items-start gap-1 animate-fade-in stagger-2 min-w-[106px]"style={{ fontFamily: 'Playfair Display, serif', textAlign: 'center' }}>
+              <div className="flex flex-wrap gap-2 min-w-[106px] cases"style={{ fontFamily: 'Playfair Display, serif', margin: 'auto' }}>
                 {[
                   { label: 'Services', path: '/services' },
                   { label: 'Produits', path: '/products' },
@@ -542,13 +542,13 @@ const HomePage = () => {
                   <Link
                     key={cat.label}
                     to={cat.path}
-                    className="px-4 py-2 bg-black/80 backdrop-blur-md border border-white/20 rounded-[10px] text-white text-sm hover:bg-white hover:text-black transition-all duration-300"
+                    className="px-4 py-2 bg-black/80 backdrop-blur-md border border-white/20 rounded-[10px] text-white text-sm hover:bg-white hover:text-black transition-all duration-300 min-w[106px]"style={{ fontFamily: 'Playfair Display, serif', textAlign: 'center', minWidth: '106px' }}
                   >
                     {cat.label}
                   </Link>
                 ))}
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 min-w-[106px] cases"style={{ fontFamily: 'Playfair Display, serif', margin: 'auto' }}>
                 {[
                   { label: 'Premium', path: '/premium' },
                   { label: 'Tendances', path: '/tendances' },
@@ -558,7 +558,7 @@ const HomePage = () => {
                   <Link
                     key={cat.label}
                     to={cat.path}
-                    className="px-4 py-2 bg-black/80 backdrop-blur-md border border-white/20 rounded-[10px] text-white text-sm hover:bg-white hover:text-black transition-all duration-300"
+                    className="px-4 py-2 bg-black/80 backdrop-blur-md border border-white/20 rounded-[10px] text-white text-sm hover:bg-white hover:text-black transition-all duration-300 max-w[10px]" style={{ fontFamily: 'Playfair Display, serif', textAlign: 'center', minWidth: '106px' }}
                   >
                     {cat.label}
                   </Link>
@@ -570,12 +570,23 @@ const HomePage = () => {
 
 
 
+
       </section>
 
 
       {/* Search Bar Section - Under Video */}
       <section className="py-4 sm:py-6 bg-white" data-testid="search-section">
         <div className="max-w-2xl mx-auto px-4">
+         <Link to="/" className="text-amber-400 hover:text-amber-300 hidden sm:inline-block" data-testid="logo-link">
+                <img 
+                    src="/logo_titelli.png" 
+                    alt="Titelli"
+                    className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
+                  />
+            </Link>
+           <Link to="/cashback" className="p-2 text-amber-400 hover:text-amber-300 hidden sm:inline-block" data-testid="cashback-link">
+              <HandCoins className="w-5 h-5" />
+            </Link>
           <form onSubmit={handleSearch} className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
@@ -601,13 +612,10 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           {/* Title aligned with cards */}
           <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold text-gray-900 mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
-            Les meilleurs prestataires de ta région
+            Les meilleurs services de ta région
           </h2>
           <div className="flex items-center justify-start mb-4">
-            <Link to="/entreprises" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors">
-              Voir tout
-              <ArrowRight className="w-5 h-5" />
-            </Link>
+      
           </div>
 
 
