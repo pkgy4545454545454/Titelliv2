@@ -7,7 +7,7 @@ from fpdf import FPDF
 from datetime import datetime
 import os
 
-BASE_URL = "https://category-video-hub.preview.emergentagent.com"
+BASE_URL = "https://category-refactor-2.preview.emergentagent.com"
 MEDIA_PATH = "/app/backend/uploads/media_titelli"
 
 class TitelliPDF(FPDF):

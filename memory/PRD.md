@@ -5,70 +5,87 @@ Application marketplace locale suisse (Lausanne) connectant clients et prestatai
 
 ## User Language: **Français**
 
-## Last Completed (March 16, 2026)
+## Last Completed (March 17, 2026)
 
-### ✅ Fix Render Deployment - Category Videos
-- Moved videos from `/backend/uploads/category_videos/` to `/frontend/public/videos/`
-- Updated paths in `EnterpriseCard.js`: `/api/uploads/category_videos/` → `/videos/`
-- 12 videos now included in frontend build for production deployment
-- **No additional action required** on Render - videos bundled with frontend
+### ✅ Fix Catégories et Sous-catégories dynamiques
+- **Problème:** Les pages de catégories affichaient "undefined" et les sous-catégories ne montraient aucune entreprise
+- **Cause:** Les sous-catégories dans le frontend ne correspondaient pas aux données réelles de MongoDB
+- **Solution:** 
+  1. Modifié `/api/enterprise-subcategories/{category}` pour retourner les vraies sous-catégories depuis la DB
+  2. Modifié `/api/enterprises` pour utiliser le mapping des catégories principales depuis `main_categories`
+  3. Corrigé `EnterpriseCard.js` pour utiliser l'API au lieu de listes statiques
+  4. Corrigé le handler de clic sur les catégories (était `handleSubcategoryClick` au lieu de `handleCategoryClick`)
 
-### ✅ GitHub Changes Integrated
-- Header.js simplified with navigation
-- HomePage.js with "Les meilleurs prestataires de ta région" title
+### ✅ Pages catégories maintenant fonctionnelles
+- `/categorie/Restauration` → 671 entreprises avec 21 sous-catégories réelles
+- `/categorie/Coiffeurs` → 323 entreprises avec sous-catégories (Coupe mixte, Barbier, Coiffure afro)
+- Toutes les 15 catégories principales fonctionnent correctement
 
-### ✅ Professional Marketing Flyer
-- Page at `/flyer` with minimalist design
-- QR code, contact info, slogans
-
-### ✅ Essai IA Gratuit à l'inscription entreprise
-- 1 crédit d'image IA offert automatiquement
-- Validité 90 jours après activation
-- Collection MongoDB: `ai_credits`
-
-### ✅ 15 Catégories principales avec vidéos
-| # | Catégorie | Vidéo |
-|---|-----------|-------|
-| 1 | Restauration | ✅ |
-| 2 | Personnel de maison | ✅ |
-| 3 | Soins esthétiques | ✅ |
-| 4 | Coiffeurs | ✅ |
-| 5 | Cours de sport | ✅ |
-| 6 | Activités | ✅ |
-| 7 | Professionnels de santé | ✅ |
-| 8 | Agent immobilier | ✅ |
-| 9 | Sécurité | ✅ |
-| 10-15 | Autres | Images |
+### ✅ Previous Completed Work
+- Fix Render Deployment - Category Videos (videos in `/frontend/public/videos/`)
+- Marketing Flyer at `/flyer`
+- Essai IA Gratuit (1 crédit d'image IA à l'inscription)
+- 15 Catégories principales avec vidéos
+- Webhook synchronization avec Titelli Management (SalonPro)
 
 ## Files Modified This Session
-- `/app/frontend/src/components/Header.js` - Navigation simplifiée
-- `/app/frontend/src/pages/FlyerPage.js` - Flyer professionnel
-- `/app/backend/server.py` - Endpoints ai-credits
+- `/app/backend/server.py` - Modified:
+  - `GET /api/enterprise-subcategories/{category}` - Returns real subcategories from DB
+  - `GET /api/enterprises` - Uses main_categories mapping for category search
+- `/app/frontend/src/components/EnterpriseCard.js` - Fixed:
+  - Category click handler (was calling wrong function)
+  - Subcategory fetching (now uses API instead of static list)
+  - Removed misleading enterprise count from dropdown
+
+## System Architecture
+
+### Main Categories Flow
+1. `main_categories` collection defines 15 main categories
+2. Each main category maps to multiple DB categories (e.g., "Restauration" → ["Restaurant", "Brasserie", "Bar", etc.])
+3. API uses this mapping to aggregate enterprises from all related DB categories
+
+### Subcategories Flow
+1. `/api/enterprise-subcategories/{category}` checks `main_categories` collection
+2. Queries enterprises with categories in the mapped list
+3. Returns distinct subcategories actually present in the database
 
 ## Pending Tasks
 
-### P0 - Priority Critical
-- [ ] Refinements UI/UX des cartes Enterprise:
-  - Changer flèche dropdown → cercle avec '+'
-  - Nettoyer titres (supprimer _ et -)
-  - Changer police titres cartes
-  - Ajouter flèches navigation médias
-  - Remplacer étoiles par 5 bulles vertes
+### P0 - Priority Critical ✅ COMPLETED
+- [x] Fix category pages showing "undefined"
+- [x] Fix subcategories not displaying enterprises
 
 ### P1 - Priority High
-- [ ] Générer vidéos manquantes (6 catégories) - BLOQUÉ sur crédits
+- [ ] Générer vidéos manquantes (6 catégories) - BLOQUÉ sur crédits Sora 2
 - [ ] Régénérer vidéo #107 sans personnes
+- [ ] Refinements UI/UX des cartes Enterprise:
+  - Changer flèche dropdown → cercle avec '+' ✅ DONE
+  - Nettoyer titres (supprimer _ et -)
+  - Changer police titres cartes ("pro et cool")
+  - Ajouter flèches navigation médias
 
 ### P2 - Medium
 - [ ] Réorganiser produits/services homepage
 - [ ] Investiguer images corrompues
 - [ ] Corriger design brochure monétisation
 
+### P3 - Backlog
+- [ ] Refactorer server.py (10,000+ lignes) en modules APIRouter
+
 ## API Endpoints
-- GET /api/main-categories - 15 catégories principales
-- GET /api/ai-credits - Crédits IA disponibles
-- POST /api/ai-credits/use - Utiliser un crédit IA
+- `GET /api/main-categories` - 15 catégories principales avec mapping
+- `GET /api/enterprise-subcategories/{category}` - Vraies sous-catégories depuis DB
+- `GET /api/enterprises?category=X&subcategory=Y` - Liste entreprises avec filtres
+- `GET /api/ai-credits` - Crédits IA disponibles
+- `POST /api/ai-credits/use` - Utiliser un crédit IA
 
 ## Key Resources
-- Flyer: https://category-video-hub.preview.emergentagent.com/flyer
-- Homepage: https://category-video-hub.preview.emergentagent.com/
+- Preview URL: https://category-refactor-2.preview.emergentagent.com/
+- Flyer: /flyer
+- Test Categories: /categorie/Restauration, /categorie/Coiffeurs
+
+## Database Collections
+- `enterprises` - 8,251 entreprises avec category et subcategory
+- `main_categories` - 15 catégories principales avec mapping
+- `users` - Utilisateurs (clients et entreprises)
+- `ai_credits` - Crédits IA pour entreprises

@@ -1341,13 +1341,23 @@ async def list_enterprises(
 ):
     query = {}
     if category:
-        # Case insensitive search for category - also match without trailing 's'
-        cat_base = category.rstrip('s') if category.endswith('s') else category
-        query["$or"] = [
-            {"category": {"$regex": f"^{category}$", "$options": "i"}},
-            {"category": {"$regex": f"^{cat_base}$", "$options": "i"}},
-            {"category": {"$regex": f"^{category}", "$options": "i"}}
-        ]
+        # First check if this is a main category with mapped subcategories
+        main_cat = await db.main_categories.find_one({
+            "name": {"$regex": f"^{category}$", "$options": "i"}
+        }, {"_id": 0})
+        
+        if main_cat and main_cat.get('subcategories'):
+            # Use the mapped DB categories from main_categories
+            mapped_categories = main_cat.get('subcategories', [])
+            query["category"] = {"$in": mapped_categories}
+        else:
+            # Fallback: Case insensitive search for category - also match without trailing 's'
+            cat_base = category.rstrip('s') if category.endswith('s') else category
+            query["$or"] = [
+                {"category": {"$regex": f"^{category}$", "$options": "i"}},
+                {"category": {"$regex": f"^{cat_base}$", "$options": "i"}},
+                {"category": {"$regex": f"^{category}", "$options": "i"}}
+            ]
     if subcategory:
         query["subcategory"] = {"$regex": subcategory, "$options": "i"}
     if is_certified is not None:
@@ -1357,11 +1367,18 @@ async def list_enterprises(
     if is_premium is not None:
         query["is_premium"] = is_premium
     if search:
-        query["$or"] = [
+        search_query = [
             {"business_name": {"$regex": search, "$options": "i"}},
             {"name": {"$regex": search, "$options": "i"}},
             {"description": {"$regex": search, "$options": "i"}}
         ]
+        # Merge with existing $or if present, otherwise set it
+        if "$or" in query:
+            # Move existing $or to $and and add search $or
+            existing_or = query.pop("$or")
+            query["$and"] = [{"$or": existing_or}, {"$or": search_query}]
+        else:
+            query["$or"] = search_query
     
     enterprises = await db.enterprises.find(query, {"_id": 0}).skip(skip).limit(limit).to_list(limit)
     
@@ -1934,9 +1951,70 @@ async def get_category_details(category_name: str):
 
 @api_router.get("/enterprise-subcategories/{category_name}")
 async def get_subcategories(category_name: str):
-    """Get subcategories for a specific category"""
+    """Get real subcategories from database for a specific main category"""
     decoded_cat = category_name.replace('_', ' ')
     
+    # First, check if this is a main category with mapped subcategories
+    main_cat = await db.main_categories.find_one({
+        "name": {"$regex": f"^{decoded_cat}$", "$options": "i"}
+    }, {"_id": 0})
+    
+    if main_cat:
+        # Get the DB categories that belong to this main category
+        mapped_categories = main_cat.get('subcategories', [])
+        if mapped_categories:
+            # Find all unique subcategories for enterprises in these mapped categories
+            pipeline = [
+                {"$match": {"category": {"$in": mapped_categories}}},
+                {"$match": {"subcategory": {"$exists": True, "$ne": None, "$ne": ""}}},
+                {"$group": {"_id": "$subcategory", "count": {"$sum": 1}}},
+                {"$sort": {"count": -1}},
+                {"$limit": 50}
+            ]
+            
+            try:
+                subcats_result = await db.enterprises.aggregate(pipeline).to_list(50)
+                real_subcategories = [s["_id"] for s in subcats_result if s["_id"]]
+                
+                if real_subcategories:
+                    return {
+                        "category": decoded_cat,
+                        "subcategories": real_subcategories
+                    }
+            except Exception as e:
+                logger.error(f"Error fetching subcategories from DB: {e}")
+    
+    # Fallback: Direct category search with flexibility
+    cat_base = decoded_cat.rstrip('s') if decoded_cat.endswith('s') else decoded_cat
+    category_query = {
+        "$or": [
+            {"category": {"$regex": f"^{decoded_cat}$", "$options": "i"}},
+            {"category": {"$regex": f"^{cat_base}$", "$options": "i"}},
+            {"category": {"$regex": f"^{decoded_cat}", "$options": "i"}}
+        ]
+    }
+    
+    pipeline = [
+        {"$match": category_query},
+        {"$match": {"subcategory": {"$exists": True, "$ne": None, "$ne": ""}}},
+        {"$group": {"_id": "$subcategory", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 50}
+    ]
+    
+    try:
+        subcats_result = await db.enterprises.aggregate(pipeline).to_list(50)
+        real_subcategories = [s["_id"] for s in subcats_result if s["_id"]]
+        
+        if real_subcategories:
+            return {
+                "category": decoded_cat,
+                "subcategories": real_subcategories
+            }
+    except Exception as e:
+        logger.error(f"Error fetching subcategories from DB: {e}")
+    
+    # Fallback to predefined subcategories if no real data found
     matching_key = None
     for key in ENTERPRISE_SUBCATEGORIES.keys():
         if key.lower() == decoded_cat.lower() or decoded_cat.lower() in key.lower():
@@ -4184,8 +4262,8 @@ async def purchase_training(training_id: str, current_user: dict = Depends(get_c
         checkout_request = CheckoutSessionRequest(
             amount=training['price'],  # Amount in CHF (not cents)
             currency="chf",
-            success_url=f"{os.environ.get('FRONTEND_URL', 'https://category-video-hub.preview.emergentagent.com')}/payment/success?session_id={{CHECKOUT_SESSION_ID}}&type=training&training_id={training_id}",
-            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://category-video-hub.preview.emergentagent.com')}/payment/cancel",
+            success_url=f"{os.environ.get('FRONTEND_URL', 'https://category-refactor-2.preview.emergentagent.com')}/payment/success?session_id={{CHECKOUT_SESSION_ID}}&type=training&training_id={training_id}",
+            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://category-refactor-2.preview.emergentagent.com')}/payment/cancel",
             metadata={"type": "training", "training_id": training_id, "user_id": current_user['id'], "product_name": f"Formation: {training['title']}"}
         )
         response = await stripe_checkout.create_checkout_session(checkout_request)
@@ -9143,8 +9221,8 @@ async def create_premium_checkout(plan: str, current_user: dict = Depends(get_cu
             amount=plan_info['price'],  # Amount in CHF
             currency="chf",
             quantity=1,
-            success_url=f"{os.environ.get('FRONTEND_URL', 'https://category-video-hub.preview.emergentagent.com')}/dashboard/client?tab=premium&success=true&plan={plan}",
-            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://category-video-hub.preview.emergentagent.com')}/dashboard/client?tab=premium&cancelled=true",
+            success_url=f"{os.environ.get('FRONTEND_URL', 'https://category-refactor-2.preview.emergentagent.com')}/dashboard/client?tab=premium&success=true&plan={plan}",
+            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://category-refactor-2.preview.emergentagent.com')}/dashboard/client?tab=premium&cancelled=true",
             metadata={
                 "plan": plan,
                 "user_id": current_user['id'],
@@ -9404,8 +9482,8 @@ async def apply_for_certification(
             amount=cert_info['price'],
             currency="chf",
             quantity=1,
-            success_url=f"{os.environ.get('FRONTEND_URL', 'https://category-video-hub.preview.emergentagent.com')}/enterprise-dashboard?tab=certifications&success=true",
-            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://category-video-hub.preview.emergentagent.com')}/enterprise-dashboard?tab=certifications&cancelled=true",
+            success_url=f"{os.environ.get('FRONTEND_URL', 'https://category-refactor-2.preview.emergentagent.com')}/enterprise-dashboard?tab=certifications&success=true",
+            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://category-refactor-2.preview.emergentagent.com')}/enterprise-dashboard?tab=certifications&cancelled=true",
             metadata={
                 "type": "certification",
                 "certification_type": request.certification_type,
@@ -9494,8 +9572,8 @@ async def book_expert_service(
             amount=service['price'],
             currency="chf",
             quantity=1,
-            success_url=f"{os.environ.get('FRONTEND_URL', 'https://category-video-hub.preview.emergentagent.com')}/dashboard?success=expert",
-            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://category-video-hub.preview.emergentagent.com')}/dashboard",
+            success_url=f"{os.environ.get('FRONTEND_URL', 'https://category-refactor-2.preview.emergentagent.com')}/dashboard?success=expert",
+            cancel_url=f"{os.environ.get('FRONTEND_URL', 'https://category-refactor-2.preview.emergentagent.com')}/dashboard",
             metadata={
                 "type": "expert_service",
                 "service_type": service_type,
