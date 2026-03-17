@@ -38,17 +38,16 @@ const MAIN_CATEGORY_SUBCATEGORIES = {
   'Professionnels de construction': ['Maçonnerie', 'Électricité', 'Plomberie', 'Peinture', 'Menuiserie']
 };
 
-// Fonction pour nettoyer les titres (enlever _ et - et mettre en forme propre)
+// Fonction pour nettoyer les titres (seulement la première lettre en majuscule)
 const cleanTitle = (title) => {
   if (!title) return '';
-  return title
+  const cleaned = title
     .replace(/_/g, ' ')
     .replace(/-/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
+    .toLowerCase();
+  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
 };
 
 // Composant pour les bulles de notation (5 mini bulles vertes)

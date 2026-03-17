@@ -90,6 +90,9 @@ const HomePage = () => {
   
   // Training purchase state
   const [purchasingTraining, setPurchasingTraining] = useState(null);
+  
+  // State pour afficher toutes les catégories ou non
+  const [showAllCategories, setShowAllCategories] = useState(false);
 
   // Filter enterprises with real photos only (no unsplash/default images)
   const hasRealPhoto = (enterprise) => {
@@ -484,6 +487,30 @@ const HomePage = () => {
   // Combiner : 15 principales d'abord, puis les autres
   const allSortedCategories = [...sortedMainCategories, ...sortedOtherCategories];
 
+  // Catégories visibles par défaut (de Restauration à Professionnels informatiques + construction)
+  const VISIBLE_CATEGORIES = [
+    'Restauration',
+    'Personnel de maison', 
+    'Soins esthétiques',
+    'Coiffeurs',
+    'Cours de sport',
+    'Activités',
+    'Professionnels de santé',
+    'Agent immobilier',
+    'Sécurité',
+    'Professionnels de transports',
+    'Professionnels d\'éducation',
+    'Professionnels administratifs',
+    'Professionnels juridiques',
+    'Professionnels informatiques',
+    'Professionnels de construction'
+  ];
+
+  // Filtrer les catégories selon showAllCategories
+  const visibleCategories = showAllCategories 
+    ? allSortedCategories 
+    : allSortedCategories.filter(([cat]) => VISIBLE_CATEGORIES.includes(cat));
+
 
 
 
@@ -530,9 +557,9 @@ const HomePage = () => {
               
             </h1>
 
-            {/* Category Buttons - 2 rows */}
-            <div className="flex flex-col items-start gap-1 animate-fade-in stagger-2 min-w-[106px]"style={{ fontFamily: 'Playfair Display, serif', textAlign: 'center' }}>
-              <div className="flex flex-wrap gap-2 min-w-[106px] cases"style={{ fontFamily: 'Playfair Display, serif', margin: 'auto' }}>
+            {/* Category Buttons - 2 rows - Same size on mobile */}
+            <div className="flex flex-col items-center gap-2 animate-fade-in stagger-2 px-2">
+              <div className="grid grid-cols-4 gap-2 w-full max-w-md">
                 {[
                   { label: 'Services', path: '/services' },
                   { label: 'Produits', path: '/products' },
@@ -542,13 +569,14 @@ const HomePage = () => {
                   <Link
                     key={cat.label}
                     to={cat.path}
-                    className="px-4 py-2 bg-black/80 backdrop-blur-md border border-white/20 rounded-[10px] text-white text-sm hover:bg-white hover:text-black transition-all duration-300 min-w[106px]"style={{ fontFamily: 'Playfair Display, serif', textAlign: 'center', minWidth: '106px' }}
+                    className="px-2 py-2.5 bg-black/80 backdrop-blur-md border border-white/20 rounded-xl text-white text-xs sm:text-sm font-medium hover:bg-white hover:text-black transition-all duration-300 text-center"
+                    style={{ fontFamily: 'Inter, sans-serif' }}
                   >
                     {cat.label}
                   </Link>
                 ))}
               </div>
-              <div className="flex flex-wrap gap-2 min-w-[106px] cases"style={{ fontFamily: 'Playfair Display, serif', margin: 'auto' }}>
+              <div className="grid grid-cols-4 gap-2 w-full max-w-md">
                 {[
                   { label: 'Premium', path: '/premium' },
                   { label: 'Tendances', path: '/tendances' },
@@ -558,7 +586,8 @@ const HomePage = () => {
                   <Link
                     key={cat.label}
                     to={cat.path}
-                    className="px-4 py-2 bg-black/80 backdrop-blur-md border border-white/20 rounded-[10px] text-white text-sm hover:bg-white hover:text-black transition-all duration-300 max-w[10px]" style={{ fontFamily: 'Playfair Display, serif', textAlign: 'center', minWidth: '106px' }}
+                    className="px-2 py-2.5 bg-black/80 backdrop-blur-md border border-white/20 rounded-xl text-white text-xs sm:text-sm font-medium hover:bg-white hover:text-black transition-all duration-300 text-center"
+                    style={{ fontFamily: 'Inter, sans-serif' }}
                   >
                     {cat.label}
                   </Link>
@@ -627,7 +656,7 @@ const HomePage = () => {
             </div>
           ) : allEnterprises.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
-           {allSortedCategories.map(([category, list]) => (
+           {visibleCategories.map(([category, list]) => (
               <div key={category} className="w-full">
                 <EnterpriseCard
                   category={category}
@@ -640,6 +669,19 @@ const HomePage = () => {
             <p className="text-gray-500 text-left py-8 text-sm">Aucun prestataire avec photo disponible</p>
           )}
 
+          {/* Bouton Tout voir */}
+          {!showAllCategories && allSortedCategories.length > visibleCategories.length && (
+            <div className="flex justify-center mt-6">
+              <button
+                onClick={() => setShowAllCategories(true)}
+                className="px-6 py-3 bg-[#0047AB] text-white rounded-xl font-medium hover:bg-[#0047AB]/90 transition-all flex items-center gap-2"
+              >
+                Tout voir
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
           <Link to="/entreprises" className="md:hidden flex items-center justify-start gap-2 mt-4 sm:mt-6 text-[#0047AB] font-medium text-sm">
             Voir tous les prestataires
             <ArrowRight className="w-4 h-4" />
@@ -647,8 +689,8 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Services Section - Grid 4 columns */}
-      <section className="py-8 sm:py-16 bg-gray-50" data-testid="services-section">
+      {/* Services Section - Grid 4 columns - HIDDEN */}
+      <section className="py-8 sm:py-16 bg-gray-50" data-testid="services-section" style={{ display: 'none' }}>
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex items-center justify-between mb-6 sm:mb-8">
             <div>
