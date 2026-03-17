@@ -289,20 +289,6 @@ const EnterpriseCardLight = ({ enterprise, index = 0 }) => {
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 rounded-t-2xl"
           onError={() => setImageError(true)}
         />
-        {/* Subcategory Badge */}
-        {subcategory && (
-          <div className="absolute top-2 left-2">
-            <span className="px-2 py-1 bg-black/60 backdrop-blur-sm text-white text-xs rounded-full">
-              {subcategory}
-            </span>
-          </div>
-        )}
-        {/* Logo */}
-        {logo && !imageError && (
-          <div className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-white p-1 shadow-md">
-            <img src={logo} alt="" className="w-full h-full object-cover rounded-full" />
-          </div>
-        )}
       </div>
 
       {/* Content */}
