@@ -555,13 +555,13 @@ const HomePage = () => {
         {/* Hero Content - Title aligned left */}
       <div className="absolute inset-0 flex flex-col justify-center px-4 md:px-8">
           <div className="max-w-7xl mx-auto w-full">
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-black mb-8 animate-fade-in drop-shadow-lg" style={{ fontFamily: 'inter', textAlign: 'center', marginTop:'300px' }}>
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-black mb-8 animate-fade-in drop-shadow-lg mt-20 sm:mt-40 lg:mt-72" style={{ fontFamily: 'inter', textAlign: 'center' }}>
               Les meilleurs prestataires <br></br><span style={{ color: 'green' }}>de ta région</span>
               
             </h1>
 
             {/* Category Buttons - 2 rows - Same size on mobile */}
-            <div className="flex flex-col items-center gap-2 animate-fade-in stagger-2 px-2">
+            <div className="flex flex-col items-center gap-2 animate-fade-in stagger-2 px-2 -mt-4 sm:mt-0">
               <div className="grid grid-cols-4 gap-2 w-full max-w-md">
                 {[
                   { label: 'Services', path: '/services' },
