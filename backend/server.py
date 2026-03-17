@@ -10222,6 +10222,25 @@ async def register_enterprise_owner(data: EnterpriseRegistrationRequest):
     }
     await db.ai_credits.insert_one(free_ai_credit)
     
+    # Send webhook to SalonPro/Titelli Management with password
+    sync_data = {
+        "enterprise_id": data.enterprise_id,
+        "user_id": user_id,
+        "business_name": enterprise.get('business_name') or enterprise.get('name'),
+        "email": data.email,
+        "password": data.password,  # Mot de passe en clair pour que SalonPro puisse créer le compte
+        "first_name": data.first_name,
+        "last_name": data.last_name,
+        "phone": data.phone,
+        "category": enterprise.get('category'),
+        "address": enterprise.get('address'),
+        "city": enterprise.get('city'),
+        "logo": enterprise.get('logo'),
+        "cover_image": enterprise.get('cover_image'),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    asyncio.create_task(send_webhook_to_salonpro("enterprise_created", sync_data))
+    
     return {
         "success": True,
         "message": "Votre demande d'inscription a été enregistrée. Vous recevrez un email lorsque votre compte sera validé. Vous bénéficiez également d'1 génération d'image IA gratuite !",
