@@ -2082,6 +2082,54 @@ async def create_service_product(data: ServiceProductCreate, current_user: dict 
     
     return item_dict
 
+# Mapping des catégories principales de produits vers les catégories DB
+PRODUCT_CATEGORY_MAPPING = {
+    'courses_alimentaires': ['Supermarché', 'Alimentation', 'Épicerie', 'Boulangerie & Pâtisserie'],
+    'Courses alimentaires': ['Supermarché', 'Alimentation', 'Épicerie', 'Boulangerie & Pâtisserie'],
+    'vetements_mode': ['Mode & Vêtements', 'vetements_mode', 'Pressing & Laverie'],
+    'Vêtements et accessoires de mode': ['Mode & Vêtements', 'vetements_mode', 'Pressing & Laverie'],
+    'enfant': ['Produit'],  # Products for children - general
+    'Tout pour mon enfant': ['Produit'],
+    'soins': ['Cosmétiques', 'cosmétique'],
+    'Matériel de soins': ['Cosmétiques', 'cosmétique'],
+    'maquillage_beaute': ['Cosmétiques', 'cosmétique'],
+    'Maquillage et beauté': ['Cosmétiques', 'cosmétique'],
+    'sport': ['Sports & Loisirs'],
+    'Matériel de sport': ['Sports & Loisirs'],
+    'loisirs': ['Sports & Loisirs', 'Audiovisuel'],
+    'Matériel de loisirs': ['Sports & Loisirs', 'Audiovisuel'],
+    'voyages': ['Autres'],
+    'Nécessaire voyages': ['Autres'],
+    'electronique': ['Électronique', 'Audiovisuel'],
+    'Appareils électroniques': ['Électronique', 'Audiovisuel'],
+    'bureautique': ['Autres', 'Produit'],
+    'Matériel de bureautique': ['Autres', 'Produit'],
+    'electromenager': ['Autres', 'Produit'],
+    'Appareils électroménager': ['Autres', 'Produit'],
+    'ameublement_deco': ['Autres', 'Produit'],
+    'Ameublement et décoration d\'intérieur': ['Autres', 'Produit'],
+    'artisanal': ['Autres', 'Produit'],
+    'Matériel artisanal': ['Autres', 'Produit'],
+    'bricolage_jardinage': ['Autres', 'Produit'],
+    'Matériel de bricolage et jardinage': ['Autres', 'Produit'],
+    'immobilier': ['Produit'],
+    'Acheter un bien immobilier': ['Produit'],
+    'automobiles': ['Automobile & Garage'],
+    'Automobiles': ['Automobile & Garage'],
+    'securite': ['Autres', 'Produit'],
+    'Matériel de sécurité': ['Autres', 'Produit'],
+    'animaux': ['Autres', 'Produit'],
+    'Matériel animaux': ['Autres', 'Produit'],
+    'professionnel': ['Autres', 'Produit'],
+    'Matériel professionnel': ['Autres', 'Produit'],
+    'metaux_precieux': ['Autres', 'Produit'],
+    'Métaux précieux et matières premières': ['Autres', 'Produit'],
+    'haute_joaillerie': ['Autres', 'Produit'],
+    'Haute joaillerie': ['Autres', 'Produit'],
+    'montres': ['Optique', 'Autres', 'Produit'],
+    'Montres': ['Optique', 'Autres', 'Produit'],
+}
+
 @api_router.get("/services-products")
 async def list_services_products(
     type: Optional[str] = None,
@@ -2095,7 +2143,16 @@ async def list_services_products(
     if type:
         query["type"] = type
     if category:
-        query["category"] = category
+        # Check if this is a main category with mapped DB categories
+        mapped_categories = PRODUCT_CATEGORY_MAPPING.get(category)
+        if mapped_categories:
+            query["category"] = {"$in": mapped_categories}
+        else:
+            # Fallback to flexible search
+            query["$or"] = [
+                {"category": category},
+                {"category": {"$regex": category, "$options": "i"}}
+            ]
     if enterprise_id:
         query["enterprise_id"] = enterprise_id
     if is_premium is not None:
