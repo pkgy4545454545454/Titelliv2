@@ -93,6 +93,9 @@ const HomePage = () => {
   
   // State pour afficher toutes les catégories ou non
   const [showAllCategories, setShowAllCategories] = useState(false);
+  
+  // State pour afficher tous les produits ou non
+  const [showAllProducts, setShowAllProducts] = useState(false);
 
   // Filter enterprises with real photos only (no unsplash/default images)
   const hasRealPhoto = (enterprise) => {
@@ -771,17 +774,32 @@ const HomePage = () => {
               ))}
             </div>
           ) : bestProducts.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-              {bestProducts.slice(0, 20).map((product, index) => (
-                <div 
-                  key={product.id || product._id} 
-                  className="animate-fade-in"
-                  style={{ animationDelay: `${index * 0.05}s` }}
-                >
-                  <ServiceProductCard item={product} />
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+                {bestProducts.slice(0, showAllProducts ? 50 : 12).map((product, index) => (
+                  <div 
+                    key={product.id || product._id} 
+                    className="animate-fade-in"
+                    style={{ animationDelay: `${index * 0.05}s` }}
+                  >
+                    <ServiceProductCard item={product} />
+                  </div>
+                ))}
+              </div>
+              
+              {/* Bouton Tout voir pour les produits */}
+              {!showAllProducts && bestProducts.length > 12 && (
+                <div className="flex justify-center mt-6">
+                  <button
+                    onClick={() => setShowAllProducts(true)}
+                    className="px-6 py-3 bg-[#0047AB] text-white rounded-xl font-medium hover:bg-[#0047AB]/90 transition-all flex items-center gap-2"
+                  >
+                    Tout voir
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           ) : (
             /* Fallback to category cards if no products with images */
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
