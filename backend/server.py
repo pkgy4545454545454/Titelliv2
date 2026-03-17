@@ -1979,6 +1979,10 @@ async def create_service_product(data: ServiceProductCreate, current_user: dict 
     
     insert_doc = item_dict.copy()
     await db.services_products.insert_one(insert_doc)
+    
+    # Sync service to SalonPro/Titelli Management
+    asyncio.create_task(sync_service_to_salonpro(item_dict, enterprise['id']))
+    
     return item_dict
 
 @api_router.get("/services-products")
