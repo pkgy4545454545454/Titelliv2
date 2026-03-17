@@ -828,17 +828,40 @@ const HomePage = () => {
                   Tendances actuelles
                 </h2>
               </div>
-              <Link to="/labellises" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors">
+              <Link to="/tendances" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors">
                 Voir tout
                 <ArrowRight className="w-5 h-5" />
               </Link>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-              {tendances.slice(0, 20).map((enterprise, index) => (
-                <div key={enterprise.id}>
-                  <EnterpriseCard enterprise={enterprise} />
-                </div>
+              {tendances.slice(0, 10).map((enterprise) => (
+                <Link 
+                  key={enterprise.id} 
+                  to={`/entreprise/${enterprise.id}`}
+                  className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all"
+                >
+                  <div className="aspect-[4/3] relative overflow-hidden">
+                    <img 
+                      src={enterprise.cover_image || enterprise.logo || '/placeholder.jpg'} 
+                      alt={enterprise.business_name || enterprise.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => { e.target.src = '/placeholder.jpg'; }}
+                    />
+                  </div>
+                  <div className="p-3">
+                    <h3 className="font-medium text-gray-900 text-sm truncate">
+                      {enterprise.business_name || enterprise.name}
+                    </h3>
+                    <p className="text-xs text-gray-500 truncate">{enterprise.category}</p>
+                    {enterprise.rating && (
+                      <div className="flex items-center gap-1 mt-1">
+                        <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+                        <span className="text-xs text-gray-600">{enterprise.rating}</span>
+                      </div>
+                    )}
+                  </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -855,17 +878,40 @@ const HomePage = () => {
                   Guests du moment
                 </h2>
               </div>
-              <Link to="/certifies" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors">
+              <Link to="/guests" className="hidden md:flex items-center gap-2 text-[#0047AB] hover:text-[#2E74D6] font-medium transition-colors">
                 Voir tout
                 <ArrowRight className="w-5 h-5" />
               </Link>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-              {guests.slice(0, 20).map((enterprise, index) => (
-                <div key={enterprise.id}>
-                  <EnterpriseCard enterprise={enterprise} />
-                </div>
+              {guests.slice(0, 10).map((enterprise) => (
+                <Link 
+                  key={enterprise.id} 
+                  to={`/entreprise/${enterprise.id}`}
+                  className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all border border-gray-100"
+                >
+                  <div className="aspect-[4/3] relative overflow-hidden">
+                    <img 
+                      src={enterprise.cover_image || enterprise.logo || '/placeholder.jpg'} 
+                      alt={enterprise.business_name || enterprise.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => { e.target.src = '/placeholder.jpg'; }}
+                    />
+                  </div>
+                  <div className="p-3">
+                    <h3 className="font-medium text-gray-900 text-sm truncate">
+                      {enterprise.business_name || enterprise.name}
+                    </h3>
+                    <p className="text-xs text-gray-500 truncate">{enterprise.category}</p>
+                    {enterprise.rating && (
+                      <div className="flex items-center gap-1 mt-1">
+                        <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+                        <span className="text-xs text-gray-600">{enterprise.rating}</span>
+                      </div>
+                    )}
+                  </div>
+                </Link>
               ))}
             </div>
           </div>

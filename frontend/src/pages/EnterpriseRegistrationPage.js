@@ -876,9 +876,16 @@ const EnterpriseRegistrationPage = () => {
         <h1 className="text-3xl font-bold text-white mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
           Demande envoyée !
         </h1>
-        <p className="text-gray-400 text-lg mb-8">
+        <p className="text-gray-400 text-lg mb-4">
           Votre inscription est en attente de validation. Vous recevrez un email lorsque votre compte sera activé.
         </p>
+        
+        {/* Validation time message */}
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-8">
+          <p className="text-amber-400 text-sm font-medium">
+            ⏱️ Votre validation prend entre 30 et 60 jours généralement, le temps de contrôler toutes vos informations !
+          </p>
+        </div>
         
         {/* Free AI Credit Bonus */}
         <div className="bg-gradient-to-r from-[#0047AB]/20 to-[#D4AF37]/20 border border-[#D4AF37]/30 rounded-xl p-6 mb-8">

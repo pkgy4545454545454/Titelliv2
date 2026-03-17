@@ -28,8 +28,10 @@ load_dotenv(ROOT_DIR / '.env')
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
+db_name = os.environ['DB_NAME']
+print(f"[STARTUP] Connecting to MongoDB database: {db_name}")
 client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+db = client[db_name]
 
 # JWT Config
 JWT_SECRET = os.environ.get('JWT_SECRET', 'titelli_jwt_secret_key_2024')
@@ -3796,16 +3798,18 @@ async def export_accounting_pdf(
 
 @api_router.get("/featured/tendances")
 async def get_tendances():
+    # Fetch enterprises marked as tendance (without badge display)
     enterprises = await db.enterprises.find(
-        {"is_labeled": True}, {"_id": 0}
-    ).sort("rating", -1).limit(6).to_list(6)
+        {"is_tendance": True}, {"_id": 0}
+    ).sort("rating", -1).limit(20).to_list(20)
     return enterprises
 
 @api_router.get("/featured/guests")
 async def get_guests():
+    # Fetch enterprises marked as guest (without badge display)
     enterprises = await db.enterprises.find(
-        {"is_certified": True}, {"_id": 0}
-    ).sort("rating", -1).limit(6).to_list(6)
+        {"is_guest": True}, {"_id": 0}
+    ).sort("rating", -1).limit(20).to_list(20)
     return enterprises
 
 @api_router.get("/featured/offres")

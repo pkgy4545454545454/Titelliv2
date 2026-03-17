@@ -155,6 +155,13 @@ const AuthPage = () => {
         loggedUser = await register(registrationData);
         toast.success('Inscription réussie ! Bienvenue sur Titelli');
         
+        // Show validation time message
+        setTimeout(() => {
+          toast.info('⏱️ Votre validation prend entre 30 et 60 jours généralement, le temps de contrôler toutes vos informations !', {
+            duration: 8000,
+          });
+        }, 1500);
+        
         // Apply referral code if present
         if (formData.referral_code && loggedUser?.token) {
           try {
