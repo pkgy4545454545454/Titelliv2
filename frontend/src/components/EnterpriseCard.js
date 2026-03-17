@@ -289,17 +289,6 @@ const EnterpriseCard = ({ enterprises = [], large = false, category }) => {
           </>
         )}
 
-        {/* LOGO */}
-        {logo && !logoError && (
-          <div className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-white p-1 shadow-md z-10">
-            <img
-              src={logo}
-              alt=""
-              className="w-full h-full object-cover rounded-full"
-              onError={() => setLogoError(true)}
-            />
-          </div>
-        )}
       </div>
 
       {/* CONTENT */}
