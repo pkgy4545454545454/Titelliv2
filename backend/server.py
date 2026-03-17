@@ -1449,10 +1449,10 @@ async def get_all_enterprises_public_route(
 
 ENTERPRISE_SUBCATEGORIES = {
     # RESTAURATION
-    'Restaurant': ['Cuisine française', 'Cuisine italienne', 'Cuisine chinoise', 'Cuisine japonaise', 'Cuisine thaï', 'Cuisine indienne', 'Cuisine mexicaine', 'Cuisine libanaise', 'Cuisine grecque', 'Fast food', 'Gastronomique', 'Végétarien/Vegan', 'Pizzeria', 'Sushi', 'Brasserie'],
-    'Restauration': ['Cuisine française', 'Cuisine italienne', 'Cuisine chinoise', 'Cuisine japonaise', 'Cuisine thaï', 'Cuisine indienne', 'Cuisine mexicaine', 'Cuisine libanaise', 'Cuisine grecque', 'Fast food', 'Gastronomique', 'Végétarien/Vegan', 'Pizzeria', 'Sushi', 'Brasserie'],
-    'Restaurants': ['Cuisine française', 'Cuisine italienne', 'Cuisine chinoise', 'Cuisine japonaise', 'Cuisine thaï', 'Fast food', 'Gastronomique', 'Végétarien', 'Pizzeria', 'Sushi'],
-    'restauration': ['Cuisine française', 'Cuisine italienne', 'Cuisine asiatique', 'Fast food', 'Gastronomique', 'Végétarien'],
+    'Restaurant': ['Cuisine traditionnelle', 'Cuisine française', 'Cuisine italienne', 'Cuisine chinoise', 'Cuisine japonaise', 'Cuisine thaï', 'Cuisine indienne', 'Cuisine mexicaine', 'Cuisine libanaise', 'Cuisine grecque', 'Fast food', 'Gastronomique', 'Végétarien/Vegan', 'Pizzeria', 'Sushi', 'Brasserie'],
+    'Restauration': ['Cuisine traditionnelle', 'Cuisine française', 'Cuisine italienne', 'Cuisine chinoise', 'Cuisine japonaise', 'Cuisine thaï', 'Cuisine indienne', 'Cuisine mexicaine', 'Cuisine libanaise', 'Cuisine grecque', 'Fast food', 'Gastronomique', 'Végétarien/Vegan', 'Pizzeria', 'Sushi', 'Brasserie'],
+    'Restaurants': ['Cuisine traditionnelle', 'Cuisine française', 'Cuisine italienne', 'Cuisine chinoise', 'Cuisine japonaise', 'Cuisine thaï', 'Fast food', 'Gastronomique', 'Végétarien', 'Pizzeria', 'Sushi'],
+    'restauration': ['Cuisine traditionnelle', 'Cuisine française', 'Cuisine italienne', 'Cuisine asiatique', 'Fast food', 'Gastronomique', 'Végétarien'],
     'Brasserie': ['Cuisine traditionnelle', 'Plat du jour', 'Terrasse', 'Service midi', 'Service soir'],
     'Bistrot': ['Cuisine de marché', 'Plat du jour', 'Vin naturel', 'Ambiance conviviale'],
     'Bar': ['Cocktails', 'Vins', 'Bières', 'Tapas', 'Ambiance lounge', 'Sport'],
