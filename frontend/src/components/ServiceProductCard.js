@@ -94,11 +94,7 @@ const ServiceProductCard = ({ item, onAddToCart }) => {
 
       {/* Content */}
       <div className="p-4">
-        <Link to={`/${type}/${id}`}>
-          <h3 className="text-base font-semibold text-gray-900 group-hover:text-[#0047AB] transition-colors mb-1 line-clamp-1">
-            {name}
-          </h3>
-        </Link>
+    
 
         <p className="text-sm text-gray-500 mb-3 line-clamp-2">
           {description}
