@@ -533,3 +533,12 @@ backend/uploads/TITELLI_TOUTES_LES_VIDEOS_COMPLETE.zip
 # Environment files
 *.env
 *.env.*
+-e 
+# Environment and credential files
+.env
+.env.*
+*.env
+credentials.json
+*.pem
+*.key
+.credentials
