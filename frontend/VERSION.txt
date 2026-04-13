@@ -1,0 +1,6 @@
+VERSION: 2026-04-12-v2
+CHANGES:
+- Menu simplifié (Services, Produits, Entreprises seulement)
+- Pas de symbole + sur les catégories  
+- Catégories produits avec mapping DB
+- Labels gris supprimés des cards
